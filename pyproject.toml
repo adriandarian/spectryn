@@ -101,6 +101,11 @@ branch = true
 omit = ["*/tests/*", "*/__main__.py"]
 
 [tool.coverage.report]
+# Target: 80%+ coverage. Current baseline: ~72%. Increase as coverage improves.
+fail_under = 70
+show_missing = true
+skip_covered = false
+precision = 2
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
