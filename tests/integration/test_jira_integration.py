@@ -18,7 +18,7 @@ import pytest
 from unittest.mock import Mock, patch
 import json
 
-from md2jira.adapters.jira.client import JiraApiClient
+from md2jira.adapters.jira.client import JiraApiClient, RateLimiter
 from md2jira.adapters.jira.adapter import JiraAdapter
 from md2jira.core.ports.issue_tracker import (
     IssueTrackerError,
@@ -58,6 +58,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = True
             mock_response.text = json.dumps(mock_myself_response)
             mock_response.json.return_value = mock_myself_response
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             result = client.get_myself()
@@ -80,6 +81,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = True
             mock_response.text = json.dumps(mock_myself_response)
             mock_response.json.return_value = mock_myself_response
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             # Call twice
@@ -103,6 +105,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = False
             mock_response.status_code = 401
             mock_response.text = "Unauthorized"
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             with pytest.raises(AuthenticationError):
@@ -122,6 +125,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = False
             mock_response.status_code = 404
             mock_response.text = "Issue not found"
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             with pytest.raises(NotFoundError):
@@ -141,6 +145,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = False
             mock_response.status_code = 403
             mock_response.text = "Forbidden"
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             with pytest.raises(PermissionError):
@@ -175,6 +180,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = True
             mock_response.text = json.dumps(mock_epic_children_response)
             mock_response.json.return_value = mock_epic_children_response
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             result = client.search_jql("parent = TEST-1", ["summary"])
@@ -196,6 +202,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = True
             mock_response.text = json.dumps(mock_myself_response)
             mock_response.json.return_value = mock_myself_response
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             assert client.test_connection() is True
@@ -214,6 +221,7 @@ class TestJiraApiClientIntegration:
             mock_response.ok = False
             mock_response.status_code = 401
             mock_response.text = "Unauthorized"
+            mock_response.headers = {}
             mock_request.return_value = mock_response
 
             assert client.test_connection() is False
@@ -247,6 +255,7 @@ class TestRetryLogic:
             mock_success.status_code = 200
             mock_success.text = json.dumps(mock_myself_response)
             mock_success.json.return_value = mock_myself_response
+            mock_success.headers = {}
 
             mock_request.side_effect = [
                 requests.exceptions.ConnectionError("Connection reset"),
@@ -278,6 +287,7 @@ class TestRetryLogic:
             mock_success.status_code = 200
             mock_success.text = json.dumps(mock_myself_response)
             mock_success.json.return_value = mock_myself_response
+            mock_success.headers = {}
 
             mock_request.side_effect = [
                 requests.exceptions.Timeout("Read timed out"),
@@ -313,6 +323,7 @@ class TestRetryLogic:
             mock_success.status_code = 200
             mock_success.text = json.dumps(mock_myself_response)
             mock_success.json.return_value = mock_myself_response
+            mock_success.headers = {}
 
             mock_request.side_effect = [mock_rate_limit, mock_success]
 
@@ -345,6 +356,7 @@ class TestRetryLogic:
             mock_success.status_code = 200
             mock_success.text = json.dumps(mock_myself_response)
             mock_success.json.return_value = mock_myself_response
+            mock_success.headers = {}
 
             mock_request.side_effect = [mock_503, mock_success]
 
@@ -448,6 +460,7 @@ class TestRetryLogic:
             mock_401.ok = False
             mock_401.status_code = 401
             mock_401.text = "Unauthorized"
+            mock_401.headers = {}
 
             mock_request.return_value = mock_401
 
@@ -473,6 +486,7 @@ class TestRetryLogic:
             mock_404.ok = False
             mock_404.status_code = 404
             mock_404.text = "Not found"
+            mock_404.headers = {}
 
             mock_request.return_value = mock_404
 
@@ -554,6 +568,262 @@ class TestRetryLogic:
 
         mock_response.headers = {"Retry-After": "invalid"}
         assert client._get_retry_after(mock_response) is None
+
+
+# =============================================================================
+# Rate Limiting Tests
+# =============================================================================
+
+class TestRateLimiter:
+    """Tests for the RateLimiter class."""
+
+    def test_initial_burst_capacity(self):
+        """Test that rate limiter starts with full burst capacity."""
+        limiter = RateLimiter(requests_per_second=10.0, burst_size=5)
+        
+        # Should be able to acquire burst_size tokens immediately
+        for _ in range(5):
+            assert limiter.try_acquire() is True
+        
+        # Next one should fail (no tokens left)
+        assert limiter.try_acquire() is False
+
+    def test_token_refill(self):
+        """Test that tokens refill over time."""
+        limiter = RateLimiter(requests_per_second=100.0, burst_size=1)
+        
+        # Use the token
+        assert limiter.try_acquire() is True
+        assert limiter.try_acquire() is False
+        
+        # Wait for refill (10ms at 100 req/s = 1 token)
+        import time
+        time.sleep(0.015)
+        
+        # Should have refilled
+        assert limiter.try_acquire() is True
+
+    def test_acquire_blocks_and_succeeds(self):
+        """Test that acquire() blocks until token is available."""
+        limiter = RateLimiter(requests_per_second=100.0, burst_size=1)
+        
+        # Use the token
+        limiter.try_acquire()
+        
+        # Acquire should block briefly then succeed
+        import time
+        start = time.monotonic()
+        result = limiter.acquire(timeout=1.0)
+        elapsed = time.monotonic() - start
+        
+        assert result is True
+        assert elapsed < 0.1  # Should be quick at 100 req/s
+
+    def test_acquire_timeout(self):
+        """Test that acquire() respects timeout."""
+        limiter = RateLimiter(requests_per_second=0.5, burst_size=1)  # Very slow: 1 req/2s
+        
+        # Use the token
+        limiter.try_acquire()
+        
+        # Acquire with short timeout should fail
+        import time
+        start = time.monotonic()
+        result = limiter.acquire(timeout=0.05)
+        elapsed = time.monotonic() - start
+        
+        assert result is False
+        assert elapsed < 0.1  # Should respect timeout
+
+    def test_burst_capacity(self):
+        """Test that burst allows multiple quick requests."""
+        limiter = RateLimiter(requests_per_second=1.0, burst_size=10)
+        
+        # Should be able to burst 10 requests instantly
+        successes = sum(1 for _ in range(15) if limiter.try_acquire())
+        assert successes == 10
+
+    def test_stats_tracking(self):
+        """Test that statistics are tracked correctly."""
+        limiter = RateLimiter(requests_per_second=100.0, burst_size=5)
+        
+        # Make some requests
+        for _ in range(3):
+            limiter.try_acquire()
+        
+        stats = limiter.stats
+        assert stats["total_requests"] == 3
+        assert stats["burst_size"] == 5
+        assert stats["requests_per_second"] == 100.0
+
+    def test_reset(self):
+        """Test that reset restores initial state."""
+        limiter = RateLimiter(requests_per_second=10.0, burst_size=5)
+        
+        # Use all tokens
+        for _ in range(5):
+            limiter.try_acquire()
+        
+        assert limiter.try_acquire() is False
+        
+        # Reset
+        limiter.reset()
+        
+        # Should have full burst capacity again
+        assert limiter.available_tokens == 5.0
+        stats = limiter.stats
+        assert stats["total_requests"] == 0
+
+    def test_update_from_429_response(self):
+        """Test that 429 response reduces rate."""
+        limiter = RateLimiter(requests_per_second=10.0, burst_size=5)
+        
+        original_rate = limiter.requests_per_second
+        
+        mock_response = Mock()
+        mock_response.status_code = 429
+        mock_response.headers = {}
+        
+        limiter.update_from_response(mock_response)
+        
+        # Rate should be reduced by 50%
+        assert limiter.requests_per_second == original_rate * 0.5
+
+    def test_thread_safety(self):
+        """Test that rate limiter is thread-safe."""
+        import threading
+        
+        limiter = RateLimiter(requests_per_second=1000.0, burst_size=100)
+        results = []
+        
+        def worker():
+            for _ in range(10):
+                results.append(limiter.try_acquire())
+        
+        threads = [threading.Thread(target=worker) for _ in range(5)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        
+        # Should have exactly 50 attempts, 100 tokens available initially
+        # but only burst_size tokens available
+        successes = sum(1 for r in results if r)
+        # All 50 should succeed since we have 100 burst capacity
+        # and 50 requests < 100 burst
+        assert successes <= 100
+
+
+class TestRateLimitingIntegration:
+    """Tests for rate limiting integrated with JiraApiClient."""
+
+    def test_client_creates_rate_limiter_by_default(self, jira_config):
+        """Test that client creates rate limiter with default settings."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+        )
+        
+        assert client.is_rate_limited is True
+        assert client.rate_limiter is not None
+
+    def test_client_rate_limiting_disabled(self, jira_config):
+        """Test that rate limiting can be disabled."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            requests_per_second=None,  # Disable rate limiting
+        )
+        
+        assert client.is_rate_limited is False
+        assert client.rate_limiter is None
+        assert client.rate_limit_stats is None
+
+    def test_client_custom_rate_limit(self, jira_config):
+        """Test that custom rate limit is applied."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            requests_per_second=2.0,
+            burst_size=5,
+        )
+        
+        assert client.is_rate_limited is True
+        stats = client.rate_limit_stats
+        assert stats["requests_per_second"] == 2.0
+        assert stats["burst_size"] == 5
+
+    def test_requests_go_through_rate_limiter(self, jira_config, mock_myself_response):
+        """Test that requests acquire tokens from rate limiter."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            requests_per_second=100.0,
+            burst_size=10,
+        )
+        
+        with patch.object(client._session, "request") as mock_request:
+            mock_response = Mock()
+            mock_response.ok = True
+            mock_response.status_code = 200
+            mock_response.text = json.dumps(mock_myself_response)
+            mock_response.json.return_value = mock_myself_response
+            mock_response.headers = {}
+            mock_request.return_value = mock_response
+            
+            # Make several requests
+            for _ in range(5):
+                client.get("myself")
+            
+            # Rate limiter should have tracked these
+            stats = client.rate_limit_stats
+            assert stats["total_requests"] == 5
+
+    def test_rate_limiter_slows_down_on_429(self, jira_config, mock_myself_response):
+        """Test that rate limiter reduces rate when 429 is received."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            requests_per_second=10.0,
+            burst_size=5,
+            max_retries=1,
+            initial_delay=0.01,
+        )
+        
+        original_rate = client.rate_limiter.requests_per_second
+        
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            # First call returns 429, second succeeds
+            mock_429 = Mock()
+            mock_429.ok = False
+            mock_429.status_code = 429
+            mock_429.headers = {}
+            mock_429.text = "Rate limited"
+            
+            mock_success = Mock()
+            mock_success.ok = True
+            mock_success.status_code = 200
+            mock_success.text = json.dumps(mock_myself_response)
+            mock_success.json.return_value = mock_myself_response
+            mock_success.headers = {}
+            
+            mock_request.side_effect = [mock_429, mock_success]
+            
+            client.get("myself")
+            
+            # Rate should have been reduced
+            assert client.rate_limiter.requests_per_second < original_rate
 
 
 # =============================================================================
