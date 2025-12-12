@@ -46,6 +46,25 @@ class TransitionError(IssueTrackerError):
     pass
 
 
+class RateLimitError(IssueTrackerError):
+    """Rate limit exceeded (HTTP 429)."""
+    
+    def __init__(
+        self,
+        message: str,
+        retry_after: int | None = None,
+        issue_key: str | None = None,
+        cause: Exception | None = None
+    ):
+        super().__init__(message, issue_key, cause)
+        self.retry_after = retry_after
+
+
+class TransientError(IssueTrackerError):
+    """Transient server error (5xx) that may succeed on retry."""
+    pass
+
+
 @dataclass
 class IssueData:
     """

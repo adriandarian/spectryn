@@ -25,6 +25,8 @@ from md2jira.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     PermissionError,
+    RateLimitError,
+    TransientError,
 )
 
 
@@ -215,6 +217,343 @@ class TestJiraApiClientIntegration:
             mock_request.return_value = mock_response
 
             assert client.test_connection() is False
+
+
+# =============================================================================
+# Retry Logic Tests
+# =============================================================================
+
+class TestRetryLogic:
+    """Tests for retry logic with exponential backoff."""
+
+    def test_retry_on_connection_error_then_success(self, jira_config, mock_myself_response):
+        """Test that connection errors are retried and succeed."""
+        import requests
+
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,  # Fast for testing
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):  # Skip actual sleep
+            # First call fails, second succeeds
+            mock_success = Mock()
+            mock_success.ok = True
+            mock_success.status_code = 200
+            mock_success.text = json.dumps(mock_myself_response)
+            mock_success.json.return_value = mock_myself_response
+
+            mock_request.side_effect = [
+                requests.exceptions.ConnectionError("Connection reset"),
+                mock_success,
+            ]
+
+            result = client.get_myself()
+
+            assert result["accountId"] == "user-123-abc"
+            assert mock_request.call_count == 2
+
+    def test_retry_on_timeout_then_success(self, jira_config, mock_myself_response):
+        """Test that timeout errors are retried and succeed."""
+        import requests
+
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_success = Mock()
+            mock_success.ok = True
+            mock_success.status_code = 200
+            mock_success.text = json.dumps(mock_myself_response)
+            mock_success.json.return_value = mock_myself_response
+
+            mock_request.side_effect = [
+                requests.exceptions.Timeout("Read timed out"),
+                mock_success,
+            ]
+
+            result = client.get_myself()
+
+            assert result["accountId"] == "user-123-abc"
+            assert mock_request.call_count == 2
+
+    def test_retry_on_429_rate_limit(self, jira_config, mock_myself_response):
+        """Test that 429 rate limit triggers retry."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_rate_limit = Mock()
+            mock_rate_limit.ok = False
+            mock_rate_limit.status_code = 429
+            mock_rate_limit.headers = {"Retry-After": "1"}
+            mock_rate_limit.text = "Rate limit exceeded"
+
+            mock_success = Mock()
+            mock_success.ok = True
+            mock_success.status_code = 200
+            mock_success.text = json.dumps(mock_myself_response)
+            mock_success.json.return_value = mock_myself_response
+
+            mock_request.side_effect = [mock_rate_limit, mock_success]
+
+            result = client.get_myself()
+
+            assert result["accountId"] == "user-123-abc"
+            assert mock_request.call_count == 2
+
+    def test_retry_on_503_service_unavailable(self, jira_config, mock_myself_response):
+        """Test that 503 service unavailable triggers retry."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_503 = Mock()
+            mock_503.ok = False
+            mock_503.status_code = 503
+            mock_503.headers = {}
+            mock_503.text = "Service temporarily unavailable"
+
+            mock_success = Mock()
+            mock_success.ok = True
+            mock_success.status_code = 200
+            mock_success.text = json.dumps(mock_myself_response)
+            mock_success.json.return_value = mock_myself_response
+
+            mock_request.side_effect = [mock_503, mock_success]
+
+            result = client.get_myself()
+
+            assert result["accountId"] == "user-123-abc"
+            assert mock_request.call_count == 2
+
+    def test_exhausted_retries_raises_rate_limit_error(self, jira_config):
+        """Test that exhausted retries on 429 raises RateLimitError."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_rate_limit = Mock()
+            mock_rate_limit.ok = False
+            mock_rate_limit.status_code = 429
+            mock_rate_limit.headers = {"Retry-After": "60"}
+            mock_rate_limit.text = "Rate limit exceeded"
+
+            mock_request.return_value = mock_rate_limit
+
+            with pytest.raises(RateLimitError) as exc_info:
+                client.get("myself")
+
+            assert "Rate limit exceeded" in str(exc_info.value)
+            assert exc_info.value.retry_after == 60
+            # Initial attempt + 2 retries = 3 total
+            assert mock_request.call_count == 3
+
+    def test_exhausted_retries_raises_transient_error(self, jira_config):
+        """Test that exhausted retries on 500 raises TransientError."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_500 = Mock()
+            mock_500.ok = False
+            mock_500.status_code = 500
+            mock_500.headers = {}
+            mock_500.text = "Internal server error"
+
+            mock_request.return_value = mock_500
+
+            with pytest.raises(TransientError) as exc_info:
+                client.get("myself")
+
+            assert "Server error 500" in str(exc_info.value)
+            assert mock_request.call_count == 3
+
+    def test_exhausted_retries_on_connection_error(self, jira_config):
+        """Test that exhausted retries on connection error raises IssueTrackerError."""
+        import requests
+
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=2,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request, \
+             patch("time.sleep"):
+            mock_request.side_effect = requests.exceptions.ConnectionError("Connection refused")
+
+            with pytest.raises(IssueTrackerError) as exc_info:
+                client.get("myself")
+
+            assert "Connection failed after 3 attempts" in str(exc_info.value)
+            assert mock_request.call_count == 3
+
+    def test_no_retry_on_401_authentication_error(self, jira_config):
+        """Test that 401 errors are not retried."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=3,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request:
+            mock_401 = Mock()
+            mock_401.ok = False
+            mock_401.status_code = 401
+            mock_401.text = "Unauthorized"
+
+            mock_request.return_value = mock_401
+
+            with pytest.raises(AuthenticationError):
+                client.get("myself")
+
+            # Should only be called once - no retries
+            assert mock_request.call_count == 1
+
+    def test_no_retry_on_404_not_found(self, jira_config):
+        """Test that 404 errors are not retried."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=3,
+            initial_delay=0.01,
+        )
+
+        with patch.object(client._session, "request") as mock_request:
+            mock_404 = Mock()
+            mock_404.ok = False
+            mock_404.status_code = 404
+            mock_404.text = "Not found"
+
+            mock_request.return_value = mock_404
+
+            with pytest.raises(NotFoundError):
+                client.get("issue/INVALID-999")
+
+            assert mock_request.call_count == 1
+
+    def test_exponential_backoff_delay_calculation(self, jira_config):
+        """Test that delay calculation uses exponential backoff."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            max_retries=5,
+            initial_delay=1.0,
+            max_delay=60.0,
+            backoff_factor=2.0,
+            jitter=0,  # Disable jitter for predictable testing
+        )
+
+        # Test exponential growth
+        assert client._calculate_delay(0) == 1.0   # 1 * 2^0 = 1
+        assert client._calculate_delay(1) == 2.0   # 1 * 2^1 = 2
+        assert client._calculate_delay(2) == 4.0   # 1 * 2^2 = 4
+        assert client._calculate_delay(3) == 8.0   # 1 * 2^3 = 8
+        assert client._calculate_delay(4) == 16.0  # 1 * 2^4 = 16
+
+    def test_delay_respects_max_delay(self, jira_config):
+        """Test that delay is capped at max_delay."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            initial_delay=1.0,
+            max_delay=10.0,
+            backoff_factor=2.0,
+            jitter=0,
+        )
+
+        # 1 * 2^10 = 1024, but should be capped at 10
+        assert client._calculate_delay(10) == 10.0
+
+    def test_delay_uses_retry_after_header(self, jira_config):
+        """Test that Retry-After header value is used when present."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+            initial_delay=1.0,
+            max_delay=120.0,
+            jitter=0,
+        )
+
+        # Should use retry_after value
+        assert client._calculate_delay(0, retry_after=30) == 30.0
+        
+        # Should cap at max_delay even with retry_after
+        assert client._calculate_delay(0, retry_after=200) == 120.0
+
+    def test_retry_after_header_parsing(self, jira_config):
+        """Test Retry-After header is correctly parsed from response."""
+        client = JiraApiClient(
+            base_url=jira_config.url,
+            email=jira_config.email,
+            api_token=jira_config.api_token,
+            dry_run=False,
+        )
+
+        mock_response = Mock()
+        mock_response.headers = {"Retry-After": "45"}
+        assert client._get_retry_after(mock_response) == 45
+
+        mock_response.headers = {}
+        assert client._get_retry_after(mock_response) is None
+
+        mock_response.headers = {"Retry-After": "invalid"}
+        assert client._get_retry_after(mock_response) is None
 
 
 # =============================================================================

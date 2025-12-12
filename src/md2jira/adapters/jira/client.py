@@ -6,6 +6,8 @@ The JiraAdapter uses this to implement the IssueTrackerPort.
 """
 
 import logging
+import random
+import time
 from typing import Any, Optional
 
 import requests
@@ -15,7 +17,13 @@ from ...core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     PermissionError,
+    RateLimitError,
+    TransientError,
 )
+
+
+# HTTP status codes that should trigger retry
+RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 
 
 class JiraApiClient:
@@ -27,12 +35,24 @@ class JiraApiClient:
     
     API_VERSION = "3"
     
+    # Default retry configuration
+    DEFAULT_MAX_RETRIES = 3
+    DEFAULT_INITIAL_DELAY = 1.0  # seconds
+    DEFAULT_MAX_DELAY = 60.0  # seconds
+    DEFAULT_BACKOFF_FACTOR = 2.0
+    DEFAULT_JITTER = 0.1  # 10% jitter
+    
     def __init__(
         self,
         base_url: str,
         email: str,
         api_token: str,
         dry_run: bool = True,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        initial_delay: float = DEFAULT_INITIAL_DELAY,
+        max_delay: float = DEFAULT_MAX_DELAY,
+        backoff_factor: float = DEFAULT_BACKOFF_FACTOR,
+        jitter: float = DEFAULT_JITTER,
     ):
         """
         Initialize the Jira client.
@@ -42,12 +62,24 @@ class JiraApiClient:
             email: User email for authentication
             api_token: API token
             dry_run: If True, don't make write operations
+            max_retries: Maximum number of retry attempts for transient failures
+            initial_delay: Initial delay between retries in seconds
+            max_delay: Maximum delay between retries in seconds
+            backoff_factor: Multiplier for exponential backoff
+            jitter: Random jitter factor (0.1 = 10% variation)
         """
         self.base_url = base_url.rstrip("/")
         self.api_url = f"{self.base_url}/rest/api/{self.API_VERSION}"
         self.auth = (email, api_token)
         self.dry_run = dry_run
         self.logger = logging.getLogger("JiraApiClient")
+        
+        # Retry configuration
+        self.max_retries = max_retries
+        self.initial_delay = initial_delay
+        self.max_delay = max_delay
+        self.backoff_factor = backoff_factor
+        self.jitter = jitter
         
         self.headers = {
             "Accept": "application/json",
@@ -71,7 +103,10 @@ class JiraApiClient:
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
-        Make an authenticated request to Jira API.
+        Make an authenticated request to Jira API with retry logic.
+        
+        Automatically retries on transient failures (connection errors,
+        timeouts, rate limits, server errors) using exponential backoff.
         
         Args:
             method: HTTP method (GET, POST, PUT, DELETE)
@@ -82,17 +117,135 @@ class JiraApiClient:
             JSON response as dict
             
         Raises:
-            IssueTrackerError: On API errors
+            IssueTrackerError: On API errors after all retries exhausted
+            AuthenticationError: On 401 (not retried)
+            NotFoundError: On 404 (not retried)
+            PermissionError: On 403 (not retried)
+            RateLimitError: On 429 after all retries exhausted
+            TransientError: On 5xx after all retries exhausted
         """
         url = f"{self.api_url}/{endpoint}"
+        last_exception: Exception | None = None
         
-        try:
-            response = self._session.request(method, url, **kwargs)
-            return self._handle_response(response, endpoint)
-        except requests.exceptions.ConnectionError as e:
-            raise IssueTrackerError(f"Connection failed: {e}", cause=e)
-        except requests.exceptions.Timeout as e:
-            raise IssueTrackerError(f"Request timed out: {e}", cause=e)
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = self._session.request(method, url, **kwargs)
+                
+                # Check for retryable status codes before handling response
+                if response.status_code in RETRYABLE_STATUS_CODES:
+                    retry_after = self._get_retry_after(response)
+                    delay = self._calculate_delay(attempt, retry_after)
+                    
+                    if attempt < self.max_retries:
+                        self.logger.warning(
+                            f"Retryable error {response.status_code} on {method} {endpoint}, "
+                            f"attempt {attempt + 1}/{self.max_retries + 1}, "
+                            f"retrying in {delay:.2f}s"
+                        )
+                        time.sleep(delay)
+                        continue
+                    
+                    # All retries exhausted
+                    if response.status_code == 429:
+                        raise RateLimitError(
+                            f"Rate limit exceeded for {endpoint} after {self.max_retries + 1} attempts",
+                            retry_after=retry_after,
+                            issue_key=endpoint,
+                        )
+                    else:
+                        raise TransientError(
+                            f"Server error {response.status_code} for {endpoint} "
+                            f"after {self.max_retries + 1} attempts",
+                            issue_key=endpoint,
+                        )
+                
+                return self._handle_response(response, endpoint)
+                
+            except requests.exceptions.ConnectionError as e:
+                last_exception = e
+                if attempt < self.max_retries:
+                    delay = self._calculate_delay(attempt)
+                    self.logger.warning(
+                        f"Connection error on {method} {endpoint}, "
+                        f"attempt {attempt + 1}/{self.max_retries + 1}, "
+                        f"retrying in {delay:.2f}s: {e}"
+                    )
+                    time.sleep(delay)
+                    continue
+                raise IssueTrackerError(
+                    f"Connection failed after {self.max_retries + 1} attempts: {e}",
+                    cause=e
+                )
+                
+            except requests.exceptions.Timeout as e:
+                last_exception = e
+                if attempt < self.max_retries:
+                    delay = self._calculate_delay(attempt)
+                    self.logger.warning(
+                        f"Timeout on {method} {endpoint}, "
+                        f"attempt {attempt + 1}/{self.max_retries + 1}, "
+                        f"retrying in {delay:.2f}s: {e}"
+                    )
+                    time.sleep(delay)
+                    continue
+                raise IssueTrackerError(
+                    f"Request timed out after {self.max_retries + 1} attempts: {e}",
+                    cause=e
+                )
+        
+        # This should never be reached, but just in case
+        raise IssueTrackerError(
+            f"Request failed after {self.max_retries + 1} attempts",
+            cause=last_exception
+        )
+    
+    def _calculate_delay(
+        self,
+        attempt: int,
+        retry_after: int | None = None
+    ) -> float:
+        """
+        Calculate delay before next retry using exponential backoff with jitter.
+        
+        Args:
+            attempt: Current attempt number (0-indexed)
+            retry_after: Optional Retry-After header value in seconds
+            
+        Returns:
+            Delay in seconds
+        """
+        if retry_after is not None:
+            # Use Retry-After header if provided, but cap at max_delay
+            base_delay = min(retry_after, self.max_delay)
+        else:
+            # Exponential backoff: initial_delay * (backoff_factor ^ attempt)
+            base_delay = self.initial_delay * (self.backoff_factor ** attempt)
+            base_delay = min(base_delay, self.max_delay)
+        
+        # Add jitter to prevent thundering herd
+        jitter_range = base_delay * self.jitter
+        jitter_value = random.uniform(-jitter_range, jitter_range)
+        
+        return max(0, base_delay + jitter_value)
+    
+    def _get_retry_after(self, response: requests.Response) -> int | None:
+        """
+        Extract Retry-After header value from response.
+        
+        Args:
+            response: HTTP response
+            
+        Returns:
+            Retry delay in seconds, or None if header not present
+        """
+        retry_after = response.headers.get("Retry-After")
+        if retry_after is not None:
+            try:
+                return int(retry_after)
+            except ValueError:
+                # Could be a date, but we'll ignore that for simplicity
+                return None
+        return None
     
     def get(self, endpoint: str, **kwargs: Any) -> dict[str, Any]:
         """
