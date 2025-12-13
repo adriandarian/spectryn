@@ -1,0 +1,144 @@
+# Example workflow for using md2jira GitHub Action
+# Copy this file to your repository's .github/workflows/ directory
+
+name: Sync Documentation to Jira
+
+on:
+  # Sync on push to main branch
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**/*.md'
+      - 'EPIC.md'
+  
+  # Preview on pull requests
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'EPIC.md'
+  
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Run in dry-run mode'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  # Preview changes on PRs
+  preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Preview Jira Sync
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Preview Sync
+        id: preview
+        uses: md2jira/md2jira-action@v1
+        with:
+          markdown-file: docs/EPIC.md
+          epic-key: PROJ-123
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-email: ${{ secrets.JIRA_EMAIL }}
+          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
+          execute: false
+          verbose: true
+      
+      - name: Comment Preview Results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `## 📋 Jira Sync Preview
+            
+            | Metric | Count |
+            |--------|-------|
+            | Stories Matched | ${{ steps.preview.outputs.stories-matched }} |
+            | Stories to Update | ${{ steps.preview.outputs.stories-updated }} |
+            | Subtasks to Create | ${{ steps.preview.outputs.subtasks-created }} |
+            | Comments to Add | ${{ steps.preview.outputs.comments-added }} |
+            
+            **Status**: ${{ steps.preview.outputs.success == 'true' && '✅ Ready to sync' || '⚠️ Issues detected' }}
+            
+            _This is a preview. Changes will be applied when merged to main._`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+  
+  # Sync on merge to main
+  sync:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run != 'true')
+    runs-on: ubuntu-latest
+    name: Sync to Jira
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Sync to Jira
+        id: sync
+        uses: md2jira/md2jira-action@v1
+        with:
+          markdown-file: docs/EPIC.md
+          epic-key: PROJ-123
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-email: ${{ secrets.JIRA_EMAIL }}
+          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
+          execute: true
+          incremental: true
+          export-results: sync-results.json
+      
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-results
+          path: sync-results.json
+          retention-days: 30
+      
+      - name: Summary
+        run: |
+          echo "## Jira Sync Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Stories Matched | ${{ steps.sync.outputs.stories-matched }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stories Updated | ${{ steps.sync.outputs.stories-updated }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subtasks Created | ${{ steps.sync.outputs.subtasks-created }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subtasks Updated | ${{ steps.sync.outputs.subtasks-updated }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Comments Added | ${{ steps.sync.outputs.comments-added }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.sync.outputs.success }}" = "true" ]; then
+            echo "✅ **Sync completed successfully!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Sync completed with issues**" >> $GITHUB_STEP_SUMMARY
+          fi
+  
+  # Dry-run on manual trigger
+  dry-run:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run == 'true'
+    runs-on: ubuntu-latest
+    name: Dry-run Sync
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Dry-run Sync
+        uses: md2jira/md2jira-action@v1
+        with:
+          markdown-file: docs/EPIC.md
+          epic-key: PROJ-123
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-email: ${{ secrets.JIRA_EMAIL }}
+          jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
+          execute: false
+          verbose: true
+

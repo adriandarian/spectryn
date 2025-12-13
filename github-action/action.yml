@@ -1,0 +1,106 @@
+name: 'md2jira Sync'
+description: 'Sync markdown documentation to Jira issues, epics, and subtasks'
+author: 'md2jira'
+branding:
+  icon: 'upload-cloud'
+  color: 'blue'
+
+inputs:
+  markdown-file:
+    description: 'Path to the markdown file to sync'
+    required: true
+  epic-key:
+    description: 'Jira epic key to sync to (e.g., PROJ-123)'
+    required: true
+  jira-url:
+    description: 'Jira instance URL (e.g., https://company.atlassian.net)'
+    required: true
+  jira-email:
+    description: 'Jira account email'
+    required: true
+  jira-api-token:
+    description: 'Jira API token'
+    required: true
+  
+  # Execution mode
+  dry-run:
+    description: 'Run in dry-run mode (no changes made)'
+    required: false
+    default: 'false'
+  execute:
+    description: 'Execute changes (opposite of dry-run)'
+    required: false
+    default: 'true'
+  
+  # Sync options
+  phase:
+    description: 'Sync phase: all, descriptions, subtasks, comments, statuses'
+    required: false
+    default: 'all'
+  incremental:
+    description: 'Only sync changed stories'
+    required: false
+    default: 'false'
+  
+  # Multi-epic mode
+  multi-epic:
+    description: 'Enable multi-epic mode (sync multiple epics from one file)'
+    required: false
+    default: 'false'
+  epic-filter:
+    description: 'Comma-separated list of epic keys to sync (multi-epic mode)'
+    required: false
+    default: ''
+  
+  # Pull mode (reverse sync)
+  pull:
+    description: 'Pull from Jira to markdown (reverse sync)'
+    required: false
+    default: 'false'
+  pull-output:
+    description: 'Output file path for pull mode'
+    required: false
+    default: ''
+  
+  # Backup options
+  backup:
+    description: 'Create backup before sync'
+    required: false
+    default: 'true'
+  
+  # Output options
+  verbose:
+    description: 'Enable verbose output'
+    required: false
+    default: 'false'
+  export-results:
+    description: 'Export results to JSON file'
+    required: false
+    default: ''
+
+outputs:
+  success:
+    description: 'Whether the sync was successful'
+  stories-matched:
+    description: 'Number of stories matched'
+  stories-updated:
+    description: 'Number of stories updated'
+  subtasks-created:
+    description: 'Number of subtasks created'
+  subtasks-updated:
+    description: 'Number of subtasks updated'
+  comments-added:
+    description: 'Number of comments added'
+  errors:
+    description: 'Number of errors encountered'
+  result-file:
+    description: 'Path to exported results JSON (if export-results was set)'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    JIRA_URL: ${{ inputs.jira-url }}
+    JIRA_EMAIL: ${{ inputs.jira-email }}
+    JIRA_API_TOKEN: ${{ inputs.jira-api-token }}
+
