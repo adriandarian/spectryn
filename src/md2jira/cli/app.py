@@ -83,6 +83,15 @@ Examples:
   # Webhook server on custom port with secret
   md2jira --webhook --webhook-port 9000 --webhook-secret mysecret --epic PROJ-123 --pull-output EPIC.md --execute
 
+  # Multi-epic sync - sync all epics from one file
+  md2jira --multi-epic --markdown ROADMAP.md --execute
+
+  # Multi-epic with filter - sync only specific epics  
+  md2jira --multi-epic --markdown ROADMAP.md --epic-filter PROJ-100,PROJ-200 --execute
+
+  # List epics in a multi-epic file
+  md2jira --list-epics --markdown ROADMAP.md
+
 Environment Variables:
   JIRA_URL         Jira instance URL (e.g., https://company.atlassian.net)
   JIRA_EMAIL       Jira account email
@@ -407,6 +416,29 @@ Environment Variables:
         type=str,
         metavar="SECRET",
         help="Webhook secret for signature verification"
+    )
+    
+    # Multi-epic support
+    parser.add_argument(
+        "--multi-epic",
+        action="store_true",
+        help="Enable multi-epic mode for files containing multiple epics"
+    )
+    parser.add_argument(
+        "--epic-filter",
+        type=str,
+        metavar="KEYS",
+        help="Comma-separated list of epic keys to sync (e.g., PROJ-100,PROJ-200)"
+    )
+    parser.add_argument(
+        "--stop-on-error",
+        action="store_true",
+        help="Stop syncing on first epic error in multi-epic mode"
+    )
+    parser.add_argument(
+        "--list-epics",
+        action="store_true",
+        help="List epics found in markdown file without syncing"
     )
     
     return parser
@@ -933,6 +965,172 @@ def run_rollback(args) -> int:
             console.detail(f"... and {len(result.errors) - 10} more")
     
     return ExitCode.SUCCESS if result.success else ExitCode.ERROR
+
+
+def run_multi_epic(args) -> int:
+    """
+    Run multi-epic sync mode.
+    
+    Syncs multiple epics from a single markdown file.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Exit code.
+    """
+    from .logging import setup_logging
+    from ..application.sync import MultiEpicSyncOrchestrator
+    from ..adapters import JiraAdapter, ADFFormatter, EnvironmentConfigProvider
+    from ..adapters.parsers import MarkdownParser
+    
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, 'verbose', False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+    
+    # Create console
+    console = Console(
+        color=not getattr(args, 'no_color', False),
+        verbose=getattr(args, 'verbose', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    markdown_path = args.markdown
+    dry_run = not getattr(args, 'execute', False)
+    list_only = getattr(args, 'list_epics', False)
+    epic_filter_str = getattr(args, 'epic_filter', None)
+    stop_on_error = getattr(args, 'stop_on_error', False)
+    
+    # Parse epic filter
+    epic_filter = None
+    if epic_filter_str:
+        epic_filter = [k.strip() for k in epic_filter_str.split(',')]
+    
+    # Check markdown file exists
+    if not Path(markdown_path).exists():
+        console.error(f"Markdown file not found: {markdown_path}")
+        return ExitCode.FILE_NOT_FOUND
+    
+    console.header("md2jira Multi-Epic Sync")
+    
+    # Just list epics
+    if list_only:
+        parser = MarkdownParser()
+        epics = parser.parse_epics(markdown_path)
+        
+        console.section(f"Epics in {markdown_path}")
+        console.info(f"Found {len(epics)} epics:")
+        print()
+        
+        for epic in epics:
+            stories = len(epic.stories)
+            console.item(f"{epic.key}: {epic.title} ({stories} stories)", "info")
+        
+        print()
+        return ExitCode.SUCCESS
+    
+    if dry_run:
+        console.dry_run_banner()
+    
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, 'config', None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+    errors = config_provider.validate()
+    
+    if errors:
+        console.error("Configuration errors:")
+        for error in errors:
+            console.item(error, "fail")
+        return ExitCode.CONFIG_ERROR
+    
+    config = config_provider.load()
+    config.sync.dry_run = dry_run
+    
+    # Initialize components
+    formatter = ADFFormatter()
+    tracker = JiraAdapter(
+        config=config.tracker,
+        dry_run=dry_run,
+        formatter=formatter,
+    )
+    parser = MarkdownParser()
+    
+    # Test connection
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.error("Failed to connect to Jira. Check credentials.")
+        return ExitCode.CONNECTION_ERROR
+    
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+    
+    # Check if file has multiple epics
+    if not parser.is_multi_epic(markdown_path):
+        console.warning("File does not appear to contain multiple epics")
+        console.info("Expected format: ## Epic: PROJ-100 - Epic Title")
+        return ExitCode.VALIDATION_ERROR
+    
+    # Create orchestrator
+    orchestrator = MultiEpicSyncOrchestrator(
+        tracker=tracker,
+        parser=parser,
+        formatter=formatter,
+        config=config.sync,
+    )
+    
+    # Get summary first
+    summary = orchestrator.get_epic_summary(markdown_path)
+    console.section(f"Found {summary['total_epics']} epics with {summary['total_stories']} stories")
+    
+    for epic_info in summary['epics']:
+        console.item(f"{epic_info['key']}: {epic_info['title']} ({epic_info['stories']} stories)", "info")
+    
+    print()
+    
+    if epic_filter:
+        console.info(f"Filter: syncing only {', '.join(epic_filter)}")
+        print()
+    
+    # Progress callback
+    def on_progress(epic_key: str, phase: str, current: int, total: int):
+        console.info(f"[{epic_key}] {phase}")
+    
+    # Run sync
+    console.section("Syncing Epics")
+    result = orchestrator.sync(
+        markdown_path=markdown_path,
+        epic_filter=epic_filter,
+        progress_callback=on_progress,
+        stop_on_error=stop_on_error,
+    )
+    
+    # Show results
+    console.section("Results")
+    
+    for epic_result in result.epic_results:
+        status = "success" if epic_result.success else "fail"
+        console.item(
+            f"{epic_result.epic_key}: {epic_result.stories_matched} matched, "
+            f"{epic_result.subtasks_created} subtasks",
+            status,
+        )
+    
+    print()
+    console.info(f"Total: {result.epics_synced}/{result.epics_total} epics synced")
+    console.info(f"Stories: {result.total_stories_matched} matched, {result.total_stories_updated} updated")
+    console.info(f"Subtasks: {result.total_subtasks_created} created")
+    
+    if result.errors:
+        print()
+        console.error(f"Errors ({len(result.errors)}):")
+        for error in result.errors[:5]:
+            console.item(error, "fail")
+    
+    return ExitCode.SUCCESS if result.success else ExitCode.SYNC_ERROR
 
 
 def run_webhook(args) -> int:
@@ -1858,6 +2056,12 @@ def main() -> int:
         if not args.epic:
             parser.error("--webhook requires --epic/-e to be specified")
         return run_webhook(args)
+    
+    # Handle multi-epic sync
+    if args.multi_epic or args.list_epics:
+        if not args.markdown:
+            parser.error("--multi-epic and --list-epics require --markdown/-m to be specified")
+        return run_multi_epic(args)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:

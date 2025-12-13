@@ -2,6 +2,7 @@
 Markdown Parser - Parse markdown epic files into domain entities.
 
 Implements the DocumentParserPort interface.
+Supports both single-epic and multi-epic formats.
 """
 
 import logging
@@ -25,7 +26,23 @@ class MarkdownParser(DocumentParserPort):
     """
     Parser for markdown epic files.
     
-    Expected format:
+    Single-Epic Format:
+    # Epic Title
+    ### [emoji] US-XXX: Title
+    ...
+    
+    Multi-Epic Format:
+    # Project: Project Title
+    
+    ## Epic: PROJ-100 - Epic Title 1
+    ### [emoji] US-XXX: Title
+    ...
+    
+    ## Epic: PROJ-200 - Epic Title 2  
+    ### [emoji] US-XXX: Title
+    ...
+    
+    Story Format:
     ### [emoji] US-XXX: Title
     
     | Field | Value |
@@ -52,6 +69,8 @@ class MarkdownParser(DocumentParserPort):
     # Configurable patterns
     STORY_PATTERN = r'### [^\n]+ (US-\d+): ([^\n]+)\n'
     EPIC_TITLE_PATTERN = r'^#\s+[^\n]+\s+([^\n]+)$'
+    # Multi-epic pattern: ## Epic: PROJ-100 - Epic Title or ## Epic: PROJ-100
+    MULTI_EPIC_PATTERN = r'^##\s+Epic:\s*([A-Z]+-\d+)(?:\s*[-–—]\s*(.+))?$'
     
     def __init__(self, story_pattern: Optional[str] = None):
         """
@@ -91,6 +110,11 @@ class MarkdownParser(DocumentParserPort):
     def parse_epic(self, source: Union[str, Path]) -> Optional[Epic]:
         content = self._get_content(source)
         
+        # Check if this is a multi-epic file
+        if self.is_multi_epic(content):
+            epics = self.parse_epics(content)
+            return epics[0] if epics else None
+        
         # Extract epic title from first heading
         title_match = re.search(r'^#\s+[^\n]*?([A-Z]+-\d+)?.*$', content, re.MULTILINE)
         title = title_match.group(0) if title_match else "Untitled Epic"
@@ -107,6 +131,89 @@ class MarkdownParser(DocumentParserPort):
             title=title.strip("# "),
             stories=stories,
         )
+    
+    def is_multi_epic(self, source: Union[str, Path]) -> bool:
+        """
+        Check if source contains multiple epics.
+        
+        Args:
+            source: File path or content string
+            
+        Returns:
+            True if multiple epics are found
+        """
+        content = self._get_content(source)
+        epic_matches = re.findall(self.MULTI_EPIC_PATTERN, content, re.MULTILINE)
+        return len(epic_matches) >= 1
+    
+    def parse_epics(self, source: Union[str, Path]) -> list[Epic]:
+        """
+        Parse multiple epics from source.
+        
+        Expected format:
+        ## Epic: PROJ-100 - Epic Title 1
+        ### US-001: Story 1
+        ...
+        
+        ## Epic: PROJ-200 - Epic Title 2
+        ### US-002: Story 2
+        ...
+        
+        Args:
+            source: File path or content string
+            
+        Returns:
+            List of Epic entities
+        """
+        content = self._get_content(source)
+        epics = []
+        
+        # Find all epic headers
+        epic_matches = list(re.finditer(self.MULTI_EPIC_PATTERN, content, re.MULTILINE))
+        
+        if not epic_matches:
+            # Fall back to single epic parsing
+            single_epic = self.parse_epic(source)
+            return [single_epic] if single_epic else []
+        
+        self.logger.info(f"Found {len(epic_matches)} epics in file")
+        
+        for i, match in enumerate(epic_matches):
+            epic_key = match.group(1)
+            epic_title = match.group(2).strip() if match.group(2) else f"Epic {epic_key}"
+            
+            # Get content from this epic header to the next (or end)
+            start = match.end()
+            end = epic_matches[i + 1].start() if i + 1 < len(epic_matches) else len(content)
+            epic_content = content[start:end]
+            
+            # Parse stories within this epic section
+            stories = self._parse_all_stories(epic_content)
+            
+            self.logger.debug(f"Epic {epic_key}: {len(stories)} stories")
+            
+            epic = Epic(
+                key=IssueKey(epic_key),
+                title=epic_title,
+                stories=stories,
+            )
+            epics.append(epic)
+        
+        return epics
+    
+    def get_epic_keys(self, source: Union[str, Path]) -> list[str]:
+        """
+        Get list of epic keys from a multi-epic file.
+        
+        Args:
+            source: File path or content string
+            
+        Returns:
+            List of epic keys (e.g., ["PROJ-100", "PROJ-200"])
+        """
+        content = self._get_content(source)
+        matches = re.findall(self.MULTI_EPIC_PATTERN, content, re.MULTILINE)
+        return [match[0] for match in matches]
     
     def validate(self, source: Union[str, Path]) -> list[str]:
         content = self._get_content(source)

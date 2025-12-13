@@ -42,6 +42,11 @@ from .conflict import (
     SnapshotStore,
     create_snapshot_from_sync,
 )
+from .multi_epic import (
+    MultiEpicSyncOrchestrator,
+    MultiEpicSyncResult,
+    EpicSyncResult,
+)
 
 __all__ = [
     "SyncOrchestrator",
@@ -89,5 +94,9 @@ __all__ = [
     "FieldSnapshot",
     "SnapshotStore",
     "create_snapshot_from_sync",
+    # Multi-Epic Sync
+    "MultiEpicSyncOrchestrator",
+    "MultiEpicSyncResult",
+    "EpicSyncResult",
 ]
 
