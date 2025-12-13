@@ -36,10 +36,23 @@
 
 ## Installation
 
-### From PyPI (coming soon)
+### Quick Install
 
 ```bash
+# pip (all platforms)
 pip install md2jira
+
+# pipx (isolated environment)
+pipx install md2jira
+
+# Homebrew (macOS/Linux)
+brew install adriandarian/md2jira/md2jira
+
+# Chocolatey (Windows)
+choco install md2jira
+
+# Universal Linux installer
+curl -fsSL https://raw.githubusercontent.com/adriandarian/md2jira/main/packaging/linux/install.sh | bash
 ```
 
 ### From Source

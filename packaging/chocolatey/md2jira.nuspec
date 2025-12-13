@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chocolatey package specification for md2jira
+  
+  To build and test locally:
+    choco pack
+    choco install md2jira -s .
+  
+  To push to Chocolatey community repository:
+    choco push md2jira.2.0.0.nupkg --source https://push.chocolatey.org/
+-->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>md2jira</id>
+    <version>2.0.0</version>
+    <title>md2jira</title>
+    <authors>Adrian Darian</authors>
+    <owners>adriandarian</owners>
+    <licenseUrl>https://github.com/adriandarian/md2jira/blob/main/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/adriandarian/md2jira</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/adriandarian/md2jira/main/docs/assets/icon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+A production-grade CLI tool for synchronizing markdown documentation with Jira.
+
+## Features
+- Full Epic Sync - Sync user stories, subtasks, descriptions, and comments
+- Markdown-Native - Write epic documentation in markdown, sync to Jira automatically
+- Smart Matching - Fuzzy title matching between markdown stories and Jira issues
+- Safe by Default - Dry-run mode, confirmations, and detailed previews
+- Command Pattern - Undo-capable operations with full audit trail
+- Plugin System - Extensible architecture for custom integrations
+
+## Requirements
+- Python 3.10 or higher
+- Jira API token (cloud or server)
+
+## Usage
+```
+md2jira --markdown EPIC.md --epic PROJ-123
+md2jira --markdown EPIC.md --epic PROJ-123 --execute
+```
+    </description>
+    <summary>Sync markdown epic documentation with Jira</summary>
+    <releaseNotes>https://github.com/adriandarian/md2jira/blob/main/CHANGELOG.md</releaseNotes>
+    <copyright>Copyright 2024 Adrian Darian</copyright>
+    <tags>jira markdown sync documentation cli agile project-management devops</tags>
+    <projectSourceUrl>https://github.com/adriandarian/md2jira</projectSourceUrl>
+    <packageSourceUrl>https://github.com/adriandarian/md2jira/tree/main/packaging/chocolatey</packageSourceUrl>
+    <docsUrl>https://github.com/adriandarian/md2jira#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/adriandarian/md2jira/issues</bugTrackerUrl>
+    <dependencies>
+      <dependency id="python3" version="[3.10,)" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
+
