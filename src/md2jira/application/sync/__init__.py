@@ -22,6 +22,12 @@ from .diff import (
     FieldDiff,
     compare_backup_to_current,
 )
+from .reverse_sync import (
+    ReverseSyncOrchestrator,
+    PullResult,
+    PullChanges,
+    ChangeDetail,
+)
 
 __all__ = [
     "SyncOrchestrator",
@@ -51,5 +57,10 @@ __all__ = [
     "IssueDiff",
     "FieldDiff",
     "compare_backup_to_current",
+    # Reverse Sync (Pull)
+    "ReverseSyncOrchestrator",
+    "PullResult",
+    "PullChanges",
+    "ChangeDetail",
 ]
 

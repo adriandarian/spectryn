@@ -104,6 +104,51 @@ class SyncCompleted(DomainEvent):
     errors: list[str] = field(default_factory=list)
 
 
+# -------------------------------------------------------------------------
+# Reverse Sync (Pull) Events
+# -------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class PullStarted(DomainEvent):
+    """Event: A pull (reverse sync) operation started."""
+    
+    epic_key: Optional[Union[str, IssueKey]] = None
+    output_path: str = ""
+    dry_run: bool = True
+
+
+@dataclass(frozen=True)
+class PullCompleted(DomainEvent):
+    """Event: A pull (reverse sync) operation completed."""
+    
+    epic_key: Optional[Union[str, IssueKey]] = None
+    stories_pulled: int = 0
+    stories_created: int = 0
+    stories_updated: int = 0
+    output_path: str = ""
+    errors: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class StoryPulled(DomainEvent):
+    """Event: A story was pulled from Jira."""
+    
+    issue_key: Optional[Union[str, IssueKey]] = None
+    story_id: Optional[StoryId] = None
+    is_new: bool = False
+    changes: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class MarkdownUpdated(DomainEvent):
+    """Event: Markdown file was updated from Jira."""
+    
+    file_path: str = ""
+    stories_added: int = 0
+    stories_modified: int = 0
+
+
 class EventBus:
     """
     Simple event bus for publishing and subscribing to domain events.

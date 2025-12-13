@@ -53,6 +53,15 @@ Examples:
   # Verbose output for debugging
   md2jira --markdown EPIC.md --epic PROJ-123 -v
 
+  # Pull from Jira to markdown (reverse sync)
+  md2jira --pull --epic PROJ-123 --pull-output EPIC.md --execute
+
+  # Preview what would be pulled from Jira
+  md2jira --pull --epic PROJ-123 --preview
+
+  # Update existing markdown from Jira
+  md2jira --pull --epic PROJ-123 --markdown EPIC.md --update-existing --execute
+
 Environment Variables:
   JIRA_URL         Jira instance URL (e.g., https://company.atlassian.net)
   JIRA_EMAIL       Jira account email
@@ -249,6 +258,30 @@ Environment Variables:
         "--version",
         action="version",
         version="%(prog)s 2.0.0"
+    )
+    
+    # Bidirectional sync (pull from Jira)
+    parser.add_argument(
+        "--pull",
+        action="store_true",
+        help="Pull changes FROM Jira to markdown (reverse sync)"
+    )
+    parser.add_argument(
+        "--pull-output",
+        type=str,
+        dest="pull_output",
+        metavar="PATH",
+        help="Output path for pulled markdown (used with --pull)"
+    )
+    parser.add_argument(
+        "--update-existing",
+        action="store_true",
+        help="Update existing markdown file instead of overwriting (used with --pull)"
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Preview what would be pulled without making changes (used with --pull)"
     )
     
     return parser
@@ -777,6 +810,179 @@ def run_rollback(args) -> int:
     return ExitCode.SUCCESS if result.success else ExitCode.ERROR
 
 
+def run_pull(args) -> int:
+    """
+    Run the pull operation to sync from Jira to markdown.
+    
+    This is the reverse of the normal sync - it fetches issue data
+    from Jira and generates/updates a markdown file.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Exit code.
+    """
+    from .logging import setup_logging
+    from ..application.sync import ReverseSyncOrchestrator, PullResult
+    from ..adapters import JiraAdapter, ADFFormatter, EnvironmentConfigProvider
+    from ..adapters.formatters import MarkdownWriter
+    
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, 'verbose', False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+    
+    # Create console
+    console = Console(
+        color=not getattr(args, 'no_color', False),
+        verbose=getattr(args, 'verbose', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    epic_key = args.epic
+    output_path = getattr(args, 'pull_output', None)
+    existing_markdown = getattr(args, 'markdown', None)
+    preview_only = getattr(args, 'preview', False)
+    update_existing = getattr(args, 'update_existing', False)
+    dry_run = not getattr(args, 'execute', False)
+    
+    # Determine output path
+    if not output_path:
+        if existing_markdown and update_existing:
+            output_path = existing_markdown
+        else:
+            output_path = f"{epic_key}.md"
+    
+    console.header("md2jira Pull (Reverse Sync)")
+    console.info(f"Epic: {epic_key}")
+    console.info(f"Output: {output_path}")
+    
+    if dry_run:
+        console.dry_run_banner()
+    
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, 'config', None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+    errors = config_provider.validate()
+    
+    if errors:
+        console.error("Configuration errors:")
+        for error in errors:
+            console.item(error, "fail")
+        return ExitCode.CONFIG_ERROR
+    
+    config = config_provider.load()
+    config.sync.dry_run = dry_run
+    
+    # Initialize Jira adapter
+    formatter = ADFFormatter()
+    tracker = JiraAdapter(
+        config=config.tracker,
+        dry_run=True,  # Pull is read-only from Jira
+        formatter=formatter,
+    )
+    
+    # Test connection
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.error("Failed to connect to Jira. Check credentials.")
+        return ExitCode.CONNECTION_ERROR
+    
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+    
+    # Create orchestrator
+    orchestrator = ReverseSyncOrchestrator(
+        tracker=tracker,
+        config=config.sync,
+        writer=MarkdownWriter(),
+    )
+    
+    # Preview mode
+    if preview_only:
+        console.section("Previewing Changes")
+        changes = orchestrator.preview(
+            epic_key=epic_key,
+            existing_markdown=existing_markdown if update_existing else None,
+        )
+        
+        if not changes.has_changes:
+            console.success("No changes detected")
+            return ExitCode.SUCCESS
+        
+        console.info(f"Changes detected: {changes.total_changes}")
+        console.print()
+        
+        if changes.new_stories:
+            console.info(f"New stories ({len(changes.new_stories)}):")
+            for story in changes.new_stories:
+                console.item(f"{story.external_key}: {story.title}", "add")
+        
+        if changes.updated_stories:
+            console.info(f"Updated stories ({len(changes.updated_stories)}):")
+            for story, details in changes.updated_stories:
+                console.item(f"{story.external_key}: {story.title}", "change")
+                for detail in details:
+                    console.detail(f"  {detail.field}: {detail.old_value} → {detail.new_value}")
+        
+        return ExitCode.SUCCESS
+    
+    # Confirmation
+    if not dry_run and not getattr(args, 'no_confirm', False):
+        if not console.confirm(f"Pull from Jira and write to {output_path}?"):
+            console.warning("Cancelled by user")
+            return ExitCode.CANCELLED
+    
+    # Run pull
+    console.section("Pulling from Jira")
+    
+    def progress_callback(phase: str, current: int, total: int) -> None:
+        console.progress(current, total, phase)
+    
+    result = orchestrator.pull(
+        epic_key=epic_key,
+        output_path=output_path,
+        existing_markdown=existing_markdown if update_existing else None,
+        progress_callback=progress_callback,
+    )
+    
+    # Show results
+    console.print()
+    
+    if result.success:
+        if dry_run:
+            console.success("Pull preview completed (dry-run)")
+            console.info("Use --execute to write the markdown file")
+        else:
+            console.success("Pull completed successfully!")
+            console.success(f"Markdown written to: {result.output_path}")
+    else:
+        console.error("Pull completed with errors")
+    
+    console.detail(f"Stories pulled: {result.stories_pulled}")
+    console.detail(f"  - New: {result.stories_created}")
+    console.detail(f"  - Updated: {result.stories_updated}")
+    console.detail(f"Subtasks: {result.subtasks_pulled}")
+    
+    if result.errors:
+        console.print()
+        console.error("Errors:")
+        for error in result.errors[:10]:
+            console.item(error, "fail")
+    
+    if result.warnings:
+        console.print()
+        console.warning("Warnings:")
+        for warning in result.warnings[:5]:
+            console.item(warning, "warn")
+    
+    return ExitCode.SUCCESS if result.success else ExitCode.ERROR
+
+
 def run_sync(
     console: Console,
     args: argparse.Namespace,
@@ -1054,6 +1260,12 @@ def main() -> int:
     # Handle rollback
     if args.rollback:
         return run_rollback(args)
+    
+    # Handle pull (reverse sync from Jira to markdown)
+    if args.pull:
+        if not args.epic:
+            parser.error("--pull requires --epic/-e to be specified")
+        return run_pull(args)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:
