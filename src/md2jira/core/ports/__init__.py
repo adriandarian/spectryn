@@ -15,6 +15,7 @@ from .issue_tracker import (
     RateLimitError,
     TransientError,
 )
+from .async_tracker import AsyncIssueTrackerPort
 from .document_parser import DocumentParserPort, ParserError
 from .document_output import (
     DocumentOutputPort,
@@ -30,6 +31,7 @@ from .config_provider import ConfigProviderPort
 __all__ = [
     # Ports
     "IssueTrackerPort",
+    "AsyncIssueTrackerPort",
     "DocumentParserPort",
     "DocumentOutputPort",
     "DocumentFormatterPort",

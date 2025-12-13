@@ -673,4 +673,35 @@ class JiraAdapter(IssueTrackerPort):
             BatchResult
         """
         return self._batch_client.bulk_add_comments(comments)
+    
+    # -------------------------------------------------------------------------
+    # Async Operations (Optional - requires aiohttp)
+    # -------------------------------------------------------------------------
+    
+    def get_async_client(self) -> "AsyncJiraAdapter":
+        """
+        Get an async-capable version of this adapter.
+        
+        Returns an AsyncJiraAdapter that implements AsyncIssueTrackerPort
+        for parallel operations using asyncio.
+        
+        Requires aiohttp: pip install aiohttp
+        
+        Example:
+            >>> async with adapter.get_async_client() as async_adapter:
+            ...     issues = await async_adapter.get_issues_async(keys)
+        
+        Returns:
+            AsyncJiraAdapter instance
+            
+        Raises:
+            ImportError: If aiohttp is not installed
+        """
+        from .async_adapter import AsyncJiraAdapter
+        
+        return AsyncJiraAdapter(
+            config=self.config,
+            dry_run=self._dry_run,
+            formatter=self.formatter,
+        )
 
