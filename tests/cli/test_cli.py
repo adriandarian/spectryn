@@ -251,6 +251,63 @@ class TestArgumentParser:
         assert args.verbose is True
         assert args.export == "out.json"
 
+    def test_backup_options(self, cli_parser):
+        """Test backup-related arguments."""
+        # --no-backup flag
+        args = cli_parser.parse_args([
+            "--markdown", "epic.md",
+            "--epic", "PROJ-123",
+            "--no-backup"
+        ])
+        assert args.no_backup is True
+        
+        # --backup-dir
+        args = cli_parser.parse_args([
+            "--markdown", "epic.md",
+            "--epic", "PROJ-123",
+            "--backup-dir", "/custom/backups"
+        ])
+        assert args.backup_dir == "/custom/backups"
+        
+        # --list-backups
+        args = cli_parser.parse_args(["--list-backups", "--epic", "PROJ-123"])
+        assert args.list_backups is True
+
+    def test_restore_backup_option(self, cli_parser):
+        """Test --restore-backup argument."""
+        args = cli_parser.parse_args([
+            "--restore-backup", "PROJ-123_20251212_123456_abc12345",
+            "--execute"
+        ])
+        assert args.restore_backup == "PROJ-123_20251212_123456_abc12345"
+        assert args.execute is True
+
+    def test_diff_backup_option(self, cli_parser):
+        """Test --diff-backup argument."""
+        args = cli_parser.parse_args([
+            "--diff-backup", "PROJ-123_20251212_123456_abc12345"
+        ])
+        assert args.diff_backup == "PROJ-123_20251212_123456_abc12345"
+
+    def test_diff_latest_option(self, cli_parser):
+        """Test --diff-latest argument."""
+        args = cli_parser.parse_args([
+            "--diff-latest",
+            "--epic", "PROJ-123"
+        ])
+        assert args.diff_latest is True
+
+    def test_rollback_option(self, cli_parser):
+        """Test --rollback argument."""
+        args = cli_parser.parse_args([
+            "--rollback",
+            "--epic", "PROJ-123",
+            "--execute"
+        ])
+        assert args.rollback is True
+        assert args.epic == "PROJ-123"
+        assert args.execute is True
+
 
 # =============================================================================
 # Console Output Tests

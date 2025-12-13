@@ -205,6 +205,11 @@ Environment Variables:
         action="store_true",
         help="Show diff between latest backup and current Jira state"
     )
+    parser.add_argument(
+        "--rollback",
+        action="store_true",
+        help="Undo last sync by restoring from most recent backup (requires --epic)"
+    )
     
     # Special modes
     parser.add_argument(
@@ -620,6 +625,158 @@ def run_diff(args) -> int:
     return ExitCode.SUCCESS
 
 
+def run_rollback(args) -> int:
+    """
+    Rollback to the most recent backup.
+    
+    This is a convenience command that finds the latest backup for an epic
+    and restores from it.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Exit code.
+    """
+    from .exit_codes import ExitCode
+    from .logging import setup_logging
+    from ..application.sync import BackupManager, compare_backup_to_current
+    from ..adapters import JiraAdapter, ADFFormatter, EnvironmentConfigProvider
+    
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, 'verbose', False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+    
+    # Create console
+    console = Console(
+        color=not getattr(args, 'no_color', False),
+        verbose=getattr(args, 'verbose', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    epic_key = getattr(args, 'epic', None)
+    dry_run = not getattr(args, 'execute', False)
+    
+    if not epic_key:
+        console.error("--rollback requires --epic to be specified")
+        return ExitCode.CONFIG_ERROR
+    
+    console.header("md2jira Rollback")
+    
+    # Find latest backup
+    backup_dir = Path(args.backup_dir) if getattr(args, 'backup_dir', None) else None
+    manager = BackupManager(backup_dir=backup_dir)
+    
+    backup = manager.get_latest_backup(epic_key)
+    if not backup:
+        console.error(f"No backups found for epic {epic_key}")
+        console.info("Cannot rollback without a backup.")
+        console.info("Backups are automatically created before each sync operation.")
+        return ExitCode.FILE_NOT_FOUND
+    
+    console.info(f"Latest backup: {backup.backup_id}")
+    console.info(f"Epic: {backup.epic_key}")
+    console.info(f"Created: {backup.created_at}")
+    console.info(f"Issues: {backup.issue_count}, Subtasks: {backup.subtask_count}")
+    
+    if dry_run:
+        console.dry_run_banner()
+    
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, 'config', None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+    errors = config_provider.validate()
+    
+    if errors:
+        console.error("Configuration errors:")
+        for error in errors:
+            console.item(error, "fail")
+        return ExitCode.CONFIG_ERROR
+    
+    config = config_provider.load()
+    
+    # Initialize Jira adapter
+    formatter = ADFFormatter()
+    tracker = JiraAdapter(
+        config=config.tracker,
+        dry_run=dry_run,
+        formatter=formatter,
+    )
+    
+    # Test connection
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.error("Failed to connect to Jira. Check credentials.")
+        return ExitCode.CONNECTION_ERROR
+    
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+    
+    # Show diff first
+    console.section("Changes to Rollback")
+    console.print()
+    
+    diff_result, formatted_diff = compare_backup_to_current(
+        tracker=tracker,
+        backup=backup,
+        color=console.color,
+    )
+    
+    if not diff_result.has_changes:
+        console.success("No changes detected - current state already matches backup")
+        console.info("Nothing to rollback.")
+        return ExitCode.SUCCESS
+    
+    print(formatted_diff)
+    console.print()
+    
+    # Confirmation
+    if not dry_run and not getattr(args, 'no_confirm', False):
+        console.warning("This will rollback Jira issues to their backed-up state!")
+        console.detail(f"  {diff_result.changed_issues} issues will be modified")
+        if not console.confirm("Proceed with rollback?"):
+            console.warning("Cancelled by user")
+            return ExitCode.CANCELLED
+    
+    # Run restore
+    console.section("Rolling Back")
+    
+    result = manager.restore_backup(
+        tracker=tracker,
+        backup_id=backup.backup_id,
+        epic_key=backup.epic_key,
+        dry_run=dry_run,
+    )
+    
+    # Show results
+    console.print()
+    if result.success:
+        if dry_run:
+            console.success("Rollback preview completed (dry-run)")
+            console.info("Use --execute to perform the actual rollback")
+        else:
+            console.success("Rollback completed successfully!")
+    else:
+        console.error("Rollback completed with errors")
+    
+    console.detail(f"  Issues restored: {result.issues_restored}")
+    console.detail(f"  Subtasks restored: {result.subtasks_restored}")
+    
+    if result.errors:
+        console.print()
+        console.error("Errors:")
+        for error in result.errors[:10]:
+            console.item(error, "fail")
+        if len(result.errors) > 10:
+            console.detail(f"... and {len(result.errors) - 10} more")
+    
+    return ExitCode.SUCCESS if result.success else ExitCode.ERROR
+
+
 def run_sync(
     console: Console,
     args: argparse.Namespace,
@@ -893,6 +1050,10 @@ def main() -> int:
     # Handle diff-backup or diff-latest
     if args.diff_backup or args.diff_latest:
         return run_diff(args)
+    
+    # Handle rollback
+    if args.rollback:
+        return run_rollback(args)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:
