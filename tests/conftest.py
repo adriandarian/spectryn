@@ -652,5 +652,6 @@ def base_cli_args():
     args.export = None
     args.validate = False
     args.interactive = False  # Interactive mode disabled by default
+    args.completions = None  # Shell completions disabled by default
     return args
 

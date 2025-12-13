@@ -60,17 +60,15 @@ Environment Variables:
         """
     )
     
-    # Required arguments
+    # Required arguments (conditionally required - not needed for --completions)
     parser.add_argument(
         "--markdown", "-m",
         type=str,
-        required=True,
         help="Path to markdown epic file"
     )
     parser.add_argument(
         "--epic", "-e",
         type=str,
-        required=True,
         help="Jira epic key (e.g., PROJ-123)"
     )
     
@@ -146,6 +144,13 @@ Environment Variables:
         "--interactive", "-i",
         action="store_true",
         help="Interactive mode with step-by-step guided sync"
+    )
+    parser.add_argument(
+        "--completions",
+        type=str,
+        choices=["bash", "zsh", "fish"],
+        metavar="SHELL",
+        help="Generate shell completion script (bash, zsh, fish)"
     )
     parser.add_argument(
         "--version",
@@ -369,6 +374,16 @@ def main() -> int:
     """
     parser = create_parser()
     args = parser.parse_args()
+    
+    # Handle completions first (doesn't require other args)
+    if args.completions:
+        from .completions import print_completion
+        success = print_completion(args.completions)
+        return ExitCode.SUCCESS if success else ExitCode.ERROR
+    
+    # Validate required arguments for other modes
+    if not args.markdown or not args.epic:
+        parser.error("the following arguments are required: --markdown/-m, --epic/-e")
     
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO

@@ -21,15 +21,24 @@ class TestArgumentParser:
     """Tests for CLI argument parsing."""
 
     def test_required_arguments(self, cli_parser):
-        """Test that --markdown and --epic are required."""
-        with pytest.raises(SystemExit):
-            cli_parser.parse_args([])
-
-        with pytest.raises(SystemExit):
-            cli_parser.parse_args(["--markdown", "file.md"])
-
-        with pytest.raises(SystemExit):
-            cli_parser.parse_args(["--epic", "PROJ-123"])
+        """Test that --markdown and --epic are conditionally required.
+        
+        Note: Arguments are no longer required at the parser level to support
+        --completions mode. Validation happens in main() for other modes.
+        """
+        # Parser accepts empty args (validation happens in main())
+        args = cli_parser.parse_args([])
+        assert args.markdown is None
+        assert args.epic is None
+        
+        # Parser accepts partial args
+        args = cli_parser.parse_args(["--markdown", "file.md"])
+        assert args.markdown == "file.md"
+        assert args.epic is None
+        
+        args = cli_parser.parse_args(["--epic", "PROJ-123"])
+        assert args.epic == "PROJ-123"
+        assert args.markdown is None
 
     def test_minimal_valid_args(self, cli_parser):
         """Test parsing with only required arguments."""

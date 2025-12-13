@@ -226,6 +226,7 @@ md2jira -m EPIC.md -e PROJ-123 -x --export sync-results.json
 - [AI Prompt](docs/AI_PROMPT.md) - Prompt for AI agents to generate content
 - [Configuration](docs/CONFIG.md) - Configuration file format and options
 - [Exit Codes](docs/EXIT_CODES.md) - CLI exit codes for scripting and CI/CD
+- [Shell Completions](docs/COMPLETIONS.md) - Tab completion for Bash, Zsh, Fish
 
 ## Development
 
