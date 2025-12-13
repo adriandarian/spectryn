@@ -28,6 +28,20 @@ from .reverse_sync import (
     PullChanges,
     ChangeDetail,
 )
+from .conflict import (
+    ConflictType,
+    ResolutionStrategy,
+    Conflict,
+    ConflictReport,
+    ConflictResolution,
+    ConflictDetector,
+    ConflictResolver,
+    SyncSnapshot,
+    StorySnapshot,
+    FieldSnapshot,
+    SnapshotStore,
+    create_snapshot_from_sync,
+)
 
 __all__ = [
     "SyncOrchestrator",
@@ -62,5 +76,18 @@ __all__ = [
     "PullResult",
     "PullChanges",
     "ChangeDetail",
+    # Conflict Detection
+    "ConflictType",
+    "ResolutionStrategy",
+    "Conflict",
+    "ConflictReport",
+    "ConflictResolution",
+    "ConflictDetector",
+    "ConflictResolver",
+    "SyncSnapshot",
+    "StorySnapshot",
+    "FieldSnapshot",
+    "SnapshotStore",
+    "create_snapshot_from_sync",
 ]
 

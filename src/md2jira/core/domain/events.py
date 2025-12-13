@@ -149,6 +149,41 @@ class MarkdownUpdated(DomainEvent):
     stories_modified: int = 0
 
 
+# -------------------------------------------------------------------------
+# Conflict Detection Events
+# -------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ConflictDetected(DomainEvent):
+    """Event: A sync conflict was detected."""
+    
+    story_id: Optional[StoryId] = None
+    issue_key: Optional[Union[str, IssueKey]] = None
+    field: str = ""
+    conflict_type: str = ""  # both_modified, local_deleted, etc.
+
+
+@dataclass(frozen=True)
+class ConflictResolved(DomainEvent):
+    """Event: A conflict was resolved."""
+    
+    story_id: Optional[StoryId] = None
+    issue_key: Optional[Union[str, IssueKey]] = None
+    field: str = ""
+    resolution: str = ""  # local, remote, skip, merge
+
+
+@dataclass(frozen=True)
+class ConflictCheckCompleted(DomainEvent):
+    """Event: Conflict check completed for sync operation."""
+    
+    epic_key: Optional[Union[str, IssueKey]] = None
+    conflicts_found: int = 0
+    conflicts_resolved: int = 0
+    has_unresolved: bool = False
+
+
 class EventBus:
     """
     Simple event bus for publishing and subscribing to domain events.

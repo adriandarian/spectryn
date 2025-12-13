@@ -284,6 +284,42 @@ Environment Variables:
         help="Preview what would be pulled without making changes (used with --pull)"
     )
     
+    # Conflict detection
+    parser.add_argument(
+        "--check-conflicts",
+        action="store_true",
+        help="Check for conflicts before syncing (compares with last sync state)"
+    )
+    parser.add_argument(
+        "--conflict-strategy",
+        type=str,
+        choices=["ask", "force-local", "force-remote", "skip", "abort"],
+        default="ask",
+        help="How to resolve conflicts: ask (interactive), force-local (take markdown), "
+             "force-remote (take Jira), skip (skip conflicts), abort (fail on conflicts)"
+    )
+    parser.add_argument(
+        "--save-snapshot",
+        action="store_true",
+        default=True,
+        help="Save sync snapshot after successful sync (enables conflict detection)"
+    )
+    parser.add_argument(
+        "--no-snapshot",
+        action="store_true",
+        help="Don't save sync snapshot after sync"
+    )
+    parser.add_argument(
+        "--list-snapshots",
+        action="store_true",
+        help="List all stored sync snapshots"
+    )
+    parser.add_argument(
+        "--clear-snapshot",
+        action="store_true",
+        help="Clear the sync snapshot for the specified epic (resets conflict baseline)"
+    )
+    
     return parser
 
 
@@ -810,6 +846,64 @@ def run_rollback(args) -> int:
     return ExitCode.SUCCESS if result.success else ExitCode.ERROR
 
 
+def run_list_snapshots() -> int:
+    """
+    List all stored sync snapshots.
+    
+    Returns:
+        Exit code.
+    """
+    from ..application.sync import SnapshotStore
+    
+    store = SnapshotStore()
+    snapshots = store.list_snapshots()
+    
+    if not snapshots:
+        print("No sync snapshots found.")
+        print(f"Snapshot directory: {store.snapshot_dir}")
+        return ExitCode.SUCCESS
+    
+    print(f"\n{'Epic':<15} {'Stories':<10} {'Created':<25}")
+    print("-" * 52)
+    
+    for s in snapshots:
+        epic = s.get("epic_key", "")[:13]
+        stories = str(s.get("story_count", 0))
+        created = s.get("created_at", "")[:24]
+        print(f"{epic:<15} {stories:<10} {created:<25}")
+    
+    print()
+    print(f"Total snapshots: {len(snapshots)}")
+    print(f"Snapshot directory: {store.snapshot_dir}")
+    print()
+    print("Use --clear-snapshot --epic EPIC-KEY to reset conflict baseline")
+    
+    return ExitCode.SUCCESS
+
+
+def run_clear_snapshot(epic_key: str) -> int:
+    """
+    Clear the sync snapshot for an epic.
+    
+    Args:
+        epic_key: The epic key.
+        
+    Returns:
+        Exit code.
+    """
+    from ..application.sync import SnapshotStore
+    
+    store = SnapshotStore()
+    
+    if store.delete(epic_key):
+        print(f"✓ Cleared snapshot for {epic_key}")
+        print("  Next sync will not detect conflicts (fresh baseline)")
+        return ExitCode.SUCCESS
+    else:
+        print(f"No snapshot found for {epic_key}")
+        return ExitCode.FILE_NOT_FOUND
+
+
 def run_pull(args) -> int:
     """
     Run the pull operation to sync from Jira to markdown.
@@ -1266,6 +1360,16 @@ def main() -> int:
         if not args.epic:
             parser.error("--pull requires --epic/-e to be specified")
         return run_pull(args)
+    
+    # Handle list-snapshots
+    if args.list_snapshots:
+        return run_list_snapshots()
+    
+    # Handle clear-snapshot
+    if args.clear_snapshot:
+        if not args.epic:
+            parser.error("--clear-snapshot requires --epic/-e to be specified")
+        return run_clear_snapshot(args.epic)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:
