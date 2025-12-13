@@ -50,6 +50,34 @@ cd md2jira
 pip install -e ".[dev]"
 ```
 
+### Docker
+
+```bash
+# Pull the image (when available on Docker Hub)
+docker pull adriandarian/md2jira:latest
+
+# Or build locally
+docker build -t md2jira:latest .
+
+# Run with your markdown file and Jira credentials
+docker run --rm \
+  -e JIRA_URL=https://your-company.atlassian.net \
+  -e JIRA_EMAIL=your.email@company.com \
+  -e JIRA_API_TOKEN=your-api-token \
+  -v $(pwd):/workspace \
+  md2jira:latest \
+  --markdown EPIC.md --epic PROJ-123
+
+# Execute sync (not just dry-run)
+docker run --rm \
+  -e JIRA_URL=https://your-company.atlassian.net \
+  -e JIRA_EMAIL=your.email@company.com \
+  -e JIRA_API_TOKEN=your-api-token \
+  -v $(pwd):/workspace \
+  md2jira:latest \
+  --markdown EPIC.md --epic PROJ-123 --execute
+```
+
 ## Quick Start
 
 ### 1. Set up environment variables
