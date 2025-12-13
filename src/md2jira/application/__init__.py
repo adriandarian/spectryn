@@ -5,6 +5,7 @@ This layer contains:
 - commands/: Individual operations (CreateSubtask, UpdateDescription, etc.)
 - queries/: Read-only queries
 - sync/: Synchronization orchestrator
+- watch: File watching for auto-sync
 """
 
 from .sync import SyncOrchestrator, SyncResult
@@ -16,6 +17,14 @@ from .commands import (
     AddCommentCommand,
     TransitionStatusCommand,
 )
+from .watch import (
+    FileWatcher,
+    WatchOrchestrator,
+    WatchDisplay,
+    WatchEvent,
+    FileChange,
+    WatchStats,
+)
 
 __all__ = [
     "SyncOrchestrator",
@@ -26,5 +35,12 @@ __all__ = [
     "CreateSubtaskCommand",
     "AddCommentCommand",
     "TransitionStatusCommand",
+    # Watch mode
+    "FileWatcher",
+    "WatchOrchestrator",
+    "WatchDisplay",
+    "WatchEvent",
+    "FileChange",
+    "WatchStats",
 ]
 

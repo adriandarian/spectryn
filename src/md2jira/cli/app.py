@@ -62,6 +62,12 @@ Examples:
   # Update existing markdown from Jira
   md2jira --pull --epic PROJ-123 --markdown EPIC.md --update-existing --execute
 
+  # Watch mode - auto-sync on file changes
+  md2jira --watch --markdown EPIC.md --epic PROJ-123 --execute
+
+  # Watch mode with custom debounce (5 seconds between syncs)
+  md2jira --watch --markdown EPIC.md --epic PROJ-123 --execute --debounce 5
+
 Environment Variables:
   JIRA_URL         Jira instance URL (e.g., https://company.atlassian.net)
   JIRA_EMAIL       Jira account email
@@ -318,6 +324,27 @@ Environment Variables:
         "--clear-snapshot",
         action="store_true",
         help="Clear the sync snapshot for the specified epic (resets conflict baseline)"
+    )
+    
+    # Watch mode
+    parser.add_argument(
+        "--watch", "-w",
+        action="store_true",
+        help="Watch mode: auto-sync on file changes"
+    )
+    parser.add_argument(
+        "--debounce",
+        type=float,
+        default=2.0,
+        metavar="SECONDS",
+        help="Minimum time between syncs in watch mode (default: 2.0)"
+    )
+    parser.add_argument(
+        "--poll-interval",
+        type=float,
+        default=1.0,
+        metavar="SECONDS",
+        help="How often to check for file changes (default: 1.0)"
     )
     
     return parser
@@ -846,6 +873,132 @@ def run_rollback(args) -> int:
     return ExitCode.SUCCESS if result.success else ExitCode.ERROR
 
 
+def run_watch(args) -> int:
+    """
+    Run watch mode - auto-sync on file changes.
+    
+    Monitors the markdown file and triggers sync whenever
+    changes are detected.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Exit code.
+    """
+    from .logging import setup_logging
+    from ..application import SyncOrchestrator, WatchOrchestrator, WatchDisplay
+    from ..adapters import JiraAdapter, MarkdownParser, ADFFormatter, EnvironmentConfigProvider
+    
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, 'verbose', False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+    
+    # Create console
+    console = Console(
+        color=not getattr(args, 'no_color', False),
+        verbose=getattr(args, 'verbose', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    markdown_path = args.markdown
+    epic_key = args.epic
+    debounce = getattr(args, 'debounce', 2.0)
+    poll_interval = getattr(args, 'poll_interval', 1.0)
+    dry_run = not getattr(args, 'execute', False)
+    
+    # Validate markdown exists
+    if not Path(markdown_path).exists():
+        console.error(f"Markdown file not found: {markdown_path}")
+        return ExitCode.FILE_NOT_FOUND
+    
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, 'config', None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+    errors = config_provider.validate()
+    
+    if errors:
+        console.error("Configuration errors:")
+        for error in errors:
+            console.item(error, "fail")
+        return ExitCode.CONFIG_ERROR
+    
+    config = config_provider.load()
+    config.sync.dry_run = dry_run
+    
+    # Configure sync phases from args
+    config.sync.sync_descriptions = args.phase in ("all", "descriptions")
+    config.sync.sync_subtasks = args.phase in ("all", "subtasks")
+    config.sync.sync_comments = args.phase in ("all", "comments")
+    config.sync.sync_statuses = args.phase in ("all", "statuses")
+    
+    # Initialize components
+    formatter = ADFFormatter()
+    parser = MarkdownParser()
+    tracker = JiraAdapter(
+        config=config.tracker,
+        dry_run=dry_run,
+        formatter=formatter,
+    )
+    
+    # Test connection
+    console.header("md2jira Watch Mode")
+    
+    if dry_run:
+        console.dry_run_banner()
+    
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.error("Failed to connect to Jira. Check credentials.")
+        return ExitCode.CONNECTION_ERROR
+    
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+    
+    # Create sync orchestrator
+    sync_orchestrator = SyncOrchestrator(
+        tracker=tracker,
+        parser=parser,
+        formatter=formatter,
+        config=config.sync,
+    )
+    
+    # Create display handler
+    display = WatchDisplay(
+        color=not getattr(args, 'no_color', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    # Create watch orchestrator with callbacks
+    watch = WatchOrchestrator(
+        orchestrator=sync_orchestrator,
+        markdown_path=markdown_path,
+        epic_key=epic_key,
+        debounce_seconds=debounce,
+        poll_interval=poll_interval,
+        on_change_detected=display.show_change_detected,
+        on_sync_start=display.show_sync_start,
+        on_sync_complete=display.show_sync_complete,
+    )
+    
+    # Show start message
+    display.show_start(markdown_path, epic_key)
+    
+    try:
+        # Run watch mode (blocks until Ctrl+C)
+        watch.start()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        display.show_stop(watch.stats)
+    
+    return ExitCode.SUCCESS
+
+
 def run_list_snapshots() -> int:
     """
     List all stored sync snapshots.
@@ -1370,6 +1523,12 @@ def main() -> int:
         if not args.epic:
             parser.error("--clear-snapshot requires --epic/-e to be specified")
         return run_clear_snapshot(args.epic)
+    
+    # Handle watch mode
+    if args.watch:
+        if not args.markdown or not args.epic:
+            parser.error("--watch requires --markdown/-m and --epic/-e to be specified")
+        return run_watch(args)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:
