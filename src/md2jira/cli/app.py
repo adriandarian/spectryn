@@ -194,6 +194,17 @@ Environment Variables:
         metavar="BACKUP_ID",
         help="Restore Jira state from a backup (use --list-backups to see available backups)"
     )
+    parser.add_argument(
+        "--diff-backup",
+        type=str,
+        metavar="BACKUP_ID",
+        help="Show diff between backup and current Jira state"
+    )
+    parser.add_argument(
+        "--diff-latest",
+        action="store_true",
+        help="Show diff between latest backup and current Jira state"
+    )
     
     # Special modes
     parser.add_argument(
@@ -493,6 +504,122 @@ def run_restore(args) -> int:
     return ExitCode.SUCCESS if result.success else ExitCode.ERROR
 
 
+def run_diff(args) -> int:
+    """
+    Run the diff operation comparing backup to current Jira state.
+    
+    Args:
+        args: Parsed command-line arguments.
+        
+    Returns:
+        Exit code.
+    """
+    from .exit_codes import ExitCode
+    from .logging import setup_logging
+    from ..application.sync import BackupManager, compare_backup_to_current
+    from ..adapters import JiraAdapter, ADFFormatter, EnvironmentConfigProvider
+    
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, 'verbose', False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+    
+    # Create console
+    console = Console(
+        color=not getattr(args, 'no_color', False),
+        verbose=getattr(args, 'verbose', False),
+        quiet=getattr(args, 'quiet', False),
+    )
+    
+    backup_id = getattr(args, 'diff_backup', None)
+    diff_latest = getattr(args, 'diff_latest', False)
+    epic_key = getattr(args, 'epic', None)
+    
+    console.header("md2jira Diff View")
+    
+    # Load backup
+    backup_dir = Path(args.backup_dir) if getattr(args, 'backup_dir', None) else None
+    manager = BackupManager(backup_dir=backup_dir)
+    
+    if diff_latest:
+        if not epic_key:
+            console.error("--diff-latest requires --epic to be specified")
+            return ExitCode.CONFIG_ERROR
+        
+        backup = manager.get_latest_backup(epic_key)
+        if not backup:
+            console.error(f"No backups found for epic {epic_key}")
+            console.info("Use --list-backups to see available backups")
+            return ExitCode.FILE_NOT_FOUND
+        console.info(f"Using latest backup: {backup.backup_id}")
+    else:
+        backup = manager.load_backup(backup_id, epic_key)
+        if not backup:
+            console.error(f"Backup not found: {backup_id}")
+            console.info("Use --list-backups to see available backups")
+            return ExitCode.FILE_NOT_FOUND
+    
+    console.info(f"Backup: {backup.backup_id}")
+    console.info(f"Epic: {backup.epic_key}")
+    console.info(f"Created: {backup.created_at}")
+    console.info(f"Issues in backup: {backup.issue_count}")
+    
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, 'config', None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+    errors = config_provider.validate()
+    
+    if errors:
+        console.error("Configuration errors:")
+        for error in errors:
+            console.item(error, "fail")
+        return ExitCode.CONFIG_ERROR
+    
+    config = config_provider.load()
+    
+    # Initialize Jira adapter (read-only, so dry_run=True is fine)
+    formatter = ADFFormatter()
+    tracker = JiraAdapter(
+        config=config.tracker,
+        dry_run=True,
+        formatter=formatter,
+    )
+    
+    # Test connection
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.error("Failed to connect to Jira. Check credentials.")
+        return ExitCode.CONNECTION_ERROR
+    
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+    
+    # Run diff
+    console.section("Comparing Backup to Current State")
+    console.print()
+    
+    result, formatted_output = compare_backup_to_current(
+        tracker=tracker,
+        backup=backup,
+        color=console.color,
+    )
+    
+    # Print the formatted diff
+    print(formatted_output)
+    
+    # Summary
+    console.print()
+    if result.has_changes:
+        console.warning(f"Found changes in {result.changed_issues}/{result.total_issues} issues ({result.total_changes} field changes)")
+    else:
+        console.success("No changes detected - current state matches backup")
+    
+    return ExitCode.SUCCESS
+
+
 def run_sync(
     console: Console,
     args: argparse.Namespace,
@@ -762,6 +889,10 @@ def main() -> int:
     # Handle restore-backup (requires backup ID, optionally epic key)
     if args.restore_backup:
         return run_restore(args)
+    
+    # Handle diff-backup or diff-latest
+    if args.diff_backup or args.diff_latest:
+        return run_diff(args)
     
     # Handle resume-session (loads args from session)
     if args.resume_session:

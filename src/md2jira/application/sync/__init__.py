@@ -14,6 +14,14 @@ from .backup import (
     create_pre_sync_backup,
     restore_from_backup,
 )
+from .diff import (
+    DiffResult,
+    DiffCalculator,
+    DiffFormatter,
+    IssueDiff,
+    FieldDiff,
+    compare_backup_to_current,
+)
 
 __all__ = [
     "SyncOrchestrator",
@@ -36,5 +44,12 @@ __all__ = [
     "RestoreOperation",
     "create_pre_sync_backup",
     "restore_from_backup",
+    # Diff
+    "DiffResult",
+    "DiffCalculator",
+    "DiffFormatter",
+    "IssueDiff",
+    "FieldDiff",
+    "compare_backup_to_current",
 ]
 
