@@ -5,7 +5,7 @@ Implementations:
 - JiraAdapter: Atlassian Jira
 - GitHubAdapter: GitHub Issues
 - LinearAdapter: Linear
-- (Future) AzureDevOpsAdapter: Azure DevOps
+- AzureDevOpsAdapter: Azure DevOps
 """
 
 from abc import ABC, abstractmethod

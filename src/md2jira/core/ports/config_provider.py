@@ -18,7 +18,7 @@ class TrackerType(Enum):
     JIRA = "jira"
     GITHUB = "github"
     LINEAR = "linear"
-    AZURE_DEVOPS = "azure_devops"  # Future
+    AZURE_DEVOPS = "azure_devops"
 
 
 @dataclass
@@ -78,6 +78,25 @@ class LinearConfig:
     def is_valid(self) -> bool:
         """Check if configuration is valid."""
         return bool(self.api_key and self.team_key)
+
+
+@dataclass
+class AzureDevOpsConfig:
+    """Configuration for Azure DevOps tracker."""
+    
+    organization: str
+    project: str
+    pat: str  # Personal Access Token
+    base_url: str = "https://dev.azure.com"
+    
+    # Work item type mappings
+    epic_type: str = "Epic"
+    story_type: str = "User Story"
+    task_type: str = "Task"
+    
+    def is_valid(self) -> bool:
+        """Check if configuration is valid."""
+        return bool(self.organization and self.project and self.pat)
 
 
 @dataclass
