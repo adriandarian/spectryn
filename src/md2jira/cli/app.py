@@ -59,6 +59,9 @@ Examples:
   # Enable Prometheus metrics (exposed on :9090/metrics)
   md2jira --prometheus --prometheus-port 9090 --markdown EPIC.md --epic PROJ-123
 
+  # Enable health check endpoint (for Kubernetes/Docker)
+  md2jira --health --health-port 8080 --markdown EPIC.md --epic PROJ-123
+
   # Analyze without making changes (dry-run)
   md2jira --markdown EPIC.md --epic PROJ-123
 
@@ -353,6 +356,26 @@ Environment Variables:
         default="0.0.0.0",
         metavar="HOST",
         help="Prometheus metrics host (default: 0.0.0.0)"
+    )
+    
+    # Health check arguments
+    parser.add_argument(
+        "--health",
+        action="store_true",
+        help="Enable health check HTTP endpoint"
+    )
+    parser.add_argument(
+        "--health-port",
+        type=int,
+        default=8080,
+        metavar="PORT",
+        help="Health check port (default: 8080)"
+    )
+    parser.add_argument(
+        "--health-host",
+        default="0.0.0.0",
+        metavar="HOST",
+        help="Health check host (default: 0.0.0.0)"
     )
     
     parser.add_argument(
@@ -2457,6 +2480,16 @@ def main() -> int:
         if telemetry_provider is None:
             telemetry_provider = prometheus_provider
     
+    # Setup health check server if enabled
+    health_server = None
+    if getattr(args, 'health', False):
+        from .health import configure_health
+        health_server = configure_health(
+            enabled=True,
+            port=getattr(args, 'health_port', 8080),
+            host=getattr(args, 'health_host', '0.0.0.0'),
+        )
+    
     # Create console
     console = Console(
         color=not args.no_color,
@@ -2487,6 +2520,10 @@ def main() -> int:
         # Shutdown telemetry if enabled
         if telemetry_provider:
             telemetry_provider.shutdown()
+        
+        # Shutdown health server if enabled
+        if health_server:
+            health_server.stop()
 
 
 def run() -> None:
