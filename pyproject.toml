@@ -51,6 +51,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
     "pytest-asyncio>=0.21.0",  # Async test support
+    "hypothesis>=6.0",  # Property-based testing
     "aiohttp>=3.8.0",  # For testing async functionality
     "mypy>=1.0",
     "ruff>=0.1.0",
