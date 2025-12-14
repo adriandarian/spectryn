@@ -1,0 +1,230 @@
+{
+  "name": "md2jira",
+  "displayName": "md2jira",
+  "description": "Sync markdown documentation with Jira - validate, preview, and sync stories directly from VS Code",
+  "version": "1.0.0",
+  "publisher": "md2jira",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/md2jira"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "jira",
+    "markdown",
+    "sync",
+    "agile",
+    "documentation"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "workspaceContains:**/*.md"
+  ],
+  "main": "./out/extension.js",
+  "icon": "media/icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "md2jira.validate",
+        "title": "Validate Markdown",
+        "category": "md2jira",
+        "icon": "$(check)"
+      },
+      {
+        "command": "md2jira.sync",
+        "title": "Sync to Jira (Dry Run)",
+        "category": "md2jira",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "md2jira.syncExecute",
+        "title": "Sync to Jira (Execute)",
+        "category": "md2jira",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "md2jira.dashboard",
+        "title": "Show Dashboard",
+        "category": "md2jira",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "md2jira.init",
+        "title": "Setup Wizard",
+        "category": "md2jira",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "md2jira.generate",
+        "title": "Generate Template from Jira",
+        "category": "md2jira",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "md2jira.gotoStory",
+        "title": "Go to Story",
+        "category": "md2jira",
+        "icon": "$(symbol-class)"
+      },
+      {
+        "command": "md2jira.copyStoryId",
+        "title": "Copy Story ID",
+        "category": "md2jira"
+      },
+      {
+        "command": "md2jira.openInJira",
+        "title": "Open in Jira",
+        "category": "md2jira",
+        "icon": "$(link-external)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "md2jira.validate",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@1"
+        },
+        {
+          "command": "md2jira.sync",
+          "when": "resourceLangId == markdown",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "md2jira.copyStoryId",
+          "when": "resourceLangId == markdown",
+          "group": "md2jira@1"
+        },
+        {
+          "command": "md2jira.openInJira",
+          "when": "resourceLangId == markdown",
+          "group": "md2jira@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "md2jira.validate",
+          "when": "resourceLangId == markdown"
+        },
+        {
+          "command": "md2jira.sync",
+          "when": "resourceLangId == markdown"
+        },
+        {
+          "command": "md2jira.syncExecute",
+          "when": "resourceLangId == markdown"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "md2jira",
+      "properties": {
+        "md2jira.executable": {
+          "type": "string",
+          "default": "md2jira",
+          "description": "Path to md2jira executable"
+        },
+        "md2jira.jiraUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Jira instance URL (e.g., https://your-org.atlassian.net)"
+        },
+        "md2jira.autoValidate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate markdown on save"
+        },
+        "md2jira.showStoryDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline decorations for stories"
+        },
+        "md2jira.showCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show CodeLens above stories"
+        },
+        "md2jira.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show story count in status bar"
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "md2jira.storyIdColor",
+        "description": "Color for story IDs",
+        "defaults": {
+          "dark": "#4EC9B0",
+          "light": "#008080",
+          "highContrast": "#4EC9B0"
+        }
+      },
+      {
+        "id": "md2jira.epicIdColor",
+        "description": "Color for epic IDs",
+        "defaults": {
+          "dark": "#DCDCAA",
+          "light": "#795E26",
+          "highContrast": "#DCDCAA"
+        }
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "md2jira.validate",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "resourceLangId == markdown"
+      },
+      {
+        "command": "md2jira.sync",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "resourceLangId == markdown"
+      },
+      {
+        "command": "md2jira.gotoStory",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "resourceLangId == markdown"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "md2jiraStories",
+          "name": "md2jira Stories",
+          "when": "resourceLangId == markdown",
+          "icon": "$(list-unordered)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+
