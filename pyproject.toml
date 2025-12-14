@@ -51,6 +51,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
     "pytest-asyncio>=0.21.0",  # Async test support
+    "pytest-benchmark>=4.0",  # Performance benchmarking
     "hypothesis>=6.0",  # Property-based testing
     "mutmut>=2.4",  # Mutation testing
     "aiohttp>=3.8.0",  # For testing async functionality
@@ -106,7 +107,9 @@ addopts = [
 markers = [
     "slow: marks tests as slow",
     "integration: marks tests as integration tests",
+    "benchmark: marks test as a performance benchmark",
 ]
+# Benchmarks disabled by default; run with: pytest tests/benchmarks/ --benchmark-only
 
 [tool.coverage.run]
 source = ["src/md2jira"]

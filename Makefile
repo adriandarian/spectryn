@@ -16,7 +16,12 @@ help:
 	@echo "  make test-fast    Run tests without slow tests"
 	@echo "  make test-cov     Run tests with coverage"
 	@echo "  make mutation     Run mutation testing (core modules)"
-	@echo "  make mutation-quick Run quick mutation test (one module)"
+	@echo ""
+	@echo "Benchmarking:"
+	@echo "  make bench        Run all benchmarks"
+	@echo "  make bench-save   Save benchmark baseline"
+	@echo "  make bench-compare Compare against baseline"
+	@echo "  make bench-quick  Run quick benchmark subset"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  make lint         Run linter (ruff)"
@@ -40,6 +45,29 @@ test-fast:
 
 test-cov:
 	pytest tests/ --cov=src/md2jira --cov-report=html --cov-report=term-missing
+
+# Benchmarking
+bench:
+	@echo "⏱️  Running performance benchmarks..."
+	pytest tests/benchmarks/ --benchmark-only --benchmark-group-by=func
+
+bench-save:
+	@echo "⏱️  Saving benchmark baseline..."
+	pytest tests/benchmarks/ --benchmark-only --benchmark-save=baseline
+	@echo "Baseline saved to .benchmarks/"
+
+bench-compare:
+	@echo "⏱️  Comparing against baseline..."
+	pytest tests/benchmarks/ --benchmark-only --benchmark-compare=baseline
+
+bench-quick:
+	@echo "⏱️  Running quick benchmarks..."
+	pytest tests/benchmarks/test_result_bench.py -k "creation" --benchmark-only
+
+bench-json:
+	@echo "⏱️  Running benchmarks with JSON output..."
+	pytest tests/benchmarks/ --benchmark-only --benchmark-json=benchmark_results.json
+	@echo "Results saved to benchmark_results.json"
 
 # Mutation Testing
 mutation:
