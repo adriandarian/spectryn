@@ -1,0 +1,155 @@
+name: 📦 Release - OS Packages
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      dry_run:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # ============================================================================
+  # Chocolatey Package (Windows)
+  # ============================================================================
+  publish-chocolatey:
+    name: 🍫 Publish to Chocolatey
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔧 Update Package Version
+        shell: pwsh
+        run: |
+          $version = "${{ inputs.version }}"
+          $nuspec = "dist/packages/chocolatey/spectra.nuspec"
+          
+          # Update version in nuspec
+          (Get-Content $nuspec) -replace '<version>.*</version>', "<version>$version</version>" | Set-Content $nuspec
+          
+          # Update download URL
+          $url = "https://github.com/adriandarian/spectra/releases/download/v$version/spectra-$version.tar.gz"
+          (Get-Content "dist/packages/chocolatey/tools/chocolateyinstall.ps1") -replace '\$url = .*', "`$url = '$url'" | Set-Content "dist/packages/chocolatey/tools/chocolateyinstall.ps1"
+
+      - name: 📦 Pack Chocolatey Package
+        shell: pwsh
+        run: |
+          cd dist/packages/chocolatey
+          choco pack
+
+      - name: 🚀 Push to Chocolatey
+        if: ${{ !inputs.dry_run }}
+        shell: pwsh
+        run: |
+          cd dist/packages/chocolatey
+          choco push spectra.${{ inputs.version }}.nupkg --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+        continue-on-error: true
+
+  # ============================================================================
+  # Debian Package
+  # ============================================================================
+  build-debian:
+    name: 🐧 Build Debian Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev fakeroot
+          pip install build
+
+      - name: 🏗️ Build Python Package
+        run: python -m build
+
+      - name: 📦 Create Debian Package Structure
+        run: |
+          VERSION="${{ inputs.version }}"
+          PKG_DIR="spectra_${VERSION}_all"
+          
+          mkdir -p $PKG_DIR/DEBIAN
+          mkdir -p $PKG_DIR/usr/local/bin
+          mkdir -p $PKG_DIR/usr/local/lib/python3/dist-packages
+          
+          # Control file
+          cat > $PKG_DIR/DEBIAN/control << EOF
+          Package: spectra
+          Version: $VERSION
+          Section: utils
+          Priority: optional
+          Architecture: all
+          Depends: python3 (>= 3.10), python3-pip
+          Maintainer: Adrian Darian <adrian.the.hactus@gmail.com>
+          Description: Sync markdown specifications with issue trackers
+           Spectra is a production-grade CLI tool for synchronizing
+           markdown specifications with issue trackers like Jira,
+           GitHub Issues, Azure DevOps, and Linear.
+          Homepage: https://github.com/adriandarian/spectra
+          EOF
+          
+          # Post-install script
+          cat > $PKG_DIR/DEBIAN/postinst << 'EOF'
+          #!/bin/bash
+          pip3 install spectra==$VERSION || true
+          EOF
+          chmod 755 $PKG_DIR/DEBIAN/postinst
+          
+          # Build the package
+          dpkg-deb --build $PKG_DIR
+          
+      - name: 📤 Upload Debian Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: "*.deb"
+
+  # ============================================================================
+  # RPM Package
+  # ============================================================================
+  build-rpm:
+    name: 🎩 Build RPM Package
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Install Build Dependencies
+        run: |
+          dnf install -y rpm-build python3-pip python3-devel
+
+      - name: 🏗️ Build RPM Package
+        run: |
+          VERSION="${{ inputs.version }}"
+          
+          # Create RPM build structure
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          
+          # Copy spec file
+          cp dist/packages/linux/spectra.spec ~/rpmbuild/SPECS/
+          
+          # Update version in spec
+          sed -i "s/^Version:.*/Version: $VERSION/" ~/rpmbuild/SPECS/spectra.spec
+          
+          # Download source
+          curl -sL "https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz" -o ~/rpmbuild/SOURCES/spectra-${VERSION}.tar.gz || \
+            tar czf ~/rpmbuild/SOURCES/spectra-${VERSION}.tar.gz .
+          
+          # Build RPM
+          rpmbuild -ba ~/rpmbuild/SPECS/spectra.spec || echo "RPM build skipped - source not available yet"
+
+      - name: 📤 Upload RPM Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: ~/rpmbuild/RPMS/**/*.rpm
+        continue-on-error: true
+

@@ -1,0 +1,452 @@
+name: 🚀 Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (skip actual publishing)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ============================================================================
+  # Validation & Preparation
+  # ============================================================================
+  validate:
+    name: 🔍 Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📋 Determine Version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if prerelease
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "📦 Version: $VERSION"
+
+      - name: ✅ Validate Version Format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: X.Y.Z or X.Y.Z-prerelease"
+            exit 1
+          fi
+
+      - name: 🔍 Check CHANGELOG Entry
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! grep -q "\[$VERSION\]" CHANGELOG.md; then
+            echo "⚠️ Warning: No CHANGELOG entry found for version $VERSION"
+            echo "Consider adding release notes to CHANGELOG.md"
+          fi
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install and Validate Package
+        run: |
+          pip install -e ".[dev]"
+          python -c "import spectra; print(f'Package version: {spectra.__version__}')"
+
+      - name: 🧪 Run Tests
+        run: pytest tests/ -v --tb=short
+
+  # ============================================================================
+  # Build Release Assets
+  # ============================================================================
+  build:
+    name: 📦 Build Assets
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install Build Tools
+        run: pip install build twine
+
+      - name: 🔧 Update Version in pyproject.toml
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+          cat pyproject.toml | grep "^version"
+
+      - name: 🏗️ Build Python Package
+        run: python -m build
+
+      - name: ✅ Verify Package
+        run: twine check dist/*
+
+      - name: 📤 Upload Python Dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: 📤 Upload Shell Completions
+        uses: actions/upload-artifact@v4
+        with:
+          name: completions
+          path: dist/completions/
+
+  # ============================================================================
+  # Create GitHub Release
+  # ============================================================================
+  github-release:
+    name: 🏷️ GitHub Release
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: 📝 Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          
+          # Extract changelog section for this version
+          NOTES=$(awk "/## \[$VERSION\]/,/## \[/{if(/## \[/ && !/## \[$VERSION\]/)exit; print}" CHANGELOG.md | tail -n +2)
+          
+          if [ -z "$NOTES" ]; then
+            NOTES="Release $VERSION"
+          fi
+          
+          # Create release notes file
+          cat > release_notes.md << 'EOF'
+          ## What's New in v${{ needs.validate.outputs.version }}
+          
+          $NOTES
+          
+          ---
+          
+          ## Installation
+          
+          ### pip (recommended)
+          ```bash
+          pip install spectra==${{ needs.validate.outputs.version }}
+          ```
+          
+          ### pipx
+          ```bash
+          pipx install spectra==${{ needs.validate.outputs.version }}
+          ```
+          
+          ### Homebrew (macOS/Linux)
+          ```bash
+          brew install adriandarian/spectra/spectra
+          ```
+          
+          ### Docker
+          ```bash
+          docker pull adriandarian/spectra:${{ needs.validate.outputs.version }}
+          ```
+          
+          ### From Source
+          ```bash
+          pip install git+https://github.com/adriandarian/spectra.git@v${{ needs.validate.outputs.version }}
+          ```
+          
+          ---
+          
+          ## Checksums
+          
+          SHA256 checksums for release assets:
+          ```
+          $(cd artifacts && find . -type f -exec sha256sum {} \; 2>/dev/null || echo "See individual files")
+          ```
+          
+          ---
+          
+          **Full Changelog**: https://github.com/adriandarian/spectra/compare/v$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "1.0.0")...v${{ needs.validate.outputs.version }}
+          EOF
+          
+          echo "Generated release notes"
+
+      - name: 🏷️ Create Tag (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ needs.validate.outputs.tag }}" -m "Release ${{ needs.validate.outputs.version }}"
+          git push origin "${{ needs.validate.outputs.tag }}"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: ${{ !inputs.dry_run }}
+        with:
+          tag_name: ${{ needs.validate.outputs.tag }}
+          name: "Spectra ${{ needs.validate.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ needs.validate.outputs.prerelease }}
+          files: |
+            artifacts/python-dist/*
+            artifacts/completions/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # Publish Python Package to PyPI
+  # ============================================================================
+  publish-pypi:
+    name: 🐍 Publish to PyPI
+    needs: [validate, build, github-release]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/spectra/
+    steps:
+      - name: 📥 Download Python Dist
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: 🚀 Publish to PyPI
+        if: ${{ !inputs.dry_run }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Uses OIDC trusted publishing - configure in PyPI project settings
+          # No password needed!
+          skip-existing: true
+
+  # ============================================================================
+  # Publish Docker Image
+  # ============================================================================
+  publish-docker:
+    name: 🐳 Publish Docker Image
+    needs: [validate, github-release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🔐 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            adriandarian/spectra
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.validate.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.validate.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.validate.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.validate.outputs.prerelease == 'false' }}
+
+      - name: 🏗️ Build and Push
+        uses: docker/build-push-action@v5
+        if: ${{ !inputs.dry_run }}
+        with:
+          context: .
+          file: dist/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # ============================================================================
+  # Publish Documentation
+  # ============================================================================
+  publish-docs:
+    name: 📚 Publish Documentation
+    needs: [validate, github-release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: docs/package-lock.json
+
+      - name: 📦 Install Dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: 🏗️ Build Documentation
+        working-directory: docs
+        run: npm run build
+
+      - name: 🚀 Deploy to GitHub Pages
+        if: ${{ !inputs.dry_run }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist
+          cname: spectra.dev  # Optional: custom domain
+
+  # ============================================================================
+  # Publish VS Code Extension
+  # ============================================================================
+  publish-vscode:
+    name: 🆚 Publish VS Code Extension
+    needs: [validate, github-release]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/vscode
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔧 Update Version
+        run: npm version ${{ needs.validate.outputs.version }} --no-git-tag-version
+
+      - name: 🏗️ Build Extension
+        run: npm run compile
+
+      - name: 📦 Package Extension
+        run: npx vsce package
+
+      - name: 🚀 Publish to VS Code Marketplace
+        if: ${{ !inputs.dry_run }}
+        run: npx vsce publish -p ${{ secrets.VSCE_PAT }}
+        continue-on-error: true  # Don't fail release if this fails
+
+      - name: 🚀 Publish to Open VSX
+        if: ${{ !inputs.dry_run }}
+        run: npx ovsx publish -p ${{ secrets.OVSX_PAT }}
+        continue-on-error: true
+
+      - name: 📤 Upload Extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension
+          path: integrations/vscode/*.vsix
+
+  # ============================================================================
+  # Publish Homebrew Formula
+  # ============================================================================
+  publish-homebrew:
+    name: 🍺 Update Homebrew Formula
+    needs: [validate, publish-pypi]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📝 Update Formula
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          
+          # Download the release tarball to get SHA256
+          curl -sL "https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz" -o spectra.tar.gz
+          SHA256=$(sha256sum spectra.tar.gz | cut -d' ' -f1)
+          
+          # Update formula
+          sed -i "s|url \".*\"|url \"https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz\"|" dist/packages/homebrew/spectra.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" dist/packages/homebrew/spectra.rb
+          sed -i "s|version \".*\"|version \"${VERSION}\"|" dist/packages/homebrew/spectra.rb
+          
+          echo "Updated formula with version $VERSION and SHA256 $SHA256"
+
+      - name: 🚀 Push to Homebrew Tap
+        if: ${{ !inputs.dry_run }}
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        with:
+          source-directory: 'dist/packages/homebrew'
+          destination-github-username: 'adriandarian'
+          destination-repository-name: 'homebrew-spectra'
+          target-branch: main
+          commit-message: 'Update spectra to ${{ needs.validate.outputs.version }}'
+
+  # ============================================================================
+  # Summary
+  # ============================================================================
+  release-summary:
+    name: 📋 Release Summary
+    needs: [validate, github-release, publish-pypi, publish-docker, publish-docs, publish-vscode, publish-homebrew]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📋 Summary
+        run: |
+          echo "## 🚀 Release Summary for v${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Release | ${{ needs.github-release.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PyPI | ${{ needs.publish-pypi.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Hub | ${{ needs.publish-docker.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Documentation | ${{ needs.publish-docs.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| VS Code Extension | ${{ needs.publish-vscode.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Homebrew | ${{ needs.publish-homebrew.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/adriandarian/spectra/releases/tag/v${{ needs.validate.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [PyPI Package](https://pypi.org/project/spectra/${{ needs.validate.outputs.version }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker Hub](https://hub.docker.com/r/adriandarian/spectra)" >> $GITHUB_STEP_SUMMARY
+
