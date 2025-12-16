@@ -1,0 +1,58 @@
+# Auto-assign configuration
+# https://github.com/kentaro-m/auto-assign-action
+
+# Set to true to add reviewers to PRs
+addReviewers: true
+
+# Set to true to add assignees to PRs
+addAssignees: false  # Handled by separate job
+
+# A list of reviewers to be added to PRs (GitHub usernames)
+reviewers:
+  - adriandarian
+
+# A list of keywords to check against PR titles/labels
+# If matched, specific reviewers are assigned
+# reviewGroups:
+#   coreTeam:
+#     - adriandarian
+#   docsTeam:
+#     - adriandarian
+
+# A number of reviewers added to the PR
+# Set 0 to add all reviewers
+numberOfReviewers: 1
+
+# A list of usernames to skip when adding reviewers
+# (useful for not assigning PR author as reviewer)
+skipUsers:
+  - dependabot[bot]
+  - github-actions[bot]
+
+# More specific assignment based on changed files
+# Uses glob patterns
+# useReviewGroups: true
+# assignFromChangedFilesGroups:
+#   core:
+#     - src/spectra/core/**/*
+#   adapters:
+#     - src/spectra/adapters/**/*
+#   cli:
+#     - src/spectra/cli/**/*
+#   docs:
+#     - docs/**/*
+#     - "*.md"
+
+# Filter by PR labels to determine reviewers
+# filterLabels:
+#   include:
+#     - needs-review
+#   exclude:
+#     - wip
+#     - draft
+
+# Run only when the PR is not in draft
+skipDraft: true
+
+# Run only when the PR does not have requested reviewers
+skipAlreadyAssigned: true

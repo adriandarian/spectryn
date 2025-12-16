@@ -1,0 +1,88 @@
+# PR Labeler Configuration
+# Automatically labels PRs based on changed files
+# https://github.com/actions/labeler
+
+# Core domain logic
+core:
+  - changed-files:
+      - any-glob-to-any-file: "src/spectra/core/**/*"
+
+# Adapters layer
+adapters:
+  - changed-files:
+      - any-glob-to-any-file: "src/spectra/adapters/**/*"
+
+# CLI changes
+cli:
+  - changed-files:
+      - any-glob-to-any-file: "src/spectra/cli/**/*"
+
+# Application layer
+application:
+  - changed-files:
+      - any-glob-to-any-file: "src/spectra/application/**/*"
+
+# Plugin system
+plugins:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/spectra/plugins/**/*"
+          - "tests/plugins/**/*"
+
+# Documentation changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**/*"
+          - "**/*.md"
+          - "!CHANGELOG.md"
+
+# Test changes
+tests:
+  - changed-files:
+      - any-glob-to-any-file: "tests/**/*"
+
+# CI/CD changes
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**/*"
+          - "Makefile"
+          - "Dockerfile"
+          - ".dockerignore"
+
+# Configuration changes
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "pyproject.toml"
+          - "setup.cfg"
+          - ".pre-commit-config.yaml"
+          - ".editorconfig"
+          - ".env.example"
+
+# Integrations (VS Code, Neovim, Terraform, GitHub Action)
+integrations:
+  - changed-files:
+      - any-glob-to-any-file: "integrations/**/*"
+
+# VS Code extension specifically
+vscode:
+  - changed-files:
+      - any-glob-to-any-file: "integrations/vscode/**/*"
+
+# GitHub Action integration
+github-action:
+  - changed-files:
+      - any-glob-to-any-file: "integrations/github-action/**/*"
+
+# Security-related changes
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "SECURITY.md"
+          - "**/security/**/*"
+          - ".github/dependabot.yml"
+
+# Size labels based on lines changed (requires size plugin)
+# These are handled by the labeler workflow with custom logic

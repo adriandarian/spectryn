@@ -1,0 +1,74 @@
+# Mark and close stale PRs and issues
+name: Stale
+
+on:
+  schedule:
+    # Run daily at 1:00 AM UTC
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Mark Stale
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          # PR settings
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          stale-pr-message: |
+            This PR has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 7 days if no further activity occurs.
+
+            If this PR is still relevant:
+            - Push new commits to update it
+            - Comment to indicate it's still being worked on
+            - Remove the `stale` label
+
+            Thank you for your contributions! 🙏
+          close-pr-message: |
+            This PR has been automatically closed due to inactivity.
+            Feel free to reopen it if you'd like to continue working on it.
+
+          # Issue settings
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          stale-issue-label: "stale"
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 14 days if no further activity occurs.
+
+            If this issue is still relevant, please comment to keep it open.
+          close-issue-message: |
+            This issue has been automatically closed due to inactivity.
+            Feel free to reopen it if you believe it should be addressed.
+
+          # Labels to exempt from stale
+          exempt-pr-labels: "pinned,security,work-in-progress,blocked"
+          exempt-issue-labels: "pinned,security,help-wanted,good-first-issue,blocked"
+
+          # Don't mark PRs from bots as stale
+          exempt-all-pr-assignees: true
+
+          # Operations per run (to avoid rate limiting)
+          operations-per-run: 100
+
+          # Remove stale label when updated
+          remove-stale-when-updated: true
+
+          # Only process items in specific states
+          only-pr-labels: ""
+          only-issue-labels: ""
+
+          # Ascending order (oldest first)
+          ascending: true
+
+          # Enable debug logging
+          debug-only: false

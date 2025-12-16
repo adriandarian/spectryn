@@ -475,6 +475,71 @@ jobs:
           fi
 
   # ============================================================================
+  # Benchmark Regression Check
+  # ============================================================================
+  benchmark:
+    name: ⚡ Benchmark
+    runs-on: ubuntu-latest
+    # Only run on PRs with performance label or perf changes
+    if: |
+      github.event_name == 'pull_request' && (
+        contains(github.event.pull_request.labels.*.name, 'performance') ||
+        contains(github.event.pull_request.title, 'perf')
+      )
+    steps:
+      - name: 📥 Checkout PR
+        uses: actions/checkout@v4
+
+      - name: 📥 Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main-branch
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_PRIMARY }}
+          cache: 'pip'
+
+      - name: 📦 Install Dependencies (PR)
+        run: pip install -e ".[dev]"
+
+      - name: ⚡ Run Benchmarks (PR)
+        run: |
+          pytest tests/benchmarks/ \
+            --benchmark-only \
+            --benchmark-json=pr-benchmark.json \
+            --benchmark-min-rounds=5 \
+            -q || true
+
+      - name: 📦 Install Dependencies (main)
+        working-directory: main-branch
+        run: pip install -e ".[dev]"
+
+      - name: ⚡ Run Benchmarks (main)
+        working-directory: main-branch
+        run: |
+          pytest tests/benchmarks/ \
+            --benchmark-only \
+            --benchmark-json=../main-benchmark.json \
+            --benchmark-min-rounds=5 \
+            -q || true
+
+      - name: 📊 Compare Benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: pytest
+          output-file-path: pr-benchmark.json
+          external-data-json-path: main-benchmark.json
+          fail-on-alert: false
+          alert-threshold: "150%"
+          comment-on-alert: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-always: true
+          summary-always: true
+
+  # ============================================================================
   # Final Status Check (Required for branch protection)
   # ============================================================================
   status-check:
@@ -526,4 +591,5 @@ jobs:
 
       - name: ✅ All Checks Passed
         run: echo "✅ All required checks passed!"
+
 
