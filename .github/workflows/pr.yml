@@ -102,8 +102,8 @@ jobs:
       - name: 🔍 Ruff Format Check
         run: ruff format --check src/ tests/
 
-      - name: 🔍 Black Format Check
-        run: black --check src/ tests/
+      # Note: Black check removed - ruff format is the primary formatter
+      # Both tools have similar functionality, ruff is faster and more integrated
 
   typecheck:
     name: 🏷️ Type Check
