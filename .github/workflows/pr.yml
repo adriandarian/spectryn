@@ -185,7 +185,7 @@ jobs:
         run: pip install -e ".[dev,async]"
 
       - name: 🧪 Run Tests
-        run: pytest tests/ -v --tb=short --junitxml=test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml
+        run: pytest tests/ -v --tb=short --ignore=tests/benchmarks/ --junitxml=test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml
 
       - name: 📤 Upload Test Results
         uses: actions/upload-artifact@v4
@@ -215,6 +215,7 @@ jobs:
       - name: 🧪 Run Tests with Coverage
         run: |
           pytest tests/ \
+            --ignore=tests/benchmarks/ \
             --cov=src/spectra \
             --cov-report=xml \
             --cov-report=html \
