@@ -131,6 +131,7 @@ markers = [
 [tool.coverage.run]
 source = ["src/spectra"]
 branch = true
+relative_files = true
 omit = ["*/tests/*", "*/__main__.py"]
 
 [tool.coverage.report]
