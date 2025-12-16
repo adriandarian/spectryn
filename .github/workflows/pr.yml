@@ -30,7 +30,9 @@ jobs:
   pr-title:
     name: 📝 Validate PR Title
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
     steps:
       - name: Check PR title format
         uses: amannn/action-semantic-pull-request@v5
