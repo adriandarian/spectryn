@@ -8,10 +8,12 @@ Provides a foundation for async API clients with:
 - Typed error handling
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import random
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 
 try:
@@ -19,7 +21,11 @@ try:
 
     AIOHTTP_AVAILABLE = True
 except ImportError:
+    aiohttp = None  # type: ignore[assignment]
     AIOHTTP_AVAILABLE = False
+
+if TYPE_CHECKING:
+    import aiohttp
 
 from spectra.core.ports.issue_tracker import (
     AuthenticationError,
