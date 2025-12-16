@@ -316,7 +316,10 @@ class TelemetryProvider:
             "spectra_info",
             "spectra version and service information",
             ["version", "service_name"],
-        ).labels(version=self.config.service_version, service_name=self.config.service_name,).set(1)
+        ).labels(
+            version=self.config.service_version,
+            service_name=self.config.service_name,
+        ).set(1)
 
     def _start_prometheus_server(self) -> None:
         """Start the Prometheus HTTP server."""
