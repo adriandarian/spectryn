@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review, edited]
+  pull_request_target:
+    branches: [main]
+    types: [opened, edited, reopened]
   push:
     branches: [main]
 
@@ -13,7 +16,7 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
   checks: write
 
 env:
@@ -27,7 +30,9 @@ jobs:
   pr-title:
     name: 📝 PR Title
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request_target'
+    permissions:
+      pull-requests: read
     steps:
       - name: Check PR title format
         uses: amannn/action-semantic-pull-request@v5
@@ -153,6 +158,7 @@ jobs:
       - name: Coverage Comment
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && github.event_name == 'pull_request'
         uses: py-cov-action/python-coverage-comment-action@v3
+        continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MINIMUM_GREEN: 80
