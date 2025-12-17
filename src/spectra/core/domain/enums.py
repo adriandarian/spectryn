@@ -46,6 +46,10 @@ class Status(Enum):
         if any(x in value for x in ["cancel", "wontfix", "won't fix"]):
             return cls.CANCELLED
 
+        # Not started variations (including empty checkbox emoji)
+        if any(x in value for x in ["not started", "🔲", "backlog"]):
+            return cls.PLANNED
+
         # Default to planned
         return cls.PLANNED
 
@@ -99,6 +103,8 @@ class Priority(Enum):
             return cls.CRITICAL
         if any(x in value for x in ["high", "🟡", "p1"]):
             return cls.HIGH
+        if any(x in value for x in ["medium", "🟢", "p2"]):
+            return cls.MEDIUM
         if any(x in value for x in ["low", "minor", "p3"]):
             return cls.LOW
 

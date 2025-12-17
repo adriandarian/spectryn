@@ -18,8 +18,10 @@ from typing import Any
 
 from spectra.core.ports.issue_tracker import (
     IssueData,
+    IssueLink,
     IssueTrackerError,
     IssueTrackerPort,
+    LinkType,
     TransitionError,
 )
 
@@ -656,3 +658,359 @@ class GitHubAdapter(IssueTrackerPort):
         self._client.update_issue(issue_number, milestone=milestone_number)
         self.logger.info(f"Linked #{issue_number} to milestone {milestone_number}")
         return True
+
+    # -------------------------------------------------------------------------
+    # Link Operations (Cross-Issue Linking)
+    # -------------------------------------------------------------------------
+
+    def get_issue_links(self, issue_key: str) -> list[IssueLink]:
+        """
+        Get all links for an issue.
+
+        GitHub doesn't have native issue links, so we parse the issue body
+        for link references and check for cross-references in the timeline.
+
+        Supported body formats:
+        - **Blocks:** #123, #456
+        - **Blocked by:** #789
+        - **Related to:** owner/repo#123
+
+        Args:
+            issue_key: Issue to get links for
+
+        Returns:
+            List of IssueLinks
+        """
+        issue_number = self._parse_issue_key(issue_key)
+
+        try:
+            data = self._client.get_issue(issue_number)
+        except IssueTrackerError as e:
+            self.logger.error(f"Failed to get issue {issue_key}: {e}")
+            return []
+
+        links: list[IssueLink] = []
+        body = data.get("body", "") or ""
+
+        # Parse structured link references from body
+        links.extend(self._parse_body_links(body, issue_key))
+
+        return links
+
+    def _parse_body_links(self, body: str, source_key: str) -> list[IssueLink]:
+        """
+        Parse issue links from the issue body.
+
+        Supports formats:
+        - **Blocks:** #123, #456
+        - **Blocked by:** #789
+        - **Related to:** #123
+        - **Depends on:** owner/repo#123
+        - **Duplicates:** #123
+        """
+        links: list[IssueLink] = []
+
+        # Pattern definitions: (regex_pattern, link_type)
+        link_patterns = [
+            (r"\*\*Blocks[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.BLOCKS),
+            (r"\*\*Blocked by[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.IS_BLOCKED_BY),
+            (r"\*\*Related to[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.RELATES_TO),
+            (r"\*\*Relates to[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.RELATES_TO),
+            (r"\*\*Depends on[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.DEPENDS_ON),
+            (r"\*\*Duplicates[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.DUPLICATES),
+            (r"\*\*Is duplicated by[:\s]*\*\*\s*((?:#\d+(?:\s*,\s*)?)+)", LinkType.IS_DUPLICATED_BY),
+        ]
+
+        for pattern, link_type in link_patterns:
+            match = re.search(pattern, body, re.IGNORECASE)
+            if match:
+                refs_str = match.group(1)
+                # Extract all issue references
+                for ref in re.findall(r"#(\d+)", refs_str):
+                    links.append(
+                        IssueLink(
+                            link_type=link_type,
+                            target_key=f"#{ref}",
+                            source_key=source_key,
+                        )
+                    )
+
+        # Also check for cross-repo links (owner/repo#123)
+        cross_repo_patterns = [
+            (r"\*\*Blocks[:\s]*\*\*\s*((?:[\w-]+/[\w-]+#\d+(?:\s*,\s*)?)+)", LinkType.BLOCKS),
+            (r"\*\*Related to[:\s]*\*\*\s*((?:[\w-]+/[\w-]+#\d+(?:\s*,\s*)?)+)", LinkType.RELATES_TO),
+        ]
+
+        for pattern, link_type in cross_repo_patterns:
+            match = re.search(pattern, body, re.IGNORECASE)
+            if match:
+                refs_str = match.group(1)
+                for ref in re.findall(r"([\w-]+/[\w-]+#\d+)", refs_str):
+                    links.append(
+                        IssueLink(
+                            link_type=link_type,
+                            target_key=ref,
+                            source_key=source_key,
+                        )
+                    )
+
+        return links
+
+    def create_link(
+        self,
+        source_key: str,
+        target_key: str,
+        link_type: LinkType,
+    ) -> bool:
+        """
+        Create a link between two issues.
+
+        GitHub doesn't have native issue linking, so we add a formatted
+        reference to the source issue's body.
+
+        Args:
+            source_key: Source issue key (e.g., "#123")
+            target_key: Target issue key (e.g., "#456" or "owner/repo#789")
+            link_type: Type of link to create
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(
+                f"[DRY-RUN] Would create link: {source_key} {link_type.value} {target_key}"
+            )
+            return True
+
+        source_number = self._parse_issue_key(source_key)
+
+        try:
+            # Get current issue body
+            issue = self._client.get_issue(source_number)
+            current_body = issue.get("body", "") or ""
+
+            # Add link to body
+            new_body = self._add_link_to_body(current_body, target_key, link_type)
+
+            if new_body != current_body:
+                self._client.update_issue(source_number, body=new_body)
+                self.logger.info(f"Created link: {source_key} {link_type.value} {target_key}")
+            else:
+                self.logger.debug(f"Link already exists: {source_key} -> {target_key}")
+
+            return True
+        except IssueTrackerError as e:
+            self.logger.error(f"Failed to create link: {e}")
+            return False
+
+    def _add_link_to_body(
+        self,
+        body: str,
+        target_key: str,
+        link_type: LinkType,
+    ) -> str:
+        """
+        Add a link reference to the issue body.
+
+        Creates or updates a Links section with formatted references.
+        """
+        # Normalize target key
+        if not target_key.startswith("#") and "/" not in target_key:
+            target_key = f"#{target_key}"
+
+        # Map link types to section headers
+        link_headers = {
+            LinkType.BLOCKS: "Blocks",
+            LinkType.IS_BLOCKED_BY: "Blocked by",
+            LinkType.RELATES_TO: "Related to",
+            LinkType.DUPLICATES: "Duplicates",
+            LinkType.IS_DUPLICATED_BY: "Is duplicated by",
+            LinkType.DEPENDS_ON: "Depends on",
+            LinkType.IS_DEPENDENCY_OF: "Is dependency of",
+            LinkType.CLONES: "Clones",
+            LinkType.IS_CLONED_BY: "Is cloned by",
+        }
+
+        header = link_headers.get(link_type, "Related to")
+        pattern = rf"\*\*{header}[:\s]*\*\*\s*(.+?)(?:\n|$)"
+
+        match = re.search(pattern, body, re.IGNORECASE)
+        if match:
+            # Check if target already exists
+            existing = match.group(1)
+            if target_key in existing:
+                return body  # Already linked
+
+            # Add to existing line
+            new_line = f"**{header}:** {existing.strip()}, {target_key}"
+            return re.sub(pattern, new_line + "\n", body, flags=re.IGNORECASE)
+
+        # Add new links section if not exists
+        links_section = f"\n\n**{header}:** {target_key}"
+
+        # Try to add before any existing sections like "## Tasks"
+        if "## Tasks" in body:
+            return body.replace("## Tasks", f"{links_section}\n\n## Tasks")
+        if "## Links" in body:
+            # Add after existing Links header
+            return re.sub(r"(## Links\n)", rf"\1{links_section[2:]}\n", body)
+
+        # Append to end
+        return body.rstrip() + links_section
+
+    def delete_link(
+        self,
+        source_key: str,
+        target_key: str,
+        link_type: LinkType | None = None,
+    ) -> bool:
+        """
+        Delete a link between issues.
+
+        Removes the reference from the source issue's body.
+
+        Args:
+            source_key: Source issue key
+            target_key: Target issue key
+            link_type: Optional specific link type to delete
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would delete link: {source_key} -> {target_key}")
+            return True
+
+        source_number = self._parse_issue_key(source_key)
+
+        try:
+            issue = self._client.get_issue(source_number)
+            current_body = issue.get("body", "") or ""
+
+            # Remove link from body
+            new_body = self._remove_link_from_body(current_body, target_key, link_type)
+
+            if new_body != current_body:
+                self._client.update_issue(source_number, body=new_body)
+                self.logger.info(f"Deleted link: {source_key} -> {target_key}")
+
+            return True
+        except IssueTrackerError as e:
+            self.logger.error(f"Failed to delete link: {e}")
+            return False
+
+    def _remove_link_from_body(
+        self,
+        body: str,
+        target_key: str,
+        link_type: LinkType | None = None,
+    ) -> str:
+        """Remove a link reference from the issue body."""
+        # Normalize target key for matching
+        target_patterns = [
+            re.escape(target_key),
+            re.escape(target_key.lstrip("#")),
+            rf"#{re.escape(target_key.lstrip('#'))}",
+        ]
+
+        if link_type:
+            # Remove from specific link type section
+            headers = {
+                LinkType.BLOCKS: "Blocks",
+                LinkType.IS_BLOCKED_BY: "Blocked by",
+                LinkType.RELATES_TO: "Related to",
+                LinkType.DUPLICATES: "Duplicates",
+                LinkType.DEPENDS_ON: "Depends on",
+            }
+            header = headers.get(link_type, "Related to")
+            pattern = rf"(\*\*{header}[:\s]*\*\*\s*)(.+?)(\n|$)"
+
+            def remove_target(match: re.Match) -> str:
+                prefix = match.group(1)
+                refs = match.group(2)
+                suffix = match.group(3)
+
+                for tp in target_patterns:
+                    refs = re.sub(rf",?\s*{tp}", "", refs)
+                    refs = re.sub(rf"{tp}\s*,?\s*", "", refs)
+
+                refs = refs.strip().strip(",").strip()
+
+                if not refs:
+                    return ""  # Remove entire line if no refs left
+                return f"{prefix}{refs}{suffix}"
+
+            return re.sub(pattern, remove_target, body, flags=re.IGNORECASE)
+
+        # Remove from any link type
+        for tp in target_patterns:
+            # Remove from comma-separated lists
+            body = re.sub(rf",\s*{tp}", "", body)
+            body = re.sub(rf"{tp}\s*,\s*", "", body)
+            # Remove standalone
+            body = re.sub(rf"\*\*\w+[:\s]*\*\*\s*{tp}\s*\n?", "", body)
+
+        return body
+
+    def get_link_types(self) -> list[dict[str, Any]]:
+        """
+        Get available link types.
+
+        GitHub doesn't have native link types, so we return the standard
+        link types supported by our body-parsing approach.
+        """
+        return [
+            {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"},
+            {"name": "Relates", "inward": "relates to", "outward": "relates to"},
+            {"name": "Duplicates", "inward": "is duplicated by", "outward": "duplicates"},
+            {"name": "Depends", "inward": "is dependency of", "outward": "depends on"},
+            {"name": "Clones", "inward": "is cloned by", "outward": "clones"},
+        ]
+
+    def sync_links(
+        self,
+        issue_key: str,
+        desired_links: list[tuple[str, str]],
+        delete_removed: bool = False,
+    ) -> dict[str, int]:
+        """
+        Sync links for an issue to match desired state.
+
+        Args:
+            issue_key: Issue to sync links for
+            desired_links: List of (link_type, target_key) tuples
+            delete_removed: If True, delete links not in desired list
+
+        Returns:
+            Dict with counts: {created, deleted, unchanged, failed}
+        """
+        result = {"created": 0, "deleted": 0, "unchanged": 0, "failed": 0}
+
+        # Get existing links
+        existing = self.get_issue_links(issue_key)
+        existing_set = {(link.link_type.value, link.target_key) for link in existing}
+        desired_set = set(desired_links)
+
+        # Create missing links
+        to_create = desired_set - existing_set
+        for link_type_str, target_key in to_create:
+            link_type = LinkType.from_string(link_type_str)
+            if self.create_link(issue_key, target_key, link_type):
+                result["created"] += 1
+            else:
+                result["failed"] += 1
+
+        # Delete removed links (if enabled)
+        if delete_removed:
+            to_delete = existing_set - desired_set
+            for link_type_str, target_key in to_delete:
+                link_type = LinkType.from_string(link_type_str)
+                if self.delete_link(issue_key, target_key, link_type):
+                    result["deleted"] += 1
+                else:
+                    result["failed"] += 1
+
+        # Count unchanged
+        result["unchanged"] = len(existing_set & desired_set)
+
+        return result

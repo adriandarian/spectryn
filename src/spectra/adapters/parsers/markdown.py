@@ -25,23 +25,10 @@ class MarkdownParser(DocumentParserPort):
     """
     Parser for markdown epic files.
 
-    Single-Epic Format:
-    # Epic Title
-    ### [emoji] US-XXX: Title
-    ...
+    Supports multiple markdown formats with auto-detection:
 
-    Multi-Epic Format:
-    # Project: Project Title
-
-    ## Epic: PROJ-100 - Epic Title 1
-    ### [emoji] US-XXX: Title
-    ...
-
-    ## Epic: PROJ-200 - Epic Title 2
-    ### [emoji] US-XXX: Title
-    ...
-
-    Story Format:
+    FORMAT A (Table-based metadata):
+    --------------------------------
     ### [emoji] US-XXX: Title
 
     | Field | Value |
@@ -55,21 +42,49 @@ class MarkdownParser(DocumentParserPort):
     **I want** feature
     **So that** benefit
 
-    #### Acceptance Criteria
-    - [ ] Criterion 1
+    FORMAT B (Inline metadata):
+    ---------------------------
+    ### US-XXX: Title
 
-    #### Subtasks
-    | # | Subtask | Description | SP | Status |
+    **Priority**: P0
+    **Story Points**: 5
+    **Status**: ✅ Complete
 
-    #### Related Commits
-    | Commit | Message |
+    #### User Story
+    > **As a** role,
+    > **I want** feature,
+    > **So that** benefit.
+
+    Multi-Epic Format (both formats):
+    ---------------------------------
+    # Project: Project Title
+
+    ## Epic: PROJ-100 - Epic Title 1
+    ### US-XXX: Title
+    ...
+
+    Common sections (both formats):
+    - #### Acceptance Criteria
+    - #### Subtasks
+    - #### Related Commits
+    - #### Technical Notes
+    - #### Dependencies
     """
 
-    # Configurable patterns
-    STORY_PATTERN = r"### [^\n]+ (US-\d+): ([^\n]+)\n"
+    # Format detection patterns
+    FORMAT_TABLE = "table"  # Table-based metadata
+    FORMAT_INLINE = "inline"  # Inline key: value metadata
+
+    # Story patterns - flexible to match both formats
+    # Matches: ### ✅ US-001: Title  OR  ### US-001: Title
+    STORY_PATTERN = r"### (?:[^\n]+ )?(US-\d+): ([^\n]+)\n"
+    STORY_PATTERN_FLEXIBLE = r"### (?:.*?)?(US-\d+):\s*([^\n]+)\n"
     EPIC_TITLE_PATTERN = r"^#\s+[^\n]+\s+([^\n]+)$"
     # Multi-epic pattern: ## Epic: PROJ-100 - Epic Title or ## Epic: PROJ-100
     MULTI_EPIC_PATTERN = r"^##\s+Epic:\s*([A-Z]+-\d+)(?:\s*[-–—]\s*(.+))?$"
+
+    # Inline metadata patterns (Format B)
+    INLINE_FIELD_PATTERN = r"\*\*{field}\*\*:\s*(.+?)(?:\s*$|\s{2,})"
 
     def __init__(self, story_pattern: str | None = None):
         """
@@ -79,6 +94,7 @@ class MarkdownParser(DocumentParserPort):
             story_pattern: Optional custom regex for story detection
         """
         self.logger = logging.getLogger("MarkdownParser")
+        self._detected_format: str | None = None
 
         if story_pattern:
             self.STORY_PATTERN = story_pattern
@@ -99,11 +115,40 @@ class MarkdownParser(DocumentParserPort):
         if isinstance(source, Path):
             return source.suffix.lower() in self.supported_extensions
 
-        # Check if content looks like markdown
-        return bool(re.search(self.STORY_PATTERN, source))
+        # Check if content looks like markdown with either pattern
+        return bool(
+            re.search(self.STORY_PATTERN, source)
+            or re.search(self.STORY_PATTERN_FLEXIBLE, source)
+        )
+
+    def _detect_format(self, content: str) -> str:
+        """
+        Detect which markdown format is being used.
+
+        Args:
+            content: Markdown content to analyze
+
+        Returns:
+            FORMAT_TABLE or FORMAT_INLINE
+        """
+        # Look for table-based metadata (| **Field** | Value |)
+        has_table_metadata = bool(re.search(r"\|\s*\*\*Story Points\*\*\s*\|", content))
+
+        # Look for inline metadata (**Field**: Value)
+        has_inline_metadata = bool(re.search(r"\*\*(?:Priority|Story Points|Status)\*\*:\s*", content))
+
+        if has_table_metadata and not has_inline_metadata:
+            return self.FORMAT_TABLE
+        if has_inline_metadata and not has_table_metadata:
+            return self.FORMAT_INLINE
+
+        # Default to table format for backward compatibility
+        return self.FORMAT_TABLE
 
     def parse_stories(self, source: str | Path) -> list[UserStory]:
         content = self._get_content(source)
+        self._detected_format = self._detect_format(content)
+        self.logger.debug(f"Detected markdown format: {self._detected_format}")
         return self._parse_all_stories(content)
 
     def parse_epic(self, source: str | Path) -> Epic | None:
@@ -218,10 +263,16 @@ class MarkdownParser(DocumentParserPort):
         content = self._get_content(source)
         errors = []
 
-        # Check for story pattern
-        story_matches = list(re.finditer(self.STORY_PATTERN, content))
+        # Detect format for appropriate validation
+        detected_format = self._detect_format(content)
+
+        # Check for story pattern using flexible pattern
+        story_matches = list(re.finditer(self.STORY_PATTERN_FLEXIBLE, content))
         if not story_matches:
-            errors.append("No user stories found matching pattern '### [emoji] US-XXX: Title'")
+            story_matches = list(re.finditer(self.STORY_PATTERN, content))
+
+        if not story_matches:
+            errors.append("No user stories found matching pattern '### [emoji] US-XXX: Title' or '### US-XXX: Title'")
 
         # Validate each story
         for i, match in enumerate(story_matches):
@@ -230,11 +281,15 @@ class MarkdownParser(DocumentParserPort):
             end = story_matches[i + 1].start() if i + 1 < len(story_matches) else len(content)
             story_content = content[start:end]
 
-            # Check for required sections
-            if not re.search(r"\*\*Story Points\*\*", story_content):
+            # Check for required fields - both formats accepted
+            has_story_points_table = bool(re.search(r"\|\s*\*\*Story Points\*\*\s*\|", story_content))
+            has_story_points_inline = bool(re.search(r"\*\*Story Points\*\*:\s*\d+", story_content))
+            if not has_story_points_table and not has_story_points_inline:
                 errors.append(f"{story_id}: Missing Story Points field")
 
-            if not re.search(r"\*\*As a\*\*", story_content):
+            # Check for description in either format
+            has_description = bool(re.search(r"\*\*As a\*\*", story_content))
+            if not has_description:
                 errors.append(f"{story_id}: Missing 'As a' description")
 
         return errors
@@ -264,7 +319,11 @@ class MarkdownParser(DocumentParserPort):
         """Parse all stories from content."""
         stories = []
 
-        story_matches = list(re.finditer(self.STORY_PATTERN, content))
+        # Try flexible pattern first, then fall back to strict pattern
+        story_matches = list(re.finditer(self.STORY_PATTERN_FLEXIBLE, content))
+        if not story_matches:
+            story_matches = list(re.finditer(self.STORY_PATTERN, content))
+
         self.logger.debug(f"Found {len(story_matches)} stories")
 
         for i, match in enumerate(story_matches):
@@ -325,28 +384,93 @@ class MarkdownParser(DocumentParserPort):
         )
 
     def _extract_field(self, content: str, field_name: str, default: str = "") -> str:
-        """Extract field value from markdown table."""
-        pattern = rf"\|\s*\*\*{field_name}\*\*\s*\|\s*([^|]+)\s*\|"
-        match = re.search(pattern, content)
-        return match.group(1).strip() if match else default
+        """
+        Extract field value from markdown - supports both table and inline formats.
+
+        Format A (Table): | **Field** | Value |
+        Format B (Inline): **Field**: Value
+        """
+        # Try table format first: | **Field** | Value |
+        table_pattern = rf"\|\s*\*\*{field_name}\*\*\s*\|\s*([^|]+)\s*\|"
+        match = re.search(table_pattern, content)
+        if match:
+            return match.group(1).strip()
+
+        # Try inline format: **Field**: Value or **Field**: Value (with trailing spaces)
+        inline_pattern = rf"\*\*{field_name}\*\*:\s*(.+?)(?:\s*$|\s{{2,}}|\n)"
+        match = re.search(inline_pattern, content, re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+
+        return default
 
     def _extract_description(self, content: str) -> Description | None:
-        """Extract As a/I want/So that description."""
+        """
+        Extract As a/I want/So that description.
+
+        Supports multiple formats:
+        - Direct format: **As a** role **I want** feature **So that** benefit
+        - Blockquote format: > **As a** role, > **I want** feature, > **So that** benefit
+        - User Story section: #### User Story with blockquotes
+        """
+        # First try to find a dedicated User Story section (Format B)
+        user_story_section = re.search(
+            r"#### User Story\n([\s\S]*?)(?=####|\n---|\Z)", content
+        )
+
+        search_content = user_story_section.group(1) if user_story_section else content
+
+        # Pattern for blockquote format (with optional commas and line continuations)
+        # > **As a** role,
+        # > **I want** feature,
+        # > **So that** benefit.
+        blockquote_pattern = (
+            r">\s*\*\*As a\*\*\s*(.+?)(?:,\s*\n|\n)"
+            r"(?:>\s*)?\*\*I want\*\*\s*(.+?)(?:,\s*\n|\n)"
+            r"(?:>\s*)?\*\*So that\*\*\s*(.+?)(?:\.|$)"
+        )
+        match = re.search(blockquote_pattern, search_content, re.DOTALL | re.IGNORECASE)
+
+        if match:
+            return Description(
+                role=match.group(1).strip().rstrip(","),
+                want=match.group(2).strip().rstrip(","),
+                benefit=match.group(3).strip().rstrip("."),
+            )
+
+        # Standard format (direct, no blockquotes)
         pattern = (
             r"\*\*As a\*\*\s*(.+?)\s*\n\s*"
             r"\*\*I want\*\*\s*(.+?)\s*\n\s*"
             r"\*\*So that\*\*\s*(.+?)(?:\n|$)"
         )
-        match = re.search(pattern, content, re.DOTALL)
+        match = re.search(pattern, search_content, re.DOTALL)
 
-        if not match:
-            return None
+        if match:
+            return Description(
+                role=match.group(1).strip(),
+                want=match.group(2).strip(),
+                benefit=match.group(3).strip(),
+            )
 
-        return Description(
-            role=match.group(1).strip(),
-            want=match.group(2).strip(),
-            benefit=match.group(3).strip(),
+        # Try a more lenient blockquote pattern for multi-line
+        lenient_blockquote = (
+            r">\s*\*\*As a\*\*\s*([^,\n]+)"
+            r"[\s\S]*?"
+            r"\*\*I want\*\*\s*([^,\n]+)"
+            r"[\s\S]*?"
+            r"\*\*So that\*\*\s*([^.\n]+)"
         )
+        match = re.search(lenient_blockquote, search_content, re.IGNORECASE)
+
+        if match:
+            return Description(
+                role=match.group(1).strip().rstrip(","),
+                want=match.group(2).strip().rstrip(","),
+                benefit=match.group(3).strip().rstrip("."),
+            )
+
+        return None
 
     def _extract_acceptance_criteria(self, content: str) -> AcceptanceCriteria:
         """Extract acceptance criteria checkboxes."""

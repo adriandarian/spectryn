@@ -190,6 +190,7 @@ class UserStory:
             "labels": self.labels,
             "subtasks": [st.to_dict() for st in self.subtasks],
             "commits": [{"hash": c.hash, "message": c.message} for c in self.commits],
+            "links": [{"type": link_type, "target": target} for link_type, target in self.links],
             "external_key": str(self.external_key) if self.external_key else None,
         }
 

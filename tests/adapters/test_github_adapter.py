@@ -613,3 +613,198 @@ class TestGitHubAdapterIntegration:
         assert call_kwargs["assignees"] == ["newdev"]
         assert "points:3" in call_kwargs["labels"]
         assert "points:2" not in call_kwargs["labels"]
+
+
+# =============================================================================
+# Link Operations Tests
+# =============================================================================
+
+
+class TestGitHubAdapterLinks:
+    """Tests for GitHub adapter link operations."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create a mock API client."""
+        with patch("spectra.adapters.github.adapter.GitHubApiClient") as mock:
+            client = MagicMock()
+            client.list_labels.return_value = []
+            mock.return_value = client
+            yield client
+
+    @pytest.fixture
+    def adapter(self, mock_client):
+        """Create a test adapter."""
+        return GitHubAdapter(
+            token="test-token",
+            owner="test-owner",
+            repo="test-repo",
+            dry_run=False,
+        )
+
+    def test_get_issue_links_empty_body(self, adapter, mock_client):
+        """Should return empty list for issue without links."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Just a regular description",
+        }
+
+        links = adapter.get_issue_links("#123")
+
+        assert links == []
+
+    def test_get_issue_links_blocks(self, adapter, mock_client):
+        """Should parse Blocks links from body."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocks:** #456, #789",
+        }
+
+        links = adapter.get_issue_links("#123")
+
+        assert len(links) == 2
+        assert any(l.target_key == "#456" for l in links)
+        assert any(l.target_key == "#789" for l in links)
+
+    def test_get_issue_links_blocked_by(self, adapter, mock_client):
+        """Should parse Blocked by links from body."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocked by:** #100",
+        }
+
+        links = adapter.get_issue_links("#123")
+
+        assert len(links) == 1
+        assert links[0].target_key == "#100"
+        assert links[0].link_type.value == "is blocked by"
+
+    def test_get_issue_links_multiple_types(self, adapter, mock_client):
+        """Should parse multiple link types from body."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": """Description
+
+**Blocks:** #456
+**Related to:** #789
+**Depends on:** #111
+""",
+        }
+
+        links = adapter.get_issue_links("#123")
+
+        assert len(links) == 3
+
+    def test_create_link_adds_to_body(self, adapter, mock_client):
+        """Should add link reference to issue body."""
+        from spectra.core.ports.issue_tracker import LinkType
+
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Original description",
+        }
+
+        result = adapter.create_link("#123", "#456", LinkType.BLOCKS)
+
+        assert result is True
+        mock_client.update_issue.assert_called_once()
+        call_args = mock_client.update_issue.call_args
+        assert "#456" in call_args[1]["body"]
+        assert "**Blocks:**" in call_args[1]["body"]
+
+    def test_create_link_appends_to_existing(self, adapter, mock_client):
+        """Should append to existing link section."""
+        from spectra.core.ports.issue_tracker import LinkType
+
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocks:** #456",
+        }
+
+        result = adapter.create_link("#123", "#789", LinkType.BLOCKS)
+
+        assert result is True
+        call_args = mock_client.update_issue.call_args
+        assert "#456" in call_args[1]["body"]
+        assert "#789" in call_args[1]["body"]
+
+    def test_create_link_no_duplicate(self, adapter, mock_client):
+        """Should not duplicate existing link."""
+        from spectra.core.ports.issue_tracker import LinkType
+
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocks:** #456",
+        }
+
+        result = adapter.create_link("#123", "#456", LinkType.BLOCKS)
+
+        # Should succeed but not call update since link already exists
+        assert result is True
+        mock_client.update_issue.assert_not_called()
+
+    def test_create_link_dry_run(self, mock_client):
+        """Should not modify issue in dry run mode."""
+        from spectra.core.ports.issue_tracker import LinkType
+
+        adapter = GitHubAdapter(
+            token="test-token",
+            owner="test-owner",
+            repo="test-repo",
+            dry_run=True,
+        )
+
+        result = adapter.create_link("#123", "#456", LinkType.BLOCKS)
+
+        assert result is True
+        mock_client.update_issue.assert_not_called()
+
+    def test_delete_link_removes_from_body(self, adapter, mock_client):
+        """Should remove link reference from body."""
+        from spectra.core.ports.issue_tracker import LinkType
+
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocks:** #456, #789",
+        }
+
+        result = adapter.delete_link("#123", "#456", LinkType.BLOCKS)
+
+        assert result is True
+        call_args = mock_client.update_issue.call_args
+        assert "#456" not in call_args[1]["body"]
+        assert "#789" in call_args[1]["body"]
+
+    def test_get_link_types(self, adapter):
+        """Should return supported link types."""
+        link_types = adapter.get_link_types()
+
+        assert len(link_types) > 0
+        assert any(lt["name"] == "Blocks" for lt in link_types)
+        assert any(lt["name"] == "Relates" for lt in link_types)
+
+    def test_sync_links_creates_missing(self, adapter, mock_client):
+        """Should create links that don't exist."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description",
+        }
+
+        desired_links = [("blocks", "#456"), ("relates to", "#789")]
+        result = adapter.sync_links("#123", desired_links)
+
+        assert result["created"] == 2
+        assert result["unchanged"] == 0
+
+    def test_sync_links_preserves_existing(self, adapter, mock_client):
+        """Should not recreate existing links."""
+        mock_client.get_issue.return_value = {
+            "number": 123,
+            "body": "Description\n\n**Blocks:** #456",
+        }
+
+        desired_links = [("blocks", "#456"), ("relates to", "#789")]
+        result = adapter.sync_links("#123", desired_links)
+
+        assert result["unchanged"] == 1
+        assert result["created"] == 1

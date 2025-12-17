@@ -237,6 +237,9 @@ class YamlParser(DocumentParserPort):
         # Parse commits
         commits = self._parse_commits(data.get("commits", []))
 
+        # Parse links (cross-project linking)
+        links = self._parse_links(data.get("links", []))
+
         # Get scalar fields
         story_points = int(data.get("story_points", 0))
         priority = Priority.from_string(data.get("priority", "medium"))
@@ -254,6 +257,7 @@ class YamlParser(DocumentParserPort):
             status=status,
             subtasks=subtasks,
             commits=commits,
+            links=links,
         )
 
     def _parse_description(
@@ -358,6 +362,46 @@ class YamlParser(DocumentParserPort):
                 )
 
         return commits
+
+    def _parse_links(self, data: list[Any]) -> list[tuple[str, str]]:
+        """
+        Parse issue links from YAML data.
+
+        Supports multiple formats:
+        - Simple string: "blocks PROJ-123"
+        - Structured: {type: "blocks", target: "PROJ-123"}
+        - Shorthand: {blocks: "PROJ-123"}
+
+        Returns:
+            List of (link_type, target_key) tuples
+        """
+        links: list[tuple[str, str]] = []
+
+        for item in data:
+            if isinstance(item, str):
+                # Parse "blocks PROJ-123" format
+                parts = item.strip().split(None, 1)
+                if len(parts) == 2:
+                    link_type = parts[0].lower().replace("_", " ")
+                    target = parts[1].strip()
+                    links.append((link_type, target))
+            elif isinstance(item, dict):
+                # Structured format: {type: "blocks", target: "PROJ-123"}
+                if "type" in item and "target" in item:
+                    link_type = str(item["type"]).lower().replace("_", " ")
+                    target = str(item["target"])
+                    links.append((link_type, target))
+                else:
+                    # Shorthand format: {blocks: "PROJ-123"} or {blocks: ["A-1", "B-2"]}
+                    for link_type, targets in item.items():
+                        link_type_normalized = str(link_type).lower().replace("_", " ")
+                        if isinstance(targets, str):
+                            links.append((link_type_normalized, targets))
+                        elif isinstance(targets, list):
+                            for target in targets:
+                                links.append((link_type_normalized, str(target)))
+
+        return links
 
     # -------------------------------------------------------------------------
     # Private Methods - Validation

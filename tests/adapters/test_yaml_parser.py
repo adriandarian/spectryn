@@ -300,6 +300,107 @@ class TestYamlParser:
         assert commits[0].message == "Add feature"
         assert commits[1].hash == "b2c3d4e5"
 
+    # -------------------------------------------------------------------------
+    # Links Tests
+    # -------------------------------------------------------------------------
+
+    def test_parse_links_structured(self, parser):
+        """Should parse structured link format."""
+        content = dedent(
+            """
+            stories:
+              - id: US-001
+                title: "Story with Links"
+                links:
+                  - type: "blocks"
+                    target: "PROJ-123"
+                  - type: "depends on"
+                    target: "OTHER-456"
+        """
+        )
+
+        stories = parser.parse_stories(content)
+
+        links = stories[0].links
+        assert len(links) == 2
+        assert ("blocks", "PROJ-123") in links
+        assert ("depends on", "OTHER-456") in links
+
+    def test_parse_links_shorthand(self, parser):
+        """Should parse shorthand link format."""
+        content = dedent(
+            """
+            stories:
+              - id: US-001
+                title: "Story with Links"
+                links:
+                  - blocks: "PROJ-123"
+                  - relates_to: "OTHER-456"
+        """
+        )
+
+        stories = parser.parse_stories(content)
+
+        links = stories[0].links
+        assert len(links) == 2
+        assert ("blocks", "PROJ-123") in links
+        assert ("relates to", "OTHER-456") in links
+
+    def test_parse_links_shorthand_multiple_targets(self, parser):
+        """Should parse shorthand links with multiple targets."""
+        content = dedent(
+            """
+            stories:
+              - id: US-001
+                title: "Story with Links"
+                links:
+                  - blocks:
+                      - "PROJ-123"
+                      - "PROJ-456"
+        """
+        )
+
+        stories = parser.parse_stories(content)
+
+        links = stories[0].links
+        assert len(links) == 2
+        assert ("blocks", "PROJ-123") in links
+        assert ("blocks", "PROJ-456") in links
+
+    def test_parse_links_string_format(self, parser):
+        """Should parse simple string link format."""
+        content = dedent(
+            """
+            stories:
+              - id: US-001
+                title: "Story with Links"
+                links:
+                  - "blocks PROJ-123"
+                  - "depends_on OTHER-456"
+        """
+        )
+
+        stories = parser.parse_stories(content)
+
+        links = stories[0].links
+        assert len(links) == 2
+        assert ("blocks", "PROJ-123") in links
+        assert ("depends on", "OTHER-456") in links
+
+    def test_parse_links_empty(self, parser):
+        """Should handle story without links."""
+        content = dedent(
+            """
+            stories:
+              - id: US-001
+                title: "Story without Links"
+        """
+        )
+
+        stories = parser.parse_stories(content)
+
+        assert stories[0].links == []
+
     def test_parse_technical_notes(self, parser):
         """Should parse technical notes."""
         content = dedent(
