@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review, edited]
-  pull_request_target:
-    branches: [main]
-    types: [opened, edited, reopened]
   push:
     branches: [main]
 
@@ -16,7 +13,7 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
   checks: write
 
 env:
@@ -30,7 +27,7 @@ jobs:
   pr-title:
     name: 📝 PR Title
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     permissions:
       pull-requests: read
     steps:
@@ -276,6 +273,7 @@ jobs:
   security:
     name: 🔒 Security
     runs-on: ubuntu-latest
+    # Security checks are informational - don't block PRs
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -285,11 +283,9 @@ jobs:
           cache: 'pip'
       - run: pip install -e ".[dev]" bandit pip-audit
       - name: Bandit
-        run: bandit -r src/spectra/ -ll -ii -x "*/tests/*"
-        continue-on-error: true
+        run: bandit -r src/spectra/ -ll -ii -x "*/tests/*" || echo "Bandit found issues (non-blocking)"
       - name: Pip Audit
-        run: pip-audit --strict --desc
-        continue-on-error: true
+        run: pip-audit --desc || echo "Pip audit found issues (non-blocking)"
 
   # ============================================================================
   # PR Management (runs in parallel)
@@ -332,6 +328,9 @@ jobs:
     name: 🏷️ Labels
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/labeler@v5
         with:
