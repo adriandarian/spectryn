@@ -429,7 +429,8 @@ class TestNotionParser:
 
             > 👤 As a user, I want file parsing so that I can import Notion exports
         """
-            )
+            ),
+            encoding="utf-8",
         )
 
         stories = parser.parse_stories(md_file)

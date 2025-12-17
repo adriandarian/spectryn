@@ -295,7 +295,8 @@ class TestLoadDashboardData:
 **As a** user
 **I want** to test
 **So that** it works
-"""
+""",
+            encoding="utf-8",
         )
 
         data = load_dashboard_data(markdown_path=str(md_file))
@@ -341,7 +342,8 @@ class TestRunDashboard:
 | **Story Points** | 5 |
 
 Description.
-"""
+""",
+            encoding="utf-8",
         )
 
         console = Console(color=False)

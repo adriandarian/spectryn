@@ -629,7 +629,7 @@ class TestValidateMarkdown:
 - [ ] Criterion 1
 """
         md_file = tmp_path / "valid.md"
-        md_file.write_text(md_content)
+        md_file.write_text(md_content, encoding="utf-8")
 
         result = validate_markdown(console, str(md_file))
 

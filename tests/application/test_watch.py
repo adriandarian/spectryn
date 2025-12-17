@@ -72,23 +72,19 @@ class TestWatchStats:
 class TestFileWatcher:
     """Tests for FileWatcher class."""
 
-    def test_start_stop(self):
+    def test_start_stop(self, tmp_path):
         """Test starting and stopping the watcher."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Test content")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Test content")
 
-            try:
-                watcher = FileWatcher(f.name, poll_interval=0.1)
-                watcher.start()
+        watcher = FileWatcher(str(test_file), poll_interval=0.1)
+        watcher.start()
 
-                assert watcher._running
+        assert watcher._running
 
-                watcher.stop()
+        watcher.stop()
 
-                assert not watcher._running
-            finally:
-                Path(f.name).unlink()
+        assert not watcher._running
 
     def test_file_not_found(self):
         """Test error when file doesn't exist."""
@@ -97,112 +93,92 @@ class TestFileWatcher:
         with pytest.raises(FileNotFoundError):
             watcher.start()
 
-    def test_detect_modification(self):
+    def test_detect_modification(self, tmp_path):
         """Test detecting file modifications."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial content")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial content")
 
-            changes_detected = []
+        changes_detected = []
 
-            try:
-                watcher = FileWatcher(f.name, debounce_seconds=0.1, poll_interval=0.1)
-                watcher.on_change(lambda c: changes_detected.append(c))
-                watcher.start()
+        watcher = FileWatcher(str(test_file), debounce_seconds=0.1, poll_interval=0.1)
+        watcher.on_change(lambda c: changes_detected.append(c))
+        watcher.start()
 
-                # Modify the file
-                time.sleep(0.2)  # Wait for initial poll
-                Path(f.name).write_text("# Modified content")
+        # Modify the file
+        time.sleep(0.2)  # Wait for initial poll
+        test_file.write_text("# Modified content")
 
-                # Wait for detection
-                time.sleep(0.5)
-                watcher.stop()
+        # Wait for detection
+        time.sleep(0.5)
+        watcher.stop()
 
-                # Should have detected the change
-                assert len(changes_detected) >= 1
-                assert any(c.event == WatchEvent.MODIFIED for c in changes_detected)
+        # Should have detected the change
+        assert len(changes_detected) >= 1
+        assert any(c.event == WatchEvent.MODIFIED for c in changes_detected)
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_debouncing(self):
+    def test_debouncing(self, tmp_path):
         """Test that rapid changes are debounced."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            changes_detected = []
+        changes_detected = []
 
-            try:
-                watcher = FileWatcher(f.name, debounce_seconds=0.5, poll_interval=0.1)
-                watcher.on_change(lambda c: changes_detected.append(c))
-                watcher.start()
+        watcher = FileWatcher(str(test_file), debounce_seconds=0.5, poll_interval=0.1)
+        watcher.on_change(lambda c: changes_detected.append(c))
+        watcher.start()
 
-                time.sleep(0.2)
+        time.sleep(0.2)
 
-                # Make rapid changes
-                for i in range(5):
-                    Path(f.name).write_text(f"# Version {i}")
-                    time.sleep(0.05)
+        # Make rapid changes
+        for i in range(5):
+            test_file.write_text(f"# Version {i}")
+            time.sleep(0.05)
 
-                # Wait for debounce
-                time.sleep(0.7)
-                watcher.stop()
+        # Wait for debounce
+        time.sleep(0.7)
+        watcher.stop()
 
-                # Should have fewer changes than modifications due to debouncing
-                assert len(changes_detected) < 5
+        # Should have fewer changes than modifications due to debouncing
+        assert len(changes_detected) < 5
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_multiple_callbacks(self):
+    def test_multiple_callbacks(self, tmp_path):
         """Test registering multiple callbacks."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            callback1_called = []
-            callback2_called = []
+        callback1_called = []
+        callback2_called = []
 
-            try:
-                watcher = FileWatcher(f.name, debounce_seconds=0.1, poll_interval=0.1)
-                watcher.on_change(lambda c: callback1_called.append(c))
-                watcher.on_change(lambda c: callback2_called.append(c))
-                watcher.start()
+        watcher = FileWatcher(str(test_file), debounce_seconds=0.1, poll_interval=0.1)
+        watcher.on_change(lambda c: callback1_called.append(c))
+        watcher.on_change(lambda c: callback2_called.append(c))
+        watcher.start()
 
-                time.sleep(0.2)
-                Path(f.name).write_text("# Modified")
-                time.sleep(0.4)
-                watcher.stop()
+        time.sleep(0.2)
+        test_file.write_text("# Modified")
+        time.sleep(0.4)
+        watcher.stop()
 
-                # Both callbacks should be called
-                assert len(callback1_called) >= 1
-                assert len(callback2_called) >= 1
+        # Both callbacks should be called
+        assert len(callback1_called) >= 1
+        assert len(callback2_called) >= 1
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_compute_hash_consistency(self):
+    def test_compute_hash_consistency(self, tmp_path):
         """Test that hash computation is consistent."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Test content")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Test content")
 
-            try:
-                watcher = FileWatcher(f.name)
-                hash1 = watcher._compute_hash()
-                hash2 = watcher._compute_hash()
+        watcher = FileWatcher(str(test_file))
+        hash1 = watcher._compute_hash()
+        hash2 = watcher._compute_hash()
 
-                assert hash1 == hash2
+        assert hash1 == hash2
 
-                # Change content
-                Path(f.name).write_text("# Different content")
-                hash3 = watcher._compute_hash()
+        # Change content
+        test_file.write_text("# Different content")
+        hash3 = watcher._compute_hash()
 
-                assert hash1 != hash3
-
-            finally:
-                Path(f.name).unlink()
+        assert hash1 != hash3
 
 
 class TestWatchOrchestrator:
@@ -222,209 +198,174 @@ class TestWatchOrchestrator:
         )
         return orchestrator
 
-    def test_initialization(self, mock_orchestrator):
+    def test_initialization(self, mock_orchestrator, tmp_path):
         """Test orchestrator initialization."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Test")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Test")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+        )
 
-                assert watch.markdown_path == f.name
-                assert watch.epic_key == "PROJ-123"
-                assert watch.stats.syncs_triggered == 0
+        assert watch.markdown_path == str(test_file)
+        assert watch.epic_key == "PROJ-123"
+        assert watch.stats.syncs_triggered == 0
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_start_async(self, mock_orchestrator):
+    def test_start_async(self, mock_orchestrator, tmp_path):
         """Test async start mode."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Test")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Test")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+        )
 
-                watch.start_async()
-                assert watch._running
+        watch.start_async()
+        assert watch._running
 
-                watch.stop()
-                assert not watch._running
+        watch.stop()
+        assert not watch._running
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_trigger_sync_on_change(self, mock_orchestrator):
+    def test_trigger_sync_on_change(self, mock_orchestrator, tmp_path):
         """Test that sync is triggered when file changes."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                    debounce_seconds=0.1,
-                    poll_interval=0.1,
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+            debounce_seconds=0.1,
+            poll_interval=0.1,
+        )
 
-                watch.start_async()
+        watch.start_async()
 
-                # Modify file
-                time.sleep(0.2)
-                Path(f.name).write_text("# Modified content")
+        # Modify file
+        time.sleep(0.2)
+        test_file.write_text("# Modified content")
 
-                # Wait for sync
-                time.sleep(0.5)
-                watch.stop()
+        # Wait for sync
+        time.sleep(0.5)
+        watch.stop()
 
-                # Should have triggered a sync
-                assert watch.stats.syncs_triggered >= 1
-                mock_orchestrator.sync.assert_called()
+        # Should have triggered a sync
+        assert watch.stats.syncs_triggered >= 1
+        mock_orchestrator.sync.assert_called()
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_callbacks(self, mock_orchestrator):
+    def test_callbacks(self, mock_orchestrator, tmp_path):
         """Test that callbacks are invoked."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            change_callback_called = []
-            sync_start_called = []
-            sync_complete_called = []
+        change_callback_called = []
+        sync_start_called = []
+        sync_complete_called = []
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                    debounce_seconds=0.1,
-                    poll_interval=0.1,
-                    on_change_detected=lambda c: change_callback_called.append(c),
-                    on_sync_start=lambda: sync_start_called.append(True),
-                    on_sync_complete=lambda r: sync_complete_called.append(r),
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+            debounce_seconds=0.1,
+            poll_interval=0.1,
+            on_change_detected=lambda c: change_callback_called.append(c),
+            on_sync_start=lambda: sync_start_called.append(True),
+            on_sync_complete=lambda r: sync_complete_called.append(r),
+        )
 
-                watch.start_async()
+        watch.start_async()
 
-                time.sleep(0.2)
-                Path(f.name).write_text("# Modified")
-                time.sleep(0.5)
-                watch.stop()
+        time.sleep(0.2)
+        test_file.write_text("# Modified")
+        time.sleep(0.5)
+        watch.stop()
 
-                assert len(change_callback_called) >= 1
-                assert len(sync_start_called) >= 1
-                assert len(sync_complete_called) >= 1
+        assert len(change_callback_called) >= 1
+        assert len(sync_start_called) >= 1
+        assert len(sync_complete_called) >= 1
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_get_status(self, mock_orchestrator):
+    def test_get_status(self, mock_orchestrator, tmp_path):
         """Test getting watch status."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Test")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Test")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+        )
 
-                watch.start_async()
-                status = watch.get_status()
+        watch.start_async()
+        status = watch.get_status()
 
-                # Check status while running
-                assert status["running"] is True
-                assert status["epic_key"] == "PROJ-123"
-                assert "uptime" in status
+        # Check status while running
+        assert status["running"] is True
+        assert status["epic_key"] == "PROJ-123"
+        assert "uptime" in status
 
-                watch.stop()
+        watch.stop()
 
-                # Check status after stopping
-                status_after = watch.get_status()
-                assert status_after["running"] is False
+        # Check status after stopping
+        status_after = watch.get_status()
+        assert status_after["running"] is False
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_sync_failure_handling(self, mock_orchestrator):
+    def test_sync_failure_handling(self, mock_orchestrator, tmp_path):
         """Test handling of sync failures."""
         mock_orchestrator.sync.return_value = Mock(
             success=False,
             errors=["Test error"],
         )
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                    debounce_seconds=0.1,
-                    poll_interval=0.1,
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+            debounce_seconds=0.1,
+            poll_interval=0.1,
+        )
 
-                watch.start_async()
+        watch.start_async()
 
-                time.sleep(0.2)
-                Path(f.name).write_text("# Modified")
-                time.sleep(0.5)
-                watch.stop()
+        time.sleep(0.2)
+        test_file.write_text("# Modified")
+        time.sleep(0.5)
+        watch.stop()
 
-                # Should have recorded the failure
-                assert watch.stats.syncs_failed >= 1
+        # Should have recorded the failure
+        assert watch.stats.syncs_failed >= 1
 
-            finally:
-                Path(f.name).unlink()
-
-    def test_sync_exception_handling(self, mock_orchestrator):
+    def test_sync_exception_handling(self, mock_orchestrator, tmp_path):
         """Test handling of sync exceptions."""
         mock_orchestrator.sync.side_effect = Exception("Test exception")
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write("# Initial")
-            f.flush()
+        test_file = tmp_path / "test.md"
+        test_file.write_text("# Initial")
 
-            try:
-                watch = WatchOrchestrator(
-                    orchestrator=mock_orchestrator,
-                    markdown_path=f.name,
-                    epic_key="PROJ-123",
-                    debounce_seconds=0.1,
-                    poll_interval=0.1,
-                )
+        watch = WatchOrchestrator(
+            orchestrator=mock_orchestrator,
+            markdown_path=str(test_file),
+            epic_key="PROJ-123",
+            debounce_seconds=0.1,
+            poll_interval=0.1,
+        )
 
-                watch.start_async()
+        watch.start_async()
 
-                time.sleep(0.2)
-                Path(f.name).write_text("# Modified")
-                time.sleep(0.5)
-                watch.stop()
+        time.sleep(0.2)
+        test_file.write_text("# Modified")
+        time.sleep(0.5)
+        watch.stop()
 
-                # Should have recorded the failure
-                assert watch.stats.syncs_failed >= 1
-                assert len(watch.stats.errors) >= 1
-
-            finally:
-                Path(f.name).unlink()
+        # Should have recorded the failure
+        assert watch.stats.syncs_failed >= 1
+        assert len(watch.stats.errors) >= 1
 
 
 class TestWatchDisplay:

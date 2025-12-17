@@ -110,7 +110,7 @@ class TestMarkdownParser:
     def test_parse_from_file(self, markdown_parser, sample_markdown, tmp_path):
         """Test parsing from file path."""
         md_file = tmp_path / "epic.md"
-        md_file.write_text(sample_markdown)
+        md_file.write_text(sample_markdown, encoding="utf-8")
 
         stories = markdown_parser.parse_stories(str(md_file))
         assert len(stories) == 2

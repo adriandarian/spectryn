@@ -375,7 +375,7 @@ class TestMultiEpicSyncOrchestrator:
         """Test getting epic summary."""
         # Write test file
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         orchestrator = MultiEpicSyncOrchestrator(
             tracker=mock_tracker,
@@ -393,7 +393,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_analyze(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test analyzing multi-epic file."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         orchestrator = MultiEpicSyncOrchestrator(
             tracker=mock_tracker,
@@ -410,7 +410,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_analyze_with_filter(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test analyzing with epic filter."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         orchestrator = MultiEpicSyncOrchestrator(
             tracker=mock_tracker,
@@ -433,7 +433,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_sync_all_epics(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test syncing all epics."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         # Mock tracker methods
         mock_tracker.get_epic.return_value = {"key": "PROJ-100", "fields": {"summary": "Epic"}}
@@ -455,7 +455,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_sync_with_filter(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test syncing with filter."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         mock_tracker.get_epic.return_value = {"key": "PROJ-200", "fields": {"summary": "Epic"}}
         mock_tracker.get_issues_for_epic.return_value = []
@@ -478,7 +478,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_sync_progress_callback(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test progress callback is called."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         mock_tracker.get_epic.return_value = {"key": "PROJ-100", "fields": {"summary": "Epic"}}
         mock_tracker.get_issues_for_epic.return_value = []
@@ -505,7 +505,7 @@ class TestMultiEpicSyncOrchestrator:
     def test_sync_stop_on_error(self, mock_tracker, mock_formatter, config, tmp_path):
         """Test stopping on first error."""
         md_file = tmp_path / "roadmap.md"
-        md_file.write_text(MULTI_EPIC_MARKDOWN)
+        md_file.write_text(MULTI_EPIC_MARKDOWN, encoding="utf-8")
 
         # Make first epic fail
         mock_tracker.get_epic.side_effect = Exception("Epic not found")

@@ -323,10 +323,14 @@ class TestBackupManager:
 
     def test_backup_id_generation(self, manager):
         """Should generate unique backup IDs."""
-        # Generate multiple IDs rapidly
-        ids = [manager._generate_backup_id("PROJ-1") for _ in range(10)]
+        import time
+        # Generate multiple IDs with small delays to ensure uniqueness
+        ids = []
+        for _ in range(10):
+            ids.append(manager._generate_backup_id("PROJ-1"))
+            time.sleep(0.001)  # 1ms delay to ensure timestamp changes
 
-        # All IDs should be unique (uses microseconds now)
+        # All IDs should be unique
         assert len(set(ids)) == 10
 
         # All IDs should contain epic key

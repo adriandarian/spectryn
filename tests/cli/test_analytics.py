@@ -166,10 +166,12 @@ class TestAnalyticsConfig:
 
     def test_storage_path_custom(self):
         """Test storage_path with custom data_dir."""
+        from pathlib import PurePosixPath
         config = AnalyticsConfig(data_dir="/custom/path")
 
         path = config.storage_path
-        assert str(path) == "/custom/path"
+        # Use PurePosixPath for cross-platform comparison
+        assert PurePosixPath(path.as_posix()) == PurePosixPath("/custom/path")
 
 
 # =============================================================================

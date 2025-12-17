@@ -173,7 +173,9 @@ class TestSyncState:
 
     def test_generate_session_id(self):
         """Test session ID generation."""
+        import time
         id1 = SyncState.generate_session_id("/path/file.md", "PROJ-1")
+        time.sleep(0.001)  # Small delay to ensure timestamp changes
         id2 = SyncState.generate_session_id("/path/file.md", "PROJ-1")
 
         # Should be different due to timestamp

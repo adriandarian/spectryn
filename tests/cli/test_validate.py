@@ -322,7 +322,7 @@ Just a plain description without As a / I want / So that.
     def test_validate_from_file(self, validator, tmp_path, valid_markdown):
         """Test validation from file path."""
         md_file = tmp_path / "test.md"
-        md_file.write_text(valid_markdown)
+        md_file.write_text(valid_markdown, encoding="utf-8")
 
         result = validator.validate(md_file)
 
@@ -441,7 +441,8 @@ class TestRunValidate:
 **As a** user
 **I want** to test
 **So that** it works
-"""
+""",
+            encoding="utf-8",
         )
 
         console = Console(color=False)
@@ -474,7 +475,8 @@ class TestRunValidate:
             """### 📋 US-001: X
 
 Description without points or format.
-"""
+""",
+            encoding="utf-8",
         )
 
         console = Console(color=False)
