@@ -2,6 +2,27 @@
 
 This document defines the exact schema that spectra parses. Follow this structure for successful Jira synchronization.
 
+## Field Mapping Overview
+
+Each `#### Section` in your markdown maps to a specific field in your issue tracker:
+
+| Markdown Section | Maps To | Required |
+|------------------|---------|----------|
+| `### US-XXX: Title` | Issue summary/title | ✅ Yes |
+| Metadata table | Story points, priority, status | ✅ Yes |
+| `#### Description` | Issue description field | ✅ Yes |
+| `#### Acceptance Criteria` | Description (formatted) or custom field | No |
+| `#### Technical Notes` | Appended to description | No |
+| `#### Subtasks` | Child subtask issues | No |
+| `#### Related Commits` | Issue comments (commit table) | No |
+| `#### Comments` | Issue comments | No |
+| `#### Attachments` | Issue attachments | No |
+| `#### Links` / `#### Dependencies` | Issue links | No |
+
+::: tip Section Recognition
+Spectra identifies sections by the exact `#### Header Name` format. Use the exact names above for automatic field mapping.
+:::
+
 ## Quick Reference
 
 ```markdown
@@ -174,6 +195,50 @@ that support format-on-save.
 
 ::: warning Commit Hash Format
 Commit hash must be wrapped in backticks: `` `hash` ``
+:::
+
+## Comments Section (Optional)
+
+```markdown
+#### Comments
+
+> **@username** (2025-01-15):
+> This is a comment that will be synced to the issue tracker.
+> Can span multiple lines.
+
+> **@another_user** (2025-01-16):
+> A follow-up comment with additional context.
+```
+
+::: tip Comment Format
+- Each comment starts with `>` (blockquote)
+- Author format: `**@username**` (optional)
+- Date format: `(YYYY-MM-DD)` (optional)
+- Comments are imported as issue comments, separate from the description
+:::
+
+### Comment vs Description
+
+| Content | Section | Maps To |
+|---------|---------|---------|
+| User story (As a/I want/So that) | `#### Description` | Issue description field |
+| Discussion/feedback | `#### Comments` | Issue comments |
+| Implementation details | `#### Technical Notes` | Appended to description |
+| Acceptance checklist | `#### Acceptance Criteria` | Description or custom field |
+
+## Attachments Section (Optional)
+
+```markdown
+#### Attachments
+
+- [design-mockup.png](./attachments/design-mockup.png)
+- [api-spec.yaml](./attachments/api-spec.yaml)
+```
+
+::: info Attachment Handling
+Attachments are referenced by relative path. During sync, spectra will:
+1. Upload referenced files to the issue tracker
+2. Update the issue with attachment links
 :::
 
 ## Story Separator

@@ -94,6 +94,15 @@ Copy this template and replace the placeholders with your content.
 | `abc1234` | feat: description of change |
 | `def5678` | fix: description of fix |
 
+#### Comments
+
+> **@reviewer** (2025-01-15):
+> Initial review feedback - looks good overall.
+> Consider adding error handling for edge cases.
+
+> **@developer** (2025-01-16):
+> Good point! I'll add try/catch blocks in the next iteration.
+
 ---
 
 ### 🚀 US-002: [Next Story Title]

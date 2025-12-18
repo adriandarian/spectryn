@@ -319,3 +319,74 @@ class TestMarkdownParserFormatDetection:
         stories = markdown_parser.parse_stories(self.INLINE_FORMAT_SAMPLE)
         assert len(stories) == 1
         assert stories[0].story_points == 3
+
+
+class TestCommentsExtraction:
+    """Tests for comments section parsing."""
+
+    COMMENTS_SAMPLE = '''
+### US-001: Story With Comments
+
+| Field | Value |
+|-------|-------|
+| **Story Points** | 3 |
+| **Priority** | 🟡 High |
+| **Status** | 📋 Planned |
+
+#### Description
+
+**As a** user
+**I want** to track discussions
+**So that** context is preserved
+
+#### Comments
+
+> **@reviewer** (2025-01-15):
+> This looks good overall.
+> Consider adding error handling.
+
+> **@developer** (2025-01-16):
+> Thanks! Will add in next iteration.
+
+> Simple comment without author
+'''
+
+    def test_extract_comments_with_author_and_date(self, markdown_parser):
+        """Test extracting comments with full metadata."""
+        stories = markdown_parser.parse_stories(self.COMMENTS_SAMPLE)
+        assert len(stories) == 1
+
+        comments = stories[0].comments
+        assert len(comments) >= 2
+
+        # First comment with author and date
+        first_comment = comments[0]
+        assert first_comment.author == "reviewer"
+        assert first_comment.created_at is not None
+        assert first_comment.created_at.year == 2025
+        assert "looks good" in first_comment.body
+
+    def test_extract_comment_body_multiline(self, markdown_parser):
+        """Test multiline comment body extraction."""
+        stories = markdown_parser.parse_stories(self.COMMENTS_SAMPLE)
+        comments = stories[0].comments
+
+        # First comment spans multiple lines
+        first_comment = comments[0]
+        assert "error handling" in first_comment.body
+
+    def test_extract_comment_without_author(self, markdown_parser):
+        """Test extracting comments without author metadata."""
+        stories = markdown_parser.parse_stories(self.COMMENTS_SAMPLE)
+        comments = stories[0].comments
+
+        # Last comment has no author
+        last_comment = comments[-1]
+        assert "Simple comment" in last_comment.body
+
+    def test_no_comments_section(self, markdown_parser, sample_markdown):
+        """Test parsing markdown without comments section."""
+        stories = markdown_parser.parse_stories(sample_markdown)
+        # Should return empty list, not error
+        assert stories[0].comments == []
+
