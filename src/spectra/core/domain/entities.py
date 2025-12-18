@@ -85,6 +85,17 @@ class Comment:
         """Check if this is a commits table comment."""
         return self.comment_type == "commits" or bool(self.commits)
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "id": self.id,
+            "body": self.body,
+            "author": self.author,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "comment_type": self.comment_type,
+            "commits": [{"hash": c.hash, "message": c.message} for c in self.commits],
+        }
+
 
 @dataclass
 class UserStory:
@@ -190,6 +201,7 @@ class UserStory:
             "labels": self.labels,
             "subtasks": [st.to_dict() for st in self.subtasks],
             "commits": [{"hash": c.hash, "message": c.message} for c in self.commits],
+            "comments": [c.to_dict() for c in self.comments],
             "links": [{"type": link_type, "target": target} for link_type, target in self.links],
             "external_key": str(self.external_key) if self.external_key else None,
         }
