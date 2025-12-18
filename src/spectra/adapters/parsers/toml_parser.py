@@ -1,18 +1,21 @@
 """
-YAML Parser - Parse YAML epic/story files into domain entities.
+TOML Parser - Parse TOML epic/story files into domain entities.
 
-Implements the DocumentParserPort interface for YAML-based specifications.
+Implements the DocumentParserPort interface for TOML-based specifications.
 
-This provides an alternative to markdown for defining epics and stories,
-with a more structured, machine-friendly format that's easier to validate
-and generate programmatically.
+TOML (Tom's Obvious, Minimal Language) is a configuration file format that's
+easy to read and write due to its clear semantics.
 """
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    import tomli as tomllib  # Fallback for older Python
 
 from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
 from spectra.core.domain.enums import Priority, Status
@@ -26,58 +29,58 @@ from spectra.core.domain.value_objects import (
 from spectra.core.ports.document_parser import DocumentParserPort, ParserError
 
 
-class YamlParser(DocumentParserPort):
+class TomlParser(DocumentParserPort):
     """
-    Parser for YAML epic/story specification files.
+    Parser for TOML epic/story specification files.
 
-    Supports a structured YAML format for defining epics, stories,
+    Supports a structured TOML format for defining epics, stories,
     subtasks, and all related metadata.
 
-    Example YAML format:
+    Example TOML format:
 
-    ```yaml
-    epic:
-      key: PROJ-123  # Optional - use existing epic
-      title: "Epic Title"
-      description: "Epic description"
+    ```toml
+    [epic]
+    key = "PROJ-123"
+    title = "Epic Title"
+    description = "Epic description"
 
-    stories:
-      - id: US-001
-        title: "Story Title"
-        description:
-          as_a: "user"
-          i_want: "feature"
-          so_that: "benefit"
-        story_points: 5
-        priority: high
-        status: planned
-        acceptance_criteria:
-          - criterion: "First criterion"
-            done: false
-          - criterion: "Second criterion"
-            done: true
-        subtasks:
-          - name: "Subtask 1"
-            description: "Do something"
-            story_points: 2
-            status: planned
-        technical_notes: |
-          Some technical details here.
-        links:
-          - type: blocks
-            target: PROJ-456
-          - depends_on: OTHER-789
-        comments:
-          - body: "This is a comment"
-            author: "user"
-            created_at: "2025-01-15"
-          - "Simple comment without metadata"
+    [[stories]]
+    id = "US-001"
+    title = "Story Title"
+    story_points = 5
+    priority = "high"
+    status = "planned"
+    technical_notes = "Some technical details here."
+
+    [stories.description]
+    as_a = "user"
+    i_want = "feature"
+    so_that = "benefit"
+
+    [[stories.acceptance_criteria]]
+    criterion = "First criterion"
+    done = false
+
+    [[stories.subtasks]]
+    name = "Subtask 1"
+    description = "Do something"
+    story_points = 2
+    status = "planned"
+
+    [[stories.links]]
+    type = "blocks"
+    target = "PROJ-456"
+
+    [[stories.comments]]
+    body = "This is a comment"
+    author = "user"
+    created_at = "2025-01-15"
     ```
     """
 
     def __init__(self) -> None:
-        """Initialize the YAML parser."""
-        self.logger = logging.getLogger("YamlParser")
+        """Initialize the TOML parser."""
+        self.logger = logging.getLogger("TomlParser")
 
     # -------------------------------------------------------------------------
     # DocumentParserPort Implementation
@@ -85,30 +88,29 @@ class YamlParser(DocumentParserPort):
 
     @property
     def name(self) -> str:
-        return "YAML"
+        return "TOML"
 
     @property
     def supported_extensions(self) -> list[str]:
-        return [".yaml", ".yml"]
+        return [".toml"]
 
     def can_parse(self, source: str | Path) -> bool:
-        """Check if source is a valid YAML file or content."""
+        """Check if source is a valid TOML file or content."""
         if isinstance(source, Path):
             return source.suffix.lower() in self.supported_extensions
 
-        # Try to parse as YAML and check for expected structure
+        # Try to parse as TOML and check for expected structure
         try:
-            data = yaml.safe_load(source)
+            data = tomllib.loads(source)
             if isinstance(data, dict):
-                # Check for expected keys
                 return "stories" in data or "epic" in data
             return False
-        except yaml.YAMLError:
+        except Exception:
             return False
 
     def parse_stories(self, source: str | Path) -> list[UserStory]:
-        """Parse user stories from YAML source."""
-        data = self._load_yaml(source)
+        """Parse user stories from TOML source."""
+        data = self._load_toml(source)
 
         stories_data = data.get("stories", [])
         if not stories_data:
@@ -127,16 +129,14 @@ class YamlParser(DocumentParserPort):
         return stories
 
     def parse_epic(self, source: str | Path) -> Epic | None:
-        """Parse an epic with its stories from YAML source."""
-        data = self._load_yaml(source)
+        """Parse an epic with its stories from TOML source."""
+        data = self._load_toml(source)
 
-        # Get epic metadata
         epic_data = data.get("epic", {})
         epic_key = epic_data.get("key", "EPIC-0")
         epic_title = epic_data.get("title", "Untitled Epic")
         epic_description = epic_data.get("description", "")
 
-        # Parse stories
         stories = self.parse_stories(source)
 
         if not stories and not epic_data:
@@ -150,109 +150,89 @@ class YamlParser(DocumentParserPort):
         )
 
     def validate(self, source: str | Path) -> list[str]:
-        """Validate YAML source without full parsing."""
+        """Validate TOML source without full parsing."""
         errors: list[str] = []
 
         try:
-            data = self._load_yaml(source)
+            data = self._load_toml(source)
         except ParserError as e:
             return [str(e)]
 
-        # Validate structure
         if not isinstance(data, dict):
-            errors.append("Root element must be a dictionary")
+            errors.append("Root element must be a table")
             return errors
 
-        # Check for required sections
         if "stories" not in data and "epic" not in data:
-            errors.append("YAML must contain 'stories' or 'epic' key")
+            errors.append("TOML must contain 'stories' or 'epic' key")
 
-        # Validate stories
         stories_data = data.get("stories", [])
         if not isinstance(stories_data, list):
-            errors.append("'stories' must be a list")
+            errors.append("'stories' must be an array of tables")
         else:
             for i, story in enumerate(stories_data):
                 story_errors = self._validate_story(story, i)
                 errors.extend(story_errors)
 
-        # Validate epic
         epic_data = data.get("epic", {})
         if epic_data and not isinstance(epic_data, dict):
-            errors.append("'epic' must be a dictionary")
+            errors.append("'epic' must be a table")
         elif epic_data and not epic_data.get("title"):
             errors.append("Epic missing required field: 'title'")
 
         return errors
 
     # -------------------------------------------------------------------------
-    # Private Methods - Loading
+    # Private Methods
     # -------------------------------------------------------------------------
 
-    def _load_yaml(self, source: str | Path) -> dict[str, Any]:
-        """Load YAML content from file or string."""
+    def _load_toml(self, source: str | Path) -> dict[str, Any]:
+        """Load TOML content from file or string."""
         try:
             if isinstance(source, Path):
                 content = source.read_text(encoding="utf-8")
             elif isinstance(source, str):
-                # Only try to treat as file path if it's short enough and doesn't contain newlines
                 content = source
                 if "\n" not in source and len(source) < 4096:
                     try:
                         path = Path(source)
-                        if path.exists():
+                        if path.exists() and path.suffix.lower() == ".toml":
                             content = path.read_text(encoding="utf-8")
                     except OSError:
                         pass
             else:
                 content = source
 
-            data = yaml.safe_load(content)
+            data = tomllib.loads(content)
 
             if data is None:
                 return {}
             if not isinstance(data, dict):
-                raise ParserError("YAML root must be a dictionary")
+                raise ParserError("TOML root must be a table")
 
             return data
 
-        except yaml.YAMLError as e:
-            raise ParserError(f"Invalid YAML: {e}")
+        except Exception as e:
+            if isinstance(e, ParserError):
+                raise
+            raise ParserError(f"Invalid TOML: {e}")
 
     def _is_valid_key(self, key: str) -> bool:
         """Check if a string is a valid issue key."""
         import re
-
         return bool(re.match(r"^[A-Z]+-\d+$", str(key).upper()))
 
-    # -------------------------------------------------------------------------
-    # Private Methods - Parsing
-    # -------------------------------------------------------------------------
-
     def _parse_story(self, data: dict[str, Any]) -> UserStory | None:
-        """Parse a single story from YAML data."""
+        """Parse a single story from TOML data."""
         story_id = data.get("id", "US-000")
         title = data.get("title", "Untitled Story")
 
-        # Parse description
         description = self._parse_description(data.get("description"))
-
-        # Parse acceptance criteria
         acceptance = self._parse_acceptance_criteria(data.get("acceptance_criteria", []))
-
-        # Parse subtasks
         subtasks = self._parse_subtasks(data.get("subtasks", []))
-
-        # Parse commits
         commits = self._parse_commits(data.get("commits", []))
-
-        # Parse links (cross-project linking)
         links = self._parse_links(data.get("links", []))
-
-        # Parse comments
         comments = self._parse_comments(data.get("comments", []))
 
-        # Get scalar fields
         story_points = int(data.get("story_points", 0))
         priority = Priority.from_string(data.get("priority", "medium"))
         status = Status.from_string(data.get("status", "planned"))
@@ -273,19 +253,13 @@ class YamlParser(DocumentParserPort):
             comments=comments,
         )
 
-    def _parse_description(
-        self,
-        data: Any,
-    ) -> Description | None:
-        """Parse description from YAML data."""
+    def _parse_description(self, data: Any) -> Description | None:
+        """Parse description from TOML data."""
         if data is None:
             return None
 
-        # Support simple string format
         if isinstance(data, str):
-            # Try to extract As a/I want/So that from string
             import re
-
             pattern = r"As a[n]?\s+(.+?),?\s+I want\s+(.+?),?\s+so that\s+(.+)"
             match = re.search(pattern, data, re.IGNORECASE | re.DOTALL)
             if match:
@@ -294,10 +268,8 @@ class YamlParser(DocumentParserPort):
                     want=match.group(2).strip(),
                     benefit=match.group(3).strip(),
                 )
-            # Return as simple description
             return Description(role="", want=data, benefit="")
 
-        # Support structured format
         if isinstance(data, dict):
             return Description(
                 role=data.get("as_a", data.get("role", "")),
@@ -307,11 +279,8 @@ class YamlParser(DocumentParserPort):
 
         return None
 
-    def _parse_acceptance_criteria(
-        self,
-        data: list[Any],
-    ) -> AcceptanceCriteria:
-        """Parse acceptance criteria from YAML data."""
+    def _parse_acceptance_criteria(self, data: list[Any]) -> AcceptanceCriteria:
+        """Parse acceptance criteria from TOML data."""
         items: list[str] = []
         checked: list[bool] = []
 
@@ -328,12 +297,11 @@ class YamlParser(DocumentParserPort):
         return AcceptanceCriteria.from_list(items, checked)
 
     def _parse_subtasks(self, data: list[Any]) -> list[Subtask]:
-        """Parse subtasks from YAML data."""
+        """Parse subtasks from TOML data."""
         subtasks = []
 
         for i, item in enumerate(data):
             if isinstance(item, str):
-                # Simple string format
                 subtasks.append(
                     Subtask(
                         number=i + 1,
@@ -344,7 +312,6 @@ class YamlParser(DocumentParserPort):
                     )
                 )
             elif isinstance(item, dict):
-                # Structured format
                 subtasks.append(
                     Subtask(
                         number=item.get("number", i + 1),
@@ -359,12 +326,11 @@ class YamlParser(DocumentParserPort):
         return subtasks
 
     def _parse_commits(self, data: list[Any]) -> list[CommitRef]:
-        """Parse commit references from YAML data."""
+        """Parse commit references from TOML data."""
         commits = []
 
         for item in data:
             if isinstance(item, str):
-                # Just a hash
                 commits.append(CommitRef(hash=item[:8], message=""))
             elif isinstance(item, dict):
                 commits.append(
@@ -377,35 +343,22 @@ class YamlParser(DocumentParserPort):
         return commits
 
     def _parse_links(self, data: list[Any]) -> list[tuple[str, str]]:
-        """
-        Parse issue links from YAML data.
-
-        Supports multiple formats:
-        - Simple string: "blocks PROJ-123"
-        - Structured: {type: "blocks", target: "PROJ-123"}
-        - Shorthand: {blocks: "PROJ-123"}
-
-        Returns:
-            List of (link_type, target_key) tuples
-        """
+        """Parse issue links from TOML data."""
         links: list[tuple[str, str]] = []
 
         for item in data:
             if isinstance(item, str):
-                # Parse "blocks PROJ-123" format
                 parts = item.strip().split(None, 1)
                 if len(parts) == 2:
                     link_type = parts[0].lower().replace("_", " ")
                     target = parts[1].strip()
                     links.append((link_type, target))
             elif isinstance(item, dict):
-                # Structured format: {type: "blocks", target: "PROJ-123"}
                 if "type" in item and "target" in item:
                     link_type = str(item["type"]).lower().replace("_", " ")
                     target = str(item["target"])
                     links.append((link_type, target))
                 else:
-                    # Shorthand format: {blocks: "PROJ-123"} or {blocks: ["A-1", "B-2"]}
                     for link_type, targets in item.items():
                         link_type_normalized = str(link_type).lower().replace("_", " ")
                         if isinstance(targets, str):
@@ -417,23 +370,11 @@ class YamlParser(DocumentParserPort):
         return links
 
     def _parse_comments(self, data: list[Any]) -> list[Comment]:
-        """
-        Parse comments from YAML data.
-
-        Supports multiple formats:
-        - Simple string: "This is a comment"
-        - Structured: {body: "Comment text", author: "user", created_at: "2025-01-15"}
-
-        Returns:
-            List of Comment objects
-        """
-        from datetime import datetime
-
+        """Parse comments from TOML data."""
         comments: list[Comment] = []
 
         for item in data:
             if isinstance(item, str):
-                # Simple string format
                 comments.append(
                     Comment(
                         body=item,
@@ -447,16 +388,14 @@ class YamlParser(DocumentParserPort):
                 author = item.get("author", item.get("user", None))
                 created_at = None
 
-                # Parse date if provided
-                date_str = item.get("created_at", item.get("date", item.get("created", None)))
-                if date_str:
-                    if isinstance(date_str, datetime):
-                        created_at = date_str
-                    elif isinstance(date_str, str):
-                        # Try common date formats
+                date_val = item.get("created_at", item.get("date", item.get("created", None)))
+                if date_val:
+                    if isinstance(date_val, datetime):
+                        created_at = date_val
+                    elif isinstance(date_val, str):
                         for fmt in ["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"]:
                             try:
-                                created_at = datetime.strptime(date_str, fmt)
+                                created_at = datetime.strptime(date_val, fmt)
                                 break
                             except ValueError:
                                 continue
@@ -475,52 +414,35 @@ class YamlParser(DocumentParserPort):
 
         return comments
 
-    # -------------------------------------------------------------------------
-    # Private Methods - Validation
-    # -------------------------------------------------------------------------
-
     def _validate_story(self, story: Any, index: int) -> list[str]:
         """Validate a single story entry."""
         errors: list[str] = []
         prefix = f"stories[{index}]"
 
         if not isinstance(story, dict):
-            errors.append(f"{prefix}: must be a dictionary")
+            errors.append(f"{prefix}: must be a table")
             return errors
 
-        # Required fields
         if not story.get("id"):
             errors.append(f"{prefix}: missing required field 'id'")
         if not story.get("title"):
             errors.append(f"{prefix}: missing required field 'title'")
 
-        # Validate story points
         sp = story.get("story_points")
         if sp is not None and not isinstance(sp, (int, float)):
             errors.append(f"{prefix}.story_points: must be a number")
 
-        # Validate priority
         priority = story.get("priority")
         if priority is not None:
             valid_priorities = ["low", "medium", "high", "critical"]
             if str(priority).lower() not in valid_priorities:
                 errors.append(f"{prefix}.priority: must be one of {valid_priorities}")
 
-        # Validate status
         status = story.get("status")
         if status is not None:
             valid_statuses = ["planned", "in_progress", "done", "blocked"]
             if str(status).lower().replace(" ", "_") not in valid_statuses:
                 errors.append(f"{prefix}.status: must be one of {valid_statuses}")
 
-        # Validate subtasks
-        subtasks = story.get("subtasks", [])
-        if not isinstance(subtasks, list):
-            errors.append(f"{prefix}.subtasks: must be a list")
-
-        # Validate acceptance criteria
-        ac = story.get("acceptance_criteria", [])
-        if not isinstance(ac, list):
-            errors.append(f"{prefix}.acceptance_criteria: must be a list")
-
         return errors
+

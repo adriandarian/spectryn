@@ -2,10 +2,15 @@
 Document Parser Port - Abstract interface for parsing source documents.
 
 Implementations:
-- MarkdownParser: Parse markdown epic files
-- YamlParser: Parse YAML-based specs
+- MarkdownParser: Parse markdown epic files (.md, .markdown)
+- YamlParser: Parse YAML-based specs (.yaml, .yml)
+- JsonParser: Parse JSON-based specs (.json)
+- TomlParser: Parse TOML-based specs (.toml)
+- CsvParser: Parse CSV/TSV spreadsheets (.csv, .tsv)
+- AsciiDocParser: Parse AsciiDoc documents (.adoc, .asciidoc)
+- ExcelParser: Parse Excel spreadsheets (.xlsx, .xlsm, .xls)
+- ToonParser: Parse TOON format (.toon) - LLM-optimized notation
 - NotionParser: Parse Notion exports (markdown/CSV/folders)
-- (Future) JsonParser: Parse JSON specs
 """
 
 from abc import ABC, abstractmethod

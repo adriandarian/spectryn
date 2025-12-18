@@ -17,10 +17,11 @@ import logging
 import re
 from pathlib import Path
 
-from spectra.core.domain.entities import Epic, Subtask, UserStory
+from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
 from spectra.core.domain.enums import Priority, Status
 from spectra.core.domain.value_objects import (
     AcceptanceCriteria,
+    CommitRef,
     Description,
     IssueKey,
     StoryId,
@@ -69,6 +70,20 @@ class NotionParser(DocumentParserPort):
     ## Technical Notes
 
     Implementation details here.
+
+    ## Links
+
+    | Link Type | Target |
+    |-----------|--------|
+    | blocks | PROJ-123 |
+    | depends on | OTHER-456 |
+
+    ## Comments
+
+    > **@username** (2025-01-15):
+    > This is a comment about the story.
+
+    > Another comment without author metadata.
     ```
     """
 
@@ -348,6 +363,12 @@ class NotionParser(DocumentParserPort):
         # Extract technical notes
         tech_notes = self._extract_technical_notes(content)
 
+        # Extract comments
+        comments = self._extract_comments(content)
+
+        # Extract links
+        links = self._extract_links(content, properties)
+
         # Map properties to story fields
         story_points = self._parse_int(
             properties.get("story points", properties.get("points", "0"))
@@ -366,6 +387,8 @@ class NotionParser(DocumentParserPort):
             status=status,
             subtasks=subtasks,
             commits=[],
+            comments=comments,
+            links=links,
         )
 
     def _extract_title_and_id(self, content: str) -> tuple[str, str]:
@@ -541,6 +564,158 @@ class NotionParser(DocumentParserPort):
 
         return section.strip() if section else ""
 
+    def _extract_comments(self, content: str) -> list[Comment]:
+        """
+        Extract comments from Notion content.
+
+        Supported formats:
+        - ## Comments section with blockquotes
+        - Callout blocks with comment indicator
+
+        Returns:
+            List of Comment objects
+        """
+        from datetime import datetime
+
+        comments: list[Comment] = []
+
+        # Find Comments section
+        section = self._extract_section(content, "Comments")
+        if not section:
+            section = self._extract_section(content, "Discussion")
+        if not section:
+            section = self._extract_section(content, "Notes")
+
+        if not section:
+            return comments
+
+        # Split into individual comment blocks (blockquotes or paragraphs)
+        # Pattern: blockquote blocks starting with >
+        comment_blocks = re.split(r"\n\s*\n(?=>)", section.strip())
+
+        for block in comment_blocks:
+            if not block.strip():
+                continue
+
+            # Extract blockquote content (remove > prefixes)
+            lines = []
+            for line in block.strip().split("\n"):
+                # Remove leading > and optional space
+                cleaned = re.sub(r"^>\s?", "", line)
+                lines.append(cleaned)
+
+            if not lines:
+                continue
+
+            full_text = "\n".join(lines).strip()
+            if not full_text:
+                continue
+
+            # Try to extract author and date
+            # Format: **@username** (YYYY-MM-DD): or @username (date):
+            author = None
+            created_at = None
+            body = full_text
+
+            # Try structured format: **@username** (YYYY-MM-DD):
+            header_match = re.match(
+                r"\*\*@([^*]+)\*\*\s*(?:\((\d{4}-\d{2}-\d{2})\))?:?\s*(.*)",
+                full_text,
+                re.DOTALL,
+            )
+
+            if header_match:
+                author = header_match.group(1).strip()
+                date_str = header_match.group(2)
+                if date_str:
+                    try:
+                        created_at = datetime.strptime(date_str, "%Y-%m-%d")
+                    except ValueError:
+                        pass
+                body = header_match.group(3).strip()
+            else:
+                # Check for simpler format: @username: comment
+                simple_match = re.match(r"@([^\s:]+):?\s*(.*)", full_text, re.DOTALL)
+                if simple_match:
+                    author = simple_match.group(1).strip()
+                    body = simple_match.group(2).strip()
+
+            if body:
+                comments.append(
+                    Comment(
+                        body=body,
+                        author=author,
+                        created_at=created_at,
+                        comment_type="text",
+                    )
+                )
+
+        return comments
+
+    def _extract_links(
+        self, content: str, properties: dict[str, str]
+    ) -> list[tuple[str, str]]:
+        """
+        Extract issue links from Notion content.
+
+        Supported formats:
+        - ## Links/Related/Dependencies section with table or list
+        - Properties: Blocks: PROJ-123, Depends on: OTHER-456
+        - Inline mentions: blocks PROJ-123
+
+        Returns:
+            List of (link_type, target_key) tuples
+        """
+        links: list[tuple[str, str]] = []
+
+        # Check properties first
+        link_property_map = {
+            "blocks": "blocks",
+            "blocked by": "blocked by",
+            "depends on": "depends on",
+            "related to": "relates to",
+            "relates to": "relates to",
+            "duplicates": "duplicates",
+            "parent": "parent of",
+            "child of": "child of",
+        }
+
+        for prop_name, link_type in link_property_map.items():
+            value = properties.get(prop_name, "")
+            if value:
+                # Parse comma-separated keys
+                for key in re.findall(r"[A-Z]+-\d+", value):
+                    links.append((link_type, key))
+
+        # Find Links/Related/Dependencies section
+        section = self._extract_section(content, "Links")
+        if not section:
+            section = self._extract_section(content, "Related")
+        if not section:
+            section = self._extract_section(content, "Dependencies")
+        if not section:
+            section = self._extract_section(content, "Related Issues")
+
+        if section:
+            # Parse table rows: | link_type | target_key |
+            table_pattern = r"\|\s*([^|]+)\s*\|\s*([A-Z]+-\d+)\s*\|"
+            for match in re.finditer(table_pattern, section):
+                link_type = match.group(1).strip().lower()
+                target_key = match.group(2).strip()
+                if target_key and not link_type.startswith("-"):
+                    links.append((link_type, target_key))
+
+            # Parse bullet list: - blocks: PROJ-123 or - blocks PROJ-123
+            bullet_pattern = (
+                r"[-*]\s*(blocks|blocked by|relates to|depends on|duplicates)[:\s]+([A-Z]+-\d+)"
+            )
+            for match in re.finditer(bullet_pattern, section, re.IGNORECASE):
+                link_type = match.group(1).strip().lower()
+                target_key = match.group(2).strip()
+                links.append((link_type, target_key))
+
+        return links
+
     def _extract_section(self, content: str, heading: str) -> str | None:
         """Extract content under a heading."""
         # Match heading at any level
@@ -669,6 +844,8 @@ class NotionParser(DocumentParserPort):
             status=status,
             subtasks=[],
             commits=[],
+            comments=[],
+            links=[],
         )
 
     def _parse_notion_folder(self, folder: Path) -> list[UserStory]:

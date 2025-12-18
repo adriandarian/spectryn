@@ -1,18 +1,18 @@
 """
-YAML Parser - Parse YAML epic/story files into domain entities.
+JSON Parser - Parse JSON epic/story files into domain entities.
 
-Implements the DocumentParserPort interface for YAML-based specifications.
+Implements the DocumentParserPort interface for JSON-based specifications.
 
-This provides an alternative to markdown for defining epics and stories,
-with a more structured, machine-friendly format that's easier to validate
-and generate programmatically.
+This provides an alternative to markdown/YAML for defining epics and stories,
+with a structured, machine-friendly format that's easy to generate from
+other tools and APIs.
 """
 
+import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-import yaml
 
 from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
 from spectra.core.domain.enums import Priority, Status
@@ -26,58 +26,68 @@ from spectra.core.domain.value_objects import (
 from spectra.core.ports.document_parser import DocumentParserPort, ParserError
 
 
-class YamlParser(DocumentParserPort):
+class JsonParser(DocumentParserPort):
     """
-    Parser for YAML epic/story specification files.
+    Parser for JSON epic/story specification files.
 
-    Supports a structured YAML format for defining epics, stories,
+    Supports a structured JSON format for defining epics, stories,
     subtasks, and all related metadata.
 
-    Example YAML format:
+    Example JSON format:
 
-    ```yaml
-    epic:
-      key: PROJ-123  # Optional - use existing epic
-      title: "Epic Title"
-      description: "Epic description"
-
-    stories:
-      - id: US-001
-        title: "Story Title"
-        description:
-          as_a: "user"
-          i_want: "feature"
-          so_that: "benefit"
-        story_points: 5
-        priority: high
-        status: planned
-        acceptance_criteria:
-          - criterion: "First criterion"
-            done: false
-          - criterion: "Second criterion"
-            done: true
-        subtasks:
-          - name: "Subtask 1"
-            description: "Do something"
-            story_points: 2
-            status: planned
-        technical_notes: |
-          Some technical details here.
-        links:
-          - type: blocks
-            target: PROJ-456
-          - depends_on: OTHER-789
-        comments:
-          - body: "This is a comment"
-            author: "user"
-            created_at: "2025-01-15"
-          - "Simple comment without metadata"
+    ```json
+    {
+      "epic": {
+        "key": "PROJ-123",
+        "title": "Epic Title",
+        "description": "Epic description"
+      },
+      "stories": [
+        {
+          "id": "US-001",
+          "title": "Story Title",
+          "description": {
+            "as_a": "user",
+            "i_want": "feature",
+            "so_that": "benefit"
+          },
+          "story_points": 5,
+          "priority": "high",
+          "status": "planned",
+          "acceptance_criteria": [
+            {"criterion": "First criterion", "done": false},
+            {"criterion": "Second criterion", "done": true}
+          ],
+          "subtasks": [
+            {
+              "name": "Subtask 1",
+              "description": "Do something",
+              "story_points": 2,
+              "status": "planned"
+            }
+          ],
+          "technical_notes": "Some technical details here.",
+          "links": [
+            {"type": "blocks", "target": "PROJ-456"},
+            {"depends_on": "OTHER-789"}
+          ],
+          "comments": [
+            {
+              "body": "This is a comment",
+              "author": "user",
+              "created_at": "2025-01-15"
+            },
+            "Simple comment without metadata"
+          ]
+        }
+      ]
+    }
     ```
     """
 
     def __init__(self) -> None:
-        """Initialize the YAML parser."""
-        self.logger = logging.getLogger("YamlParser")
+        """Initialize the JSON parser."""
+        self.logger = logging.getLogger("JsonParser")
 
     # -------------------------------------------------------------------------
     # DocumentParserPort Implementation
@@ -85,30 +95,30 @@ class YamlParser(DocumentParserPort):
 
     @property
     def name(self) -> str:
-        return "YAML"
+        return "JSON"
 
     @property
     def supported_extensions(self) -> list[str]:
-        return [".yaml", ".yml"]
+        return [".json"]
 
     def can_parse(self, source: str | Path) -> bool:
-        """Check if source is a valid YAML file or content."""
+        """Check if source is a valid JSON file or content."""
         if isinstance(source, Path):
             return source.suffix.lower() in self.supported_extensions
 
-        # Try to parse as YAML and check for expected structure
+        # Try to parse as JSON and check for expected structure
         try:
-            data = yaml.safe_load(source)
+            data = json.loads(source)
             if isinstance(data, dict):
                 # Check for expected keys
                 return "stories" in data or "epic" in data
             return False
-        except yaml.YAMLError:
+        except json.JSONDecodeError:
             return False
 
     def parse_stories(self, source: str | Path) -> list[UserStory]:
-        """Parse user stories from YAML source."""
-        data = self._load_yaml(source)
+        """Parse user stories from JSON source."""
+        data = self._load_json(source)
 
         stories_data = data.get("stories", [])
         if not stories_data:
@@ -127,8 +137,8 @@ class YamlParser(DocumentParserPort):
         return stories
 
     def parse_epic(self, source: str | Path) -> Epic | None:
-        """Parse an epic with its stories from YAML source."""
-        data = self._load_yaml(source)
+        """Parse an epic with its stories from JSON source."""
+        data = self._load_json(source)
 
         # Get epic metadata
         epic_data = data.get("epic", {})
@@ -150,27 +160,27 @@ class YamlParser(DocumentParserPort):
         )
 
     def validate(self, source: str | Path) -> list[str]:
-        """Validate YAML source without full parsing."""
+        """Validate JSON source without full parsing."""
         errors: list[str] = []
 
         try:
-            data = self._load_yaml(source)
+            data = self._load_json(source)
         except ParserError as e:
             return [str(e)]
 
         # Validate structure
         if not isinstance(data, dict):
-            errors.append("Root element must be a dictionary")
+            errors.append("Root element must be an object")
             return errors
 
         # Check for required sections
         if "stories" not in data and "epic" not in data:
-            errors.append("YAML must contain 'stories' or 'epic' key")
+            errors.append("JSON must contain 'stories' or 'epic' key")
 
         # Validate stories
         stories_data = data.get("stories", [])
         if not isinstance(stories_data, list):
-            errors.append("'stories' must be a list")
+            errors.append("'stories' must be an array")
         else:
             for i, story in enumerate(stories_data):
                 story_errors = self._validate_story(story, i)
@@ -179,7 +189,7 @@ class YamlParser(DocumentParserPort):
         # Validate epic
         epic_data = data.get("epic", {})
         if epic_data and not isinstance(epic_data, dict):
-            errors.append("'epic' must be a dictionary")
+            errors.append("'epic' must be an object")
         elif epic_data and not epic_data.get("title"):
             errors.append("Epic missing required field: 'title'")
 
@@ -189,8 +199,8 @@ class YamlParser(DocumentParserPort):
     # Private Methods - Loading
     # -------------------------------------------------------------------------
 
-    def _load_yaml(self, source: str | Path) -> dict[str, Any]:
-        """Load YAML content from file or string."""
+    def _load_json(self, source: str | Path) -> dict[str, Any]:
+        """Load JSON content from file or string."""
         try:
             if isinstance(source, Path):
                 content = source.read_text(encoding="utf-8")
@@ -200,24 +210,24 @@ class YamlParser(DocumentParserPort):
                 if "\n" not in source and len(source) < 4096:
                     try:
                         path = Path(source)
-                        if path.exists():
+                        if path.exists() and path.suffix.lower() == ".json":
                             content = path.read_text(encoding="utf-8")
                     except OSError:
                         pass
             else:
                 content = source
 
-            data = yaml.safe_load(content)
+            data = json.loads(content)
 
             if data is None:
                 return {}
             if not isinstance(data, dict):
-                raise ParserError("YAML root must be a dictionary")
+                raise ParserError("JSON root must be an object")
 
             return data
 
-        except yaml.YAMLError as e:
-            raise ParserError(f"Invalid YAML: {e}")
+        except json.JSONDecodeError as e:
+            raise ParserError(f"Invalid JSON: {e}")
 
     def _is_valid_key(self, key: str) -> bool:
         """Check if a string is a valid issue key."""
@@ -230,7 +240,7 @@ class YamlParser(DocumentParserPort):
     # -------------------------------------------------------------------------
 
     def _parse_story(self, data: dict[str, Any]) -> UserStory | None:
-        """Parse a single story from YAML data."""
+        """Parse a single story from JSON data."""
         story_id = data.get("id", "US-000")
         title = data.get("title", "Untitled Story")
 
@@ -277,7 +287,7 @@ class YamlParser(DocumentParserPort):
         self,
         data: Any,
     ) -> Description | None:
-        """Parse description from YAML data."""
+        """Parse description from JSON data."""
         if data is None:
             return None
 
@@ -311,7 +321,7 @@ class YamlParser(DocumentParserPort):
         self,
         data: list[Any],
     ) -> AcceptanceCriteria:
-        """Parse acceptance criteria from YAML data."""
+        """Parse acceptance criteria from JSON data."""
         items: list[str] = []
         checked: list[bool] = []
 
@@ -328,7 +338,7 @@ class YamlParser(DocumentParserPort):
         return AcceptanceCriteria.from_list(items, checked)
 
     def _parse_subtasks(self, data: list[Any]) -> list[Subtask]:
-        """Parse subtasks from YAML data."""
+        """Parse subtasks from JSON data."""
         subtasks = []
 
         for i, item in enumerate(data):
@@ -359,7 +369,7 @@ class YamlParser(DocumentParserPort):
         return subtasks
 
     def _parse_commits(self, data: list[Any]) -> list[CommitRef]:
-        """Parse commit references from YAML data."""
+        """Parse commit references from JSON data."""
         commits = []
 
         for item in data:
@@ -378,12 +388,12 @@ class YamlParser(DocumentParserPort):
 
     def _parse_links(self, data: list[Any]) -> list[tuple[str, str]]:
         """
-        Parse issue links from YAML data.
+        Parse issue links from JSON data.
 
         Supports multiple formats:
         - Simple string: "blocks PROJ-123"
-        - Structured: {type: "blocks", target: "PROJ-123"}
-        - Shorthand: {blocks: "PROJ-123"}
+        - Structured: {"type": "blocks", "target": "PROJ-123"}
+        - Shorthand: {"blocks": "PROJ-123"}
 
         Returns:
             List of (link_type, target_key) tuples
@@ -399,13 +409,13 @@ class YamlParser(DocumentParserPort):
                     target = parts[1].strip()
                     links.append((link_type, target))
             elif isinstance(item, dict):
-                # Structured format: {type: "blocks", target: "PROJ-123"}
+                # Structured format: {"type": "blocks", "target": "PROJ-123"}
                 if "type" in item and "target" in item:
                     link_type = str(item["type"]).lower().replace("_", " ")
                     target = str(item["target"])
                     links.append((link_type, target))
                 else:
-                    # Shorthand format: {blocks: "PROJ-123"} or {blocks: ["A-1", "B-2"]}
+                    # Shorthand format: {"blocks": "PROJ-123"} or {"blocks": ["A-1", "B-2"]}
                     for link_type, targets in item.items():
                         link_type_normalized = str(link_type).lower().replace("_", " ")
                         if isinstance(targets, str):
@@ -418,17 +428,15 @@ class YamlParser(DocumentParserPort):
 
     def _parse_comments(self, data: list[Any]) -> list[Comment]:
         """
-        Parse comments from YAML data.
+        Parse comments from JSON data.
 
         Supports multiple formats:
         - Simple string: "This is a comment"
-        - Structured: {body: "Comment text", author: "user", created_at: "2025-01-15"}
+        - Structured: {"body": "Comment text", "author": "user", "created_at": "2025-01-15"}
 
         Returns:
             List of Comment objects
         """
-        from datetime import datetime
-
         comments: list[Comment] = []
 
         for item in data:
@@ -485,7 +493,7 @@ class YamlParser(DocumentParserPort):
         prefix = f"stories[{index}]"
 
         if not isinstance(story, dict):
-            errors.append(f"{prefix}: must be a dictionary")
+            errors.append(f"{prefix}: must be an object")
             return errors
 
         # Required fields
@@ -516,11 +524,22 @@ class YamlParser(DocumentParserPort):
         # Validate subtasks
         subtasks = story.get("subtasks", [])
         if not isinstance(subtasks, list):
-            errors.append(f"{prefix}.subtasks: must be a list")
+            errors.append(f"{prefix}.subtasks: must be an array")
 
         # Validate acceptance criteria
         ac = story.get("acceptance_criteria", [])
         if not isinstance(ac, list):
-            errors.append(f"{prefix}.acceptance_criteria: must be a list")
+            errors.append(f"{prefix}.acceptance_criteria: must be an array")
+
+        # Validate links
+        links = story.get("links", [])
+        if not isinstance(links, list):
+            errors.append(f"{prefix}.links: must be an array")
+
+        # Validate comments
+        comments = story.get("comments", [])
+        if not isinstance(comments, list):
+            errors.append(f"{prefix}.comments: must be an array")
 
         return errors
+

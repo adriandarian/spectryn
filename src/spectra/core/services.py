@@ -117,7 +117,16 @@ def create_parser_factory(
     Create a factory function for the document parser.
 
     Args:
-        parser_type: Type of parser ('markdown', 'yaml', 'notion')
+        parser_type: Type of parser. Supported types:
+            - 'markdown' - Markdown files (.md, .markdown)
+            - 'yaml' - YAML files (.yaml, .yml)
+            - 'json' - JSON files (.json)
+            - 'toml' - TOML files (.toml)
+            - 'csv' - CSV/TSV files (.csv, .tsv)
+            - 'asciidoc' - AsciiDoc files (.adoc, .asciidoc)
+            - 'excel' - Excel files (.xlsx, .xlsm, .xls)
+            - 'toon' - TOON files (.toon)
+            - 'notion' - Notion export files
 
     Returns:
         Factory function that creates the parser
@@ -132,6 +141,30 @@ def create_parser_factory(
             from spectra.adapters.parsers import YamlParser
 
             return YamlParser()
+        if parser_type == "json":
+            from spectra.adapters.parsers import JsonParser
+
+            return JsonParser()
+        if parser_type == "toml":
+            from spectra.adapters.parsers import TomlParser
+
+            return TomlParser()
+        if parser_type == "csv":
+            from spectra.adapters.parsers import CsvParser
+
+            return CsvParser()
+        if parser_type == "asciidoc":
+            from spectra.adapters.parsers import AsciiDocParser
+
+            return AsciiDocParser()
+        if parser_type == "excel":
+            from spectra.adapters.parsers import ExcelParser
+
+            return ExcelParser()
+        if parser_type == "toon":
+            from spectra.adapters.parsers import ToonParser
+
+            return ToonParser()
         if parser_type == "notion":
             from spectra.adapters.parsers import NotionParser
 
