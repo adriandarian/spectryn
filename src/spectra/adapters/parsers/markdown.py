@@ -501,6 +501,8 @@ class MarkdownParser(DocumentParserPort):
         # Try to parse epic metadata from EPIC.md
         epic_title = "Untitled Epic"
         epic_key = IssueKey("EPIC-0")
+        epic_summary = ""
+        epic_description = ""
 
         epic_file = dir_path / "EPIC.md"
         if epic_file.exists():
@@ -517,6 +519,22 @@ class MarkdownParser(DocumentParserPort):
             if id_match:
                 epic_key = IssueKey(id_match.group(1).strip())
 
+            # Extract Epic Name as summary
+            name_match = re.search(
+                r"(?:>\s*)?\*\*Epic\s*Name\*\*:\s*(.+?)(?:\s*$|\n)", content, re.IGNORECASE
+            )
+            if name_match:
+                epic_summary = name_match.group(1).strip()
+
+            # Extract Epic Description section (everything between ## Epic Description and next ##)
+            desc_match = re.search(
+                r"##\s*Epic\s*Description\s*\n(.*?)(?=\n##\s|\Z)",
+                content,
+                re.IGNORECASE | re.DOTALL,
+            )
+            if desc_match:
+                epic_description = desc_match.group(1).strip()
+
         # Parse all stories from directory
         stories = self.parse_directory(dir_path)
 
@@ -526,6 +544,8 @@ class MarkdownParser(DocumentParserPort):
         return Epic(
             key=epic_key,
             title=epic_title,
+            summary=epic_summary,
+            description=epic_description,
             stories=stories,
         )
 
@@ -857,8 +877,10 @@ class MarkdownParser(DocumentParserPort):
                 )
             return subtasks
 
-        # Format B/C: | ID | Task | Status | Notes/Deliverable |
+        # Format B: | ID | Task | Status | Est. | (Est. is story points)
         # ID format: US-001-01 or just 01
+        # Check if header contains "Est" to detect this format
+        has_est_column = re.search(r"\|\s*Est\.?\s*\|", section_content, re.IGNORECASE)
         pattern_b = r"\|\s*(?:US-\d+-)?(\d+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|"
         matches_b = list(re.finditer(pattern_b, section_content))
         if matches_b:
@@ -867,15 +889,32 @@ class MarkdownParser(DocumentParserPort):
                 # Skip header row (if number is not numeric)
                 if not number_str.isdigit():
                     continue
-                subtasks.append(
-                    Subtask(
-                        number=int(number_str),
-                        name=match.group(2).strip(),
-                        description=match.group(4).strip(),  # Notes/Deliverable as description
-                        story_points=0,  # Not provided in this format
-                        status=Status.from_string(match.group(3)),
+
+                col4 = match.group(4).strip()
+
+                # Determine if 4th column is story points or description
+                if has_est_column and col4.isdigit():
+                    # Est. column = story points
+                    subtasks.append(
+                        Subtask(
+                            number=int(number_str),
+                            name=match.group(2).strip(),
+                            description="",  # No description in this format
+                            story_points=int(col4),
+                            status=Status.from_string(match.group(3)),
+                        )
                     )
-                )
+                else:
+                    # Notes/Deliverable column = description
+                    subtasks.append(
+                        Subtask(
+                            number=int(number_str),
+                            name=match.group(2).strip(),
+                            description=col4,
+                            story_points=0,
+                            status=Status.from_string(match.group(3)),
+                        )
+                    )
             return subtasks
 
         return subtasks

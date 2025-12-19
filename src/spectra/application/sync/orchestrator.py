@@ -606,16 +606,27 @@ class SyncOrchestrator:
                 description += "\n\n## Acceptance Criteria\n"
                 description += md_story.acceptance_criteria.to_markdown()
 
-            # Create the story
-            # Note: Priority skipped - some Jira projects have custom priority schemes
-            new_key = self.tracker.create_story(
-                summary=md_story.title,
-                description=description,
-                project_key=project_key,
-                epic_key=epic_key,
-                story_points=md_story.story_points,
-                priority=None,  # TODO: Fetch valid priorities from Jira project
-            )
+            # Create the story - try "User Story" first, fall back to "Story"
+            # Some Jira projects use "User Story" as the issue type name
+            new_key = None
+            for issue_type in ["User Story", "Story"]:
+                try:
+                    new_key = self.tracker.create_story(
+                        summary=md_story.title,
+                        description=description,
+                        project_key=project_key,
+                        epic_key=epic_key,
+                        story_points=md_story.story_points,
+                        priority=None,  # Skip priority - custom schemes vary by project
+                        assignee=None,  # Will auto-assign to current user in adapter
+                        issue_type=issue_type,
+                    )
+                    if new_key or self.config.dry_run:
+                        break  # Success or dry-run
+                except Exception as e:
+                    if "User Story" in str(e) or "issue type" in str(e).lower():
+                        continue  # Try next issue type
+                    raise  # Re-raise other errors
 
             # Count as created (even in dry-run where new_key is None)
             created_count += 1
@@ -662,18 +673,19 @@ class SyncOrchestrator:
 
         path = Path(markdown_path)
 
-        # Find and parse the epic file
-        if path.is_dir():
-            epic_file = path / "EPIC.md"
-            if not epic_file.exists():
-                self.logger.debug("No EPIC.md found in directory, skipping epic sync")
-                return
-            content = epic_file.read_text(encoding="utf-8")
-        else:
-            content = path.read_text(encoding="utf-8")
-
         # Parse epic details
-        epic = self.parser.parse_epic(content)
+        epic = None
+        if path.is_dir():
+            # Use directory parser which extracts description from EPIC.md
+            if hasattr(self.parser, "parse_epic_directory"):
+                epic = self.parser.parse_epic_directory(path)
+            else:
+                epic_file = path / "EPIC.md"
+                if epic_file.exists():
+                    epic = self.parser.parse_epic(epic_file.read_text(encoding="utf-8"))
+        else:
+            epic = self.parser.parse_epic(path.read_text(encoding="utf-8"))
+
         if not epic:
             self.logger.debug("Could not parse epic details from markdown")
             return
@@ -683,7 +695,9 @@ class SyncOrchestrator:
         if epic.description:
             description = epic.description
         if epic.summary:
-            description = f"{epic.summary}\n\n{description}" if description else epic.summary
+            description = f"**{epic.summary}**\n\n{description}" if description else epic.summary
+
+        self.logger.debug(f"Epic description length: {len(description)} chars")
 
         # Format as ADF if needed
         adf_description = self.formatter.format_text(description) if description else None
@@ -699,7 +713,7 @@ class SyncOrchestrator:
             if adf_description:
                 self.tracker.update_issue_description(epic_key, adf_description)
                 result.epic_updated = True
-                self.logger.debug(f"Updated epic {epic_key} description")
+                self.logger.info(f"Updated epic {epic_key} description")
         except Exception as e:
             result.add_warning(f"Failed to update epic {epic_key}: {e}")
             self.logger.error(f"Failed to update epic: {e}")

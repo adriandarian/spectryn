@@ -167,6 +167,13 @@ class JiraAdapter(IssueTrackerPort):
             self.logger.debug(f"[DRY-RUN] Would create {issue_type} '{summary[:50]}...'")
             return None
 
+        # Auto-assign to current user if no assignee specified
+        if assignee is None:
+            import contextlib
+
+            with contextlib.suppress(Exception):
+                assignee = self._client.get_current_user_id()
+
         # Convert description to ADF if string
         if isinstance(description, str):
             description = self.formatter.format_text(description)
