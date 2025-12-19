@@ -434,6 +434,10 @@ class SyncOrchestrator:
             self._report_progress(progress_callback, "Updating descriptions", 2, total_phases)
             self._sync_descriptions(result)
 
+        # Phase 2b: Update story metadata (priority, assignee)
+        self._report_progress(progress_callback, "Updating metadata", 2, total_phases)
+        self._sync_story_metadata(result)
+
         # Phase 3: Sync subtasks
         if self.config.sync_subtasks:
             self._report_progress(progress_callback, "Syncing subtasks", 3, total_phases)
@@ -766,6 +770,103 @@ class SyncOrchestrator:
         except Exception as e:
             result.add_warning(f"Failed to update epic {epic_key}: {e}")
             self.logger.error(f"Failed to update epic: {e}")
+
+    def _sync_story_metadata(self, result: SyncResult) -> None:
+        """
+        Sync story metadata (priority, assignee) to Jira.
+
+        Updates matched stories with priority and assignee from markdown.
+
+        Args:
+            result: SyncResult to update with operation counts.
+        """
+        if not hasattr(self.tracker, "update_issue_fields"):
+            self.logger.debug("Tracker does not support field updates")
+            return
+
+        # Get available priorities from Jira (cache for efficiency)
+        available_priorities: list[str] = []
+        if hasattr(self.tracker, "get_priorities"):
+            available_priorities = self.tracker.get_priorities()
+            self.logger.debug(f"Available priorities: {available_priorities}")
+
+        # Map our priority names to Jira priority names
+        priority_map = self._build_priority_map(available_priorities)
+
+        # Get current user for assignee
+        current_user = None
+        if hasattr(self.tracker, "_client"):
+            import contextlib
+
+            with contextlib.suppress(Exception):
+                current_user = self.tracker._client.get_current_user_id()
+
+        updated_count = 0
+        for md_story in self._md_stories:
+            story_id = str(md_story.id)
+            if story_id not in self._matches:
+                continue
+
+            issue_key = self._matches[story_id]
+
+            # Determine priority
+            jira_priority = None
+            if md_story.priority and priority_map:
+                jira_priority = priority_map.get(md_story.priority.name)
+
+            # Use current user as assignee if none specified
+            assignee = md_story.assignee or current_user
+
+            if jira_priority or assignee:
+                try:
+                    self.tracker.update_issue_fields(
+                        issue_key,
+                        priority=jira_priority,
+                        assignee=assignee,
+                    )
+                    updated_count += 1
+                except Exception as e:
+                    result.add_warning(f"Failed to update metadata for {issue_key}: {e}")
+                    self.logger.warning(f"Failed to update metadata for {issue_key}: {e}")
+
+        if updated_count > 0:
+            self.logger.debug(
+                f"{'Would update' if self.config.dry_run else 'Updated'} {updated_count} story metadata"
+            )
+
+    def _build_priority_map(self, available_priorities: list[str]) -> dict[str, str]:
+        """
+        Build a mapping from our Priority enum names to Jira priority names.
+
+        Args:
+            available_priorities: List of priority names from Jira.
+
+        Returns:
+            Dict mapping Priority enum names to Jira priority names.
+        """
+        if not available_priorities:
+            return {}
+
+        # Lowercase lookup for matching
+        priority_lookup = {p.lower(): p for p in available_priorities}
+
+        # Map our enum names to common Jira priority names
+        mappings = {
+            "CRITICAL": ["highest", "critical", "blocker", "urgent"],
+            "HIGH": ["high", "major"],
+            "MEDIUM": ["medium", "normal", "default"],
+            "LOW": ["low", "minor", "lowest", "trivial"],
+        }
+
+        result: dict[str, str] = {}
+        for enum_name, candidates in mappings.items():
+            for candidate in candidates:
+                if candidate in priority_lookup:
+                    result[enum_name] = priority_lookup[candidate]
+                    break
+
+        self.logger.debug(f"Priority map: {result}")
+        return result
 
     # -------------------------------------------------------------------------
     # Sync Phases

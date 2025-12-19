@@ -417,6 +417,78 @@ class JiraAdapter(IssueTrackerPort):
     # Extended Methods (Jira-specific)
     # -------------------------------------------------------------------------
 
+    def get_priorities(self) -> list[str]:
+        """
+        Get available priority names from Jira.
+
+        Returns:
+            List of priority names (e.g., ['Highest', 'High', 'Medium', 'Low', 'Lowest'])
+        """
+        try:
+            data = self._client.get("priority")
+            return [p.get("name", "") for p in data if p.get("name")]
+        except Exception as e:
+            self.logger.warning(f"Failed to fetch priorities: {e}")
+            return []
+
+    def get_project_issue_types(self, project_key: str) -> list[str]:
+        """
+        Get available issue types for a project.
+
+        Args:
+            project_key: Project key (e.g., 'UPP')
+
+        Returns:
+            List of issue type names
+        """
+        try:
+            data = self._client.get(f"project/{project_key}")
+            issue_types = data.get("issueTypes", [])
+            return [it.get("name", "") for it in issue_types if it.get("name")]
+        except Exception as e:
+            self.logger.warning(f"Failed to fetch issue types: {e}")
+            return []
+
+    def update_issue_fields(
+        self,
+        issue_key: str,
+        priority: str | None = None,
+        assignee: str | None = None,
+    ) -> bool:
+        """
+        Update issue fields (priority, assignee).
+
+        Args:
+            issue_key: The issue key.
+            priority: Priority name to set.
+            assignee: Assignee account ID.
+
+        Returns:
+            True if successful.
+        """
+        if self._dry_run:
+            updates = []
+            if priority:
+                updates.append(f"priority={priority}")
+            if assignee:
+                updates.append(f"assignee={assignee}")
+            if updates:
+                self.logger.info(f"[DRY-RUN] Would update {issue_key}: {', '.join(updates)}")
+            return True
+
+        fields: dict[str, Any] = {}
+        if priority:
+            fields[JiraField.PRIORITY] = {JiraField.NAME: priority}
+        if assignee:
+            fields[JiraField.ASSIGNEE] = {JiraField.ACCOUNT_ID: assignee}
+
+        if not fields:
+            return True
+
+        self._client.put(f"issue/{issue_key}", json={JiraField.FIELDS: fields})
+        self.logger.info(f"Updated {issue_key} fields")
+        return True
+
     def add_commits_comment(self, issue_key: str, commits: list[CommitRef]) -> bool:
         """Add a formatted commits table as a comment."""
         if self._dry_run:
