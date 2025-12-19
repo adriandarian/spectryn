@@ -693,7 +693,7 @@ def run_validate(
     suggest_fix: bool = False,
     auto_fix: bool = False,
     ai_tool: str | None = None,
-    markdown_dir: str | None = None,
+    input_dir: str | None = None,
 ) -> int:
     """
     Run comprehensive validation on a markdown file or directory.
@@ -707,7 +707,7 @@ def run_validate(
         suggest_fix: Show AI prompt for fixing issues.
         auto_fix: Automatically fix using AI tool.
         ai_tool: Specific AI tool to use for auto-fix.
-        markdown_dir: Path to directory containing US-*.md files.
+        input_dir: Path to directory containing US-*.md files.
 
     Returns:
         Exit code.
@@ -732,10 +732,10 @@ def run_validate(
             return ExitCode.SUCCESS
 
     # Handle directory validation
-    if markdown_dir:
-        dir_path = Path(markdown_dir)
+    if input_dir:
+        dir_path = Path(input_dir)
         if not dir_path.is_dir():
-            console.error(f"Not a directory: {markdown_dir}")
+            console.error(f"Not a directory: {input_dir}")
             return ExitCode.FILE_NOT_FOUND
 
         # Find all story files in directory
@@ -743,10 +743,10 @@ def run_validate(
         epic_file = dir_path / "EPIC.md"
 
         if not story_files and not epic_file.exists():
-            console.error(f"No US-*.md or EPIC.md files found in {markdown_dir}")
+            console.error(f"No US-*.md or EPIC.md files found in {input_dir}")
             return ExitCode.FILE_NOT_FOUND
 
-        console.info(f"Directory: {markdown_dir}")
+        console.info(f"Directory: {input_dir}")
         console.info(f"Found {len(story_files)} story files")
         if epic_file.exists():
             console.info("EPIC.md found")

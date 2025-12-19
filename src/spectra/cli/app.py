@@ -146,6 +146,15 @@ Examples:
   # Analyze links without syncing
   spectra --analyze-links --markdown EPIC.md --epic PROJ-123
 
+  # Directory mode - sync all story files from a directory
+  spectra --input-dir ./docs/plan --epic PROJ-123 --dry-run
+
+  # Preview which files would be processed from a directory
+  spectra --input-dir ./docs/plan --list-files
+
+  # Execute directory sync
+  spectra --input-dir ./docs/plan --epic PROJ-123 --execute
+
 Environment Variables:
   JIRA_URL         Jira instance URL (e.g., https://company.atlassian.net)
   JIRA_EMAIL       Jira account email
@@ -153,18 +162,28 @@ Environment Variables:
         """,
     )
 
-    # Required arguments (conditionally required - not needed for --completions)
-    parser.add_argument("--markdown", "-m", type=str, help="Path to markdown epic file")
+    # Input arguments - supports multiple file types (markdown, yaml, json, csv, etc.)
+    # Note: -m kept for backward compatibility, -i conflicts with --interactive
     parser.add_argument(
+        "--input",
+        "--markdown",
+        "-m",
+        type=str,
+        dest="input",
+        help="Path to input file (markdown, yaml, json, csv, asciidoc, excel, toml)",
+    )
+    parser.add_argument(
+        "--input-dir",
         "--markdown-dir",
         type=str,
         metavar="DIR",
-        help="Path to directory containing US-*.md story files (alternative to --markdown)",
+        dest="input_dir",
+        help="Path to directory containing story files (auto-detects file types)",
     )
     parser.add_argument(
         "--list-files",
         action="store_true",
-        help="List which files would be processed from --markdown-dir (useful for preview)",
+        help="List which files would be processed from --input-dir (useful for preview)",
     )
     parser.add_argument("--epic", "-e", type=str, help="Jira epic key (e.g., PROJ-123)")
 
@@ -602,7 +621,7 @@ def validate_markdown(
     suggest_fix: bool = False,
     auto_fix: bool = False,
     ai_tool: str | None = None,
-    markdown_dir: str | None = None,
+    input_dir: str | None = None,
 ) -> int:
     """
     Validate a markdown file's format and structure.
@@ -618,7 +637,7 @@ def validate_markdown(
         suggest_fix: If True, generate an AI prompt to fix issues.
         auto_fix: If True, automatically fix using an AI tool.
         ai_tool: Specific AI tool to use for auto-fix.
-        markdown_dir: Path to directory containing US-*.md files.
+        input_dir: Path to directory containing US-*.md files.
 
     Returns:
         Exit code (0 for success, non-zero for errors).
@@ -633,7 +652,7 @@ def validate_markdown(
         suggest_fix=suggest_fix,
         auto_fix=auto_fix,
         ai_tool=ai_tool,
-        markdown_dir=markdown_dir,
+        input_dir=input_dir,
     )
 
 
@@ -1152,7 +1171,7 @@ def run_sync_links(args) -> int:
         quiet=getattr(args, "quiet", False),
     )
 
-    markdown_path = args.markdown
+    markdown_path = args.input
     epic_key = args.epic
     dry_run = not getattr(args, "execute", False)
     analyze_only = getattr(args, "analyze_links", False)
@@ -1324,7 +1343,7 @@ def run_multi_epic(args) -> int:
         quiet=getattr(args, "quiet", False),
     )
 
-    markdown_path = args.markdown
+    markdown_path = args.input
     dry_run = not getattr(args, "execute", False)
     list_only = getattr(args, "list_epics", False)
     epic_filter_str = getattr(args, "epic_filter", None)
@@ -1618,7 +1637,7 @@ def run_schedule(args) -> int:
         quiet=getattr(args, "quiet", False),
     )
 
-    markdown_path = args.markdown
+    markdown_path = args.input
     epic_key = args.epic
     schedule_spec = args.schedule
     run_now = getattr(args, "run_now", False)
@@ -1756,7 +1775,7 @@ def run_watch(args) -> int:
         quiet=getattr(args, "quiet", False),
     )
 
-    markdown_path = args.markdown
+    markdown_path = args.input
     epic_key = args.epic
     debounce = getattr(args, "debounce", 2.0)
     poll_interval = getattr(args, "poll_interval", 1.0)
@@ -2112,16 +2131,16 @@ def run_sync(
     config = config_provider.load()
 
     # Handle markdown source (file or directory)
-    markdown_dir = getattr(args, "markdown_dir", None)
-    is_directory_mode = bool(markdown_dir)
+    input_dir = getattr(args, "input_dir", None)
+    is_directory_mode = bool(input_dir)
 
     if is_directory_mode:
-        markdown_path = Path(markdown_dir)
+        markdown_path = Path(input_dir)
         if not markdown_path.is_dir():
-            console.error_rich(FileNotFoundError(f"Directory not found: {markdown_dir}"))
+            console.error_rich(FileNotFoundError(f"Directory not found: {input_dir}"))
             return ExitCode.FILE_NOT_FOUND
     else:
-        markdown_path = Path(args.markdown)
+        markdown_path = Path(args.input)
         if not markdown_path.exists():
             console.error_rich(FileNotFoundError(markdown_path))
             return ExitCode.FILE_NOT_FOUND
@@ -2425,14 +2444,14 @@ def main() -> int:
 
     # Handle watch mode
     if args.watch:
-        if not args.markdown or not args.epic:
-            parser.error("--watch requires --markdown/-m and --epic/-e to be specified")
+        if not args.input or not args.epic:
+            parser.error("--watch requires --input/-i and --epic/-e to be specified")
         return run_watch(args)
 
     # Handle scheduled sync
     if args.schedule:
-        if not args.markdown or not args.epic:
-            parser.error("--schedule requires --markdown/-m and --epic/-e to be specified")
+        if not args.input or not args.epic:
+            parser.error("--schedule requires --input/-i and --epic/-e to be specified")
         return run_schedule(args)
 
     # Handle webhook server
@@ -2443,15 +2462,15 @@ def main() -> int:
 
     # Handle multi-epic sync
     if args.multi_epic or args.list_epics:
-        if not args.markdown:
-            parser.error("--multi-epic and --list-epics require --markdown/-m to be specified")
+        if not args.input:
+            parser.error("--multi-epic and --list-epics require --input/-i to be specified")
         return run_multi_epic(args)
 
     # Handle link sync
     if args.sync_links or args.analyze_links:
-        if not args.markdown or not args.epic:
+        if not args.input or not args.epic:
             parser.error(
-                "--sync-links and --analyze-links require --markdown/-m and --epic/-e to be specified"
+                "--sync-links and --analyze-links require --input/-i and --epic/-e to be specified"
             )
         return run_sync_links(args)
 
@@ -2465,7 +2484,7 @@ def main() -> int:
             print(f"Error: Session '{args.resume_session}' not found")
             return ExitCode.FILE_NOT_FOUND
         # Override args from session
-        args.markdown = state.markdown_path
+        args.input = state.markdown_path
         args.epic = state.epic_key
 
     # Handle list-ai-tools (no other args needed)
@@ -2480,7 +2499,7 @@ def main() -> int:
             print(format_ai_tools_list(tools, color=console.color))
             console.print()
             console.info(
-                "Use with: spectra --validate --markdown FILE.md --auto-fix --ai-tool <name>"
+                "Use with: spectra --validate --input FILE.md --auto-fix --ai-tool <name>"
             )
         else:
             console.warning("No AI CLI tools detected on your system.")
@@ -2497,9 +2516,9 @@ def main() -> int:
 
     # Handle --list-files mode (preview which files would be processed)
     if getattr(args, "list_files", False):
-        markdown_dir = getattr(args, "markdown_dir", None)
-        if not markdown_dir:
-            parser.error("--list-files requires --markdown-dir to be specified")
+        input_dir = getattr(args, "input_dir", None)
+        if not input_dir:
+            parser.error("--list-files requires --input-dir to be specified")
         from pathlib import Path
 
         console = Console(
@@ -2508,9 +2527,9 @@ def main() -> int:
             quiet=args.quiet,
             json_mode=(args.output == "json"),
         )
-        dir_path = Path(markdown_dir)
+        dir_path = Path(input_dir)
         if not dir_path.is_dir():
-            console.error(f"Directory not found: {markdown_dir}")
+            console.error(f"Directory not found: {input_dir}")
             return ExitCode.FILE_NOT_FOUND
 
         # Find files that would be processed using the parser's detection logic
@@ -2555,9 +2574,9 @@ def main() -> int:
     # Handle validate mode (only requires markdown or markdown-dir, unless just showing guide)
     if args.validate or getattr(args, "show_guide", False):
         # show_guide can work without a markdown file
-        markdown_dir = getattr(args, "markdown_dir", None)
-        if not args.markdown and not markdown_dir and not getattr(args, "show_guide", False):
-            parser.error("--validate requires --markdown/-m or --markdown-dir to be specified")
+        input_dir = getattr(args, "input_dir", None)
+        if not args.input and not input_dir and not getattr(args, "show_guide", False):
+            parser.error("--validate requires --input/-i or --input-dir to be specified")
         from .logging import setup_logging
 
         setup_logging(
@@ -2573,13 +2592,13 @@ def main() -> int:
         try:
             return validate_markdown(
                 console,
-                args.markdown or "",
+                args.input or "",
                 strict=getattr(args, "strict", False),
                 show_guide=getattr(args, "show_guide", False),
                 suggest_fix=getattr(args, "suggest_fix", False),
                 auto_fix=getattr(args, "auto_fix", False),
                 ai_tool=getattr(args, "ai_tool", None),
-                markdown_dir=markdown_dir,
+                input_dir=input_dir,
             )
         except KeyboardInterrupt:
             console.print()
@@ -2605,7 +2624,7 @@ def main() -> int:
         )
         return run_dashboard(
             console,
-            markdown_path=args.markdown,
+            markdown_path=args.input,
             epic_key=args.epic,
         )
 
@@ -2639,9 +2658,9 @@ def main() -> int:
         return ExitCode.ERROR
 
     # Validate required arguments for other modes
-    markdown_dir = getattr(args, "markdown_dir", None)
-    if not args.markdown and not markdown_dir:
-        parser.error("one of the following arguments is required: --markdown/-m or --markdown-dir")
+    input_dir = getattr(args, "input_dir", None)
+    if not args.input and not input_dir:
+        parser.error("one of the following arguments is required: --input/-i or --input-dir")
     if not args.epic:
         parser.error("the following argument is required: --epic/-e")
 
