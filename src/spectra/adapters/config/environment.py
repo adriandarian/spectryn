@@ -111,8 +111,8 @@ class EnvironmentConfigProvider(ConfigProviderPort):
         # Normalize key
         key = key.lower().replace("-", "_")
 
-        # Check CLI overrides first
-        if key in self._cli_overrides:
+        # Check CLI overrides first (only if value is not None)
+        if key in self._cli_overrides and self._cli_overrides[key] is not None:
             return self._cli_overrides[key]
 
         # Check loaded values

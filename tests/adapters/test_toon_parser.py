@@ -289,4 +289,3 @@ stories:
         assert len(ac.items) == 2
         assert "Criterion 1" in ac.items
         assert "Criterion 2" in ac.items
-

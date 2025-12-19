@@ -37,11 +37,11 @@ class TestTomlParser:
 
     def test_parse_stories_minimal(self, parser: TomlParser) -> None:
         """Test parsing minimal story structure."""
-        content = '''
+        content = """
 [[stories]]
 id = "US-001"
 title = "Test Story"
-'''
+"""
         stories = parser.parse_stories(content)
 
         assert len(stories) == 1
@@ -50,7 +50,7 @@ title = "Test Story"
 
     def test_parse_stories_full(self, parser: TomlParser) -> None:
         """Test parsing story with all fields."""
-        content = '''
+        content = """
 [[stories]]
 id = "US-001"
 title = "Full Story"
@@ -86,7 +86,7 @@ target = "PROJ-123"
 body = "Good progress"
 author = "user1"
 created_at = "2025-01-15"
-'''
+"""
         stories = parser.parse_stories(content)
 
         assert len(stories) == 1
@@ -105,7 +105,7 @@ created_at = "2025-01-15"
 
     def test_parse_epic(self, parser: TomlParser) -> None:
         """Test parsing epic structure."""
-        content = '''
+        content = """
 [epic]
 key = "PROJ-100"
 title = "Test Epic"
@@ -118,7 +118,7 @@ title = "Story 1"
 [[stories]]
 id = "US-002"
 title = "Story 2"
-'''
+"""
         epic = parser.parse_epic(content)
 
         assert epic is not None
@@ -128,20 +128,19 @@ title = "Story 2"
 
     def test_validate_valid(self, parser: TomlParser) -> None:
         """Test validation passes for valid TOML."""
-        content = '''
+        content = """
 [[stories]]
 id = "US-001"
 title = "Valid Story"
-'''
+"""
         errors = parser.validate(content)
         assert errors == []
 
     def test_validate_missing_fields(self, parser: TomlParser) -> None:
         """Test validation catches missing fields."""
-        content = '''
+        content = """
 [[stories]]
 title = "No ID"
-'''
+"""
         errors = parser.validate(content)
         assert any("id" in e for e in errors)
-

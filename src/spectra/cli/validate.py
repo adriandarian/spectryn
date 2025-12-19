@@ -206,10 +206,20 @@ class MarkdownValidator:
         "blocker",
     }
 
-    # Story pattern - matches ### [emoji] US-001: Title or ### [emoji] PROJ-123: Title
+    # Story pattern - matches various header levels with story IDs
+    # ### [emoji] US-001: Title (h3) - most common format
+    # ### [emoji] PROJ-123: Title (h3) - for project-prefixed stories
+    # ## [emoji] US-001: Title (h2)
+    # # US-001: Title [emoji] (h1, standalone files - ONLY US-XXX format)
+    #
+    # Note: h1 headers like "# PROJ-100: Epic Title" are NOT matched (epics use project keys)
+    # Only h1 with US- prefix are matched (standalone story files)
     STORY_PATTERN = re.compile(
-        r"^###\s+(?:[^\s:]+\s+)?"  # Optional emoji/icon (any non-space chars)
-        r"(US-\d+|[A-Z]+-\d+):\s*(.+)$",
+        r"^(?:"
+        r"#{2,3}\s+(?:[^\s:]+\s+)?(?P<id1>US-\d+|[A-Z]+-\d+)"  # h2/h3: any format
+        r"|"
+        r"#\s+(?:[^\s:]+\s+)?(?P<id2>US-\d+)"  # h1: ONLY US-XXX format
+        r"):\s*(?P<title>.+?)(?:\s*[✅🔲🟡⏸️]+)?$",
         re.MULTILINE,
     )
 
@@ -316,7 +326,8 @@ class MarkdownValidator:
         seen_ids: dict[str, int] = {}
 
         for match in story_matches:
-            story_id = match.group(1)
+            # Get story ID from either named group (h2/h3 or h1 format)
+            story_id = match.group("id1") or match.group("id2")
             line_num = content[: match.start()].count("\n") + 1
 
             if story_id in seen_ids:
@@ -356,8 +367,9 @@ class MarkdownValidator:
         total_subtasks = 0
 
         for i, match in enumerate(story_matches):
-            story_id = match.group(1)
-            story_title = match.group(2).strip()
+            # Get story ID from either named group (h2/h3 or h1 format)
+            story_id = match.group("id1") or match.group("id2")
+            story_title = match.group("title").strip()
             story_start = match.start()
             story_line = content[:story_start].count("\n") + 1
 
@@ -385,9 +397,13 @@ class MarkdownValidator:
                     suggestion="Consider shortening the title and adding details to description",
                 )
 
-            # Check story points
+            # Check story points - support both "Story Points" and "Points"
             points_match = re.search(
-                r"\*\*Story\s*Points\*\*\s*\|\s*(\d+|[^\|]+)", story_content, re.IGNORECASE
+                r"(?:\*\*(?:Story\s*)?Points\*\*\s*\|\s*(\d+|[^\|]+))|"  # Table format
+                r"(?:>\s*\*\*Points\*\*:\s*(\d+|[^\n]+))|"  # Blockquote format
+                r"(?:\*\*(?:Story\s*)?Points\*\*:\s*(\d+|[^\n]+))",  # Inline format
+                story_content,
+                re.IGNORECASE,
             )
 
             if not points_match:
@@ -396,20 +412,29 @@ class MarkdownValidator:
                     "Missing Story Points",
                     line=story_line,
                     story_id=story_id,
-                    suggestion="Add a metadata table with | **Story Points** | 3 |",
+                    suggestion="Add **Points**: 3 or | **Story Points** | 3 |",
                 )
             else:
-                points_value = points_match.group(1).strip()
-                if points_value.isdigit():
-                    total_points += int(points_value)
-                elif points_value not in ("TBD", "?", "-", "N/A"):
-                    result.add_warning(
-                        "W203",
-                        f"Invalid story points value: '{points_value}'",
-                        line=story_line,
-                        story_id=story_id,
-                        suggestion="Story points should be a number or 'TBD'",
-                    )
+                # Get the first non-None group (different formats use different groups)
+                points_value = None
+                for group in points_match.groups():
+                    if group:
+                        points_value = group.strip()
+                        break
+
+                if points_value:
+                    # Clean up priority suffix like "P0 - Critical" -> just use the number if present
+                    points_value = re.sub(r"\s*[-–—].*$", "", points_value).strip()
+                    if points_value.isdigit():
+                        total_points += int(points_value)
+                    elif points_value not in ("TBD", "?", "-", "N/A"):
+                        result.add_warning(
+                            "W203",
+                            f"Invalid story points value: '{points_value}'",
+                            line=story_line,
+                            story_id=story_id,
+                            suggestion="Story points should be a number or 'TBD'",
+                        )
 
             # Check status
             status_match = re.search(
@@ -535,7 +560,7 @@ class MarkdownValidator:
             )
 
         # Check for consistent story ID format
-        story_ids = [m.group(1) for m in self.STORY_PATTERN.finditer(content)]
+        story_ids = [m.group("id1") or m.group("id2") for m in self.STORY_PATTERN.finditer(content)]
         if story_ids:
             # Check if mixing formats (US-XXX vs PROJ-XXX)
             us_format = [s for s in story_ids if s.startswith("US-")]
@@ -668,9 +693,10 @@ def run_validate(
     suggest_fix: bool = False,
     auto_fix: bool = False,
     ai_tool: str | None = None,
+    markdown_dir: str | None = None,
 ) -> int:
     """
-    Run comprehensive validation on a markdown file.
+    Run comprehensive validation on a markdown file or directory.
 
     Args:
         console: Console for output.
@@ -681,6 +707,7 @@ def run_validate(
         suggest_fix: Show AI prompt for fixing issues.
         auto_fix: Automatically fix using AI tool.
         ai_tool: Specific AI tool to use for auto-fix.
+        markdown_dir: Path to directory containing US-*.md files.
 
     Returns:
         Exit code.
@@ -701,10 +728,86 @@ def run_validate(
     if show_guide:
         guide = generate_format_guide()
         print(guide)
-        if not Path(markdown_path).exists():
+        if not markdown_path or not Path(markdown_path).exists():
             return ExitCode.SUCCESS
 
+    # Handle directory validation
+    if markdown_dir:
+        dir_path = Path(markdown_dir)
+        if not dir_path.is_dir():
+            console.error(f"Not a directory: {markdown_dir}")
+            return ExitCode.FILE_NOT_FOUND
+
+        # Find all story files in directory
+        story_files = sorted(dir_path.glob("US-*.md"))
+        epic_file = dir_path / "EPIC.md"
+
+        if not story_files and not epic_file.exists():
+            console.error(f"No US-*.md or EPIC.md files found in {markdown_dir}")
+            return ExitCode.FILE_NOT_FOUND
+
+        console.info(f"Directory: {markdown_dir}")
+        console.info(f"Found {len(story_files)} story files")
+        if epic_file.exists():
+            console.info("EPIC.md found")
+        console.print()
+
+        # Validate each file and aggregate results
+        all_results = []
+        combined_valid = True
+
+        for story_file in story_files:
+            validator = MarkdownValidator(strict=strict)
+            result = validator.validate(story_file)
+            all_results.append(result)
+            if not result.valid:
+                combined_valid = False
+
+        # Also validate EPIC.md if it exists
+        if epic_file.exists():
+            validator = MarkdownValidator(strict=strict)
+            result = validator.validate(epic_file)
+            all_results.append(result)
+            if not result.valid:
+                combined_valid = False
+
+        # Display results
+        total_stories = sum(r.story_count for r in all_results)
+        total_subtasks = sum(r.subtask_count for r in all_results)
+        total_points = sum(r.total_story_points for r in all_results)
+        total_errors = sum(len(r.errors) for r in all_results)
+        total_warnings = sum(len(r.warnings) for r in all_results)
+
+        if combined_valid:
+            console.success("Validation Passed")
+        else:
+            console.error("Validation Failed")
+
+        console.print()
+        console.info(f"  Total Stories: {total_stories}")
+        console.info(f"  Total Subtasks: {total_subtasks}")
+        console.info(f"  Total Story Points: {total_points}")
+        console.print()
+
+        if total_errors > 0:
+            console.error(f"Errors: {total_errors}")
+            for result in all_results:
+                for issue in result.errors:
+                    console.item(f"[{result.file_path}] {issue.message}", "fail")
+
+        if total_warnings > 0:
+            console.warning(f"Warnings: {total_warnings}")
+            for result in all_results:
+                for issue in result.warnings[:3]:  # Limit per file
+                    console.item(f"[{Path(result.file_path).name}] {issue.message}", "warn")
+
+        return ExitCode.SUCCESS if combined_valid else ExitCode.VALIDATION_ERROR
+
     # Check file exists
+    if not markdown_path:
+        console.error("No markdown file specified")
+        return ExitCode.FILE_NOT_FOUND
+
     if not Path(markdown_path).exists():
         console.error_rich(FileNotFoundError(markdown_path))
         return ExitCode.FILE_NOT_FOUND
@@ -791,7 +894,10 @@ def run_validate(
                     try:
                         Path(markdown_path).write_text(fix_result.fixed_content, encoding="utf-8")
                         console.success("File has been fixed!")
-                        console.info("Run validation again to verify: spectra --validate --markdown " + markdown_path)
+                        console.info(
+                            "Run validation again to verify: spectra --validate --markdown "
+                            + markdown_path
+                        )
                     except Exception as e:
                         console.error(f"Failed to write fixed content: {e}")
                         console.print()

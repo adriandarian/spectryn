@@ -20,7 +20,7 @@ from spectra.core.domain.value_objects import (
     IssueKey,
     StoryId,
 )
-from spectra.core.ports.document_parser import DocumentParserPort, ParserError
+from spectra.core.ports.document_parser import DocumentParserPort
 
 
 class AsciiDocParser(DocumentParserPort):
@@ -379,7 +379,9 @@ class AsciiDocParser(DocumentParserPort):
         # ____
         # Comment text
         # ____
-        quote_pattern = r"\[quote(?:,\s*@?([^,\]]+))?(?:,\s*(\d{4}-\d{2}-\d{2}))?\]\s*\n____\n([\s\S]*?)____"
+        quote_pattern = (
+            r"\[quote(?:,\s*@?([^,\]]+))?(?:,\s*(\d{4}-\d{2}-\d{2}))?\]\s*\n____\n([\s\S]*?)____"
+        )
         for match in re.finditer(quote_pattern, section):
             author = match.group(1).strip() if match.group(1) else None
             date_str = match.group(2)
@@ -438,4 +440,3 @@ class AsciiDocParser(DocumentParserPort):
         end = start + next_heading.start() if next_heading else len(content)
 
         return content[start:end].strip()
-

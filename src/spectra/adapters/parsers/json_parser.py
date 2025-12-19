@@ -542,4 +542,3 @@ class JsonParser(DocumentParserPort):
             errors.append(f"{prefix}.comments: must be an array")
 
         return errors
-

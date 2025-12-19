@@ -191,4 +191,3 @@ Content.
         content = "= Just a title\n\nNo stories here."
         errors = parser.validate(content)
         assert any("No user stories" in e for e in errors)
-

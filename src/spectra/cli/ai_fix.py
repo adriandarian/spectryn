@@ -9,7 +9,7 @@ Provides functionality to:
 
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -96,6 +96,7 @@ def detect_ai_tools() -> list[DetectedTool]:
         try:
             result = subprocess.run(
                 ["gh", "extension", "list"],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -133,6 +134,7 @@ def _get_version(command: str, args: list[str]) -> str | None:
     try:
         result = subprocess.run(
             [command, *args],
+            check=False,
             capture_output=True,
             text=True,
             timeout=5,
@@ -287,7 +289,7 @@ def generate_fix_prompt(
     if warnings:
         warning_list = "\n\nWarnings to address:\n" + "\n".join(f"  - {w}" for w in warnings)
 
-    prompt = f'''You are helping fix a markdown file to match the spectra tool's expected format.
+    prompt = f"""You are helping fix a markdown file to match the spectra tool's expected format.
 
 FILE: {file_path}
 
@@ -318,7 +320,7 @@ INSTRUCTIONS:
 5. Output ONLY the corrected markdown, no explanations
 
 Corrected markdown:
-'''
+"""
     return prompt
 
 
@@ -343,7 +345,7 @@ def generate_copy_paste_prompt(
     if warnings:
         warning_list = "\n\nAlso fix these warnings:\n" + "\n".join(f"- {w}" for w in warnings[:5])
 
-    return f'''Fix this markdown file ({file_path}) to match the spectra format.
+    return f"""Fix this markdown file ({file_path}) to match the spectra format.
 
 Issues to fix:
 {error_list}{warning_list}
@@ -356,7 +358,7 @@ Required format:
 - Separate stories with ---
 
 Paste your file content after this prompt, then I'll return the corrected version.
-'''
+"""
 
 
 def build_ai_command(
@@ -383,58 +385,58 @@ def build_ai_command(
         # Claude CLI: claude "prompt" -f file.md
         return (
             ["claude", prompt, "-f", file_path],
-            f"Claude will analyze and fix the file, outputting to stdout",
+            "Claude will analyze and fix the file, outputting to stdout",
         )
 
-    elif tool.tool == AITool.OLLAMA:
+    if tool.tool == AITool.OLLAMA:
         # Ollama: cat file | ollama run llama3 "prompt"
         # Need to use shell for piping
         return (
             ["sh", "-c", f'cat "{file_path}" | ollama run llama3.2 "{prompt}"'],
-            f"Ollama (llama3.2) will process the file content",
+            "Ollama (llama3.2) will process the file content",
         )
 
-    elif tool.tool == AITool.AIDER:
+    if tool.tool == AITool.AIDER:
         # Aider: aider --message "prompt" file.md
         return (
             ["aider", "--message", prompt, "--yes", file_path],
             f"Aider will edit {file_path} in place",
         )
 
-    elif tool.tool == AITool.SGPT:
+    if tool.tool == AITool.SGPT:
         # Shell GPT: cat file | sgpt "prompt"
         return (
             ["sh", "-c", f'cat "{file_path}" | sgpt "{prompt}"'],
-            f"Shell GPT will process and output the fixed content",
+            "Shell GPT will process and output the fixed content",
         )
 
-    elif tool.tool == AITool.LLM:
+    if tool.tool == AITool.LLM:
         # LLM CLI: cat file | llm "prompt"
         return (
             ["sh", "-c", f'cat "{file_path}" | llm "{prompt}"'],
-            f"LLM CLI will process and output the fixed content",
+            "LLM CLI will process and output the fixed content",
         )
 
-    elif tool.tool == AITool.MODS:
+    if tool.tool == AITool.MODS:
         # Mods: cat file | mods "prompt"
         return (
             ["sh", "-c", f'cat "{file_path}" | mods "{prompt}"'],
-            f"Mods will process and output the fixed content",
+            "Mods will process and output the fixed content",
         )
 
-    elif tool.tool == AITool.GH_COPILOT:
+    if tool.tool == AITool.GH_COPILOT:
         # GitHub Copilot: gh copilot suggest "prompt"
         return (
             ["gh", "copilot", "suggest", prompt],
-            f"GitHub Copilot will suggest fixes (interactive)",
+            "GitHub Copilot will suggest fixes (interactive)",
         )
 
-    elif tool.tool == AITool.COPILOT:
+    if tool.tool == AITool.COPILOT:
         # Standalone Copilot CLI: copilot explain "prompt"
         # The copilot CLI has subcommands: explain, suggest, etc.
         return (
             ["sh", "-c", f'cat "{file_path}" | copilot explain "{prompt}"'],
-            f"GitHub Copilot CLI will analyze and suggest fixes",
+            "GitHub Copilot CLI will analyze and suggest fixes",
         )
 
     # Fallback
@@ -491,6 +493,7 @@ def run_ai_fix(
     try:
         result = subprocess.run(
             cmd,
+            check=False,
             capture_output=True,
             text=True,
             timeout=120,  # 2 minute timeout
@@ -504,13 +507,12 @@ def run_ai_fix(
                 fixed_content=result.stdout if result.stdout.strip() else None,
                 command_run=" ".join(cmd[:50]),
             )
-        else:
-            return AIFixResult(
-                success=False,
-                tool_used=tool.display_name,
-                error=result.stderr or f"Command failed with exit code {result.returncode}",
-                command_run=" ".join(cmd[:50]),
-            )
+        return AIFixResult(
+            success=False,
+            tool_used=tool.display_name,
+            error=result.stderr or f"Command failed with exit code {result.returncode}",
+            command_run=" ".join(cmd[:50]),
+        )
 
     except subprocess.TimeoutExpired:
         return AIFixResult(
@@ -598,15 +600,21 @@ def format_fix_suggestion(
     # Option 1: View format guide
     if color:
         lines.append(f"{Colors.BOLD}Option 1: View format guide{Colors.RESET}")
-        lines.append(f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --show-guide{Colors.RESET}\n")
+        lines.append(
+            f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --show-guide{Colors.RESET}\n"
+        )
     else:
         lines.append("Option 1: View format guide")
         lines.append(f"  Run: spectra --validate --markdown {file_path} --show-guide\n")
 
     # Option 2: Get AI prompt
     if color:
-        lines.append(f"{Colors.BOLD}Option 2: Get AI fix prompt (copy to your AI tool){Colors.RESET}")
-        lines.append(f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --suggest-fix{Colors.RESET}\n")
+        lines.append(
+            f"{Colors.BOLD}Option 2: Get AI fix prompt (copy to your AI tool){Colors.RESET}"
+        )
+        lines.append(
+            f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --suggest-fix{Colors.RESET}\n"
+        )
     else:
         lines.append("Option 2: Get AI fix prompt (copy to your AI tool)")
         lines.append(f"  Run: spectra --validate --markdown {file_path} --suggest-fix\n")
@@ -624,29 +632,38 @@ def format_fix_suggestion(
         # Show example commands
         first_tool = tools[0]
         if color:
-            lines.append(f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --auto-fix --ai-tool {first_tool.tool.value}{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}Or interactively: spectra --validate --markdown {file_path} --auto-fix{Colors.RESET}")
+            lines.append(
+                f"  {Colors.DIM}Run: spectra --validate --markdown {file_path} --auto-fix --ai-tool {first_tool.tool.value}{Colors.RESET}"
+            )
+            lines.append(
+                f"  {Colors.DIM}Or interactively: spectra --validate --markdown {file_path} --auto-fix{Colors.RESET}"
+            )
         else:
-            lines.append(f"  Run: spectra --validate --markdown {file_path} --auto-fix --ai-tool {first_tool.tool.value}")
-            lines.append(f"  Or interactively: spectra --validate --markdown {file_path} --auto-fix")
+            lines.append(
+                f"  Run: spectra --validate --markdown {file_path} --auto-fix --ai-tool {first_tool.tool.value}"
+            )
+            lines.append(
+                f"  Or interactively: spectra --validate --markdown {file_path} --auto-fix"
+            )
+    # No tools detected, suggest installing one
+    elif color:
+        lines.append(f"{Colors.BOLD}Option 3: Install an AI CLI tool for auto-fix{Colors.RESET}")
+        lines.append(f"  {Colors.DIM}Supported tools:{Colors.RESET}")
+        lines.append(f"  {Colors.DIM}  • claude (Anthropic): pip install anthropic{Colors.RESET}")
+        lines.append(f"  {Colors.DIM}  • ollama: https://ollama.ai{Colors.RESET}")
+        lines.append(f"  {Colors.DIM}  • aider: pip install aider-chat{Colors.RESET}")
+        lines.append(
+            f"  {Colors.DIM}  • gh copilot: gh extension install github/gh-copilot{Colors.RESET}"
+        )
+        lines.append(f"  {Colors.DIM}  • llm: pip install llm{Colors.RESET}")
     else:
-        # No tools detected, suggest installing one
-        if color:
-            lines.append(f"{Colors.BOLD}Option 3: Install an AI CLI tool for auto-fix{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}Supported tools:{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}  • claude (Anthropic): pip install anthropic{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}  • ollama: https://ollama.ai{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}  • aider: pip install aider-chat{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}  • gh copilot: gh extension install github/gh-copilot{Colors.RESET}")
-            lines.append(f"  {Colors.DIM}  • llm: pip install llm{Colors.RESET}")
-        else:
-            lines.append("Option 3: Install an AI CLI tool for auto-fix")
-            lines.append("  Supported tools:")
-            lines.append("    • claude (Anthropic): pip install anthropic")
-            lines.append("    • ollama: https://ollama.ai")
-            lines.append("    • aider: pip install aider-chat")
-            lines.append("    • gh copilot: gh extension install github/gh-copilot")
-            lines.append("    • llm: pip install llm")
+        lines.append("Option 3: Install an AI CLI tool for auto-fix")
+        lines.append("  Supported tools:")
+        lines.append("    • claude (Anthropic): pip install anthropic")
+        lines.append("    • ollama: https://ollama.ai")
+        lines.append("    • aider: pip install aider-chat")
+        lines.append("    • gh copilot: gh extension install github/gh-copilot")
+        lines.append("    • llm: pip install llm")
 
     return "\n".join(lines)
 
@@ -676,7 +693,7 @@ def select_ai_tool(tools: list[DetectedTool], console: Console) -> DetectedTool 
         version_str = f" ({tool.version})" if tool.version else ""
         console.print(f"  {i}. {tool.display_name}{version_str}")
 
-    console.print(f"  0. Cancel")
+    console.print("  0. Cancel")
     console.print()
 
     try:
@@ -714,4 +731,3 @@ def get_tool_by_name(name: str, tools: list[DetectedTool]) -> DetectedTool | Non
         if name_lower in tool.tool.value or name_lower in tool.display_name.lower():
             return tool
     return None
-

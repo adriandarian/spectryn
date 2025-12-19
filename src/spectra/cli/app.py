@@ -80,7 +80,10 @@ Examples:
   spectra --analytics-show
   spectra --analytics-clear
 
-  # Analyze without making changes (dry-run)
+  # Preview changes without executing (dry-run is default)
+  spectra --markdown EPIC.md --epic PROJ-123 --dry-run
+
+  # Analyze without making changes (same as above, --dry-run is optional)
   spectra --markdown EPIC.md --epic PROJ-123
 
   # Execute sync with confirmations
@@ -152,11 +155,28 @@ Environment Variables:
 
     # Required arguments (conditionally required - not needed for --completions)
     parser.add_argument("--markdown", "-m", type=str, help="Path to markdown epic file")
+    parser.add_argument(
+        "--markdown-dir",
+        type=str,
+        metavar="DIR",
+        help="Path to directory containing US-*.md story files (alternative to --markdown)",
+    )
+    parser.add_argument(
+        "--list-files",
+        action="store_true",
+        help="List which files would be processed from --markdown-dir (useful for preview)",
+    )
     parser.add_argument("--epic", "-e", type=str, help="Jira epic key (e.g., PROJ-123)")
 
     # Execution mode
     parser.add_argument(
         "--execute", "-x", action="store_true", help="Execute changes (default is dry-run)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Preview changes without executing (this is the default, use for explicit clarity)",
     )
     parser.add_argument("--no-confirm", action="store_true", help="Skip confirmation prompts")
     parser.add_argument(
@@ -582,6 +602,7 @@ def validate_markdown(
     suggest_fix: bool = False,
     auto_fix: bool = False,
     ai_tool: str | None = None,
+    markdown_dir: str | None = None,
 ) -> int:
     """
     Validate a markdown file's format and structure.
@@ -597,6 +618,7 @@ def validate_markdown(
         suggest_fix: If True, generate an AI prompt to fix issues.
         auto_fix: If True, automatically fix using an AI tool.
         ai_tool: Specific AI tool to use for auto-fix.
+        markdown_dir: Path to directory containing US-*.md files.
 
     Returns:
         Exit code (0 for success, non-zero for errors).
@@ -611,6 +633,7 @@ def validate_markdown(
         suggest_fix=suggest_fix,
         auto_fix=auto_fix,
         ai_tool=ai_tool,
+        markdown_dir=markdown_dir,
     )
 
 
@@ -2088,11 +2111,20 @@ def run_sync(
 
     config = config_provider.load()
 
-    # Validate markdown exists
-    markdown_path = Path(args.markdown)
-    if not markdown_path.exists():
-        console.error_rich(FileNotFoundError(markdown_path))
-        return ExitCode.FILE_NOT_FOUND
+    # Handle markdown source (file or directory)
+    markdown_dir = getattr(args, "markdown_dir", None)
+    is_directory_mode = bool(markdown_dir)
+
+    if is_directory_mode:
+        markdown_path = Path(markdown_dir)
+        if not markdown_path.is_dir():
+            console.error_rich(FileNotFoundError(f"Directory not found: {markdown_dir}"))
+            return ExitCode.FILE_NOT_FOUND
+    else:
+        markdown_path = Path(args.markdown)
+        if not markdown_path.exists():
+            console.error_rich(FileNotFoundError(markdown_path))
+            return ExitCode.FILE_NOT_FOUND
 
     # Show header
     console.header(f"spectra {Symbols.ROCKET}")
@@ -2104,7 +2136,14 @@ def run_sync(
     if config_provider.config_file_path:
         console.info(f"Config: {config_provider.config_file_path}")
 
-    console.info(f"Markdown: {markdown_path}")
+    if is_directory_mode:
+        # Count files in directory
+        story_files = [f for f in markdown_path.glob("*.md") if f.name.lower().startswith("us-")]
+        has_epic = (markdown_path / "EPIC.md").exists()
+        console.info(f"Directory: {markdown_path}")
+        console.info(f"Files: {len(story_files)} stories" + (" + EPIC.md" if has_epic else ""))
+    else:
+        console.info(f"Markdown: {markdown_path}")
     console.info(f"Epic: {args.epic}")
     console.info(f"Mode: {'Execute' if args.execute else 'Dry-run'}")
     if getattr(args, "incremental", False):
@@ -2440,7 +2479,9 @@ def main() -> int:
         if tools:
             print(format_ai_tools_list(tools, color=console.color))
             console.print()
-            console.info("Use with: spectra --validate --markdown FILE.md --auto-fix --ai-tool <name>")
+            console.info(
+                "Use with: spectra --validate --markdown FILE.md --auto-fix --ai-tool <name>"
+            )
         else:
             console.warning("No AI CLI tools detected on your system.")
             console.print()
@@ -2454,11 +2495,69 @@ def main() -> int:
             console.info("  • mods: https://github.com/charmbracelet/mods")
         return ExitCode.SUCCESS
 
-    # Handle validate mode (only requires markdown, unless just showing guide)
+    # Handle --list-files mode (preview which files would be processed)
+    if getattr(args, "list_files", False):
+        markdown_dir = getattr(args, "markdown_dir", None)
+        if not markdown_dir:
+            parser.error("--list-files requires --markdown-dir to be specified")
+        from pathlib import Path
+
+        console = Console(
+            color=not args.no_color,
+            verbose=args.verbose,
+            quiet=args.quiet,
+            json_mode=(args.output == "json"),
+        )
+        dir_path = Path(markdown_dir)
+        if not dir_path.is_dir():
+            console.error(f"Directory not found: {markdown_dir}")
+            return ExitCode.FILE_NOT_FOUND
+
+        # Find files that would be processed using the parser's detection logic
+        from spectra.adapters.parsers import MarkdownParser
+
+        parser = MarkdownParser()
+        epic_file = None
+        story_files: list[Path] = []
+        ignored_files: list[Path] = []
+
+        for md_file in sorted(dir_path.glob("*.md")):
+            name_lower = md_file.name.lower()
+            if name_lower == "epic.md":
+                epic_file = md_file
+            elif parser._is_story_file(md_file):
+                story_files.append(md_file)
+            else:
+                ignored_files.append(md_file)
+
+        console.header("Files to Process")
+        if epic_file:
+            console.success(f"Epic: {epic_file.name}")
+        else:
+            console.warning("No EPIC.md found")
+
+        if story_files:
+            console.info(f"\nUser Stories ({len(story_files)} files):")
+            for sf in story_files:
+                console.info(f"  ✓ {sf.name}")
+        else:
+            console.warning("No US-*.md files found")
+
+        if ignored_files:
+            console.info(f"\nIgnored ({len(ignored_files)} files):")
+            for ig in ignored_files:
+                console.info(f"  ○ {ig.name}")
+
+        total = (1 if epic_file else 0) + len(story_files)
+        console.info(f"\nTotal: {total} file(s) will be processed")
+        return ExitCode.SUCCESS
+
+    # Handle validate mode (only requires markdown or markdown-dir, unless just showing guide)
     if args.validate or getattr(args, "show_guide", False):
         # show_guide can work without a markdown file
-        if not args.markdown and not getattr(args, "show_guide", False):
-            parser.error("--validate requires --markdown/-m to be specified")
+        markdown_dir = getattr(args, "markdown_dir", None)
+        if not args.markdown and not markdown_dir and not getattr(args, "show_guide", False):
+            parser.error("--validate requires --markdown/-m or --markdown-dir to be specified")
         from .logging import setup_logging
 
         setup_logging(
@@ -2480,6 +2579,7 @@ def main() -> int:
                 suggest_fix=getattr(args, "suggest_fix", False),
                 auto_fix=getattr(args, "auto_fix", False),
                 ai_tool=getattr(args, "ai_tool", None),
+                markdown_dir=markdown_dir,
             )
         except KeyboardInterrupt:
             console.print()
@@ -2539,8 +2639,11 @@ def main() -> int:
         return ExitCode.ERROR
 
     # Validate required arguments for other modes
-    if not args.markdown or not args.epic:
-        parser.error("the following arguments are required: --markdown/-m, --epic/-e")
+    markdown_dir = getattr(args, "markdown_dir", None)
+    if not args.markdown and not markdown_dir:
+        parser.error("one of the following arguments is required: --markdown/-m or --markdown-dir")
+    if not args.epic:
+        parser.error("the following argument is required: --epic/-e")
 
     # Setup logging with optional JSON format
     from .logging import setup_logging

@@ -89,6 +89,7 @@ class ExcelParser(DocumentParserPort):
         if self._openpyxl is None:
             try:
                 import openpyxl
+
                 self._openpyxl = openpyxl
             except ImportError:
                 raise ParserError(
@@ -286,7 +287,10 @@ class ExcelParser(DocumentParserPort):
             # Use first non-empty row as headers
             for i, row in enumerate(all_rows):
                 if row and any(cell for cell in row if cell):
-                    headers = [str(cell).lower().strip() if cell else f"col_{j}" for j, cell in enumerate(row)]
+                    headers = [
+                        str(cell).lower().strip() if cell else f"col_{j}"
+                        for j, cell in enumerate(row)
+                    ]
                     header_row_idx = i
                     break
 
@@ -294,7 +298,7 @@ class ExcelParser(DocumentParserPort):
             return rows
 
         # Parse data rows
-        for row in all_rows[header_row_idx + 1:]:
+        for row in all_rows[header_row_idx + 1 :]:
             if not row or not any(cell for cell in row if cell):
                 continue
 
@@ -368,6 +372,7 @@ class ExcelParser(DocumentParserPort):
             return None
 
         import re
+
         pattern = r"As a[n]?\s+(.+?),?\s+I want\s+(.+?),?\s+so that\s+(.+)"
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
         if match:
@@ -450,10 +455,10 @@ class ExcelParser(DocumentParserPort):
             return 0
 
         import re
+
         cleaned = re.sub(r"[^\d-]", "", str(value))
 
         try:
             return int(cleaned) if cleaned else 0
         except ValueError:
             return 0
-

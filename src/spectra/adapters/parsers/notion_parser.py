@@ -21,7 +21,6 @@ from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
 from spectra.core.domain.enums import Priority, Status
 from spectra.core.domain.value_objects import (
     AcceptanceCriteria,
-    CommitRef,
     Description,
     IssueKey,
     StoryId,
@@ -652,9 +651,7 @@ class NotionParser(DocumentParserPort):
 
         return comments
 
-    def _extract_links(
-        self, content: str, properties: dict[str, str]
-    ) -> list[tuple[str, str]]:
+    def _extract_links(self, content: str, properties: dict[str, str]) -> list[tuple[str, str]]:
         """
         Extract issue links from Notion content.
 

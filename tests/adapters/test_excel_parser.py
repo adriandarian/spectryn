@@ -54,11 +54,13 @@ class TestExcelParser:
     def mock_workbook(self):
         """Create a mock openpyxl workbook."""
         mock_ws = MagicMock()
-        mock_ws.iter_rows.return_value = iter([
-            ("id", "title", "story_points", "priority", "status"),
-            ("US-001", "Test Story", 5, "high", "planned"),
-            ("US-002", "Another Story", 3, "medium", "done"),
-        ])
+        mock_ws.iter_rows.return_value = iter(
+            [
+                ("id", "title", "story_points", "priority", "status"),
+                ("US-001", "Test Story", 5, "high", "planned"),
+                ("US-002", "Another Story", 3, "medium", "done"),
+            ]
+        )
 
         mock_wb = MagicMock()
         mock_wb.active = mock_ws
@@ -68,7 +70,9 @@ class TestExcelParser:
 
         return mock_wb
 
-    def test_parse_stories_with_mock(self, parser: ExcelParser, mock_workbook, tmp_path: Path) -> None:
+    def test_parse_stories_with_mock(
+        self, parser: ExcelParser, mock_workbook, tmp_path: Path
+    ) -> None:
         """Test parsing stories with mocked openpyxl."""
         excel_file = tmp_path / "test.xlsx"
         excel_file.touch()
@@ -167,4 +171,3 @@ class TestExcelParser:
         assert normalized.get("title") == "Test Story"
         assert normalized.get("story_points") == "5"
         assert normalized.get("priority") == "high"
-

@@ -69,10 +69,10 @@ US-001,"Full Story","As a user, I want feature, so that benefit",5,high,in_progr
 
     def test_parse_multiple_stories(self, parser: CsvParser) -> None:
         """Test parsing multiple stories."""
-        content = '''id,title,story_points
+        content = """id,title,story_points
 US-001,Story 1,3
 US-002,Story 2,5
-US-003,Story 3,8'''
+US-003,Story 3,8"""
 
         stories = parser.parse_stories(content)
 
@@ -94,8 +94,8 @@ US-003,Story 3,8'''
 
     def test_flexible_column_names(self, parser: CsvParser) -> None:
         """Test flexible column name mappings."""
-        content = '''story_id,name,points,prio
-US-001,Test Story,5,high'''
+        content = """story_id,name,points,prio
+US-001,Test Story,5,high"""
 
         stories = parser.parse_stories(content)
 
@@ -138,4 +138,3 @@ US-001,Test Story,"blocks:PROJ-123;depends_on:OTHER-456"'''
         assert len(links) == 2
         assert ("blocks", "PROJ-123") in links
         assert ("depends on", "OTHER-456") in links
-

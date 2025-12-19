@@ -124,7 +124,7 @@ class TestMarkdownParser:
 class TestMarkdownParserInlineFormat:
     """Tests for inline metadata format parsing (Format B)."""
 
-    INLINE_FORMAT_MARKDOWN = '''
+    INLINE_FORMAT_MARKDOWN = """
 # SpaceMouse Integration User Stories
 
 **Epic**: UPP-57735 - Pathologist Using a Space Mouse
@@ -175,7 +175,7 @@ Create detailed technical documentation.
 
 - [ ] Can request device connection
 - [ ] Handles disconnection gracefully
-'''
+"""
 
     def test_detect_inline_format(self, markdown_parser):
         """Test format detection identifies inline format."""
@@ -268,7 +268,7 @@ Create detailed technical documentation.
 class TestMarkdownParserFormatDetection:
     """Tests for format detection and mixed scenarios."""
 
-    TABLE_FORMAT_SAMPLE = '''
+    TABLE_FORMAT_SAMPLE = """
 ### ✅ US-001: Table Format Story
 
 | Field | Value |
@@ -282,9 +282,9 @@ class TestMarkdownParserFormatDetection:
 **As a** developer
 **I want** table format
 **So that** it works
-'''
+"""
 
-    INLINE_FORMAT_SAMPLE = '''
+    INLINE_FORMAT_SAMPLE = """
 ### US-001: Inline Format Story
 
 **Priority**: P0
@@ -296,7 +296,7 @@ class TestMarkdownParserFormatDetection:
 > **As a** user,
 > **I want** inline format,
 > **So that** it also works.
-'''
+"""
 
     def test_detect_table_format(self, markdown_parser):
         """Test detecting table-based metadata format."""
@@ -324,7 +324,7 @@ class TestMarkdownParserFormatDetection:
 class TestCommentsExtraction:
     """Tests for comments section parsing."""
 
-    COMMENTS_SAMPLE = '''
+    COMMENTS_SAMPLE = """
 ### US-001: Story With Comments
 
 | Field | Value |
@@ -349,7 +349,7 @@ class TestCommentsExtraction:
 > Thanks! Will add in next iteration.
 
 > Simple comment without author
-'''
+"""
 
     def test_extract_comments_with_author_and_date(self, markdown_parser):
         """Test extracting comments with full metadata."""
@@ -389,4 +389,3 @@ class TestCommentsExtraction:
         stories = markdown_parser.parse_stories(sample_markdown)
         # Should return empty list, not error
         assert stories[0].comments == []
-
