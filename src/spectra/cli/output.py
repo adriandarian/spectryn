@@ -390,7 +390,8 @@ class Console:
         """
         Print an updating progress bar.
 
-        Uses carriage return to update in place. Prints newline when complete.
+        Uses carriage return to update in place in interactive terminals.
+        Falls back to simple line output for non-interactive terminals.
 
         Args:
             current: Current progress value.
@@ -399,17 +400,28 @@ class Console:
         """
         if self.quiet:
             return
+
         width = 30
         filled = int(width * current / total)
         bar = "█" * filled + "░" * (width - filled)
         pct = int(100 * current / total)
 
-        line = f"\r  [{bar}] {pct}% {message}"
-        sys.stdout.write(line)
-        sys.stdout.flush()
-
-        if current >= total:
-            self.print()
+        # Check if running in interactive terminal
+        if sys.stdout.isatty():
+            # Interactive: update in place with carriage return
+            padded_message = f"{message:<25}"
+            line = f"\r  [{bar}] {pct:>3}% {padded_message}"
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            if current >= total:
+                self.print()
+        else:
+            # Non-interactive: print each phase once (track with instance variable)
+            if not hasattr(self, "_last_progress_message"):
+                self._last_progress_message = ""
+            if message != self._last_progress_message:
+                self._last_progress_message = message
+                self.print(f"  [{bar}] {pct:>3}% {message}")
 
     def dry_run_banner(self) -> None:
         """
