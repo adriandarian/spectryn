@@ -606,27 +606,18 @@ class SyncOrchestrator:
                 description += "\n\n## Acceptance Criteria\n"
                 description += md_story.acceptance_criteria.to_markdown()
 
-            # Create the story - try "User Story" first, fall back to "Story"
-            # Some Jira projects use "User Story" as the issue type name
-            new_key = None
-            for issue_type in ["User Story", "Story"]:
-                try:
-                    new_key = self.tracker.create_story(
-                        summary=md_story.title,
-                        description=description,
-                        project_key=project_key,
-                        epic_key=epic_key,
-                        story_points=md_story.story_points,
-                        priority=None,  # Skip priority - custom schemes vary by project
-                        assignee=None,  # Will auto-assign to current user in adapter
-                        issue_type=issue_type,
-                    )
-                    if new_key or self.config.dry_run:
-                        break  # Success or dry-run
-                except Exception as e:
-                    if "User Story" in str(e) or "issue type" in str(e).lower():
-                        continue  # Try next issue type
-                    raise  # Re-raise other errors
+            # Create the story with "User Story" issue type
+            # This is the standard issue type for user stories in most Jira projects
+            new_key = self.tracker.create_story(
+                summary=md_story.title,
+                description=description,
+                project_key=project_key,
+                epic_key=epic_key,
+                story_points=md_story.story_points,
+                priority=None,  # Skip priority - custom schemes vary by project
+                assignee=None,  # Will auto-assign to current user in adapter
+                issue_type="User Story",
+            )
 
             # Count as created (even in dry-run where new_key is None)
             created_count += 1
