@@ -801,9 +801,17 @@ class SyncOrchestrator:
 
             # Sync each subtask
             project_key = issue_key.split("-")[0]
+            # Get parent story priority for subtasks (if subtask doesn't have its own)
+            parent_priority = md_story.priority.jira_name if md_story.priority else None
             for md_subtask in md_story.subtasks:
                 self._sync_single_subtask(
-                    md_subtask, existing_subtasks, issue_key, project_key, story_id, result
+                    md_subtask,
+                    existing_subtasks,
+                    issue_key,
+                    project_key,
+                    story_id,
+                    result,
+                    parent_priority,
                 )
 
     def _should_sync_story_subtasks(self, story_id: str) -> bool:
@@ -839,10 +847,18 @@ class SyncOrchestrator:
         project_key: str,
         story_id: str,
         result: SyncResult,
+        parent_priority: str | None = None,
     ) -> None:
         """Sync a single subtask - update if exists, create if new."""
 
         subtask_name_lower = md_subtask.name.lower()
+
+        # Use subtask's own priority if set, otherwise inherit from parent
+        priority = None
+        if md_subtask.priority:
+            priority = md_subtask.priority.jira_name
+        elif parent_priority:
+            priority = parent_priority
 
         try:
             if subtask_name_lower in existing_subtasks:
@@ -850,7 +866,9 @@ class SyncOrchestrator:
                     md_subtask, existing_subtasks[subtask_name_lower], story_id, result
                 )
             else:
-                self._create_new_subtask(md_subtask, parent_key, project_key, story_id, result)
+                self._create_new_subtask(
+                    md_subtask, parent_key, project_key, story_id, result, priority
+                )
         except Exception as e:
             result.add_failed_operation(
                 operation="sync_subtask",
@@ -895,6 +913,7 @@ class SyncOrchestrator:
         project_key: str,
         story_id: str,
         result: SyncResult,
+        priority: str | None = None,
     ) -> None:
         """Create a new subtask."""
         adf = self.formatter.format_text(md_subtask.description)
@@ -906,6 +925,7 @@ class SyncOrchestrator:
             summary=md_subtask.name,
             description=adf,
             story_points=md_subtask.story_points,
+            priority=priority,
             event_bus=self.event_bus,
             dry_run=self.config.dry_run,
         )

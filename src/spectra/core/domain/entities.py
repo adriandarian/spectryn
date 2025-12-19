@@ -37,6 +37,7 @@ class Subtask:
     description: str = ""
     story_points: int = 1
     status: Status = Status.PLANNED
+    priority: Priority | None = None
     assignee: str | None = None
 
     # External references (populated when synced)

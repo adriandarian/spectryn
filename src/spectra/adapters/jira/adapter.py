@@ -215,6 +215,7 @@ class JiraAdapter(IssueTrackerPort):
         project_key: str,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority: str | None = None,
     ) -> str | None:
         if self._dry_run:
             self.logger.info(
@@ -241,6 +242,9 @@ class JiraAdapter(IssueTrackerPort):
 
         if story_points is not None:
             fields[self.STORY_POINTS_FIELD] = float(story_points)
+
+        if priority is not None:
+            fields[JiraField.PRIORITY] = {JiraField.NAME: priority}
 
         result = self._client.post("issue", json={"fields": fields})
         new_key = result.get("key")

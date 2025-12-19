@@ -101,6 +101,7 @@ class CreateSubtaskCommand(Command):
     description: Any = None
     story_points: int | None = None
     assignee: str | None = None
+    priority: str | None = None
 
     def __init__(
         self,
@@ -111,6 +112,7 @@ class CreateSubtaskCommand(Command):
         description: Any = None,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority: str | None = None,
         event_bus: EventBus | None = None,
         dry_run: bool = True,
     ):
@@ -121,6 +123,7 @@ class CreateSubtaskCommand(Command):
         self.description = description
         self.story_points = story_points
         self.assignee = assignee
+        self.priority = priority
 
     @property
     def name(self) -> str:
@@ -151,6 +154,7 @@ class CreateSubtaskCommand(Command):
                 project_key=self.project_key,
                 story_points=self.story_points,
                 assignee=self.assignee,
+                priority=self.priority,
             )
 
             if new_key:
