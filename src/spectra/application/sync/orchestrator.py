@@ -1080,13 +1080,17 @@ class SyncOrchestrator:
         """Create a new subtask."""
         adf = self.formatter.format_text(md_subtask.description)
 
+        # Only pass story_points if explicitly set in markdown (non-zero)
+        # 0 means "not specified" and shouldn't set a value in Jira
+        story_points = md_subtask.story_points if md_subtask.story_points else None
+
         create_cmd = CreateSubtaskCommand(
             tracker=self.tracker,
             parent_key=parent_key,
             project_key=project_key,
             summary=md_subtask.name,
             description=adf,
-            story_points=md_subtask.story_points,
+            story_points=story_points,
             priority=priority,
             event_bus=self.event_bus,
             dry_run=self.config.dry_run,
