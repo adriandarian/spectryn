@@ -136,6 +136,28 @@ class JiraAdapter(IssueTrackerPort):
         self.logger.info(f"Updated description for {issue_key}")
         return True
 
+    def update_issue_type(self, issue_key: str, issue_type: str) -> bool:
+        """
+        Change an issue's type.
+
+        Args:
+            issue_key: The issue key (e.g., 'PROJ-123').
+            issue_type: The new issue type name (e.g., 'User Story').
+
+        Returns:
+            True if successful.
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would change {issue_key} type to '{issue_type}'")
+            return True
+
+        self._client.put(
+            f"issue/{issue_key}",
+            json={JiraField.FIELDS: {JiraField.ISSUETYPE: {JiraField.NAME: issue_type}}},
+        )
+        self.logger.info(f"Changed {issue_key} type to '{issue_type}'")
+        return True
+
     def create_story(
         self,
         summary: str,

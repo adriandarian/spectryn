@@ -525,6 +525,7 @@ class Console:
             ["Epic Updated", "Yes" if epic_updated else "No"],
             ["Stories Matched", str(result.stories_matched)],
             ["Stories Created", str(getattr(result, "stories_created", 0))],
+            ["Issue Types Fixed", str(getattr(result, "issue_types_fixed", 0))],
             ["Stories Updated", str(result.stories_updated)],
             ["Subtasks Created", str(result.subtasks_created)],
             ["Subtasks Updated", str(result.subtasks_updated)],

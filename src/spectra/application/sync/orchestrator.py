@@ -91,6 +91,7 @@ class SyncResult:
     stories_matched: int = 0
     stories_created: int = 0
     stories_updated: int = 0
+    issue_types_fixed: int = 0
     subtasks_created: int = 0
     subtasks_updated: int = 0
     comments_added: int = 0
@@ -99,6 +100,9 @@ class SyncResult:
     # Details
     matched_stories: list[tuple[str, str]] = field(default_factory=list)  # (md_id, jira_key)
     unmatched_stories: list[str] = field(default_factory=list)
+    wrong_type_issues: list[tuple[str, str, str]] = field(
+        default_factory=list
+    )  # (issue_key, current_type, expected_type)
     failed_operations: list[FailedOperation] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -399,7 +403,12 @@ class SyncOrchestrator:
             result.stories_matched = len(self._matches)
             result.matched_stories = list(self._matches.items())
 
-        # Phase 1c: Detect changes (incremental sync)
+        # Phase 1c: Fix issue types (Story -> User Story)
+        if result.wrong_type_issues:
+            self._report_progress(progress_callback, "Fixing issue types", 2, total_phases)
+            self._fix_issue_types(result)
+
+        # Phase 1d: Detect changes (incremental sync)
         if self.config.incremental and self._change_tracker and not self.config.force_full_sync:
             self._change_tracker.load(epic_key, markdown_path)
             changes = self._change_tracker.detect_changes(self._md_stories)
@@ -536,11 +545,13 @@ class SyncOrchestrator:
 
         Populates self._matches with story_id -> issue_key mappings.
         Updates result with matched and unmatched story information.
+        Also detects issues with wrong issue type for later correction.
 
         Args:
             result: SyncResult to update with matching results.
         """
         self._matches = {}
+        expected_type = "User Story"
 
         for md_story in self._md_stories:
             matched_issue = None
@@ -555,6 +566,16 @@ class SyncOrchestrator:
                 self._matches[str(md_story.id)] = matched_issue.key
                 result.matched_stories.append((str(md_story.id), matched_issue.key))
                 self.logger.debug(f"Matched {md_story.id} -> {matched_issue.key}")
+
+                # Check if issue type is correct
+                current_type = getattr(matched_issue, "issue_type", None)
+                if current_type and current_type != expected_type:
+                    result.wrong_type_issues.append(
+                        (matched_issue.key, current_type, expected_type)
+                    )
+                    self.logger.debug(
+                        f"Issue {matched_issue.key} has wrong type: {current_type} (expected {expected_type})"
+                    )
             else:
                 result.unmatched_stories.append(str(md_story.id))
                 result.add_warning(f"Could not match story: {md_story.id} - {md_story.title}")
@@ -647,6 +668,40 @@ class SyncOrchestrator:
         result.stories_created = created_count
         if created_count > 0:
             self.logger.debug(f"{'Would create' if self.config.dry_run else 'Created'} {created_count} stories")
+
+    def _fix_issue_types(self, result: SyncResult) -> None:
+        """
+        Fix issues that have wrong issue type (e.g., Story -> User Story).
+
+        Args:
+            result: SyncResult to update with fix counts.
+        """
+        if not hasattr(self.tracker, "update_issue_type"):
+            self.logger.warning("Tracker does not support issue type updates")
+            return
+
+        fixed_count = 0
+        for issue_key, current_type, expected_type in result.wrong_type_issues:
+            try:
+                success = self.tracker.update_issue_type(issue_key, expected_type)
+                if success:
+                    fixed_count += 1
+                    self.logger.debug(
+                        f"Fixed {issue_key} type: {current_type} -> {expected_type}"
+                    )
+            except Exception as e:
+                result.add_failed_operation(
+                    operation="fix_issue_type",
+                    issue_key=issue_key,
+                    error=str(e),
+                )
+                self.logger.warning(f"Failed to fix issue type for {issue_key}: {e}")
+
+        result.issue_types_fixed = fixed_count
+        if fixed_count > 0:
+            self.logger.debug(
+                f"{'Would fix' if self.config.dry_run else 'Fixed'} {fixed_count} issue types"
+            )
 
     def _sync_epic(self, markdown_path: str, epic_key: str, result: SyncResult) -> None:
         """
