@@ -87,6 +87,7 @@ class SyncResult:
     dry_run: bool = True
 
     # Counts
+    epic_updated: bool = False
     stories_matched: int = 0
     stories_created: int = 0
     stories_updated: int = 0
@@ -378,12 +379,17 @@ class SyncOrchestrator:
                 result.add_warning(f"Backup failed: {e}")
 
         # Phase 1: Analyze
-        total_phases = 7 if self.config.backup_enabled else 6
+        total_phases = 8 if self.config.backup_enabled else 7
         self._report_progress(progress_callback, "Analyzing", 1, total_phases)
         analyze_result = self.analyze(markdown_path, epic_key)
         result.stories_matched = len(self._matches)
         result.matched_stories = list(self._matches.items())
         result.unmatched_stories = analyze_result.unmatched_stories
+
+        # Phase 1a: Update epic issue itself
+        if self.config.sync_epic:
+            self._report_progress(progress_callback, "Updating epic", 2, total_phases)
+            self._sync_epic(markdown_path, epic_key, result)
 
         # Phase 1b: Create unmatched stories
         if self.config.create_stories and result.unmatched_stories:
@@ -622,6 +628,69 @@ class SyncOrchestrator:
         if created_count > 0:
             result.stories_created = created_count
             self.logger.info(f"Created {created_count} new stories in Jira")
+
+    def _sync_epic(self, markdown_path: str, epic_key: str, result: SyncResult) -> None:
+        """
+        Update the epic issue itself with details from markdown.
+
+        Parses the EPIC.md (or main file) to extract title and description,
+        then updates the epic issue in Jira.
+
+        Args:
+            markdown_path: Path to markdown file or directory.
+            epic_key: The epic key to update.
+            result: SyncResult to update.
+        """
+        from pathlib import Path
+
+        path = Path(markdown_path)
+
+        # Find and parse the epic file
+        if path.is_dir():
+            epic_file = path / "EPIC.md"
+            if not epic_file.exists():
+                self.logger.debug("No EPIC.md found in directory, skipping epic sync")
+                return
+            content = epic_file.read_text(encoding="utf-8")
+        else:
+            content = path.read_text(encoding="utf-8")
+
+        # Parse epic details
+        epic = self.parser.parse_epic(content)
+        if not epic:
+            self.logger.debug("Could not parse epic details from markdown")
+            return
+
+        # Build description from epic content
+        description = ""
+        if epic.description:
+            description = epic.description
+        if epic.summary:
+            if description:
+                description = f"{epic.summary}\n\n{description}"
+            else:
+                description = epic.summary
+
+        # Format as ADF if needed
+        if description:
+            adf_description = self.formatter.format_text(description)
+        else:
+            adf_description = None
+
+        # Update the epic issue
+        if self.config.dry_run:
+            self.logger.info(f"[DRY-RUN] Would update epic {epic_key}: {epic.title}")
+            return
+
+        try:
+            # Update description
+            if adf_description:
+                self.tracker.update_issue_description(epic_key, adf_description)
+                result.epic_updated = True
+                self.logger.info(f"Updated epic {epic_key} description")
+        except Exception as e:
+            result.add_warning(f"Failed to update epic {epic_key}: {e}")
+            self.logger.error(f"Failed to update epic: {e}")
 
     # -------------------------------------------------------------------------
     # Sync Phases

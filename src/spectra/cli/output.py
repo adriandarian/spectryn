@@ -508,7 +508,9 @@ class Console:
         self.print()
 
         # Stats table
+        epic_updated = getattr(result, "epic_updated", False)
         stats = [
+            ["Epic Updated", "Yes" if epic_updated else "No"],
             ["Stories Matched", str(result.stories_matched)],
             ["Stories Created", str(getattr(result, "stories_created", 0))],
             ["Stories Updated", str(result.stories_updated)],
