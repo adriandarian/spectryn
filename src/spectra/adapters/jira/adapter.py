@@ -164,7 +164,7 @@ class JiraAdapter(IssueTrackerPort):
             New issue key (e.g., 'PROJ-456') or None if dry-run.
         """
         if self._dry_run:
-            self.logger.info(f"[DRY-RUN] Would create {issue_type} '{summary[:50]}...'")
+            self.logger.debug(f"[DRY-RUN] Would create {issue_type} '{summary[:50]}...'")
             return None
 
         # Convert description to ADF if string

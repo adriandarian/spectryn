@@ -330,11 +330,11 @@ class SyncOrchestrator:
 
         # Parse markdown
         self._md_stories = self.parser.parse_stories(markdown_path)
-        self.logger.info(f"Parsed {len(self._md_stories)} stories from markdown")
+        self.logger.debug(f"Parsed {len(self._md_stories)} stories from markdown")
 
         # Fetch Jira issues
         self._jira_issues = self.tracker.get_epic_children(epic_key)
-        self.logger.info(f"Found {len(self._jira_issues)} issues in Jira epic")
+        self.logger.debug(f"Found {len(self._jira_issues)} issues in Jira epic")
 
         # Match stories
         self._match_stories(result)
@@ -602,16 +602,16 @@ class SyncOrchestrator:
                 priority=md_story.priority.value if md_story.priority else None,
             )
 
+            # Count as created (even in dry-run where new_key is None)
+            created_count += 1
+
             if new_key:
                 # Add to matches so subsequent phases can sync to it
                 self._matches[story_id] = new_key
                 result.matched_stories.append((story_id, new_key))
-                created_count += 1
-                self.logger.info(f"Created story {new_key} for {story_id}: {md_story.title}")
+                self.logger.debug(f"Created story {new_key} for {story_id}: {md_story.title}")
 
                 # Also add to jira_issues for subtask/description sync
-                from spectra.core.domain.entities import IssueKey
-
                 # Create a minimal issue representation
                 class CreatedIssue:
                     def __init__(self, key: str, summary: str) -> None:
@@ -620,14 +620,16 @@ class SyncOrchestrator:
 
                 self._jira_issues.append(CreatedIssue(new_key, md_story.title))
 
-        # Remove created stories from unmatched list
-        result.unmatched_stories = [
-            s for s in result.unmatched_stories if s not in self._matches
-        ]
+        # Remove created stories from unmatched list (only if actually created)
+        if not self.config.dry_run:
+            result.unmatched_stories = [
+                s for s in result.unmatched_stories if s not in self._matches
+            ]
 
+        # Always set count (for dry-run display)
+        result.stories_created = created_count
         if created_count > 0:
-            result.stories_created = created_count
-            self.logger.info(f"Created {created_count} new stories in Jira")
+            self.logger.debug(f"{'Would create' if self.config.dry_run else 'Created'} {created_count} stories")
 
     def _sync_epic(self, markdown_path: str, epic_key: str, result: SyncResult) -> None:
         """
@@ -679,7 +681,8 @@ class SyncOrchestrator:
 
         # Update the epic issue
         if self.config.dry_run:
-            self.logger.info(f"[DRY-RUN] Would update epic {epic_key}: {epic.title}")
+            self.logger.debug(f"[DRY-RUN] Would update epic {epic_key}: {epic.title}")
+            result.epic_updated = True  # Mark as would-be-updated for dry-run display
             return
 
         try:
@@ -687,7 +690,7 @@ class SyncOrchestrator:
             if adf_description:
                 self.tracker.update_issue_description(epic_key, adf_description)
                 result.epic_updated = True
-                self.logger.info(f"Updated epic {epic_key} description")
+                self.logger.debug(f"Updated epic {epic_key} description")
         except Exception as e:
             result.add_warning(f"Failed to update epic {epic_key}: {e}")
             self.logger.error(f"Failed to update epic: {e}")
@@ -1090,7 +1093,7 @@ class SyncOrchestrator:
                 epic_key=epic_key,
                 dry_run=self.config.dry_run,
             )
-            self.logger.info(f"Starting session {session_id}")
+            self.logger.debug(f"Starting session {session_id}")
 
         self._state.set_phase(SyncPhase.ANALYZING)
         self._save_state()
@@ -1178,4 +1181,4 @@ class SyncOrchestrator:
         """Report progress to callback if provided."""
         if callback:
             callback(phase, current, total)
-        self.logger.info(f"Phase {current}/{total}: {phase}")
+        self.logger.debug(f"Phase {current}/{total}: {phase}")

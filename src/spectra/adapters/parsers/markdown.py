@@ -313,7 +313,7 @@ class MarkdownParser(DocumentParserPort):
 
         # Combine: stories with IDs from dict + stories without IDs
         all_stories = list(story_by_id.values()) + all_stories
-        self.logger.info(f"Total: {len(all_stories)} unique stories from directory")
+        self.logger.debug(f"Total: {len(all_stories)} unique stories from directory")
         return all_stories
 
     def parse_epic(self, source: str | Path) -> Epic | None:
