@@ -302,6 +302,7 @@ class IssueTrackerPort(ABC):
         project_key: str,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority: str | None = None,
     ) -> str | None:
         """
         Create a subtask under a parent issue.
@@ -326,6 +327,7 @@ class IssueTrackerPort(ABC):
         description: Any | None = None,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority_id: str | None = None,
     ) -> bool:
         """Update a subtask's fields."""
         ...

@@ -189,7 +189,7 @@ class JiraAdapter(IssueTrackerPort):
             return None
 
         try:
-            issue_types = self.get_project_issue_types(project_key)
+            self.get_project_issue_types(project_key)
             # issue_types is a list of names, we need IDs
             # Fetch from project endpoint
             data = self._client.get(f"project/{project_key}")

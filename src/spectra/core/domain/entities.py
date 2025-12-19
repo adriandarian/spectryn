@@ -137,6 +137,11 @@ class UserStory:
     external_key: IssueKey | None = None
     external_url: str | None = None
 
+    # Sync metadata (populated from source file tracker info)
+    last_synced: datetime | None = None
+    sync_status: str | None = None  # synced, pending, modified, conflict
+    content_hash: str | None = None
+
     def normalize_title(self) -> str:
         """Normalize title for matching with external issues."""
         title = self.title.lower()

@@ -7,6 +7,7 @@ AsciiDoc is a text document format similar to Markdown but with richer
 semantic capabilities, commonly used in technical documentation.
 """
 
+import contextlib
 import logging
 import re
 from pathlib import Path
@@ -391,10 +392,8 @@ class AsciiDocParser(DocumentParserPort):
 
             created_at = None
             if date_str:
-                try:
+                with contextlib.suppress(ValueError):
                     created_at = datetime.strptime(date_str, "%Y-%m-%d")
-                except ValueError:
-                    pass
 
             if body:
                 comments.append(

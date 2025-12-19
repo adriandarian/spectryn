@@ -445,7 +445,7 @@ class TestCLIIntegration:
                 "9000",
                 "--health-host",
                 "127.0.0.1",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -461,7 +461,7 @@ class TestCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--health",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -475,7 +475,7 @@ class TestCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--health",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -488,7 +488,7 @@ class TestCLIIntegration:
         """Test health is disabled by default."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",

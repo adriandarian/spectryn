@@ -232,6 +232,7 @@ class LinearAdapter(IssueTrackerPort):
         project_key: str,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority: str | None = None,
     ) -> str | None:
         """
         Create a subtask (sub-issue in Linear).
@@ -272,6 +273,7 @@ class LinearAdapter(IssueTrackerPort):
         description: Any | None = None,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority_id: str | None = None,
     ) -> bool:
         if self._dry_run:
             self.logger.info(f"[DRY-RUN] Would update subtask {issue_key}")

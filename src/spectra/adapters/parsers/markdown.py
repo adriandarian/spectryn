@@ -5,8 +5,10 @@ Implements the DocumentParserPort interface.
 Supports both single-epic and multi-epic formats.
 """
 
+import contextlib
 import logging
 import re
+from datetime import datetime
 from pathlib import Path
 
 from spectra.core.domain.entities import Epic, Subtask, UserStory
@@ -698,6 +700,11 @@ class MarkdownParser(DocumentParserPort):
         # Extract comments
         comments = self._extract_comments(content)
 
+        # Extract tracker info (external key, URL, sync metadata)
+        external_key, external_url, last_synced, sync_status, content_hash = (
+            self._extract_tracker_info(content)
+        )
+
         return UserStory(
             id=StoryId(story_id),
             title=title,
@@ -711,6 +718,11 @@ class MarkdownParser(DocumentParserPort):
             commits=commits,
             links=links,
             comments=comments,
+            external_key=IssueKey(external_key) if external_key else None,
+            external_url=external_url,
+            last_synced=last_synced,
+            sync_status=sync_status,
+            content_hash=content_hash,
         )
 
     def _extract_field(self, content: str, field_name: str, default: str = "") -> str:
@@ -1074,10 +1086,8 @@ class MarkdownParser(DocumentParserPort):
                 author = header_match.group(1).strip()
                 date_str = header_match.group(2)
                 if date_str:
-                    try:
+                    with contextlib.suppress(ValueError):
                         created_at = datetime.strptime(date_str, "%Y-%m-%d")
-                    except ValueError:
-                        pass
                 body = header_match.group(3).strip()
             else:
                 # Check for simpler format: @username: comment
@@ -1097,6 +1107,114 @@ class MarkdownParser(DocumentParserPort):
                 )
 
         return comments
+
+    def _extract_tracker_info(
+        self, content: str
+    ) -> tuple[str | None, str | None, datetime | None, str | None, str | None]:
+        """
+        Extract tracker information from story content.
+
+        Parses external issue key, URL, and sync metadata from blockquote metadata.
+
+        Supported formats:
+        - > **Tracker:** jira
+          > **Issue:** [PROJ-123](https://company.atlassian.net/browse/PROJ-123)
+          > **Last Synced:** 2025-01-15 14:30 UTC
+          > **Sync Status:** ✅ Synced
+          > **Content Hash:** `a1b2c3d4`
+        - > **Jira:** [PROJ-123](https://url)  (legacy/shorthand)
+        - > **GitHub:** [#123](https://url)
+        - > **Linear:** [TEAM-123](https://url)
+        - > **Azure:** [123](https://url)
+
+        Args:
+            content: Story content block to parse.
+
+        Returns:
+            Tuple of (issue_key, issue_url, last_synced, sync_status, content_hash)
+            Missing values are None.
+        """
+        issue_key: str | None = None
+        issue_url: str | None = None
+        last_synced: datetime | None = None
+        sync_status: str | None = None
+        content_hash: str | None = None
+
+        # Pattern 1: Explicit Issue field with markdown link
+        # > **Issue:** [PROJ-123](https://url)
+        # Note: colon is inside the bold markers (**Issue:**)
+        issue_match = re.search(
+            r">\s*\*\*Issue:\*\*\s*\[([^\]]+)\]\(([^)]+)\)",
+            content,
+            re.IGNORECASE,
+        )
+        if issue_match:
+            issue_key = issue_match.group(1).strip()
+            issue_url = issue_match.group(2).strip()
+
+        # Pattern 2: Tracker-specific shorthand (Jira, GitHub, Linear, Azure)
+        # > **Jira:** [PROJ-123](https://url)
+        # Note: colon is inside the bold markers (**Jira:**)
+        if not issue_key:
+            tracker_shorthand = re.search(
+                r">\s*\*\*(?:Jira|GitHub|Linear|Azure(?:\s*DevOps)?):\*\*\s*\[([^\]]+)\]\(([^)]+)\)",
+                content,
+                re.IGNORECASE,
+            )
+            if tracker_shorthand:
+                issue_key = tracker_shorthand.group(1).strip()
+                issue_url = tracker_shorthand.group(2).strip()
+
+        # Pattern 3: Just the issue key without link (for manual entries)
+        # > **Issue:** PROJ-123
+        if not issue_key:
+            key_only_match = re.search(
+                r">\s*\*\*Issue:\*\*\s*([A-Z]+-\d+|#?\d+)",
+                content,
+                re.IGNORECASE,
+            )
+            if key_only_match:
+                issue_key = key_only_match.group(1).strip()
+
+        # Extract Last Synced timestamp
+        # > **Last Synced:** 2025-01-15 14:30 UTC
+        synced_match = re.search(
+            r">\s*\*\*Last Synced:\*\*\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(?:\s*UTC)?)",
+            content,
+            re.IGNORECASE,
+        )
+        if synced_match:
+            try:
+                timestamp_str = synced_match.group(1).strip()
+                # Parse with or without UTC suffix
+                if "UTC" in timestamp_str.upper():
+                    timestamp_str = timestamp_str.replace("UTC", "").replace("utc", "").strip()
+                last_synced = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+            except ValueError:
+                pass  # Invalid timestamp format
+
+        # Extract Sync Status
+        # > **Sync Status:** ✅ Synced
+        # Match optional emoji(s) followed by status word
+        status_match = re.search(
+            r">\s*\*\*Sync Status:\*\*\s*(?:\S+\s+)?(\w+)",
+            content,
+            re.IGNORECASE,
+        )
+        if status_match:
+            sync_status = status_match.group(1).strip().lower()
+
+        # Extract Content Hash
+        # > **Content Hash:** `a1b2c3d4`
+        hash_match = re.search(
+            r">\s*\*\*Content Hash:\*\*\s*`([a-f0-9]+)`",
+            content,
+            re.IGNORECASE,
+        )
+        if hash_match:
+            content_hash = hash_match.group(1).strip()
+
+        return issue_key, issue_url, last_synced, sync_status, content_hash
 
     def _extract_attachments(self, content: str) -> list[str]:
         """

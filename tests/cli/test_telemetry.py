@@ -372,7 +372,7 @@ class TestCLIIntegration:
                 "--otel-service-name",
                 "test",
                 "--otel-console",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -388,7 +388,7 @@ class TestCLIIntegration:
         """Test default service name."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -401,7 +401,7 @@ class TestCLIIntegration:
         """Test otel is disabled by default."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -707,7 +707,7 @@ class TestPrometheusCLIIntegration:
                 "8080",
                 "--prometheus-host",
                 "127.0.0.1",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -723,7 +723,7 @@ class TestPrometheusCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--prometheus",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -737,7 +737,7 @@ class TestPrometheusCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--prometheus",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -750,7 +750,7 @@ class TestPrometheusCLIIntegration:
         """Test Prometheus is disabled by default."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",

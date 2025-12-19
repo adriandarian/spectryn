@@ -629,10 +629,8 @@ class NotionParser(DocumentParserPort):
                 author = header_match.group(1).strip()
                 date_str = header_match.group(2)
                 if date_str:
-                    try:
+                    with contextlib.suppress(ValueError):
                         created_at = datetime.strptime(date_str, "%Y-%m-%d")
-                    except ValueError:
-                        pass
                 body = header_match.group(3).strip()
             else:
                 # Check for simpler format: @username: comment

@@ -139,7 +139,7 @@ class TestCompletionScriptContent:
     def test_bash_has_all_options(self):
         """Test Bash script includes all CLI options."""
         options = [
-            "--markdown",
+            "--input",
             "-m",
             "--epic",
             "-e",
@@ -166,7 +166,7 @@ class TestCompletionScriptContent:
     def test_zsh_has_all_options(self):
         """Test Zsh script includes all CLI options."""
         options = [
-            "--markdown",
+            "--input",
             "--epic",
             "--execute",
             "--phase",
@@ -244,7 +244,7 @@ class TestCLICompletionsFlag:
         assert "complete -c spectra" in captured.out
 
     def test_completions_without_required_args(self, capsys):
-        """Test that --completions works without --markdown and --epic."""
+        """Test that --completions works without --input and --epic."""
         from spectra.cli.app import main
 
         # Should not raise error about missing required args

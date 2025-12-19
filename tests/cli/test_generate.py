@@ -466,7 +466,7 @@ class TestMarkdownContent:
         content = generator.preview("TEST-1")
 
         assert "Generated from Jira epic" in content
-        assert "spectra --markdown" in content
+        assert "spectra --input" in content
 
 
 # =============================================================================

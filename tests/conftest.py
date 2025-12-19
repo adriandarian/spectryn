@@ -653,7 +653,8 @@ def hook_manager():
 def base_cli_args():
     """Create base CLI arguments mock for testing."""
     args = Mock()
-    args.markdown = "epic.md"
+    args.input = "epic.md"
+    args.input_dir = None
     args.epic = "TEST-123"
     args.execute = False
     args.no_confirm = True

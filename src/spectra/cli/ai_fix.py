@@ -153,7 +153,7 @@ def generate_format_guide() -> str:
     Returns:
         A formatted guide string.
     """
-    guide = """
+    return """
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                      SPECTRA MARKDOWN FORMAT GUIDE                           ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -263,7 +263,6 @@ COMPLETE EXAMPLE
 ... (continue with same format)
 
 """
-    return guide
 
 
 def generate_fix_prompt(
@@ -289,7 +288,7 @@ def generate_fix_prompt(
     if warnings:
         warning_list = "\n\nWarnings to address:\n" + "\n".join(f"  - {w}" for w in warnings)
 
-    prompt = f"""You are helping fix a markdown file to match the spectra tool's expected format.
+    return f"""You are helping fix a markdown file to match the spectra tool's expected format.
 
 FILE: {file_path}
 
@@ -321,7 +320,6 @@ INSTRUCTIONS:
 
 Corrected markdown:
 """
-    return prompt
 
 
 def generate_copy_paste_prompt(
@@ -379,7 +377,6 @@ def build_ai_command(
     Returns:
         Tuple of (command args list, description of what the command does).
     """
-    out = output_path or file_path
 
     if tool.tool == AITool.CLAUDE:
         # Claude CLI: claude "prompt" -f file.md

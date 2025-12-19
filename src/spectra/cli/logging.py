@@ -412,3 +412,76 @@ class ContextLogger:
         """
         merged = {**self._context, **extra}
         return ContextLogger(self._logger.name, merged)
+
+
+class SuppressLogsForProgress:
+    """
+    Context manager to suppress INFO logs during progress bar display.
+
+    Temporarily raises log level to WARNING for specified loggers
+    to prevent log messages from interfering with progress bar output.
+
+    Usage:
+        with SuppressLogsForProgress():
+            # Progress bar updates here won't be interrupted by logs
+            for item in items:
+                progress.update()
+
+        # Logs resume normally after the context
+    """
+
+    DEFAULT_LOGGERS = [
+        "JiraAdapter",
+        "SyncOrchestrator",
+        "MarkdownParser",
+        "spectra.application.sync.backup",
+        "spectra.adapters.jira",
+    ]
+
+    def __init__(
+        self,
+        logger_names: list[str] | None = None,
+        suppress_level: int = logging.WARNING,
+    ):
+        """
+        Initialize the context manager.
+
+        Args:
+            logger_names: Names of loggers to suppress. Uses defaults if not specified.
+            suppress_level: Minimum level to show during suppression (default: WARNING).
+        """
+        self.logger_names = logger_names or self.DEFAULT_LOGGERS
+        self.suppress_level = suppress_level
+        self._original_levels: dict[str, int] = {}
+
+    def __enter__(self) -> "SuppressLogsForProgress":
+        """Suppress logs by raising log levels."""
+        for name in self.logger_names:
+            logger = logging.getLogger(name)
+            self._original_levels[name] = logger.level
+            logger.setLevel(self.suppress_level)
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Restore original log levels."""
+        for name, level in self._original_levels.items():
+            logging.getLogger(name).setLevel(level)
+
+
+def suppress_logs_for_progress(
+    logger_names: list[str] | None = None,
+) -> SuppressLogsForProgress:
+    """
+    Convenience function to create a log suppression context.
+
+    Args:
+        logger_names: Optional list of logger names to suppress.
+
+    Returns:
+        SuppressLogsForProgress context manager.
+
+    Example:
+        with suppress_logs_for_progress():
+            run_sync_with_progress_bar()
+    """
+    return SuppressLogsForProgress(logger_names=logger_names)

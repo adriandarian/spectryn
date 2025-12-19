@@ -494,7 +494,7 @@ class TestCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--analytics",
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",
@@ -519,7 +519,7 @@ class TestCLIIntegration:
         """Test analytics is disabled by default."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "TEST-123",

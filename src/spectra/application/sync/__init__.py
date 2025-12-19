@@ -59,6 +59,17 @@ from .reverse_sync import (
     PullResult,
     ReverseSyncOrchestrator,
 )
+from .source_updater import (
+    EpicTrackerInfo,
+    SourceFileUpdater,
+    SourceUpdateResult,
+    SubtaskTrackerInfo,
+    SyncStatus,
+    TrackerInfo,
+    compute_content_hash,
+    compute_story_content_hash,
+    detect_sync_conflicts,
+)
 from .state import OperationRecord, StateStore, SyncPhase, SyncState
 
 
@@ -75,13 +86,10 @@ except ImportError:
     PARALLEL_AVAILABLE = False
 
 __all__ = [
-    # Parallel Operations
     "PARALLEL_AVAILABLE",
     "AuditEntry",
-    # Audit trail
     "AuditTrail",
     "AuditTrailRecorder",
-    # Backup & Restore
     "Backup",
     "BackupManager",
     "ChangeDetail",
@@ -92,13 +100,12 @@ __all__ = [
     "ConflictReport",
     "ConflictResolution",
     "ConflictResolver",
-    # Conflict Detection
     "ConflictType",
     "DiffCalculator",
     "DiffFormatter",
-    # Diff
     "DiffResult",
     "EpicSyncResult",
+    "EpicTrackerInfo",
     "FailedOperation",
     "FieldDiff",
     "FieldSnapshot",
@@ -106,10 +113,8 @@ __all__ = [
     "IssueDiff",
     "IssueSnapshot",
     "LinkChange",
-    # Link Sync
     "LinkSyncOrchestrator",
     "LinkSyncResult",
-    # Multi-Epic Sync
     "MultiEpicSyncOrchestrator",
     "MultiEpicSyncResult",
     "OperationRecord",
@@ -118,23 +123,29 @@ __all__ = [
     "ResolutionStrategy",
     "RestoreOperation",
     "RestoreResult",
-    # Reverse Sync (Pull)
     "ReverseSyncOrchestrator",
     "SnapshotStore",
+    "SourceFileUpdater",
+    "SourceUpdateResult",
     "StateStore",
-    # Incremental Sync
     "StoryFingerprint",
     "StorySnapshot",
+    "SubtaskTrackerInfo",
     "SyncOrchestrator",
     "SyncPhase",
     "SyncResult",
     "SyncSnapshot",
     "SyncState",
+    "SyncStatus",
+    "TrackerInfo",
     "compare_backup_to_current",
+    "compute_content_hash",
+    "compute_story_content_hash",
     "compute_story_hash",
     "create_audit_trail",
     "create_pre_sync_backup",
     "create_snapshot_from_sync",
+    "detect_sync_conflicts",
     "restore_from_backup",
     "stories_differ",
 ]

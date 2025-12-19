@@ -28,51 +28,49 @@ class TestArgumentParser:
         """
         # Parser accepts empty args (validation happens in main())
         args = cli_parser.parse_args([])
-        assert args.markdown is None
+        assert args.input is None
         assert args.epic is None
 
         # Parser accepts partial args
-        args = cli_parser.parse_args(["--markdown", "file.md"])
-        assert args.markdown == "file.md"
+        args = cli_parser.parse_args(["--input", "file.md"])
+        assert args.input == "file.md"
         assert args.epic is None
 
         args = cli_parser.parse_args(["--epic", "PROJ-123"])
         assert args.epic == "PROJ-123"
-        assert args.markdown is None
+        assert args.input is None
 
     def test_minimal_valid_args(self, cli_parser):
         """Test parsing with only required arguments."""
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123"])
 
-        assert args.markdown == "epic.md"
+        assert args.input == "epic.md"
         assert args.epic == "PROJ-123"
         assert args.execute is False  # default
         assert args.phase == "all"  # default
 
     def test_short_form_arguments(self, cli_parser):
         """Test short form argument aliases."""
-        args = cli_parser.parse_args(["-m", "epic.md", "-e", "PROJ-123"])
+        args = cli_parser.parse_args(["-f", "epic.md", "-e", "PROJ-123"])
 
-        assert args.markdown == "epic.md"
+        assert args.input == "epic.md"
         assert args.epic == "PROJ-123"
 
     def test_execute_flag(self, cli_parser):
         """Test --execute flag for live mode."""
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123", "--execute"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--execute"])
 
         assert args.execute is True
 
     def test_execute_short_form(self, cli_parser):
         """Test -x short form for execute."""
-        args = cli_parser.parse_args(["-m", "epic.md", "-e", "PROJ-123", "-x"])
+        args = cli_parser.parse_args(["-f", "epic.md", "-e", "PROJ-123", "-x"])
 
         assert args.execute is True
 
     def test_no_confirm_flag(self, cli_parser):
         """Test --no-confirm flag."""
-        args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--no-confirm"]
-        )
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--no-confirm"])
 
         assert args.no_confirm is True
 
@@ -82,7 +80,7 @@ class TestArgumentParser:
 
         for phase in valid_phases:
             args = cli_parser.parse_args(
-                ["--markdown", "epic.md", "--epic", "PROJ-123", "--phase", phase]
+                ["--input", "epic.md", "--epic", "PROJ-123", "--phase", phase]
             )
             assert args.phase == phase
 
@@ -90,13 +88,13 @@ class TestArgumentParser:
         """Test --phase with invalid choice raises error."""
         with pytest.raises(SystemExit):
             cli_parser.parse_args(
-                ["--markdown", "epic.md", "--epic", "PROJ-123", "--phase", "invalid"]
+                ["--input", "epic.md", "--epic", "PROJ-123", "--phase", "invalid"]
             )
 
     def test_story_filter(self, cli_parser):
         """Test --story filter argument."""
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--story", "US-001"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--story", "US-001"]
         )
 
         assert args.story == "US-001"
@@ -105,7 +103,7 @@ class TestArgumentParser:
         """Test --jira-url override."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",
@@ -119,26 +117,26 @@ class TestArgumentParser:
     def test_project_override(self, cli_parser):
         """Test --project override."""
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--project", "NEWPROJ"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--project", "NEWPROJ"]
         )
 
         assert args.project == "NEWPROJ"
 
     def test_verbose_flag(self, cli_parser):
         """Test --verbose flag."""
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123", "--verbose"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--verbose"])
 
         assert args.verbose is True
 
     def test_verbose_short_form(self, cli_parser):
         """Test -v short form for verbose."""
-        args = cli_parser.parse_args(["-m", "epic.md", "-e", "PROJ-123", "-v"])
+        args = cli_parser.parse_args(["-f", "epic.md", "-e", "PROJ-123", "-v"])
 
         assert args.verbose is True
 
     def test_no_color_flag(self, cli_parser):
         """Test --no-color flag."""
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123", "--no-color"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--no-color"])
 
         assert args.no_color is True
 
@@ -147,7 +145,7 @@ class TestArgumentParser:
         # Default is text
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",
@@ -157,13 +155,13 @@ class TestArgumentParser:
 
         # JSON format
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--log-format", "json"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--log-format", "json"]
         )
         assert args.log_format == "json"
 
         # Text format (explicit)
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--log-format", "text"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--log-format", "text"]
         )
         assert args.log_format == "text"
 
@@ -172,7 +170,7 @@ class TestArgumentParser:
         # Default is None
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",
@@ -182,21 +180,21 @@ class TestArgumentParser:
 
         # With log file path
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--log-file", "/var/log/spectra.log"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--log-file", "/var/log/spectra.log"]
         )
         assert args.log_file == "/var/log/spectra.log"
 
     def test_export_path(self, cli_parser):
         """Test --export argument."""
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--export", "results.json"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--export", "results.json"]
         )
 
         assert args.export == "results.json"
 
     def test_validate_flag(self, cli_parser):
         """Test --validate mode flag."""
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123", "--validate"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--validate"])
 
         assert args.validate is True
 
@@ -204,7 +202,7 @@ class TestArgumentParser:
         """Test multiple arguments combined."""
         args = cli_parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",
@@ -220,7 +218,7 @@ class TestArgumentParser:
             ]
         )
 
-        assert args.markdown == "epic.md"
+        assert args.input == "epic.md"
         assert args.epic == "PROJ-123"
         assert args.execute is True
         assert args.no_confirm is True
@@ -232,12 +230,12 @@ class TestArgumentParser:
     def test_backup_options(self, cli_parser):
         """Test backup-related arguments."""
         # --no-backup flag
-        args = cli_parser.parse_args(["--markdown", "epic.md", "--epic", "PROJ-123", "--no-backup"])
+        args = cli_parser.parse_args(["--input", "epic.md", "--epic", "PROJ-123", "--no-backup"])
         assert args.no_backup is True
 
         # --backup-dir
         args = cli_parser.parse_args(
-            ["--markdown", "epic.md", "--epic", "PROJ-123", "--backup-dir", "/custom/backups"]
+            ["--input", "epic.md", "--epic", "PROJ-123", "--backup-dir", "/custom/backups"]
         )
         assert args.backup_dir == "/custom/backups"
 
@@ -565,7 +563,7 @@ class TestMainFunction:
 
         with (
             patch(
-                "sys.argv", ["spectra", "--markdown", "test.md", "--epic", "PROJ-123", "--validate"]
+                "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
             patch("spectra.cli.app.validate_markdown") as mock_validate,
         ):
@@ -578,7 +576,7 @@ class TestMainFunction:
         """Test main handles KeyboardInterrupt gracefully."""
         with (
             patch(
-                "sys.argv", ["spectra", "--markdown", "test.md", "--epic", "PROJ-123", "--validate"]
+                "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
             patch("spectra.cli.app.validate_markdown") as mock_validate,
         ):
@@ -590,7 +588,7 @@ class TestMainFunction:
         """Test main handles unexpected errors gracefully."""
         with (
             patch(
-                "sys.argv", ["spectra", "--markdown", "test.md", "--epic", "PROJ-123", "--validate"]
+                "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
             patch("spectra.cli.app.validate_markdown") as mock_validate,
         ):
@@ -685,7 +683,7 @@ class TestRunSync:
 
     def test_run_sync_markdown_not_found(self, console, base_cli_args, capsys):
         """Test run_sync returns error when markdown file not found."""
-        base_cli_args.markdown = "/nonexistent/path/epic.md"
+        base_cli_args.input = "/nonexistent/path/epic.md"
 
         with patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider:
             mock_provider = MockProvider.return_value
@@ -704,7 +702,7 @@ class TestRunSync:
         # Create temp markdown file
         md_file = tmp_path / "epic.md"
         md_file.write_text("# Test Epic")
-        base_cli_args.markdown = str(md_file)
+        base_cli_args.input = str(md_file)
 
         with (
             patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
@@ -728,7 +726,7 @@ class TestRunSync:
         """Test run_sync handles user cancellation."""
         md_file = tmp_path / "epic.md"
         md_file.write_text("# Test Epic")
-        base_cli_args.markdown = str(md_file)
+        base_cli_args.input = str(md_file)
         base_cli_args.execute = True
         base_cli_args.no_confirm = False
 
@@ -761,7 +759,7 @@ class TestRunSync:
         """Test successful sync execution."""
         md_file = tmp_path / "epic.md"
         md_file.write_text("# Test Epic")
-        base_cli_args.markdown = str(md_file)
+        base_cli_args.input = str(md_file)
 
         with (
             patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
@@ -795,7 +793,7 @@ class TestRunSync:
         """Test sync with JSON export."""
         md_file = tmp_path / "epic.md"
         md_file.write_text("# Test Epic")
-        base_cli_args.markdown = str(md_file)
+        base_cli_args.input = str(md_file)
 
         export_file = tmp_path / "results.json"
         base_cli_args.export = str(export_file)

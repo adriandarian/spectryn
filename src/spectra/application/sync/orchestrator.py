@@ -29,7 +29,7 @@ from spectra.application.commands import (
 )
 from spectra.core.domain.entities import UserStory
 from spectra.core.domain.events import EventBus, SyncCompleted, SyncStarted
-from spectra.core.ports.config_provider import SyncConfig
+from spectra.core.ports.config_provider import SyncConfig, ValidationConfig
 from spectra.core.ports.document_formatter import DocumentFormatterPort
 from spectra.core.ports.document_parser import DocumentParserPort
 
@@ -87,11 +87,8 @@ class SyncResult:
     dry_run: bool = True
 
     # Counts
-    epic_updated: bool = False
     stories_matched: int = 0
-    stories_created: int = 0
     stories_updated: int = 0
-    issue_types_fixed: int = 0
     subtasks_created: int = 0
     subtasks_updated: int = 0
     comments_added: int = 0
@@ -100,9 +97,6 @@ class SyncResult:
     # Details
     matched_stories: list[tuple[str, str]] = field(default_factory=list)  # (md_id, jira_key)
     unmatched_stories: list[str] = field(default_factory=list)
-    wrong_type_issues: list[tuple[str, str, str]] = field(
-        default_factory=list
-    )  # (issue_key, current_type, expected_type)
     failed_operations: list[FailedOperation] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -274,6 +268,7 @@ class SyncOrchestrator:
         event_bus: EventBus | None = None,
         state_store: StateStore | None = None,
         backup_manager: BackupManager | None = None,
+        validation_config: ValidationConfig | None = None,
     ):
         """
         Initialize the orchestrator.
@@ -286,11 +281,13 @@ class SyncOrchestrator:
             event_bus: Optional event bus
             state_store: Optional state store for persistence
             backup_manager: Optional backup manager for pre-sync backups
+            validation_config: Optional validation configuration for constraints
         """
         self.tracker = tracker
         self.parser = parser
         self.formatter = formatter
         self.config = config
+        self.validation_config = validation_config or ValidationConfig()
         self.event_bus = event_bus or EventBus()
         self.state_store = state_store
         self.backup_manager = backup_manager
@@ -301,6 +298,9 @@ class SyncOrchestrator:
         self._matches: dict[str, str] = {}  # story_id -> issue_key
         self._state: SyncState | None = None
         self._last_backup: Backup | None = None
+
+        # Cached priority lookup (project_key -> {priority_name_lower: priority_id})
+        self._priority_cache: dict[str | None, dict[str, str]] = {}
 
         # Incremental sync support
         self._change_tracker: ChangeTracker | None = None
@@ -314,6 +314,83 @@ class SyncOrchestrator:
     # -------------------------------------------------------------------------
     # Main Entry Points
     # -------------------------------------------------------------------------
+
+    def validate_sync_prerequisites(
+        self,
+        markdown_path: str,
+        epic_key: str,
+    ) -> list[str]:
+        """
+        Validate prerequisites before sync.
+
+        Checks:
+        - Markdown path exists and can be parsed
+        - Epic exists in Jira
+        - Required priorities are available (and warns about unmapped ones)
+
+        Args:
+            markdown_path: Path to markdown file
+            epic_key: Jira epic key
+
+        Returns:
+            List of validation error messages (empty if valid)
+        """
+        errors: list[str] = []
+        warnings: list[str] = []
+
+        # Check markdown path
+        from pathlib import Path
+
+        md_path = Path(markdown_path)
+        if not md_path.exists():
+            errors.append(f"Markdown path not found: {markdown_path}")
+        elif md_path.is_file() and md_path.suffix.lower() != ".md":
+            warnings.append(f"File may not be markdown: {markdown_path}")
+
+        # Check epic exists
+        try:
+            epic_data = self.tracker.get_issue(epic_key)
+            if not epic_data:
+                errors.append(f"Epic {epic_key} not found in Jira")
+        except Exception as e:
+            errors.append(f"Failed to access epic {epic_key}: {e}")
+
+        # Check priority mapping
+        project_key = epic_key.split("-")[0] if "-" in epic_key else None
+        if hasattr(self.tracker, "get_priorities"):
+            try:
+                available = self.tracker.get_priorities(project_key)
+                available_names = [p["name"].lower() for p in available]
+
+                # Check if our priority names can be mapped
+                mappings = {
+                    "CRITICAL": ["highest", "critical", "blocker", "urgent", "p0"],
+                    "HIGH": ["high", "major", "p1"],
+                    "MEDIUM": ["medium", "normal", "default", "p2"],
+                    "LOW": ["low", "minor", "lowest", "trivial", "p3"],
+                }
+
+                unmapped = []
+                for enum_name, candidates in mappings.items():
+                    if not any(c in available_names for c in candidates):
+                        unmapped.append(enum_name)
+
+                if unmapped:
+                    warnings.append(
+                        f"Priorities {unmapped} cannot be mapped to Jira. "
+                        f"Available: {[p['name'] for p in available]}"
+                    )
+
+                # Cache for later use
+                self._priority_cache[project_key] = {p["name"].lower(): p["id"] for p in available}
+            except Exception as e:
+                warnings.append(f"Could not fetch priorities: {e}")
+
+        # Log warnings
+        for warning in warnings:
+            self.logger.warning(f"Validation warning: {warning}")
+
+        return errors
 
     def analyze(
         self,
@@ -334,11 +411,11 @@ class SyncOrchestrator:
 
         # Parse markdown
         self._md_stories = self.parser.parse_stories(markdown_path)
-        self.logger.debug(f"Parsed {len(self._md_stories)} stories from markdown")
+        self.logger.info(f"Parsed {len(self._md_stories)} stories from markdown")
 
         # Fetch Jira issues
         self._jira_issues = self.tracker.get_epic_children(epic_key)
-        self.logger.debug(f"Found {len(self._jira_issues)} issues in Jira epic")
+        self.logger.info(f"Found {len(self._jira_issues)} issues in Jira epic")
 
         # Match stories
         self._match_stories(result)
@@ -383,33 +460,13 @@ class SyncOrchestrator:
                 result.add_warning(f"Backup failed: {e}")
 
         # Phase 1: Analyze
-        total_phases = 8 if self.config.backup_enabled else 7
+        total_phases = 6 if self.config.backup_enabled else 5
         self._report_progress(progress_callback, "Analyzing", 1, total_phases)
-        analyze_result = self.analyze(markdown_path, epic_key)
+        self.analyze(markdown_path, epic_key)
         result.stories_matched = len(self._matches)
         result.matched_stories = list(self._matches.items())
-        result.unmatched_stories = analyze_result.unmatched_stories
-        result.wrong_type_issues = analyze_result.wrong_type_issues
 
-        # Phase 1a: Update epic issue itself
-        if self.config.sync_epic:
-            self._report_progress(progress_callback, "Updating epic", 2, total_phases)
-            self._sync_epic(markdown_path, epic_key, result)
-
-        # Phase 1b: Create unmatched stories
-        if self.config.create_stories and result.unmatched_stories:
-            self._report_progress(progress_callback, "Creating stories", 2, total_phases)
-            self._create_unmatched_stories(epic_key, result, progress_callback)
-            # Update matched count after creation
-            result.stories_matched = len(self._matches)
-            result.matched_stories = list(self._matches.items())
-
-        # Phase 1c: Fix issue types (Story -> User Story)
-        if result.wrong_type_issues:
-            self._report_progress(progress_callback, "Fixing issue types", 2, total_phases)
-            self._fix_issue_types(result)
-
-        # Phase 1d: Detect changes (incremental sync)
+        # Phase 1b: Detect changes (incremental sync)
         if self.config.incremental and self._change_tracker and not self.config.force_full_sync:
             self._change_tracker.load(epic_key, markdown_path)
             changes = self._change_tracker.detect_changes(self._md_stories)
@@ -434,10 +491,6 @@ class SyncOrchestrator:
             self._report_progress(progress_callback, "Updating descriptions", 2, total_phases)
             self._sync_descriptions(result)
 
-        # Phase 2b: Update story metadata (priority, assignee)
-        self._report_progress(progress_callback, "Updating metadata", 2, total_phases)
-        self._sync_story_metadata(result)
-
         # Phase 3: Sync subtasks
         if self.config.sync_subtasks:
             self._report_progress(progress_callback, "Syncing subtasks", 3, total_phases)
@@ -461,6 +514,16 @@ class SyncOrchestrator:
             and result.success
         ):
             self._change_tracker.save(epic_key, markdown_path)
+
+        # Phase N: Update source file with tracker info
+        if self.config.update_source_file:
+            self._report_progress(
+                progress_callback, "Updating source file", total_phases - 1, total_phases
+            )
+            self._update_source_file_with_tracker_info(markdown_path, result, epic_key=epic_key)
+
+        # Final phase: Complete (100%)
+        self._report_progress(progress_callback, "Complete", total_phases, total_phases)
 
         # Publish complete event
         self.event_bus.publish(
@@ -550,14 +613,11 @@ class SyncOrchestrator:
 
         Populates self._matches with story_id -> issue_key mappings.
         Updates result with matched and unmatched story information.
-        Also detects issues with wrong issue type for later correction.
 
         Args:
             result: SyncResult to update with matching results.
         """
         self._matches = {}
-        # Accept both "Story" and "User Story" as valid - varies by Jira project
-        valid_types = {"Story", "User Story"}
 
         for md_story in self._md_stories:
             matched_issue = None
@@ -572,305 +632,11 @@ class SyncOrchestrator:
                 self._matches[str(md_story.id)] = matched_issue.key
                 result.matched_stories.append((str(md_story.id), matched_issue.key))
                 self.logger.debug(f"Matched {md_story.id} -> {matched_issue.key}")
-
-                # Check if issue type is correct (accept Story or User Story)
-                current_type = getattr(matched_issue, "issue_type", "") or ""
-                self.logger.debug(f"Issue {matched_issue.key} type: '{current_type}'")
-                if current_type and current_type not in valid_types:
-                    result.wrong_type_issues.append((matched_issue.key, current_type, "Story"))
-                    self.logger.info(
-                        f"Issue {matched_issue.key} has unexpected type: '{current_type}'"
-                    )
             else:
                 result.unmatched_stories.append(str(md_story.id))
                 result.add_warning(f"Could not match story: {md_story.id} - {md_story.title}")
 
         result.stories_matched = len(self._matches)
-
-    def _create_unmatched_stories(
-        self,
-        epic_key: str,
-        result: SyncResult,
-        progress_callback: Callable[[str, int, int], None] | None = None,
-    ) -> None:
-        """
-        Create stories in Jira for unmatched markdown stories.
-
-        Args:
-            epic_key: The epic key to link new stories to.
-            result: SyncResult to update with creation results.
-            progress_callback: Optional callback for progress updates.
-        """
-        if not hasattr(self.tracker, "create_story"):
-            self.logger.warning("Tracker does not support story creation")
-            return
-
-        # Get project key from epic key
-        project_key = epic_key.split("-")[0] if "-" in epic_key else epic_key
-
-        # Get list of stories to create
-        stories_to_create = [
-            s for s in self._md_stories if str(s.id) in list(result.unmatched_stories)
-        ]
-        total_stories = len(stories_to_create)
-
-        created_count = 0
-        for i, md_story in enumerate(stories_to_create):
-            story_id = str(md_story.id)
-
-            # Report sub-progress
-            if progress_callback:
-                progress_callback(f"Creating {i + 1}/{total_stories}", i, total_stories)
-
-            # Format description
-            description = ""
-            if md_story.description:
-                description = md_story.description.to_markdown()
-
-            # Add acceptance criteria
-            if md_story.acceptance_criteria:
-                description += "\n\n## Acceptance Criteria\n"
-                description += md_story.acceptance_criteria.to_markdown()
-
-            # Create the story with "User Story" issue type
-            # This is the standard issue type for user stories in most Jira projects
-            new_key = self.tracker.create_story(
-                summary=md_story.title,
-                description=description,
-                project_key=project_key,
-                epic_key=epic_key,
-                story_points=md_story.story_points,
-                priority=None,  # Skip priority - custom schemes vary by project
-                assignee=None,  # Will auto-assign to current user in adapter
-                issue_type="User Story",
-            )
-
-            # Count as created (even in dry-run where new_key is None)
-            created_count += 1
-
-            if new_key:
-                # Add to matches so subsequent phases can sync to it
-                self._matches[story_id] = new_key
-                result.matched_stories.append((story_id, new_key))
-                self.logger.debug(f"Created story {new_key} for {story_id}: {md_story.title}")
-
-                # Also add to jira_issues for subtask/description sync
-                # Create a minimal issue representation
-                class CreatedIssue:
-                    def __init__(self, key: str, summary: str) -> None:
-                        self.key = key
-                        self.summary = summary
-
-                self._jira_issues.append(CreatedIssue(new_key, md_story.title))
-
-        # Remove created stories from unmatched list (only if actually created)
-        if not self.config.dry_run:
-            result.unmatched_stories = [
-                s for s in result.unmatched_stories if s not in self._matches
-            ]
-
-        # Always set count (for dry-run display)
-        result.stories_created = created_count
-        if created_count > 0:
-            self.logger.debug(
-                f"{'Would create' if self.config.dry_run else 'Created'} {created_count} stories"
-            )
-
-    def _fix_issue_types(self, result: SyncResult) -> None:
-        """
-        Fix issues that have wrong issue type (e.g., Story -> User Story).
-
-        Args:
-            result: SyncResult to update with fix counts.
-        """
-        if not hasattr(self.tracker, "update_issue_type"):
-            self.logger.warning("Tracker does not support issue type updates")
-            return
-
-        fixed_count = 0
-        for issue_key, current_type, expected_type in result.wrong_type_issues:
-            try:
-                success = self.tracker.update_issue_type(issue_key, expected_type)
-                if success:
-                    fixed_count += 1
-                    self.logger.debug(f"Fixed {issue_key} type: {current_type} -> {expected_type}")
-            except Exception as e:
-                result.add_failed_operation(
-                    operation="fix_issue_type",
-                    issue_key=issue_key,
-                    error=str(e),
-                )
-                self.logger.warning(f"Failed to fix issue type for {issue_key}: {e}")
-
-        result.issue_types_fixed = fixed_count
-        if fixed_count > 0:
-            self.logger.debug(
-                f"{'Would fix' if self.config.dry_run else 'Fixed'} {fixed_count} issue types"
-            )
-
-    def _sync_epic(self, markdown_path: str, epic_key: str, result: SyncResult) -> None:
-        """
-        Update the epic issue itself with details from markdown.
-
-        Parses the EPIC.md (or main file) to extract title and description,
-        then updates the epic issue in Jira.
-
-        Args:
-            markdown_path: Path to markdown file or directory.
-            epic_key: The epic key to update.
-            result: SyncResult to update.
-        """
-        from pathlib import Path
-
-        path = Path(markdown_path)
-
-        # Parse epic details
-        epic = None
-        if path.is_dir():
-            # Use directory parser which extracts description from EPIC.md
-            if hasattr(self.parser, "parse_epic_directory"):
-                epic = self.parser.parse_epic_directory(path)
-            else:
-                epic_file = path / "EPIC.md"
-                if epic_file.exists():
-                    epic = self.parser.parse_epic(epic_file.read_text(encoding="utf-8"))
-        else:
-            epic = self.parser.parse_epic(path.read_text(encoding="utf-8"))
-
-        if not epic:
-            self.logger.debug("Could not parse epic details from markdown")
-            return
-
-        # Build description from epic content
-        description = ""
-        if epic.description:
-            description = epic.description
-        if epic.summary:
-            description = f"**{epic.summary}**\n\n{description}" if description else epic.summary
-
-        self.logger.debug(f"Epic description length: {len(description)} chars")
-
-        # Format as ADF if needed
-        adf_description = self.formatter.format_text(description) if description else None
-
-        # Update the epic issue
-        if self.config.dry_run:
-            self.logger.debug(f"[DRY-RUN] Would update epic {epic_key}: {epic.title}")
-            result.epic_updated = True  # Mark as would-be-updated for dry-run display
-            return
-
-        try:
-            # Update description
-            if adf_description:
-                self.tracker.update_issue_description(epic_key, adf_description)
-                result.epic_updated = True
-                self.logger.info(f"Updated epic {epic_key} description")
-        except Exception as e:
-            result.add_warning(f"Failed to update epic {epic_key}: {e}")
-            self.logger.error(f"Failed to update epic: {e}")
-
-    def _sync_story_metadata(self, result: SyncResult) -> None:
-        """
-        Sync story metadata (priority, assignee) to Jira.
-
-        Updates matched stories with priority and assignee from markdown.
-
-        Args:
-            result: SyncResult to update with operation counts.
-        """
-        if not hasattr(self.tracker, "update_issue_fields"):
-            self.logger.debug("Tracker does not support field updates")
-            return
-
-        # Get available priorities from Jira (cache for efficiency)
-        # Extract project key from first matched issue
-        project_key = None
-        if self._matches:
-            first_issue = next(iter(self._matches.values()))
-            project_key = first_issue.split("-")[0] if "-" in first_issue else None
-
-        available_priorities: list[dict[str, str]] = []
-        if hasattr(self.tracker, "get_priorities"):
-            available_priorities = self.tracker.get_priorities(project_key)
-            self.logger.debug(f"Available priorities: {[p['name'] for p in available_priorities]}")
-
-        # Map our priority names to Jira priority IDs
-        priority_map = self._build_priority_map(available_priorities)
-
-        # Get current user for assignee
-        current_user = None
-        if hasattr(self.tracker, "_client"):
-            import contextlib
-
-            with contextlib.suppress(Exception):
-                current_user = self.tracker._client.get_current_user_id()
-
-        updated_count = 0
-        for md_story in self._md_stories:
-            story_id = str(md_story.id)
-            if story_id not in self._matches:
-                continue
-
-            issue_key = self._matches[story_id]
-
-            # Determine priority ID
-            jira_priority_id = None
-            if md_story.priority and priority_map:
-                jira_priority_id = priority_map.get(md_story.priority.name)
-
-            # Use current user as assignee if none specified
-            assignee = md_story.assignee or current_user
-
-            if jira_priority_id or assignee:
-                try:
-                    self.tracker.update_issue_fields(
-                        issue_key,
-                        priority_id=jira_priority_id,
-                        assignee=assignee,
-                    )
-                    updated_count += 1
-                except Exception as e:
-                    result.add_warning(f"Failed to update metadata for {issue_key}: {e}")
-                    self.logger.warning(f"Failed to update metadata for {issue_key}: {e}")
-
-        if updated_count > 0:
-            self.logger.debug(
-                f"{'Would update' if self.config.dry_run else 'Updated'} {updated_count} story metadata"
-            )
-
-    def _build_priority_map(self, available_priorities: list[dict[str, str]]) -> dict[str, str]:
-        """
-        Build a mapping from our Priority enum names to Jira priority IDs.
-
-        Args:
-            available_priorities: List of dicts with 'id' and 'name' keys.
-
-        Returns:
-            Dict mapping Priority enum names to Jira priority IDs.
-        """
-        if not available_priorities:
-            return {}
-
-        # Lowercase lookup for matching (name -> id)
-        priority_lookup = {p["name"].lower(): p["id"] for p in available_priorities}
-
-        # Map our enum names to common Jira priority names
-        mappings = {
-            "CRITICAL": ["highest", "critical", "blocker", "urgent"],
-            "HIGH": ["high", "major"],
-            "MEDIUM": ["medium", "normal", "default"],
-            "LOW": ["low", "minor", "lowest", "trivial"],
-        }
-
-        result: dict[str, str] = {}
-        for enum_name, candidates in mappings.items():
-            for candidate in candidates:
-                if candidate in priority_lookup:
-                    result[enum_name] = priority_lookup[candidate]
-                    break
-
-        self.logger.debug(f"Priority map: {result}")
-        return result
 
     # -------------------------------------------------------------------------
     # Sync Phases
@@ -955,17 +721,9 @@ class SyncOrchestrator:
 
             # Sync each subtask
             project_key = issue_key.split("-")[0]
-            # Get parent story priority for subtasks (if subtask doesn't have its own)
-            parent_priority = md_story.priority.jira_name if md_story.priority else None
             for md_subtask in md_story.subtasks:
                 self._sync_single_subtask(
-                    md_subtask,
-                    existing_subtasks,
-                    issue_key,
-                    project_key,
-                    story_id,
-                    result,
-                    parent_priority,
+                    md_subtask, existing_subtasks, issue_key, project_key, story_id, result
                 )
 
     def _should_sync_story_subtasks(self, story_id: str) -> bool:
@@ -1001,28 +759,18 @@ class SyncOrchestrator:
         project_key: str,
         story_id: str,
         result: SyncResult,
-        parent_priority: str | None = None,
     ) -> None:
         """Sync a single subtask - update if exists, create if new."""
 
         subtask_name_lower = md_subtask.name.lower()
 
-        # Use subtask's own priority if set, otherwise inherit from parent
-        priority = None
-        if md_subtask.priority:
-            priority = md_subtask.priority.jira_name
-        elif parent_priority:
-            priority = parent_priority
-
         try:
             if subtask_name_lower in existing_subtasks:
                 self._update_existing_subtask(
-                    md_subtask, existing_subtasks[subtask_name_lower], story_id, result, priority
+                    md_subtask, existing_subtasks[subtask_name_lower], story_id, result
                 )
             else:
-                self._create_new_subtask(
-                    md_subtask, parent_key, project_key, story_id, result, priority
-                )
+                self._create_new_subtask(md_subtask, parent_key, project_key, story_id, result)
         except Exception as e:
             result.add_failed_operation(
                 operation="sync_subtask",
@@ -1038,28 +786,13 @@ class SyncOrchestrator:
         existing: IssueData,
         story_id: str,
         result: SyncResult,
-        priority: str | None = None,
     ) -> None:
         """Update an existing subtask."""
-        # Only pass story_points if explicitly set in markdown (non-zero)
-        # 0 means "not specified" and shouldn't overwrite Jira values
-        story_points = md_subtask.story_points if md_subtask.story_points else None
-
-        # Get priority ID if priority name is provided
-        priority_id = None
-        if priority and hasattr(self.tracker, "get_priorities"):
-            # Extract project key from existing issue
-            project_key = existing.key.split("-")[0] if "-" in existing.key else None
-            priorities = self.tracker.get_priorities(project_key)
-            priority_lookup = {p["name"].lower(): p["id"] for p in priorities}
-            priority_id = priority_lookup.get(priority.lower())
-
         update_cmd = UpdateSubtaskCommand(
             tracker=self.tracker,
             issue_key=existing.key,
             description=md_subtask.description,
-            story_points=story_points,
-            priority_id=priority_id,
+            story_points=md_subtask.story_points,
             event_bus=self.event_bus,
             dry_run=self.config.dry_run,
         )
@@ -1082,14 +815,9 @@ class SyncOrchestrator:
         project_key: str,
         story_id: str,
         result: SyncResult,
-        priority: str | None = None,
     ) -> None:
         """Create a new subtask."""
         adf = self.formatter.format_text(md_subtask.description)
-
-        # Only pass story_points if explicitly set in markdown (non-zero)
-        # 0 means "not specified" and shouldn't set a value in Jira
-        story_points = md_subtask.story_points if md_subtask.story_points else None
 
         create_cmd = CreateSubtaskCommand(
             tracker=self.tracker,
@@ -1097,8 +825,7 @@ class SyncOrchestrator:
             project_key=project_key,
             summary=md_subtask.name,
             description=adf,
-            story_points=story_points,
-            priority=priority,
+            story_points=md_subtask.story_points,
             event_bus=self.event_bus,
             dry_run=self.config.dry_run,
         )
@@ -1309,7 +1036,7 @@ class SyncOrchestrator:
                 epic_key=epic_key,
                 dry_run=self.config.dry_run,
             )
-            self.logger.debug(f"Starting session {session_id}")
+            self.logger.info(f"Starting session {session_id}")
 
         self._state.set_phase(SyncPhase.ANALYZING)
         self._save_state()
@@ -1388,6 +1115,127 @@ class SyncOrchestrator:
         return backup
 
     # -------------------------------------------------------------------------
+    # Source File Update
+    # -------------------------------------------------------------------------
+
+    def _update_source_file_with_tracker_info(
+        self,
+        markdown_path: str,
+        result: SyncResult,
+        epic_key: str | None = None,
+    ) -> None:
+        """
+        Update the source markdown file with tracker information.
+
+        Writes the external issue key, URL, and sync metadata back to the
+        markdown file for each successfully synced story. Also updates
+        epic-level tracking if epic_key is provided.
+
+        Args:
+            markdown_path: Path to the markdown file.
+            result: SyncResult (used for adding warnings if update fails).
+            epic_key: Optional epic key to write to document header.
+        """
+        from pathlib import Path
+
+        from spectra.core.ports.config_provider import TrackerType
+
+        from .source_updater import SourceFileUpdater
+
+        # Determine tracker type and base URL from the adapter
+        # Default to Jira if we can't determine
+        tracker_type = TrackerType.JIRA
+        base_url = getattr(self.tracker, "base_url", "") or getattr(self.tracker, "_base_url", "")
+
+        # Try to detect tracker type from adapter class name
+        adapter_name = type(self.tracker).__name__.lower()
+        if "github" in adapter_name:
+            tracker_type = TrackerType.GITHUB
+        elif "linear" in adapter_name:
+            tracker_type = TrackerType.LINEAR
+        elif "azure" in adapter_name:
+            tracker_type = TrackerType.AZURE_DEVOPS
+
+        if not base_url:
+            result.add_warning("Could not determine tracker base URL for source update")
+            return
+
+        # Prepare stories with external keys populated from matches
+        synced_stories = []
+        for story in self._md_stories:
+            story_id = str(story.id)
+            if story_id in self._matches:
+                # Update story's external_key with the matched issue key
+                story.external_key = self._matches[story_id]
+                # Build URL if not already set
+                if not story.external_url:
+                    story.external_url = self._build_issue_url(
+                        tracker_type, base_url, self._matches[story_id]
+                    )
+                synced_stories.append(story)
+
+        if not synced_stories:
+            self.logger.debug("No synced stories to update in source file")
+            return
+
+        # Create updater and update the file
+        updater = SourceFileUpdater(
+            tracker_type=tracker_type,
+            base_url=base_url,
+        )
+
+        file_path = Path(markdown_path)
+        if file_path.is_dir():
+            # Directory-based project
+            update_results = updater.update_directory(
+                directory=file_path,
+                stories=synced_stories,
+                epic_key=epic_key,
+                dry_run=self.config.dry_run,
+            )
+            for ur in update_results:
+                if not ur.success:
+                    for error in ur.errors:
+                        result.add_warning(f"Source update failed: {error}")
+                else:
+                    self.logger.info(ur.summary)
+        else:
+            # Single file
+            update_result = updater.update_file(
+                file_path=file_path,
+                stories=synced_stories,
+                epic_key=epic_key,
+                dry_run=self.config.dry_run,
+            )
+            if not update_result.success:
+                for error in update_result.errors:
+                    result.add_warning(f"Source update failed: {error}")
+            else:
+                self.logger.info(update_result.summary)
+
+    def _build_issue_url(
+        self,
+        tracker_type: TrackerType,
+        base_url: str,
+        issue_key: str,
+    ) -> str:
+        """Build issue URL based on tracker type."""
+        from spectra.core.ports.config_provider import TrackerType
+
+        base_url = base_url.rstrip("/")
+
+        if tracker_type == TrackerType.JIRA:
+            return f"{base_url}/browse/{issue_key}"
+        if tracker_type == TrackerType.GITHUB:
+            issue_num = issue_key.lstrip("#")
+            return f"{base_url}/issues/{issue_num}"
+        if tracker_type == TrackerType.LINEAR:
+            return f"{base_url}/issue/{issue_key}"
+        if tracker_type == TrackerType.AZURE_DEVOPS:
+            return f"{base_url}/_workitems/edit/{issue_key}"
+        return f"{base_url}/{issue_key}"
+
+    # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
 
@@ -1397,4 +1245,4 @@ class SyncOrchestrator:
         """Report progress to callback if provided."""
         if callback:
             callback(phase, current, total)
-        self.logger.debug(f"Phase {current}/{total}: {phase}")
+        self.logger.info(f"Phase {current}/{total}: {phase}")

@@ -202,6 +202,11 @@ Environment Variables:
         action="store_true",
         help="Force full sync even when --incremental is set",
     )
+    parser.add_argument(
+        "--update-source",
+        action="store_true",
+        help="Write tracker info (issue key, URL) back to source markdown file after sync",
+    )
 
     # Phase control
     parser.add_argument(
@@ -2223,6 +2228,9 @@ def run_sync(
     config.sync.incremental = getattr(args, "incremental", False)
     config.sync.force_full_sync = getattr(args, "force_full_sync", False)
 
+    # Configure source file update (writeback tracker info)
+    config.sync.update_source_file = getattr(args, "update_source", False)
+
     # Create state store for persistence
     from spectra.application.sync import StateStore
 
@@ -2272,6 +2280,14 @@ def run_sync(
         elif args.resume:
             console.info("No resumable session found, starting fresh")
 
+    # Pre-sync validation
+    validation_errors = orchestrator.validate_sync_prerequisites(str(markdown_path), args.epic)
+    if validation_errors:
+        console.error("Pre-sync validation failed:")
+        for error in validation_errors:
+            console.item(error, "fail")
+        return ExitCode.VALIDATION_ERROR
+
     # Confirmation
     if args.execute and not args.no_confirm:
         action = "Resume sync" if resume_state else "Proceed with sync"
@@ -2285,13 +2301,27 @@ def run_sync(
 
     console.section("Running Sync")
 
+    # Suppress noisy logs during progress bar display (unless verbose mode)
+    from .logging import suppress_logs_for_progress
+
     # Use resumable sync for state persistence
-    result = orchestrator.sync_resumable(
-        markdown_path=str(markdown_path),
-        epic_key=args.epic,
-        progress_callback=progress_callback,
-        resume_state=resume_state,
-    )
+    if args.verbose:
+        # Verbose mode: show all logs
+        result = orchestrator.sync_resumable(
+            markdown_path=str(markdown_path),
+            epic_key=args.epic,
+            progress_callback=progress_callback,
+            resume_state=resume_state,
+        )
+    else:
+        # Normal mode: suppress INFO logs for clean progress bar
+        with suppress_logs_for_progress():
+            result = orchestrator.sync_resumable(
+                markdown_path=str(markdown_path),
+                epic_key=args.epic,
+                progress_callback=progress_callback,
+                resume_state=resume_state,
+            )
 
     # Show results
     console.sync_result(result)

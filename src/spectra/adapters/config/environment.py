@@ -17,6 +17,7 @@ from spectra.core.ports.config_provider import (
     ConfigProviderPort,
     SyncConfig,
     TrackerConfig,
+    ValidationConfig,
 )
 
 
@@ -99,9 +100,14 @@ class EnvironmentConfigProvider(ConfigProviderPort):
             export_path=self.get("export_path"),
         )
 
+        # Get validation config from file config if available, otherwise use defaults
+        # The FileConfigProvider loads the complete nested validation configuration
+        validation = self.get("_validation_config", ValidationConfig())
+
         return AppConfig(
             tracker=tracker,
             sync=sync,
+            validation=validation,
             markdown_path=self.get("markdown_path"),
             epic_key=self.get("epic_key"),
         )
@@ -197,6 +203,10 @@ class EnvironmentConfigProvider(ConfigProviderPort):
                     self._values["story_filter"] = file_app_config.sync.story_filter
                 if file_app_config.sync.export_path:
                     self._values["export_path"] = file_app_config.sync.export_path
+
+                # Store complete validation config object
+                # This preserves all nested configuration from the file
+                self._values["_validation_config"] = file_app_config.validation
 
         except Exception:
             # File config is optional, don't fail if it can't load

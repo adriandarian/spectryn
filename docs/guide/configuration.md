@@ -179,3 +179,514 @@ spectra --markdown epic.md --epic PROJ-123 --project OTHER
 | `sync.comments` | boolean | `true` | Sync comments |
 | `sync.statuses` | boolean | `true` | Sync status transitions |
 
+### Validation Settings
+
+Configure constraints and guards for your documents and sync operations. All settings are optional - if not specified, defaults are used.
+
+The validation configuration is organized into logical sections:
+
+#### Issue Types (`validation.issue_types`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `allowed` | list | `["Story", "User Story"]` | Issue types allowed when syncing/creating |
+| `default` | string | `"User Story"` | Default type for new stories |
+| `aliases` | dict | (see below) | Map alternative names to canonical types |
+
+#### Naming Conventions (`validation.naming`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `allowed_id_prefixes` | list | `[]` | Allowed story ID prefixes (empty = all) |
+| `id_pattern` | string | `""` | Regex pattern for story IDs |
+| `require_sequential_ids` | boolean | `false` | IDs must be sequential |
+| `normalize_ids_uppercase` | boolean | `true` | Convert IDs to uppercase |
+| `epic_id_pattern` | string | `""` | Pattern for epic IDs |
+| `title_case` | string | `""` | Enforce title case: "title", "sentence", "upper" |
+
+#### Content Requirements (`validation.content`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_description` | boolean | `false` | Story must have description |
+| `description_min_length` | integer | `0` | Minimum description length |
+| `description_max_length` | integer | `0` | Maximum description length (0 = unlimited) |
+| `require_user_story_format` | boolean | `false` | Require "As a...I want...So that" format |
+| `title_min_length` | integer | `1` | Minimum title length |
+| `title_max_length` | integer | `0` | Maximum title length (0 = unlimited) |
+| `title_pattern` | string | `""` | Regex pattern title must match |
+| `require_acceptance_criteria` | boolean | `false` | Must have acceptance criteria |
+| `min_acceptance_criteria` | integer | `0` | Minimum AC items |
+| `max_acceptance_criteria` | integer | `0` | Maximum AC items |
+| `require_technical_notes` | boolean | `false` | Require technical notes |
+| `require_dependencies` | boolean | `false` | Require dependencies section |
+| `require_links` | boolean | `false` | Require at least one link |
+| `require_related_commits` | boolean | `false` | Require related commits |
+
+#### Estimation (`validation.estimation`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_story_points` | boolean | `false` | Story points must be set |
+| `min_story_points` | integer | `0` | Minimum story points |
+| `max_story_points` | integer | `0` | Maximum story points (0 = unlimited) |
+| `allowed_story_points` | list | `[]` | Allowed values (e.g., `[1, 2, 3, 5, 8, 13, 21]`) |
+| `fibonacci_only` | boolean | `false` | Only allow Fibonacci values |
+| `default_story_points` | integer | `0` | Default story points |
+| `require_time_estimate` | boolean | `false` | Require time estimate |
+
+#### Subtasks (`validation.subtasks`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_subtasks` | boolean | `false` | Must have at least one subtask |
+| `min_subtasks` | integer | `0` | Minimum subtasks per story |
+| `max_subtasks` | integer | `0` | Maximum subtasks (0 = unlimited) |
+| `subtask_title_pattern` | string | `""` | Regex for subtask titles |
+| `require_subtask_estimates` | boolean | `false` | Subtasks must have estimates |
+| `require_subtask_assignee` | boolean | `false` | Subtasks must have assignees |
+
+#### Statuses (`validation.statuses`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `allowed` | list | `[]` | Allowed status values (empty = all) |
+| `default` | string | `"Planned"` | Default status for new stories |
+| `require_status` | boolean | `false` | Status must be explicitly set |
+| `aliases` | dict | (see below) | Map alternative names to canonical statuses |
+| `allowed_transitions` | dict | `{}` | Workflow constraints: status -> allowed targets |
+| `require_status_emoji` | boolean | `false` | Require emoji in status |
+
+#### Priorities (`validation.priorities`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `allowed` | list | `[]` | Allowed priority values (empty = all) |
+| `default` | string | `"Medium"` | Default priority |
+| `require_priority` | boolean | `false` | Priority must be set |
+| `aliases` | dict | (see below) | Map P0/P1/etc to canonical names |
+
+#### Labels (`validation.labels`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `required` | list | `[]` | Labels that must be present |
+| `allowed` | list | `[]` | Whitelist of allowed labels |
+| `forbidden` | list | `[]` | Labels that are not allowed |
+| `min_labels` | integer | `0` | Minimum number of labels |
+| `max_labels` | integer | `0` | Maximum labels (0 = unlimited) |
+| `label_pattern` | string | `""` | Regex pattern for labels |
+
+#### Components (`validation.components`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `required` | list | `[]` | Components that must be present |
+| `allowed` | list | `[]` | Whitelist of allowed components |
+| `require_component` | boolean | `false` | At least one component required |
+
+#### Assignees (`validation.assignees`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_assignee` | boolean | `false` | Stories must have an assignee |
+| `allowed` | list | `[]` | Whitelist of allowed assignees |
+| `default` | string | `""` | Default assignee |
+| `max_assignees` | integer | `1` | Maximum assignees per story |
+
+#### Sprints (`validation.sprints`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_sprint` | boolean | `false` | Must be assigned to sprint |
+| `allowed` | list | `[]` | Allowed sprint names |
+| `sprint_pattern` | string | `""` | Regex for sprint names |
+
+#### Versions (`validation.versions`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_version` | boolean | `false` | Must have fix version |
+| `allowed` | list | `[]` | Allowed version values |
+| `version_pattern` | string | `""` | Regex for versions |
+
+#### Due Dates (`validation.due_dates`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_due_date` | boolean | `false` | Must have due date |
+| `max_days_in_future` | integer | `0` | Max days in future (0 = unlimited) |
+| `min_days_in_future` | integer | `0` | Min days (prevent past dates) |
+| `date_format` | string | `"YYYY-MM-DD"` | Expected date format |
+
+#### Epic Constraints (`validation.epic`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `max_stories` | integer | `0` | Maximum stories per epic |
+| `min_stories` | integer | `0` | Minimum stories per epic |
+| `require_summary` | boolean | `false` | Epic must have summary |
+| `require_description` | boolean | `false` | Epic must have description |
+| `max_total_story_points` | integer | `0` | Max total points in epic |
+| `require_epic_owner` | boolean | `false` | Epic must have owner |
+| `max_in_progress_stories` | integer | `0` | Max stories in progress at once |
+
+#### Custom Fields (`validation.custom_fields`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `mappings` | dict | `{}` | Map field names to tracker field IDs |
+| `required` | list | `[]` | Custom fields that must be present |
+| `aliases` | dict | (see below) | Alternative names for fields |
+
+#### Formatting (`validation.formatting`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_status_emoji` | boolean | `false` | Require status emoji in headers |
+| `require_priority_emoji` | boolean | `false` | Require priority emoji |
+| `allowed_header_levels` | list | `[1, 2, 3]` | Allowed header levels |
+| `require_metadata_table` | boolean | `false` | Require table format metadata |
+| `max_heading_depth` | integer | `4` | Maximum heading depth |
+
+#### External Links (`validation.external_links`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_external_links` | boolean | `false` | Require external links |
+| `allowed_domains` | list | `[]` | Allowed domains (empty = all) |
+| `forbidden_domains` | list | `[]` | Blocked domains |
+| `require_https` | boolean | `true` | Links must use HTTPS |
+
+#### Behavior (`validation.behavior`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `strict` | boolean | `false` | Treat warnings as errors |
+| `fail_fast` | boolean | `false` | Stop on first error |
+| `ignore_rules` | list | `[]` | Rule codes to ignore |
+| `auto_fix_ids` | boolean | `false` | Auto-correct ID formatting |
+| `auto_fix_statuses` | boolean | `false` | Auto-map status aliases |
+| `auto_fix_priorities` | boolean | `false` | Auto-map priority aliases |
+| `show_suggestions` | boolean | `true` | Show fix suggestions |
+| `max_errors_shown` | integer | `50` | Max errors to display |
+
+---
+
+### Extended Validation Settings
+
+The following sections provide additional constraints for advanced workflows.
+
+#### Workflow (`validation.workflow`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `definition_of_done` | list | `[]` | Checklist items for "done" status |
+| `ready_for_dev_criteria` | list | `[]` | Required before story can start |
+| `require_review` | boolean | `false` | Must be reviewed before done |
+| `require_qa_signoff` | boolean | `false` | QA approval required |
+| `blocked_by_types` | list | `[]` | Issue types that can block |
+| `max_blocked_days` | integer | `0` | Alert if blocked longer |
+| `require_parent` | boolean | `false` | Must have parent issue |
+| `require_epic_link` | boolean | `false` | Must link to epic |
+| `allowed_parent_types` | list | `[]` | Allowed parent issue types |
+
+#### Scheduling (`validation.scheduling`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `max_story_age_days` | integer | `0` | Max age for open stories |
+| `stale_after_days` | integer | `0` | Days until story is stale |
+| `require_start_date` | boolean | `false` | Must have start date |
+| `max_duration_days` | integer | `0` | Max days for story duration |
+| `work_days_only` | boolean | `false` | Exclude weekends from calculations |
+| `sla_days` | integer | `0` | SLA target in days |
+| `warn_approaching_sla_days` | integer | `0` | Warn N days before SLA |
+| `require_end_date` | boolean | `false` | Must have end/target date |
+
+#### Development (`validation.development`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `branch_naming_pattern` | string | `""` | Regex for branch names |
+| `require_branch_link` | boolean | `false` | Must link to branch |
+| `require_pr_link` | boolean | `false` | Must link to PR |
+| `commit_message_pattern` | string | `""` | Regex for commit messages |
+| `require_code_review` | boolean | `false` | Code review required |
+| `allowed_branch_prefixes` | list | `[]` | Allowed prefixes (feature/, bugfix/, etc.) |
+| `require_merge_before_done` | boolean | `false` | PR must be merged before done |
+
+#### Quality (`validation.quality`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_test_cases` | boolean | `false` | Must have test cases |
+| `min_test_cases` | integer | `0` | Minimum test cases |
+| `require_test_plan` | boolean | `false` | Test plan required |
+| `bug_severity_levels` | list | `[]` | Valid severity levels for bugs |
+| `require_reproduction_steps` | boolean | `false` | Bugs must have repro steps |
+| `require_expected_behavior` | boolean | `false` | Bugs must describe expected |
+| `require_actual_behavior` | boolean | `false` | Bugs must describe actual |
+| `require_environment_info` | boolean | `false` | Bugs must have env info |
+| `require_screenshots` | boolean | `false` | Bugs must have screenshots |
+
+#### Documentation (`validation.documentation`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_api_docs` | boolean | `false` | API documentation required |
+| `require_changelog_entry` | boolean | `false` | Must update changelog |
+| `require_release_notes` | boolean | `false` | Release notes required |
+| `documentation_link_required` | boolean | `false` | Must link to docs |
+| `readme_update_required` | boolean | `false` | README update required |
+| `require_user_docs` | boolean | `false` | User-facing docs required |
+| `docs_location_pattern` | string | `""` | Regex for docs file paths |
+
+#### Security (`validation.security`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_security_review` | boolean | `false` | Security review required |
+| `confidentiality_levels` | list | `[]` | Valid confidentiality levels |
+| `require_data_classification` | boolean | `false` | Data classification required |
+| `pii_handling_required` | boolean | `false` | PII handling docs required |
+| `require_threat_model` | boolean | `false` | Threat model required |
+| `compliance_tags` | list | `[]` | Required compliance tags |
+| `require_vulnerability_scan` | boolean | `false` | Vuln scan required |
+| `security_labels` | list | `[]` | Valid security labels |
+
+#### Templates (`validation.templates`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `story_template` | string | `""` | Path to story template |
+| `bug_template` | string | `""` | Path to bug template |
+| `epic_template` | string | `""` | Path to epic template |
+| `task_template` | string | `""` | Path to task template |
+| `enforce_template` | boolean | `false` | Strictly enforce templates |
+| `allowed_sections` | list | `[]` | Allowed markdown sections |
+| `required_sections` | list | `[]` | Required markdown sections |
+| `section_order` | list | `[]` | Enforced section order |
+
+#### Alerts (`validation.alerts`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `alert_on_blocked` | boolean | `false` | Alert when story blocked |
+| `alert_on_stale` | boolean | `false` | Alert on stale stories |
+| `alert_threshold_days` | integer | `0` | Days before alert |
+| `alert_on_over_estimate` | boolean | `false` | Alert on large estimates |
+| `watchers` | list | `[]` | Default watchers to notify |
+| `alert_on_unassigned` | boolean | `false` | Alert on unassigned stories |
+| `alert_on_no_estimate` | boolean | `false` | Alert on missing estimates |
+| `notification_channels` | list | `[]` | Notification channels (slack, email) |
+
+#### Dependencies (`validation.dependencies`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `require_dependency_check` | boolean | `false` | Check dependencies |
+| `max_dependencies` | integer | `0` | Max dependencies per story |
+| `allow_circular_dependencies` | boolean | `false` | Allow circular deps |
+| `dependency_types` | list | `[]` | Valid dependency types |
+| `cross_project_deps_allowed` | boolean | `true` | Allow cross-project deps |
+| `require_dependency_approval` | boolean | `false` | Approve new deps |
+| `blocked_dependency_types` | list | `[]` | Disallowed dep types |
+
+#### Archival (`validation.archival`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `auto_archive_after_days` | integer | `0` | Days after done to archive |
+| `archive_cancelled` | boolean | `false` | Auto-archive cancelled |
+| `retention_days` | integer | `0` | Keep archived for N days |
+| `exclude_from_archive` | list | `[]` | Labels/types to exclude |
+| `archive_on_done` | boolean | `false` | Archive when done |
+| `cleanup_stale_branches` | boolean | `false` | Clean up stale branches |
+
+#### Capacity (`validation.capacity`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `max_stories_per_assignee` | integer | `0` | Max stories per person |
+| `max_points_per_sprint` | integer | `0` | Max points per sprint |
+| `warn_overload_threshold` | integer | `0` | Warn at N% capacity |
+| `require_capacity_check` | boolean | `false` | Check capacity limits |
+| `max_parallel_stories` | integer | `0` | Max in-progress per person |
+| `points_per_day` | float | `0.0` | Team velocity (pts/day) |
+
+#### Environments (`validation.environments`)
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `allowed_environments` | list | `[]` | Valid environment names |
+| `require_environment` | boolean | `false` | Environment required |
+| `environment_order` | list | `[]` | Deployment order (dev->staging->prod) |
+| `require_rollback_plan` | boolean | `false` | Rollback plan required |
+| `require_deployment_notes` | boolean | `false` | Deployment notes required |
+| `production_approval_required` | boolean | `false` | Prod deploy needs approval |
+
+---
+
+#### Complete Example
+
+```yaml
+# .spectra.yaml - Complete Validation Configuration Example
+validation:
+  # Issue Types - Guard against "Story" vs "User Story" confusion
+  issue_types:
+    allowed:
+      - "User Story"
+      - "Bug"
+      - "Task"
+    default: "User Story"
+    aliases:
+      "story": "User Story"
+      "defect": "Bug"
+
+  # Naming Conventions
+  naming:
+    allowed_id_prefixes:
+      - "US"
+      - "BUG"
+      - "TASK"
+    normalize_ids_uppercase: true
+
+  # Content Requirements
+  content:
+    require_description: true
+    require_acceptance_criteria: true
+    min_acceptance_criteria: 1
+    title_max_length: 100
+
+  # Estimation - Fibonacci story points
+  estimation:
+    require_story_points: true
+    allowed_story_points: [1, 2, 3, 5, 8, 13, 21]
+    fibonacci_only: true
+
+  # Subtasks
+  subtasks:
+    max_subtasks: 10
+
+  # Status Workflow
+  statuses:
+    allowed:
+      - "Planned"
+      - "In Progress"
+      - "In Review"
+      - "Done"
+      - "Blocked"
+    default: "Planned"
+    aliases:
+      "todo": "Planned"
+      "wip": "In Progress"
+
+  # Priorities
+  priorities:
+    allowed:
+      - "Critical"
+      - "High"
+      - "Medium"
+      - "Low"
+    default: "Medium"
+
+  # Labels
+  labels:
+    required:
+      - "team:backend"
+    max_labels: 5
+
+  # Epic Constraints
+  epic:
+    max_stories: 50
+    require_summary: true
+
+  # Behavior
+  behavior:
+    strict: false
+    auto_fix_statuses: true
+    auto_fix_priorities: true
+
+  # Workflow constraints
+  workflow:
+    definition_of_done:
+      - "Code reviewed"
+      - "Tests passing"
+      - "Documentation updated"
+    require_review: true
+    require_epic_link: true
+
+  # Scheduling
+  scheduling:
+    stale_after_days: 14
+    sla_days: 30
+    warn_approaching_sla_days: 7
+
+  # Development workflow
+  development:
+    branch_naming_pattern: "^(feature|bugfix|hotfix)/[A-Z]+-\\d+-.+"
+    require_pr_link: true
+    allowed_branch_prefixes:
+      - "feature/"
+      - "bugfix/"
+      - "hotfix/"
+    require_merge_before_done: true
+
+  # Quality requirements
+  quality:
+    require_test_cases: true
+    min_test_cases: 1
+    require_reproduction_steps: true  # For bugs
+
+  # Documentation
+  documentation:
+    require_changelog_entry: true
+
+  # Security
+  security:
+    confidentiality_levels:
+      - "public"
+      - "internal"
+      - "confidential"
+    compliance_tags:
+      - "GDPR"
+      - "SOC2"
+
+  # Templates
+  templates:
+    required_sections:
+      - "User Story"
+      - "Acceptance Criteria"
+    enforce_template: false
+
+  # Alerts
+  alerts:
+    alert_on_blocked: true
+    alert_on_stale: true
+    alert_threshold_days: 7
+
+  # Dependencies
+  dependencies:
+    max_dependencies: 5
+    allow_circular_dependencies: false
+
+  # Capacity management
+  capacity:
+    max_stories_per_assignee: 5
+    max_points_per_sprint: 40
+    max_parallel_stories: 3
+
+  # Environments
+  environments:
+    allowed_environments:
+      - "development"
+      - "staging"
+      - "production"
+    environment_order:
+      - "development"
+      - "staging"
+      - "production"
+    production_approval_required: true
+```
+

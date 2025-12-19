@@ -226,6 +226,7 @@ class AzureDevOpsAdapter(IssueTrackerPort):
         project_key: str,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority: str | None = None,
     ) -> str | None:
         """Create a Task work item linked to the parent."""
         if self._dry_run:
@@ -257,6 +258,7 @@ class AzureDevOpsAdapter(IssueTrackerPort):
         description: Any | None = None,
         story_points: int | None = None,
         assignee: str | None = None,
+        priority_id: str | None = None,
     ) -> bool:
         if self._dry_run:
             self.logger.info(f"[DRY-RUN] Would update task {issue_key}")

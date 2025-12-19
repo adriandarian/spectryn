@@ -469,7 +469,7 @@ class TestCLIArgumentParsing:
         # Default is None
         args = parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",
@@ -480,7 +480,7 @@ class TestCLIArgumentParsing:
         # With path
         args = parser.parse_args(
             [
-                "--markdown",
+                "--input",
                 "epic.md",
                 "--epic",
                 "PROJ-123",

@@ -19,10 +19,41 @@ from typing import Any, ClassVar
 # Import ConfigFileError from centralized module and re-export for backward compatibility
 from spectra.core.exceptions import ConfigFileError
 from spectra.core.ports.config_provider import (
+    AlertsConfig,
     AppConfig,
+    ArchivalConfig,
+    AssigneesConfig,
+    BehaviorConfig,
+    CapacityConfig,
+    ComponentsConfig,
     ConfigProviderPort,
+    ContentConfig,
+    CustomFieldsConfig,
+    DependenciesConfig,
+    DevelopmentConfig,
+    DocumentationConfig,
+    DueDatesConfig,
+    EnvironmentsConfig,
+    EpicConfig,
+    EstimationConfig,
+    ExternalLinksConfig,
+    FormattingConfig,
+    IssueTypesConfig,
+    LabelsConfig,
+    NamingConfig,
+    PrioritiesConfig,
+    QualityConfig,
+    SchedulingConfig,
+    SecurityConfig,
+    SprintsConfig,
+    StatusesConfig,
+    SubtasksConfig,
     SyncConfig,
+    TemplatesConfig,
     TrackerConfig,
+    ValidationConfig,
+    VersionsConfig,
+    WorkflowConfig,
 )
 
 
@@ -118,11 +149,448 @@ class FileConfigProvider(ConfigProviderPort):
             export_path=self._get_nested("sync.export_path", None),
         )
 
+        # Load validation configuration with all nested sections
+        validation = self._load_validation_config()
+
         return AppConfig(
             tracker=tracker,
             sync=sync,
+            validation=validation,
             markdown_path=self._get_nested("markdown", None),
             epic_key=self._get_nested("epic", None),
+        )
+
+    def _load_validation_config(self) -> ValidationConfig:
+        """Load complete validation configuration from nested settings."""
+        v = "validation"  # Prefix for all validation settings
+
+        # Issue Types
+        issue_types = IssueTypesConfig(
+            allowed=self._get_nested(f"{v}.issue_types.allowed", ["Story", "User Story"]),
+            default=self._get_nested(f"{v}.issue_types.default", "User Story"),
+            aliases=self._get_nested(f"{v}.issue_types.aliases", IssueTypesConfig().aliases),
+        )
+
+        # Naming
+        naming = NamingConfig(
+            allowed_id_prefixes=self._get_nested(f"{v}.naming.allowed_id_prefixes", []),
+            id_pattern=self._get_nested(f"{v}.naming.id_pattern", ""),
+            require_sequential_ids=self._get_nested(f"{v}.naming.require_sequential_ids", False),
+            normalize_ids_uppercase=self._get_nested(f"{v}.naming.normalize_ids_uppercase", True),
+            epic_id_pattern=self._get_nested(f"{v}.naming.epic_id_pattern", ""),
+            title_case=self._get_nested(f"{v}.naming.title_case", ""),
+        )
+
+        # Content
+        content = ContentConfig(
+            require_description=self._get_nested(f"{v}.content.require_description", False),
+            description_min_length=self._get_nested(f"{v}.content.description_min_length", 0),
+            description_max_length=self._get_nested(f"{v}.content.description_max_length", 0),
+            require_user_story_format=self._get_nested(
+                f"{v}.content.require_user_story_format", False
+            ),
+            user_story_roles=self._get_nested(f"{v}.content.user_story_roles", []),
+            title_min_length=self._get_nested(f"{v}.content.title_min_length", 1),
+            title_max_length=self._get_nested(f"{v}.content.title_max_length", 0),
+            title_pattern=self._get_nested(f"{v}.content.title_pattern", ""),
+            title_forbidden_words=self._get_nested(f"{v}.content.title_forbidden_words", []),
+            title_required_words=self._get_nested(f"{v}.content.title_required_words", []),
+            require_acceptance_criteria=self._get_nested(
+                f"{v}.content.require_acceptance_criteria", False
+            ),
+            min_acceptance_criteria=self._get_nested(f"{v}.content.min_acceptance_criteria", 0),
+            max_acceptance_criteria=self._get_nested(f"{v}.content.max_acceptance_criteria", 0),
+            ac_format=self._get_nested(f"{v}.content.ac_format", ""),
+            require_technical_notes=self._get_nested(f"{v}.content.require_technical_notes", False),
+            technical_notes_min_length=self._get_nested(
+                f"{v}.content.technical_notes_min_length", 0
+            ),
+            require_dependencies=self._get_nested(f"{v}.content.require_dependencies", False),
+            max_dependencies=self._get_nested(f"{v}.content.max_dependencies", 0),
+            require_links=self._get_nested(f"{v}.content.require_links", False),
+            min_links=self._get_nested(f"{v}.content.min_links", 0),
+            max_links=self._get_nested(f"{v}.content.max_links", 0),
+            allowed_link_types=self._get_nested(f"{v}.content.allowed_link_types", []),
+            require_related_commits=self._get_nested(f"{v}.content.require_related_commits", False),
+        )
+
+        # Estimation
+        estimation = EstimationConfig(
+            require_story_points=self._get_nested(f"{v}.estimation.require_story_points", False),
+            min_story_points=self._get_nested(f"{v}.estimation.min_story_points", 0),
+            max_story_points=self._get_nested(f"{v}.estimation.max_story_points", 0),
+            allowed_story_points=self._get_nested(f"{v}.estimation.allowed_story_points", []),
+            fibonacci_only=self._get_nested(f"{v}.estimation.fibonacci_only", False),
+            default_story_points=self._get_nested(f"{v}.estimation.default_story_points", 0),
+            require_time_estimate=self._get_nested(f"{v}.estimation.require_time_estimate", False),
+            time_estimate_unit=self._get_nested(f"{v}.estimation.time_estimate_unit", "hours"),
+            max_time_estimate=self._get_nested(f"{v}.estimation.max_time_estimate", 0),
+        )
+
+        # Subtasks
+        subtasks = SubtasksConfig(
+            require_subtasks=self._get_nested(f"{v}.subtasks.require_subtasks", False),
+            min_subtasks=self._get_nested(f"{v}.subtasks.min_subtasks", 0),
+            max_subtasks=self._get_nested(f"{v}.subtasks.max_subtasks", 0),
+            subtask_title_pattern=self._get_nested(f"{v}.subtasks.subtask_title_pattern", ""),
+            subtask_title_min_length=self._get_nested(f"{v}.subtasks.subtask_title_min_length", 1),
+            subtask_title_max_length=self._get_nested(f"{v}.subtasks.subtask_title_max_length", 0),
+            require_subtask_estimates=self._get_nested(
+                f"{v}.subtasks.require_subtask_estimates", False
+            ),
+            allowed_subtask_statuses=self._get_nested(f"{v}.subtasks.allowed_subtask_statuses", []),
+            require_subtask_assignee=self._get_nested(
+                f"{v}.subtasks.require_subtask_assignee", False
+            ),
+        )
+
+        # Statuses
+        statuses = StatusesConfig(
+            allowed=self._get_nested(f"{v}.statuses.allowed", []),
+            default=self._get_nested(f"{v}.statuses.default", "Planned"),
+            require_status=self._get_nested(f"{v}.statuses.require_status", False),
+            aliases=self._get_nested(f"{v}.statuses.aliases", StatusesConfig().aliases),
+            allowed_transitions=self._get_nested(f"{v}.statuses.allowed_transitions", {}),
+            require_status_emoji=self._get_nested(f"{v}.statuses.require_status_emoji", False),
+        )
+
+        # Priorities
+        priorities = PrioritiesConfig(
+            allowed=self._get_nested(f"{v}.priorities.allowed", []),
+            default=self._get_nested(f"{v}.priorities.default", "Medium"),
+            require_priority=self._get_nested(f"{v}.priorities.require_priority", False),
+            aliases=self._get_nested(f"{v}.priorities.aliases", PrioritiesConfig().aliases),
+            require_priority_emoji=self._get_nested(
+                f"{v}.priorities.require_priority_emoji", False
+            ),
+        )
+
+        # Labels
+        labels = LabelsConfig(
+            required=self._get_nested(f"{v}.labels.required", []),
+            allowed=self._get_nested(f"{v}.labels.allowed", []),
+            forbidden=self._get_nested(f"{v}.labels.forbidden", []),
+            min_labels=self._get_nested(f"{v}.labels.min_labels", 0),
+            max_labels=self._get_nested(f"{v}.labels.max_labels", 0),
+            label_pattern=self._get_nested(f"{v}.labels.label_pattern", ""),
+            label_prefix=self._get_nested(f"{v}.labels.label_prefix", ""),
+            case_sensitive=self._get_nested(f"{v}.labels.case_sensitive", False),
+        )
+
+        # Components
+        components = ComponentsConfig(
+            required=self._get_nested(f"{v}.components.required", []),
+            allowed=self._get_nested(f"{v}.components.allowed", []),
+            min_components=self._get_nested(f"{v}.components.min_components", 0),
+            max_components=self._get_nested(f"{v}.components.max_components", 0),
+            require_component=self._get_nested(f"{v}.components.require_component", False),
+        )
+
+        # Assignees
+        assignees = AssigneesConfig(
+            require_assignee=self._get_nested(f"{v}.assignees.require_assignee", False),
+            allowed=self._get_nested(f"{v}.assignees.allowed", []),
+            default=self._get_nested(f"{v}.assignees.default", ""),
+            max_assignees=self._get_nested(f"{v}.assignees.max_assignees", 1),
+        )
+
+        # Sprints
+        sprints = SprintsConfig(
+            require_sprint=self._get_nested(f"{v}.sprints.require_sprint", False),
+            allowed=self._get_nested(f"{v}.sprints.allowed", []),
+            default=self._get_nested(f"{v}.sprints.default", ""),
+            sprint_pattern=self._get_nested(f"{v}.sprints.sprint_pattern", ""),
+        )
+
+        # Versions
+        versions = VersionsConfig(
+            require_version=self._get_nested(f"{v}.versions.require_version", False),
+            allowed=self._get_nested(f"{v}.versions.allowed", []),
+            version_pattern=self._get_nested(f"{v}.versions.version_pattern", ""),
+        )
+
+        # Due Dates
+        due_dates = DueDatesConfig(
+            require_due_date=self._get_nested(f"{v}.due_dates.require_due_date", False),
+            max_days_in_future=self._get_nested(f"{v}.due_dates.max_days_in_future", 0),
+            min_days_in_future=self._get_nested(f"{v}.due_dates.min_days_in_future", 0),
+            date_format=self._get_nested(f"{v}.due_dates.date_format", "YYYY-MM-DD"),
+        )
+
+        # Epic
+        epic = EpicConfig(
+            max_stories=self._get_nested(f"{v}.epic.max_stories", 0),
+            min_stories=self._get_nested(f"{v}.epic.min_stories", 0),
+            require_summary=self._get_nested(f"{v}.epic.require_summary", False),
+            require_description=self._get_nested(f"{v}.epic.require_description", False),
+            max_total_story_points=self._get_nested(f"{v}.epic.max_total_story_points", 0),
+            require_epic_owner=self._get_nested(f"{v}.epic.require_epic_owner", False),
+            max_in_progress_stories=self._get_nested(f"{v}.epic.max_in_progress_stories", 0),
+        )
+
+        # Custom Fields
+        custom_fields = CustomFieldsConfig(
+            mappings=self._get_nested(f"{v}.custom_fields.mappings", {}),
+            required=self._get_nested(f"{v}.custom_fields.required", []),
+            aliases=self._get_nested(f"{v}.custom_fields.aliases", CustomFieldsConfig().aliases),
+        )
+
+        # Formatting
+        formatting = FormattingConfig(
+            require_status_emoji=self._get_nested(f"{v}.formatting.require_status_emoji", False),
+            require_priority_emoji=self._get_nested(
+                f"{v}.formatting.require_priority_emoji", False
+            ),
+            allowed_header_levels=self._get_nested(
+                f"{v}.formatting.allowed_header_levels", [1, 2, 3]
+            ),
+            require_metadata_table=self._get_nested(
+                f"{v}.formatting.require_metadata_table", False
+            ),
+            allowed_markdown_elements=self._get_nested(
+                f"{v}.formatting.allowed_markdown_elements", []
+            ),
+            max_heading_depth=self._get_nested(f"{v}.formatting.max_heading_depth", 4),
+        )
+
+        # External Links
+        external_links = ExternalLinksConfig(
+            require_external_links=self._get_nested(
+                f"{v}.external_links.require_external_links", False
+            ),
+            allowed_domains=self._get_nested(f"{v}.external_links.allowed_domains", []),
+            forbidden_domains=self._get_nested(f"{v}.external_links.forbidden_domains", []),
+            require_https=self._get_nested(f"{v}.external_links.require_https", True),
+        )
+
+        # Behavior
+        behavior = BehaviorConfig(
+            strict=self._get_nested(f"{v}.behavior.strict", False),
+            fail_fast=self._get_nested(f"{v}.behavior.fail_fast", False),
+            ignore_rules=self._get_nested(f"{v}.behavior.ignore_rules", []),
+            warning_as_info=self._get_nested(f"{v}.behavior.warning_as_info", []),
+            auto_fix_ids=self._get_nested(f"{v}.behavior.auto_fix_ids", False),
+            auto_fix_statuses=self._get_nested(f"{v}.behavior.auto_fix_statuses", False),
+            auto_fix_priorities=self._get_nested(f"{v}.behavior.auto_fix_priorities", False),
+            auto_fix_case=self._get_nested(f"{v}.behavior.auto_fix_case", False),
+            auto_add_defaults=self._get_nested(f"{v}.behavior.auto_add_defaults", False),
+            show_suggestions=self._get_nested(f"{v}.behavior.show_suggestions", True),
+            max_errors_shown=self._get_nested(f"{v}.behavior.max_errors_shown", 50),
+            group_by_story=self._get_nested(f"{v}.behavior.group_by_story", True),
+        )
+
+        # Workflow
+        workflow = WorkflowConfig(
+            definition_of_done=self._get_nested(f"{v}.workflow.definition_of_done", []),
+            ready_for_dev_criteria=self._get_nested(f"{v}.workflow.ready_for_dev_criteria", []),
+            require_review=self._get_nested(f"{v}.workflow.require_review", False),
+            require_qa_signoff=self._get_nested(f"{v}.workflow.require_qa_signoff", False),
+            blocked_by_types=self._get_nested(f"{v}.workflow.blocked_by_types", []),
+            max_blocked_days=self._get_nested(f"{v}.workflow.max_blocked_days", 0),
+            require_parent=self._get_nested(f"{v}.workflow.require_parent", False),
+            require_epic_link=self._get_nested(f"{v}.workflow.require_epic_link", False),
+            allowed_parent_types=self._get_nested(f"{v}.workflow.allowed_parent_types", []),
+        )
+
+        # Scheduling
+        scheduling = SchedulingConfig(
+            max_story_age_days=self._get_nested(f"{v}.scheduling.max_story_age_days", 0),
+            stale_after_days=self._get_nested(f"{v}.scheduling.stale_after_days", 0),
+            require_start_date=self._get_nested(f"{v}.scheduling.require_start_date", False),
+            max_duration_days=self._get_nested(f"{v}.scheduling.max_duration_days", 0),
+            work_days_only=self._get_nested(f"{v}.scheduling.work_days_only", False),
+            sla_days=self._get_nested(f"{v}.scheduling.sla_days", 0),
+            warn_approaching_sla_days=self._get_nested(
+                f"{v}.scheduling.warn_approaching_sla_days", 0
+            ),
+            require_end_date=self._get_nested(f"{v}.scheduling.require_end_date", False),
+        )
+
+        # Development
+        development = DevelopmentConfig(
+            branch_naming_pattern=self._get_nested(f"{v}.development.branch_naming_pattern", ""),
+            require_branch_link=self._get_nested(f"{v}.development.require_branch_link", False),
+            require_pr_link=self._get_nested(f"{v}.development.require_pr_link", False),
+            commit_message_pattern=self._get_nested(f"{v}.development.commit_message_pattern", ""),
+            require_code_review=self._get_nested(f"{v}.development.require_code_review", False),
+            allowed_branch_prefixes=self._get_nested(
+                f"{v}.development.allowed_branch_prefixes", []
+            ),
+            require_merge_before_done=self._get_nested(
+                f"{v}.development.require_merge_before_done", False
+            ),
+        )
+
+        # Quality
+        quality = QualityConfig(
+            require_test_cases=self._get_nested(f"{v}.quality.require_test_cases", False),
+            min_test_cases=self._get_nested(f"{v}.quality.min_test_cases", 0),
+            require_test_plan=self._get_nested(f"{v}.quality.require_test_plan", False),
+            bug_severity_levels=self._get_nested(f"{v}.quality.bug_severity_levels", []),
+            require_reproduction_steps=self._get_nested(
+                f"{v}.quality.require_reproduction_steps", False
+            ),
+            require_expected_behavior=self._get_nested(
+                f"{v}.quality.require_expected_behavior", False
+            ),
+            require_actual_behavior=self._get_nested(f"{v}.quality.require_actual_behavior", False),
+            require_environment_info=self._get_nested(
+                f"{v}.quality.require_environment_info", False
+            ),
+            require_screenshots=self._get_nested(f"{v}.quality.require_screenshots", False),
+        )
+
+        # Documentation
+        documentation = DocumentationConfig(
+            require_api_docs=self._get_nested(f"{v}.documentation.require_api_docs", False),
+            require_changelog_entry=self._get_nested(
+                f"{v}.documentation.require_changelog_entry", False
+            ),
+            require_release_notes=self._get_nested(
+                f"{v}.documentation.require_release_notes", False
+            ),
+            documentation_link_required=self._get_nested(
+                f"{v}.documentation.documentation_link_required", False
+            ),
+            readme_update_required=self._get_nested(
+                f"{v}.documentation.readme_update_required", False
+            ),
+            require_user_docs=self._get_nested(f"{v}.documentation.require_user_docs", False),
+            docs_location_pattern=self._get_nested(f"{v}.documentation.docs_location_pattern", ""),
+        )
+
+        # Security
+        security = SecurityConfig(
+            require_security_review=self._get_nested(
+                f"{v}.security.require_security_review", False
+            ),
+            confidentiality_levels=self._get_nested(f"{v}.security.confidentiality_levels", []),
+            require_data_classification=self._get_nested(
+                f"{v}.security.require_data_classification", False
+            ),
+            pii_handling_required=self._get_nested(f"{v}.security.pii_handling_required", False),
+            require_threat_model=self._get_nested(f"{v}.security.require_threat_model", False),
+            compliance_tags=self._get_nested(f"{v}.security.compliance_tags", []),
+            require_vulnerability_scan=self._get_nested(
+                f"{v}.security.require_vulnerability_scan", False
+            ),
+            security_labels=self._get_nested(f"{v}.security.security_labels", []),
+        )
+
+        # Templates
+        templates = TemplatesConfig(
+            story_template=self._get_nested(f"{v}.templates.story_template", ""),
+            bug_template=self._get_nested(f"{v}.templates.bug_template", ""),
+            epic_template=self._get_nested(f"{v}.templates.epic_template", ""),
+            task_template=self._get_nested(f"{v}.templates.task_template", ""),
+            enforce_template=self._get_nested(f"{v}.templates.enforce_template", False),
+            allowed_sections=self._get_nested(f"{v}.templates.allowed_sections", []),
+            required_sections=self._get_nested(f"{v}.templates.required_sections", []),
+            section_order=self._get_nested(f"{v}.templates.section_order", []),
+        )
+
+        # Alerts
+        alerts = AlertsConfig(
+            alert_on_blocked=self._get_nested(f"{v}.alerts.alert_on_blocked", False),
+            alert_on_stale=self._get_nested(f"{v}.alerts.alert_on_stale", False),
+            alert_threshold_days=self._get_nested(f"{v}.alerts.alert_threshold_days", 0),
+            alert_on_over_estimate=self._get_nested(f"{v}.alerts.alert_on_over_estimate", False),
+            watchers=self._get_nested(f"{v}.alerts.watchers", []),
+            alert_on_unassigned=self._get_nested(f"{v}.alerts.alert_on_unassigned", False),
+            alert_on_no_estimate=self._get_nested(f"{v}.alerts.alert_on_no_estimate", False),
+            notification_channels=self._get_nested(f"{v}.alerts.notification_channels", []),
+        )
+
+        # Dependencies
+        dependencies = DependenciesConfig(
+            require_dependency_check=self._get_nested(
+                f"{v}.dependencies.require_dependency_check", False
+            ),
+            max_dependencies=self._get_nested(f"{v}.dependencies.max_dependencies", 0),
+            allow_circular_dependencies=self._get_nested(
+                f"{v}.dependencies.allow_circular_dependencies", False
+            ),
+            dependency_types=self._get_nested(f"{v}.dependencies.dependency_types", []),
+            cross_project_deps_allowed=self._get_nested(
+                f"{v}.dependencies.cross_project_deps_allowed", True
+            ),
+            require_dependency_approval=self._get_nested(
+                f"{v}.dependencies.require_dependency_approval", False
+            ),
+            blocked_dependency_types=self._get_nested(
+                f"{v}.dependencies.blocked_dependency_types", []
+            ),
+        )
+
+        # Archival
+        archival = ArchivalConfig(
+            auto_archive_after_days=self._get_nested(f"{v}.archival.auto_archive_after_days", 0),
+            archive_cancelled=self._get_nested(f"{v}.archival.archive_cancelled", False),
+            retention_days=self._get_nested(f"{v}.archival.retention_days", 0),
+            exclude_from_archive=self._get_nested(f"{v}.archival.exclude_from_archive", []),
+            archive_on_done=self._get_nested(f"{v}.archival.archive_on_done", False),
+            cleanup_stale_branches=self._get_nested(f"{v}.archival.cleanup_stale_branches", False),
+        )
+
+        # Capacity
+        capacity = CapacityConfig(
+            max_stories_per_assignee=self._get_nested(f"{v}.capacity.max_stories_per_assignee", 0),
+            max_points_per_sprint=self._get_nested(f"{v}.capacity.max_points_per_sprint", 0),
+            warn_overload_threshold=self._get_nested(f"{v}.capacity.warn_overload_threshold", 0),
+            require_capacity_check=self._get_nested(f"{v}.capacity.require_capacity_check", False),
+            max_parallel_stories=self._get_nested(f"{v}.capacity.max_parallel_stories", 0),
+            points_per_day=self._get_nested(f"{v}.capacity.points_per_day", 0.0),
+        )
+
+        # Environments
+        environments = EnvironmentsConfig(
+            allowed_environments=self._get_nested(f"{v}.environments.allowed_environments", []),
+            require_environment=self._get_nested(f"{v}.environments.require_environment", False),
+            environment_order=self._get_nested(f"{v}.environments.environment_order", []),
+            require_rollback_plan=self._get_nested(
+                f"{v}.environments.require_rollback_plan", False
+            ),
+            require_deployment_notes=self._get_nested(
+                f"{v}.environments.require_deployment_notes", False
+            ),
+            production_approval_required=self._get_nested(
+                f"{v}.environments.production_approval_required", False
+            ),
+        )
+
+        return ValidationConfig(
+            # Core sections
+            issue_types=issue_types,
+            naming=naming,
+            content=content,
+            estimation=estimation,
+            subtasks=subtasks,
+            statuses=statuses,
+            priorities=priorities,
+            labels=labels,
+            components=components,
+            assignees=assignees,
+            sprints=sprints,
+            versions=versions,
+            due_dates=due_dates,
+            epic=epic,
+            custom_fields=custom_fields,
+            formatting=formatting,
+            external_links=external_links,
+            behavior=behavior,
+            # Extended sections
+            workflow=workflow,
+            scheduling=scheduling,
+            development=development,
+            quality=quality,
+            documentation=documentation,
+            security=security,
+            templates=templates,
+            alerts=alerts,
+            dependencies=dependencies,
+            archival=archival,
+            capacity=capacity,
+            environments=environments,
         )
 
     def get(self, key: str, default: Any = None) -> Any:

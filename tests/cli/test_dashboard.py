@@ -374,7 +374,7 @@ class TestCLIIntegration:
         args = cli_parser.parse_args(
             [
                 "--dashboard",
-                "--markdown",
+                "--input",
                 "epic.md",
             ]
         )
