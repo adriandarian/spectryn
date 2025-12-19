@@ -394,7 +394,7 @@ class SyncOrchestrator:
         # Phase 1b: Create unmatched stories
         if self.config.create_stories and result.unmatched_stories:
             self._report_progress(progress_callback, "Creating stories", 2, total_phases)
-            self._create_unmatched_stories(epic_key, result)
+            self._create_unmatched_stories(epic_key, result, progress_callback)
             # Update matched count after creation
             result.stories_matched = len(self._matches)
             result.matched_stories = list(self._matches.items())
@@ -561,13 +561,19 @@ class SyncOrchestrator:
 
         result.stories_matched = len(self._matches)
 
-    def _create_unmatched_stories(self, epic_key: str, result: SyncResult) -> None:
+    def _create_unmatched_stories(
+        self,
+        epic_key: str,
+        result: SyncResult,
+        progress_callback: Callable[[str, int, int], None] | None = None,
+    ) -> None:
         """
         Create stories in Jira for unmatched markdown stories.
 
         Args:
             epic_key: The epic key to link new stories to.
             result: SyncResult to update with creation results.
+            progress_callback: Optional callback for progress updates.
         """
         if not hasattr(self.tracker, "create_story"):
             self.logger.warning("Tracker does not support story creation")
@@ -576,11 +582,19 @@ class SyncOrchestrator:
         # Get project key from epic key
         project_key = epic_key.split("-")[0] if "-" in epic_key else epic_key
 
+        # Get list of stories to create
+        stories_to_create = [
+            s for s in self._md_stories if str(s.id) in list(result.unmatched_stories)
+        ]
+        total_stories = len(stories_to_create)
+
         created_count = 0
-        for md_story in self._md_stories:
+        for i, md_story in enumerate(stories_to_create):
             story_id = str(md_story.id)
-            if story_id not in list(result.unmatched_stories):
-                continue  # Already matched
+
+            # Report sub-progress
+            if progress_callback:
+                progress_callback(f"Creating {i + 1}/{total_stories}", i, total_stories)
 
             # Format description
             description = ""
@@ -593,13 +607,14 @@ class SyncOrchestrator:
                 description += md_story.acceptance_criteria.to_markdown()
 
             # Create the story
+            # Note: Priority skipped - some Jira projects have custom priority schemes
             new_key = self.tracker.create_story(
                 summary=md_story.title,
                 description=description,
                 project_key=project_key,
                 epic_key=epic_key,
                 story_points=md_story.story_points,
-                priority=md_story.priority.jira_name if md_story.priority else None,
+                priority=None,  # TODO: Fetch valid priorities from Jira project
             )
 
             # Count as created (even in dry-run where new_key is None)
