@@ -16,7 +16,7 @@ Or import fixtures directly in conftest.py:
 
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock, create_autospec
 
 from .core.container import Container, reset_container
@@ -108,7 +108,7 @@ def create_mock_tracker(
     mock.transition_issue.return_value = True
     mock.add_comment.return_value = True
 
-    return mock
+    return cast(MagicMock, mock)
 
 
 def create_mock_parser(
@@ -137,7 +137,7 @@ def create_mock_parser(
     mock.parse.return_value = epic
     mock.parse_file.return_value = epic
 
-    return mock
+    return cast(MagicMock, mock)
 
 
 def create_mock_formatter() -> MagicMock:
@@ -158,7 +158,7 @@ def create_mock_formatter() -> MagicMock:
     mock.format_acceptance_criteria.return_value = mock.format_text.return_value
     mock.format_story.return_value = mock.format_text.return_value
 
-    return mock
+    return cast(MagicMock, mock)
 
 
 def create_test_config(
@@ -215,7 +215,7 @@ def create_test_sync_config(
 # =============================================================================
 
 
-def pytest_plugin_fixtures():
+def pytest_plugin_fixtures() -> dict[str, object]:
     """
     Returns pytest fixture functions that can be used in conftest.py.
 

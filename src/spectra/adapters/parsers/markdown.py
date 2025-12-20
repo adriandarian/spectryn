@@ -1037,8 +1037,6 @@ class MarkdownParser(DocumentParserPort):
         Returns:
             List of Comment objects
         """
-        from datetime import datetime
-
         from spectra.core.domain.entities import Comment
 
         comments = []

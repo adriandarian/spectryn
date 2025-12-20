@@ -283,7 +283,7 @@ class HasAttribute(Specification[T]):
 
     def is_satisfied_by(self, candidate: T) -> bool:
         actual = getattr(candidate, self.attribute, None)
-        return actual == self.value
+        return bool(actual == self.value)
 
     def __repr__(self) -> str:
         return f"HasAttribute({self.attribute}={self.value!r})"
@@ -302,7 +302,7 @@ class AttributeIn(Specification[T]):
 
     def is_satisfied_by(self, candidate: T) -> bool:
         actual = getattr(candidate, self.attribute, None)
-        return actual in self.values
+        return bool(actual in self.values)
 
     def __repr__(self) -> str:
         return f"AttributeIn({self.attribute} in {set(self.values)!r})"
@@ -599,8 +599,10 @@ class NeedsSyncSpec(Specification[Any]):
     def is_satisfied_by(self, candidate: Any) -> bool:
         # Check for dirty flag
         is_dirty = getattr(candidate, "is_dirty", None)
-        if is_dirty is not None:
+        if isinstance(is_dirty, bool):
             return is_dirty
+        if is_dirty is not None:
+            return bool(is_dirty)
 
         # Check for sync state
         last_synced = getattr(candidate, "last_synced", None)
@@ -611,7 +613,7 @@ class NeedsSyncSpec(Specification[Any]):
         if last_modified is None:
             return False  # No modification info
 
-        return last_modified > last_synced
+        return bool(last_modified > last_synced)
 
     def __repr__(self) -> str:
         return "NeedsSync"

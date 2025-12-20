@@ -36,7 +36,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from threading import Lock
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, cast
 
 
 T = TypeVar("T")
@@ -190,7 +190,7 @@ class Container:
         # Check overrides first (for testing)
         with self._lock:
             if service_type in self._overrides:
-                return self._overrides[service_type]
+                return cast(T, self._overrides[service_type])
 
         # Try to resolve from this container
         descriptor = self._get_descriptor(service_type)
@@ -201,7 +201,7 @@ class Container:
                 return self._parent.get(service_type)
             raise ServiceNotFoundError(f"Service not registered: {service_type.__name__}")
 
-        return self._resolve(descriptor)
+        return self._resolve(cast(ServiceDescriptor[T], descriptor))
 
     def try_get(self, service_type: type[T]) -> T | None:
         """

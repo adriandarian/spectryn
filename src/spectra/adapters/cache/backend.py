@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
@@ -250,7 +251,7 @@ class CacheBackend(ABC):
     def get_or_set(
         self,
         key: str,
-        factory: callable,
+        factory: Callable[[], T],
         ttl: float | None = None,
         tags: set[str] | None = None,
     ) -> T:

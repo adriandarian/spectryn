@@ -10,6 +10,7 @@ semantic capabilities, commonly used in technical documentation.
 import contextlib
 import logging
 import re
+from datetime import datetime
 from pathlib import Path
 
 from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
@@ -369,8 +370,6 @@ class AsciiDocParser(DocumentParserPort):
 
     def _extract_comments(self, content: str) -> list[Comment]:
         """Extract comments from quote blocks."""
-        from datetime import datetime
-
         comments = []
 
         section = self._extract_section(content, "Comments")

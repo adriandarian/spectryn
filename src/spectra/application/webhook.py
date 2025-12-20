@@ -178,11 +178,12 @@ class WebhookParser:
         if parent:
             parent_type = parent.get("fields", {}).get("issuetype", {}).get("name", "")
             if parent_type.lower() == "epic":
-                return parent.get("key")
+                parent_key = parent.get("key")
+                return parent_key if isinstance(parent_key, str) else None
 
         # Check epic link field (Jira classic)
         epic_link = fields.get(self.epic_link_field)
-        if epic_link:
+        if isinstance(epic_link, str):
             return epic_link
 
         # Check if this issue is an epic itself

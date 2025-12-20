@@ -54,7 +54,7 @@ class FieldSnapshot:
     value: Any
     hash: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.hash:
             self.hash = self._compute_hash(self.value)
 
@@ -226,7 +226,7 @@ class Conflict:
             return f"Local modified, remote deleted: {self.field}"
         if self.conflict_type == ConflictType.REMOTE_MODIFIED_LOCAL_DELETED:
             return f"Remote modified, local deleted: {self.field}"
-        return self.conflict_type.value
+        return str(self.conflict_type.value)
 
     def to_dict(self) -> dict:
         return {

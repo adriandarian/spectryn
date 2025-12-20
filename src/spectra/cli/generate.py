@@ -6,8 +6,12 @@ from existing Jira epics, bootstrapping the sync process.
 """
 
 import logging
-from dataclasses import dataclass, field
+from argparse import Namespace
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any
+
+from spectra.core.ports.issue_tracker import IssueData, IssueTrackerPort
 
 from .exit_codes import ExitCode
 from .output import Console, Symbols
@@ -58,13 +62,13 @@ class TemplateGenerator:
 
     def __init__(
         self,
-        tracker,  # IssueTrackerPort
+        tracker: IssueTrackerPort,
         console: Console,
         include_subtasks: bool = True,
         include_descriptions: bool = True,
         include_acceptance_criteria: bool = True,
         template_style: str = "full",  # "full", "minimal", "skeleton"
-    ):
+    ) -> None:
         """
         Initialize the template generator.
 
@@ -76,7 +80,7 @@ class TemplateGenerator:
             include_acceptance_criteria: Include acceptance criteria as subtasks.
             template_style: Style of template ("full", "minimal", "skeleton").
         """
-        self.tracker = tracker
+        self.tracker: IssueTrackerPort = tracker
         self.console = console
         self.include_subtasks = include_subtasks
         self.include_descriptions = include_descriptions
@@ -173,26 +177,29 @@ class TemplateGenerator:
     # Private Methods
     # -------------------------------------------------------------------------
 
-    def _fetch_epic(self, epic_key: str, result: GenerateResult) -> dict | None:
+    def _fetch_epic(self, epic_key: str, result: GenerateResult) -> dict[str, Any] | None:
         """Fetch epic data from Jira."""
         try:
-            return self.tracker.get_issue(epic_key)
+            issue = self.tracker.get_issue(epic_key)
+            return self._normalize_issue(issue)
         except Exception as e:
             result.add_error(f"Failed to fetch epic {epic_key}: {e}")
             return None
 
-    def _fetch_stories(self, epic_key: str, result: GenerateResult) -> list[dict]:
+    def _fetch_stories(self, epic_key: str, result: GenerateResult) -> list[dict[str, Any]]:
         """Fetch stories under the epic."""
         try:
-            return self.tracker.get_epic_children(epic_key)
+            return [
+                self._normalize_issue(issue) for issue in self.tracker.get_epic_children(epic_key)
+            ]
         except Exception as e:
             result.add_error(f"Failed to fetch stories: {e}")
             return []
 
     def _generate_markdown(
         self,
-        epic_data: dict,
-        stories: list[dict],
+        epic_data: dict[str, Any],
+        stories: list[dict[str, Any]],
         result: GenerateResult,
     ) -> str:
         """Generate markdown content from Jira data."""
@@ -345,7 +352,7 @@ class TemplateGenerator:
             "",
         ]
 
-    def _extract_description(self, description) -> str:
+    def _extract_description(self, description: Any) -> str:
         """Extract plain text from Jira description (ADF or plain text)."""
         if not description:
             return ""
@@ -358,6 +365,12 @@ class TemplateGenerator:
             return self._extract_text_from_adf(description)
 
         return str(description)
+
+    def _normalize_issue(self, issue: IssueData | dict[str, Any]) -> dict[str, Any]:
+        """Convert IssueData objects to dictionaries for rendering."""
+        if isinstance(issue, IssueData):
+            return asdict(issue)
+        return issue
 
     def _extract_text_from_adf(self, adf: dict) -> str:
         """Extract plain text from Atlassian Document Format."""
@@ -423,7 +436,7 @@ class TemplateGenerator:
             result.add_error(f"Failed to write file: {e}")
 
 
-def run_generate(args, console: Console) -> int:
+def run_generate(args: Namespace, console: Console) -> int:
     """
     Run the generate command.
 

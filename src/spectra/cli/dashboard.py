@@ -13,6 +13,9 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 
+from spectra.core.ports.document_parser import DocumentParserPort
+from spectra.core.ports.issue_tracker import IssueTrackerPort
+
 from .exit_codes import ExitCode
 from .output import Colors, Console, Symbols
 
@@ -540,8 +543,8 @@ class Dashboard:
 def load_dashboard_data(
     markdown_path: str | None = None,
     epic_key: str | None = None,
-    tracker=None,
-    parser=None,
+    tracker: IssueTrackerPort | None = None,
+    parser: DocumentParserPort | None = None,
 ) -> DashboardData:
     """
     Load data for the dashboard.

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
 
 
 logger = logging.getLogger(__name__)
@@ -388,8 +389,11 @@ class StateStore:
 
         try:
             with open(index_file) as f:
-                index = json.load(f)
-            return index.get("sessions", [])
+                index: dict[str, Any] = json.load(f)
+            sessions = index.get("sessions", [])
+            if not isinstance(sessions, list):
+                return []
+            return cast(list[dict[str, Any]], sessions)
         except (json.JSONDecodeError, KeyError):
             return []
 

@@ -235,7 +235,7 @@ class MarkdownUpdater:
     while updating fields that changed in Jira.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the updater."""
         self.writer = MarkdownWriter()
 

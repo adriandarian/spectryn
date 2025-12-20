@@ -183,21 +183,23 @@ Environment Variables:
     )
     parser.add_argument("--epic", "-e", type=str, help="Jira epic key (e.g., PROJ-123)")
 
-    # Execution mode
-    parser.add_argument(
+    execution_group = parser.add_argument_group("Execution")
+    execution_group.add_argument(
         "--execute", "-x", action="store_true", help="Execute changes (default is dry-run)"
     )
-    parser.add_argument(
+    execution_group.add_argument(
         "--dry-run",
         "-n",
         action="store_true",
         help="Preview changes without executing (this is the default, use for explicit clarity)",
     )
-    parser.add_argument("--no-confirm", action="store_true", help="Skip confirmation prompts")
-    parser.add_argument(
+    execution_group.add_argument(
+        "--no-confirm", action="store_true", help="Skip confirmation prompts"
+    )
+    execution_group.add_argument(
         "--incremental", action="store_true", help="Only sync changed stories (skip unchanged)"
     )
-    parser.add_argument(
+    execution_group.add_argument(
         "--force-full-sync",
         action="store_true",
         help="Force full sync even when --incremental is set",
@@ -208,8 +210,8 @@ Environment Variables:
         help="Write tracker info (issue key, URL) back to source markdown file after sync",
     )
 
-    # Phase control
-    parser.add_argument(
+    phase_group = parser.add_argument_group("Phase control")
+    phase_group.add_argument(
         "--phase",
         type=str,
         choices=["all", "descriptions", "subtasks", "comments", "statuses"],
@@ -217,25 +219,27 @@ Environment Variables:
         help="Which phase to run (default: all)",
     )
 
-    # Filters
-    parser.add_argument("--story", type=str, help="Filter to specific story ID (e.g., US-001)")
+    filters_group = parser.add_argument_group("Filters")
+    filters_group.add_argument(
+        "--story", type=str, help="Filter to specific story ID (e.g., US-001)"
+    )
 
-    # Configuration
-    parser.add_argument(
+    config_group = parser.add_argument_group("Configuration")
+    config_group.add_argument(
         "--config", "-c", type=str, help="Path to config file (.spectra.yaml, .spectra.toml)"
     )
-    parser.add_argument("--jira-url", type=str, help="Override Jira URL")
-    parser.add_argument("--project", type=str, help="Override Jira project key")
+    config_group.add_argument("--jira-url", type=str, help="Override Jira URL")
+    config_group.add_argument("--project", type=str, help="Override Jira project key")
 
-    # Output options
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument(
+    output_group = parser.add_argument_group("Output")
+    output_group.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    output_group.add_argument(
         "--quiet",
         "-q",
         action="store_true",
         help="Quiet mode - only show errors and final summary (for CI/scripting)",
     )
-    parser.add_argument(
+    output_group.add_argument(
         "--output",
         "-o",
         type=str,

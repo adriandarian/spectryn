@@ -520,7 +520,7 @@ class DiffFormatter:
         """Extract plain text from ADF document."""
         text_parts = []
 
-        def extract(node):
+        def extract(node: Any) -> None:
             if isinstance(node, dict):
                 if node.get("type") == "text":
                     text_parts.append(node.get("text", ""))

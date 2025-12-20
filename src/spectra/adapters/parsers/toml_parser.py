@@ -8,15 +8,16 @@ easy to read and write due to its clear semantics.
 """
 
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    import tomli as tomllib  # Fallback for older Python
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 from spectra.core.domain.entities import Comment, Epic, Subtask, UserStory
 from spectra.core.domain.enums import Priority, Status

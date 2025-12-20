@@ -15,7 +15,7 @@ import asyncio
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 
 if TYPE_CHECKING:
@@ -435,7 +435,7 @@ class ParallelSyncOperations:
             finally:
                 await self.close_async()
 
-        return run_async(_run())
+        return cast(ParallelSyncResult, run_async(_run()))
 
     def update_descriptions_parallel(
         self,
@@ -459,7 +459,7 @@ class ParallelSyncOperations:
             finally:
                 await self.close_async()
 
-        return run_async(_run())
+        return cast(ParallelSyncResult, run_async(_run()))
 
     def create_subtasks_parallel(
         self,
@@ -483,7 +483,7 @@ class ParallelSyncOperations:
             finally:
                 await self.close_async()
 
-        return run_async(_run())
+        return cast(ParallelSyncResult, run_async(_run()))
 
     def add_comments_parallel(
         self,
@@ -507,7 +507,7 @@ class ParallelSyncOperations:
             finally:
                 await self.close_async()
 
-        return run_async(_run())
+        return cast(ParallelSyncResult, run_async(_run()))
 
     def transition_issues_parallel(
         self,
@@ -531,7 +531,7 @@ class ParallelSyncOperations:
             finally:
                 await self.close_async()
 
-        return run_async(_run())
+        return cast(ParallelSyncResult, run_async(_run()))
 
 
 def is_parallel_available() -> bool:

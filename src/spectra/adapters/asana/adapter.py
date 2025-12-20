@@ -239,7 +239,8 @@ class AsanaAdapter(IssueTrackerPort):
     # Read operations
     # ------------------------------------------------------------------
     def get_current_user(self) -> dict[str, Any]:
-        return self._request("GET", "/users/me")
+        result = self._request("GET", "/users/me")
+        return result if isinstance(result, dict) else {}
 
     def get_issue(self, issue_key: str) -> IssueData:
         data = self._request(
@@ -320,7 +321,8 @@ class AsanaAdapter(IssueTrackerPort):
             payload["custom_fields"] = {self.config.story_points_field: story_points}
 
         data = self._request("POST", f"/tasks/{parent_key}/subtasks", json={"data": payload})
-        return data.get("gid")
+        gid = data.get("gid") if isinstance(data, dict) else None
+        return str(gid) if gid is not None else None
 
     def update_subtask(
         self,

@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "A production-grade CLI tool for synchronizing markdown specifications with issue trackers"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name = "Adrian Darian", email = "adrian.the.hactus@gmail.com"}
 ]
@@ -42,7 +42,7 @@ classifiers = [
 dependencies = [
     "requests>=2.28.0",
     "pyyaml>=6.0",  # YAML config file support
-    "tomli>=2.0; python_version < '3.11'",  # TOML support for Python 3.10
+    "tomli>=2.0; python_version < '3.11'",  # TOML support for Python <3.11
 ]
 
 [project.optional-dependencies]
@@ -136,7 +136,7 @@ omit = ["*/tests/*", "*/__main__.py"]
 
 [tool.coverage.report]
 # Target: 80%+ coverage. Current baseline: ~65%. Increase as coverage improves.
-fail_under = 65
+fail_under = 80
 show_missing = true
 skip_covered = false
 precision = 2
@@ -153,13 +153,13 @@ exclude_lines = [
 # ============================================================================
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 mypy_path = "src"
 packages = ["spectra"]
-warn_return_any = false  # TODO: Enable and fix
+warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false  # TODO: Enable and fix
-disallow_incomplete_defs = false  # TODO: Enable and fix
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
 check_untyped_defs = true
 strict_optional = true
 warn_redundant_casts = true
@@ -187,9 +187,11 @@ disable_error_code = ["type-abstract", "assignment", "valid-type", "type-var", "
 [[tool.mypy.overrides]]
 # CLI modules have some dynamic patterns
 module = [
-    "spectra.cli.app",
-    "spectra.cli.health",
+    "spectra.cli.*",
 ]
+warn_return_any = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 disable_error_code = ["union-attr", "arg-type", "assignment", "attr-defined"]
 
 [[tool.mypy.overrides]]
@@ -205,7 +207,10 @@ module = [
     "spectra.adapters.config.*",
     "spectra.adapters.async_base.*",
 ]
-disable_error_code = ["index", "union-attr", "var-annotated", "arg-type", "assignment", "attr-defined", "return-value", "name-defined", "dict-item"]
+warn_return_any = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disable_error_code = ["index", "union-attr", "var-annotated", "arg-type", "assignment", "attr-defined", "return-value", "name-defined", "dict-item", "import-untyped"]
 
 [[tool.mypy.overrides]]
 # Application sync modules
@@ -213,6 +218,15 @@ module = [
     "spectra.application.sync.*",
 ]
 disable_error_code = ["name-defined", "attr-defined", "call-arg", "arg-type", "assignment"]
+
+[[tool.mypy.overrides]]
+# Plugin modules are currently lightweight wrappers around adapters
+module = [
+    "spectra.plugins.*",
+]
+warn_return_any = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 
 [[tool.mypy.overrides]]
 # Testing utilities
