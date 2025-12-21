@@ -251,3 +251,236 @@ class TestEpic:
             ],
         )
         assert epic.completion_percentage == 50.0
+
+    def test_epic_with_story_id_key(self):
+        """Test Epic can use StoryId as key."""
+        epic = Epic(
+            key=StoryId("EPIC-100"),
+            title="Test Epic",
+        )
+        assert str(epic.key) == "EPIC-100"
+
+    def test_epic_find_story_not_found(self):
+        """Test finding non-existent story returns None."""
+        epic = Epic(
+            key=IssueKey("PROJ-1"),
+            title="Test Epic",
+            stories=[UserStory(id=StoryId("US-001"), title="Only Story")],
+        )
+        found = epic.find_story_by_title("Nonexistent")
+        assert found is None
+
+    def test_epic_total_story_points(self):
+        """Test calculating total story points."""
+        epic = Epic(
+            key=IssueKey("PROJ-1"),
+            title="Test Epic",
+            stories=[
+                UserStory(id=StoryId("US-001"), title="S1", story_points=3),
+                UserStory(id=StoryId("US-002"), title="S2", story_points=5),
+                UserStory(id=StoryId("US-003"), title="S3", story_points=8),
+            ],
+        )
+        assert epic.total_story_points == 16
+
+    def test_epic_empty_stories_completion(self):
+        """Test completion percentage with no stories."""
+        epic = Epic(
+            key=IssueKey("PROJ-1"),
+            title="Empty Epic",
+            stories=[],
+        )
+        # Empty epic returns 0.0 completion
+        assert epic.completion_percentage == 0.0
+
+
+class TestStoryIdAdvanced:
+    """Additional tests for StoryId edge cases."""
+
+    def test_story_id_underscore_separator(self):
+        """Test underscore separator."""
+        sid = StoryId("PROJ_123")
+        assert sid.prefix == "PROJ"
+        assert sid.separator == "_"
+        assert sid.number == 123
+
+    def test_story_id_slash_separator(self):
+        """Test slash separator."""
+        sid = StoryId("PROJ/456")
+        assert sid.prefix == "PROJ"
+        assert sid.separator == "/"
+        assert sid.number == 456
+
+    def test_story_id_numeric(self):
+        """Test purely numeric story ID."""
+        sid = StoryId("123")
+        assert sid.is_numeric is True
+        assert sid.prefix == ""
+        assert sid.number == 123
+
+    def test_story_id_github_style(self):
+        """Test GitHub-style #123 format."""
+        sid = StoryId("#42")
+        assert sid.is_numeric is True
+        assert sid.number == 42
+
+    def test_story_id_no_separator(self):
+        """Test story ID with no separator character."""
+        sid = StoryId("123")
+        assert sid.separator == ""
+
+
+class TestIssueKeyAdvanced:
+    """Additional tests for IssueKey edge cases."""
+
+    def test_issue_key_underscore_separator(self):
+        """Test underscore separator."""
+        key = IssueKey("PROJ_123")
+        assert key.project == "PROJ"
+        assert key.separator == "_"
+        assert key.number == 123
+
+    def test_issue_key_slash_separator(self):
+        """Test slash separator."""
+        key = IssueKey("PROJ/456")
+        assert key.project == "PROJ"
+        assert key.separator == "/"
+        assert key.number == 456
+
+    def test_issue_key_numeric(self):
+        """Test purely numeric issue key (Azure DevOps style)."""
+        key = IssueKey("789")
+        assert key.is_numeric is True
+        assert key.project == ""
+        assert key.number == 789
+
+    def test_issue_key_github_style(self):
+        """Test GitHub-style #123 format."""
+        key = IssueKey("#42")
+        assert key.is_numeric is True
+        assert key.number == 42
+
+    def test_issue_key_str_uppercase(self):
+        """Test string representation is uppercase."""
+        key = IssueKey("proj-123")
+        assert str(key) == "PROJ-123"
+
+    def test_issue_key_numeric_str(self):
+        """Test numeric key string representation."""
+        key = IssueKey("#99")
+        assert str(key) == "#99"
+
+
+class TestAcceptanceCriteriaAdvanced:
+    """Additional tests for AcceptanceCriteria."""
+
+    def test_empty_criteria(self):
+        """Test empty acceptance criteria."""
+        ac = AcceptanceCriteria.from_list([])
+        assert len(ac) == 0
+        assert ac.completion_ratio == 1.0
+
+    def test_all_checked(self):
+        """Test all criteria checked."""
+        ac = AcceptanceCriteria.from_list(["A", "B", "C"], [True, True, True])
+        assert ac.completion_ratio == 1.0
+
+    def test_iteration(self):
+        """Test iterating over criteria."""
+        ac = AcceptanceCriteria.from_list(["A", "B"], [True, False])
+        items = list(ac)
+        assert items[0] == ("A", True)
+        assert items[1] == ("B", False)
+
+
+class TestDescriptionAdvanced:
+    """Additional tests for Description."""
+
+    def test_from_markdown_no_match(self):
+        """Test from_markdown with non-matching content."""
+        desc = Description.from_markdown("Just some text")
+        assert desc is None
+
+    def test_to_plain_text(self):
+        """Test to_plain_text conversion."""
+        desc = Description(role="user", want="a feature", benefit="I can do stuff")
+        plain = desc.to_plain_text()
+        assert "As a user" in plain
+        assert "I want a feature" in plain
+        assert "so that I can do stuff" in plain
+
+    def test_description_str(self):
+        """Test string representation."""
+        desc = Description(role="dev", want="code", benefit="it works")
+        assert str(desc) == desc.to_plain_text()
+
+    def test_to_markdown_with_additional_context(self):
+        """Test to_markdown with additional context."""
+        desc = Description(
+            role="user",
+            want="feature",
+            benefit="value",
+            additional_context="Extra notes here",
+        )
+        md = desc.to_markdown()
+        assert "Extra notes here" in md
+
+
+class TestUserStoryAdvanced:
+    """Additional tests for UserStory."""
+
+    def test_find_subtask_not_found(self):
+        """Test find_subtask when not found."""
+        story = UserStory(
+            id=StoryId("US-001"),
+            title="Test",
+            subtasks=[Subtask(name="Existing")],
+        )
+        found = story.find_subtask("Nonexistent")
+        assert found is None
+
+    def test_story_with_external_key(self):
+        """Test story with external key."""
+        story = UserStory(
+            id=StoryId("US-001"),
+            title="Story",
+            external_key="PROJ-123",
+            external_url="https://jira.example.com/browse/PROJ-123",
+        )
+        assert story.external_key == "PROJ-123"
+        assert "jira.example.com" in story.external_url
+
+    def test_story_with_labels(self):
+        """Test story with labels."""
+        story = UserStory(
+            id=StoryId("US-001"),
+            title="Labeled Story",
+            labels=["backend", "api", "urgent"],
+        )
+        assert len(story.labels) == 3
+        assert "backend" in story.labels
+
+
+class TestSubtaskAdvanced:
+    """Additional tests for Subtask."""
+
+    def test_subtask_with_all_fields(self):
+        """Test subtask with all fields."""
+        st = Subtask(
+            number=1,
+            name="Test Subtask",
+            description="Description here",
+            story_points=3,
+            status=Status.IN_PROGRESS,
+            assignee="user@example.com",
+            external_key="PROJ-456",
+        )
+        assert st.number == 1
+        assert st.story_points == 3
+        assert st.status == Status.IN_PROGRESS
+        assert st.external_key == "PROJ-456"
+
+    def test_subtask_default_status(self):
+        """Test subtask default status is PLANNED."""
+        st = Subtask(name="Test")
+        assert st.status == Status.PLANNED
