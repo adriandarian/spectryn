@@ -7,9 +7,9 @@
 ## 🔴 High Priority (Core Flexibility)
 
 ### ID Format Support
-- [ ] **Custom ID Separators** - Support `PROJ_123` and `PROJ/123` in addition to `PROJ-123`
-- [ ] **Universal `#123` ID Support** - Extend GitHub-style IDs to all parsers (currently only NotionParser)
-- [ ] **Flexible ID Prefixes** - Ensure all parsers handle varied prefixes (`US-001`, `EU-001`, `PROJ-123`, `A-1`, `VERYLONGPREFIX-99999`)
+- [x] **Custom ID Separators** - Support `PROJ_123` and `PROJ/123` in addition to `PROJ-123`
+- [x] **Universal `#123` ID Support** - Extend GitHub-style IDs to all parsers (MarkdownParser, YamlParser, JsonParser, AsciiDocParser, NotionParser)
+- [x] **Flexible ID Prefixes** - All parsers handle varied prefixes (`US-001`, `EU-001`, `PROJ-123`, `A-1`, `VERYLONGPREFIX-99999`)
 
 ---
 

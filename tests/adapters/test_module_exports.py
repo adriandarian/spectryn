@@ -89,3 +89,4 @@ class TestTrackersExports:
         assert "GitHubAdapter" in trackers.__all__
         assert "JiraAdapter" in trackers.__all__
         assert "LinearAdapter" in trackers.__all__
+

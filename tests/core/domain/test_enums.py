@@ -251,3 +251,4 @@ class TestIssueType:
             """Test unknown issue type defaults to task."""
             assert IssueType.from_string("unknown") == IssueType.TASK
             assert IssueType.from_string("") == IssueType.TASK
+

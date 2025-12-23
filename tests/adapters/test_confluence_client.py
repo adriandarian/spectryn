@@ -544,3 +544,4 @@ class TestConfluenceAPIError:
             response_body='{"error": "Invalid"}',
         )
         assert error.response_body == '{"error": "Invalid"}'
+

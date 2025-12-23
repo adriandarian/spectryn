@@ -263,3 +263,4 @@ class TestFormatterPlugin:
         plugin = ConcreteFormatterPlugin()
 
         assert plugin.get_formatter() == "mock_formatter"
+

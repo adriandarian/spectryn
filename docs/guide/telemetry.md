@@ -467,3 +467,4 @@ If telemetry causes high memory usage:
 - [Docker](/guide/docker) – Running spectra in containers
 - [Architecture](/guide/architecture) – System design overview
 
+

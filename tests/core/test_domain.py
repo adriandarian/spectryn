@@ -116,6 +116,82 @@ class TestStoryId:
         # Post-init normalizes
         assert str(sid2) == "FEAT-042"
 
+    # -------------------------------------------------------------------------
+    # Custom ID Separator Tests
+    # -------------------------------------------------------------------------
+
+    def test_underscore_separator(self):
+        """Test underscore separator in story ID."""
+        sid = StoryId("PROJ_123")
+        assert str(sid) == "PROJ_123"
+        assert sid.prefix == "PROJ"
+        assert sid.separator == "_"
+        assert sid.number == 123
+
+    def test_slash_separator(self):
+        """Test forward slash separator in story ID."""
+        sid = StoryId("PROJ/456")
+        assert str(sid) == "PROJ/456"
+        assert sid.prefix == "PROJ"
+        assert sid.separator == "/"
+        assert sid.number == 456
+
+    def test_hyphen_separator(self):
+        """Test hyphen separator (standard)."""
+        sid = StoryId("PROJ-789")
+        assert str(sid) == "PROJ-789"
+        assert sid.prefix == "PROJ"
+        assert sid.separator == "-"
+        assert sid.number == 789
+
+    def test_underscore_normalizes_prefix(self):
+        """Test that underscore-separated IDs normalize prefix to uppercase."""
+        sid = StoryId.from_string("proj_123")
+        assert str(sid) == "PROJ_123"
+
+    def test_slash_normalizes_prefix(self):
+        """Test that slash-separated IDs normalize prefix to uppercase."""
+        sid = StoryId.from_string("feat/042")
+        assert str(sid) == "FEAT/042"
+
+    # -------------------------------------------------------------------------
+    # GitHub-Style #123 ID Tests
+    # -------------------------------------------------------------------------
+
+    def test_github_style_id(self):
+        """Test GitHub-style #123 ID."""
+        sid = StoryId("#123")
+        assert str(sid) == "#123"
+        assert sid.number == 123
+        assert sid.prefix == ""
+        assert sid.is_numeric
+
+    def test_github_style_id_single_digit(self):
+        """Test GitHub-style single digit ID."""
+        sid = StoryId("#1")
+        assert str(sid) == "#1"
+        assert sid.number == 1
+
+    def test_github_style_id_large_number(self):
+        """Test GitHub-style large number ID."""
+        sid = StoryId("#99999")
+        assert str(sid) == "#99999"
+        assert sid.number == 99999
+
+    def test_purely_numeric_id(self):
+        """Test purely numeric ID (no # prefix)."""
+        sid = StoryId("456")
+        assert str(sid) == "456"
+        assert sid.number == 456
+        assert sid.prefix == ""
+        assert sid.is_numeric
+
+    def test_github_style_preserves_hash(self):
+        """Test that # prefix is preserved in GitHub-style IDs."""
+        sid = StoryId.from_string("#42")
+        # Should preserve the # prefix
+        assert str(sid) == "#42"
+
 
 class TestIssueKey:
     """Tests for IssueKey value object."""
@@ -128,6 +204,62 @@ class TestIssueKey:
     def test_invalid_key(self):
         with pytest.raises(ValueError):
             IssueKey("invalid")
+
+    # -------------------------------------------------------------------------
+    # Custom ID Separator Tests
+    # -------------------------------------------------------------------------
+
+    def test_underscore_separator(self):
+        """Test underscore separator in issue key."""
+        key = IssueKey("PROJ_456")
+        assert key.project == "PROJ"
+        assert key.separator == "_"
+        assert key.number == 456
+
+    def test_slash_separator(self):
+        """Test forward slash separator in issue key."""
+        key = IssueKey("PROJ/789")
+        assert key.project == "PROJ"
+        assert key.separator == "/"
+        assert key.number == 789
+
+    def test_hyphen_separator(self):
+        """Test hyphen separator (standard Jira-style)."""
+        key = IssueKey("PROJ-123")
+        assert key.project == "PROJ"
+        assert key.separator == "-"
+        assert key.number == 123
+
+    # -------------------------------------------------------------------------
+    # GitHub-Style #123 ID Tests
+    # -------------------------------------------------------------------------
+
+    def test_github_style_issue_key(self):
+        """Test GitHub-style #123 issue key."""
+        key = IssueKey("#123")
+        assert key.number == 123
+        assert key.project == ""
+        assert key.is_numeric
+
+    def test_purely_numeric_issue_key(self):
+        """Test purely numeric issue key (Azure DevOps style)."""
+        key = IssueKey("456")
+        assert key.number == 456
+        assert key.project == ""
+        assert key.is_numeric
+
+    def test_str_preserves_format(self):
+        """Test that string representation preserves the ID format."""
+        # Prefix-based IDs are uppercased
+        key1 = IssueKey("proj-123")
+        assert str(key1) == "PROJ-123"
+
+        # Numeric IDs are preserved
+        key2 = IssueKey("#42")
+        assert str(key2) == "#42"
+
+        key3 = IssueKey("789")
+        assert str(key3) == "789"
 
 
 class TestCommitRef:
