@@ -588,6 +588,188 @@ class GitLabApiClient:
         return result if isinstance(result, list) else []
 
     # -------------------------------------------------------------------------
+    # Merge Requests API
+    # -------------------------------------------------------------------------
+
+    def get_merge_request(self, merge_request_iid: int) -> dict[str, Any]:
+        """Get a single merge request by IID."""
+        result = self.get(self.project_endpoint(f"merge_requests/{merge_request_iid}"))
+        return result if isinstance(result, dict) else {}
+
+    def list_merge_requests(
+        self,
+        state: str = "opened",
+        per_page: int = 100,
+        page: int = 1,
+    ) -> list[dict[str, Any]]:
+        """List merge requests in the project."""
+        params: dict[str, Any] = {
+            "state": state,
+            "per_page": per_page,
+            "page": page,
+        }
+        result = self.get(self.project_endpoint("merge_requests"), params=params)
+        return result if isinstance(result, list) else []
+
+    def get_merge_requests_for_issue(self, issue_iid: int) -> list[dict[str, Any]]:
+        """Get all merge requests that reference an issue."""
+        # GitLab automatically links MRs that reference issues in description/title
+        # We can search for MRs that mention the issue
+        all_mrs = self.list_merge_requests(state="all")
+        issue_ref = f"#{issue_iid}"
+        linked_mrs = []
+        for mr in all_mrs:
+            description = mr.get("description", "") or ""
+            title = mr.get("title", "") or ""
+            if issue_ref in description or issue_ref in title:
+                linked_mrs.append(mr)
+        return linked_mrs
+
+    def link_merge_request_to_issue(
+        self,
+        merge_request_iid: int,
+        issue_iid: int,
+        action: str = "closes",
+    ) -> bool:
+        """
+        Link a merge request to an issue by updating MR description.
+
+        GitLab automatically links MRs that reference issues using keywords:
+        - "closes #123", "fixes #123", "resolves #123" - closes the issue
+        - "relates to #123" - links without closing
+
+        Args:
+            merge_request_iid: Merge request IID
+            issue_iid: Issue IID to link
+            action: Action keyword ("closes", "fixes", "resolves", "relates to")
+        """
+        mr = self.get_merge_request(merge_request_iid)
+        current_description = mr.get("description", "") or ""
+        issue_ref = f"{action} #{issue_iid}"
+
+        # Check if already linked
+        if f"#{issue_iid}" in current_description:
+            return True
+
+        # Add reference to description
+        new_description = f"{current_description}\n\n{issue_ref}".strip()
+        self.update_merge_request(merge_request_iid, description=new_description)
+        return True
+
+    def update_merge_request(
+        self,
+        merge_request_iid: int,
+        title: str | None = None,
+        description: str | None = None,
+        state_event: str | None = None,
+    ) -> dict[str, Any]:
+        """Update a merge request."""
+        data: dict[str, Any] = {}
+        if title is not None:
+            data["title"] = title
+        if description is not None:
+            data["description"] = description
+        if state_event is not None:
+            data["state_event"] = state_event  # 'close', 'reopen', 'merge'
+
+        result = self.put(self.project_endpoint(f"merge_requests/{merge_request_iid}"), json=data)
+        return result if isinstance(result, dict) else {}
+
+    # -------------------------------------------------------------------------
+    # Issue Boards API
+    # -------------------------------------------------------------------------
+
+    def list_boards(self) -> list[dict[str, Any]]:
+        """List all issue boards in the project."""
+        result = self.get(self.project_endpoint("boards"))
+        return result if isinstance(result, list) else []
+
+    def get_board(self, board_id: int) -> dict[str, Any]:
+        """Get a single board."""
+        result = self.get(self.project_endpoint(f"boards/{board_id}"))
+        return result if isinstance(result, dict) else {}
+
+    def get_board_lists(self, board_id: int) -> list[dict[str, Any]]:
+        """Get all lists (columns) for a board."""
+        result = self.get(self.project_endpoint(f"boards/{board_id}/lists"))
+        return result if isinstance(result, list) else []
+
+    def move_issue_to_board_list(
+        self,
+        issue_iid: int,
+        board_id: int,
+        list_id: int,
+    ) -> bool:
+        """Move an issue to a specific board list."""
+        result = self.put(
+            self.project_endpoint(f"boards/{board_id}/lists/{list_id}/issues/{issue_iid}")
+        )
+        return isinstance(result, dict)
+
+    def get_issue_board_position(self, issue_iid: int) -> dict[str, Any] | None:
+        """Get the board position for an issue."""
+        result = self.get(self.project_endpoint(f"issues/{issue_iid}/board_position"))
+        return result if isinstance(result, dict) else None
+
+    # -------------------------------------------------------------------------
+    # Time Tracking API
+    # -------------------------------------------------------------------------
+
+    def get_issue_time_stats(self, issue_iid: int) -> dict[str, Any]:
+        """Get time tracking statistics for an issue."""
+        result = self.get(self.project_endpoint(f"issues/{issue_iid}/time_stats"))
+        return result if isinstance(result, dict) else {}
+
+    def add_spent_time(
+        self,
+        issue_iid: int,
+        duration: str,
+        summary: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Add spent time to an issue.
+
+        Args:
+            issue_iid: Issue IID
+            duration: Time duration (e.g., "1h 30m", "2h", "45m")
+            summary: Optional summary/note for the time entry
+
+        Returns:
+            Updated time stats
+        """
+        data: dict[str, Any] = {"duration": duration}
+        if summary:
+            data["summary"] = summary
+
+        result = self.post(self.project_endpoint(f"issues/{issue_iid}/add_spent_time"), json=data)
+        return result if isinstance(result, dict) else {}
+
+    def reset_spent_time(self, issue_iid: int) -> dict[str, Any]:
+        """Reset spent time for an issue."""
+        result = self.post(self.project_endpoint(f"issues/{issue_iid}/reset_spent_time"))
+        return result if isinstance(result, dict) else {}
+
+    def estimate_time(self, issue_iid: int, duration: str) -> dict[str, Any]:
+        """
+        Set time estimate for an issue.
+
+        Args:
+            issue_iid: Issue IID
+            duration: Time estimate (e.g., "3h 30m", "1d", "2w")
+
+        Returns:
+            Updated time stats
+        """
+        data = {"duration": duration}
+        result = self.post(self.project_endpoint(f"issues/{issue_iid}/time_estimate"), json=data)
+        return result if isinstance(result, dict) else {}
+
+    def reset_time_estimate(self, issue_iid: int) -> dict[str, Any]:
+        """Reset time estimate for an issue."""
+        result = self.post(self.project_endpoint(f"issues/{issue_iid}/reset_time_estimate"))
+        return result if isinstance(result, dict) else {}
+
+    # -------------------------------------------------------------------------
     # Resource Cleanup
     # -------------------------------------------------------------------------
 

@@ -410,3 +410,230 @@ class TestGitLabApiClient:
         client.__exit__(None, None, None)
         # Verify close was called on the session
         assert client._session.close.called
+
+    # -------------------------------------------------------------------------
+    # Merge Requests API
+    # -------------------------------------------------------------------------
+
+    def test_get_merge_request(self, gitlab_client, mock_session):
+        """Should fetch merge request data."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"iid": 5, "title": "Feature MR"}'
+        mock_response.json.return_value = {"iid": 5, "title": "Feature MR"}
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_merge_request(5)
+
+        assert result["iid"] == 5
+        assert result["title"] == "Feature MR"
+
+    def test_list_merge_requests(self, gitlab_client, mock_session):
+        """Should list merge requests."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '[{"iid": 1}, {"iid": 2}]'
+        mock_response.json.return_value = [{"iid": 1}, {"iid": 2}]
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.list_merge_requests(state="opened")
+
+        assert len(result) == 2
+
+    def test_get_merge_requests_for_issue(self, gitlab_client, mock_session):
+        """Should find MRs that reference an issue."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = (
+            '[{"iid": 1, "description": "Closes #123"}, {"iid": 2, "description": "Other"}]'
+        )
+        mock_response.json.return_value = [
+            {"iid": 1, "description": "Closes #123", "title": "MR 1"},
+            {"iid": 2, "description": "Other", "title": "MR 2"},
+        ]
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_merge_requests_for_issue(123)
+
+        assert len(result) == 1
+        assert result[0]["iid"] == 1
+
+    def test_link_merge_request_to_issue(self, gitlab_client, mock_session):
+        """Should link MR to issue by updating description."""
+        # Mock get MR
+        get_mr_response = MagicMock()
+        get_mr_response.ok = True
+        get_mr_response.text = '{"iid": 5, "description": "Original"}'
+        get_mr_response.json.return_value = {"iid": 5, "description": "Original"}
+        get_mr_response.status_code = 200
+        get_mr_response.headers = {}
+
+        # Mock update MR
+        update_mr_response = MagicMock()
+        update_mr_response.ok = True
+        update_mr_response.text = '{"iid": 5}'
+        update_mr_response.json.return_value = {"iid": 5}
+        update_mr_response.status_code = 200
+        update_mr_response.headers = {}
+
+        mock_session.request.side_effect = [get_mr_response, update_mr_response]
+
+        result = gitlab_client.link_merge_request_to_issue(5, 123, "closes")
+
+        assert result is True
+
+    # -------------------------------------------------------------------------
+    # Issue Boards API
+    # -------------------------------------------------------------------------
+
+    def test_list_boards(self, gitlab_client, mock_session):
+        """Should list boards."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '[{"id": 1, "name": "Development"}]'
+        mock_response.json.return_value = [{"id": 1, "name": "Development"}]
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.list_boards()
+
+        assert len(result) == 1
+        assert result[0]["name"] == "Development"
+
+    def test_get_board(self, gitlab_client, mock_session):
+        """Should get a board."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"id": 1, "name": "Development"}'
+        mock_response.json.return_value = {"id": 1, "name": "Development"}
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_board(1)
+
+        assert result["name"] == "Development"
+
+    def test_get_board_lists(self, gitlab_client, mock_session):
+        """Should get board lists."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '[{"id": 1, "label": {"name": "To Do"}}]'
+        mock_response.json.return_value = [{"id": 1, "label": {"name": "To Do"}}]
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_board_lists(1)
+
+        assert len(result) == 1
+        assert result[0]["label"]["name"] == "To Do"
+
+    def test_move_issue_to_board_list(self, gitlab_client, mock_session):
+        """Should move issue to board list."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"success": true}'
+        mock_response.json.return_value = {"success": True}
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.move_issue_to_board_list(123, board_id=1, list_id=2)
+
+        assert result is True
+
+    def test_get_issue_board_position(self, gitlab_client, mock_session):
+        """Should get issue board position."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"board_id": 1, "list_id": 2}'
+        mock_response.json.return_value = {"board_id": 1, "list_id": 2}
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_issue_board_position(123)
+
+        assert result["board_id"] == 1
+
+    # -------------------------------------------------------------------------
+    # Time Tracking API
+    # -------------------------------------------------------------------------
+
+    def test_get_issue_time_stats(self, gitlab_client, mock_session):
+        """Should get time stats."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"time_estimate": 3600, "total_time_spent": 1800}'
+        mock_response.json.return_value = {
+            "time_estimate": 3600,
+            "total_time_spent": 1800,
+        }
+        mock_response.status_code = 200
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.get_issue_time_stats(123)
+
+        assert result["time_estimate"] == 3600
+        assert result["total_time_spent"] == 1800
+
+    def test_add_spent_time(self, gitlab_client, mock_session):
+        """Should add spent time."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"total_time_spent": 1800}'
+        mock_response.json.return_value = {"total_time_spent": 1800}
+        mock_response.status_code = 200
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.add_spent_time(123, "30m", summary="Work")
+
+        assert result["total_time_spent"] == 1800
+
+    def test_reset_spent_time(self, gitlab_client, mock_session):
+        """Should reset spent time."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"total_time_spent": 0}'
+        mock_response.json.return_value = {"total_time_spent": 0}
+        mock_response.status_code = 200
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.reset_spent_time(123)
+
+        assert result["total_time_spent"] == 0
+
+    def test_estimate_time(self, gitlab_client, mock_session):
+        """Should set time estimate."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"time_estimate": 7200}'
+        mock_response.json.return_value = {"time_estimate": 7200}
+        mock_response.status_code = 200
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.estimate_time(123, "2h")
+
+        assert result["time_estimate"] == 7200
+
+    def test_reset_time_estimate(self, gitlab_client, mock_session):
+        """Should reset time estimate."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.text = '{"time_estimate": 0}'
+        mock_response.json.return_value = {"time_estimate": 0}
+        mock_response.status_code = 200
+        mock_session.request.return_value = mock_response
+
+        result = gitlab_client.reset_time_estimate(123)
+
+        assert result["time_estimate"] == 0

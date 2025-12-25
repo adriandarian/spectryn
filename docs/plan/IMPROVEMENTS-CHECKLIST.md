@@ -95,9 +95,9 @@ Each tracker adapter requires:
 
 - [x] **Advanced Features**
   - [x] Epic support (GitLab Premium/Ultimate feature)
-  - [ ] Issue boards integration (future enhancement)
-  - [ ] Merge request linking (future enhancement)
-  - [ ] Time tracking support (future enhancement)
+  - [x] Issue boards integration ✅ **COMPLETED**
+  - [x] Merge request linking ✅ **COMPLETED**
+  - [x] Time tracking support ✅ **COMPLETED**
   - [x] Labels and milestones sync
 
 - [x] **Testing**

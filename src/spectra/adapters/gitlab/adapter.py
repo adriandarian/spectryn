@@ -572,3 +572,225 @@ class GitLabAdapter(IssueTrackerPort):
         """Check if an issue references an epic."""
         description = issue.get("description", "") or ""
         return f"#{epic_iid}" in description or f"epic:{epic_iid}" in description.lower()
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Merge Request Linking
+    # -------------------------------------------------------------------------
+
+    def get_merge_requests_for_issue(self, issue_key: str) -> list[dict[str, Any]]:
+        """
+        Get all merge requests linked to an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+
+        Returns:
+            List of merge request dictionaries
+        """
+        issue_iid = self._parse_issue_key(issue_key)
+        return self._client.get_merge_requests_for_issue(issue_iid)
+
+    def link_merge_request(
+        self,
+        merge_request_iid: int,
+        issue_key: str,
+        action: str = "closes",
+    ) -> bool:
+        """
+        Link a merge request to an issue.
+
+        GitLab automatically links MRs that reference issues using keywords:
+        - "closes #123", "fixes #123", "resolves #123" - closes the issue
+        - "relates to #123" - links without closing
+
+        Args:
+            merge_request_iid: Merge request IID
+            issue_key: Issue key (e.g., "#123")
+            action: Action keyword ("closes", "fixes", "resolves", "relates to")
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(
+                f"[DRY-RUN] Would link MR !{merge_request_iid} to {issue_key} with action '{action}'"
+            )
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        return self._client.link_merge_request_to_issue(merge_request_iid, issue_iid, action)
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Issue Boards
+    # -------------------------------------------------------------------------
+
+    def list_boards(self) -> list[dict[str, Any]]:
+        """
+        List all issue boards in the project.
+
+        Returns:
+            List of board dictionaries
+        """
+        return self._client.list_boards()
+
+    def get_board(self, board_id: int) -> dict[str, Any]:
+        """
+        Get a single board.
+
+        Args:
+            board_id: Board ID
+
+        Returns:
+            Board dictionary
+        """
+        return self._client.get_board(board_id)
+
+    def get_board_lists(self, board_id: int) -> list[dict[str, Any]]:
+        """
+        Get all lists (columns) for a board.
+
+        Args:
+            board_id: Board ID
+
+        Returns:
+            List of board list dictionaries
+        """
+        return self._client.get_board_lists(board_id)
+
+    def move_issue_to_board_list(
+        self,
+        issue_key: str,
+        board_id: int,
+        list_id: int,
+    ) -> bool:
+        """
+        Move an issue to a specific board list.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+            board_id: Board ID
+            list_id: List (column) ID
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(
+                f"[DRY-RUN] Would move {issue_key} to board {board_id}, list {list_id}"
+            )
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        return self._client.move_issue_to_board_list(issue_iid, board_id, list_id)
+
+    def get_issue_board_position(self, issue_key: str) -> dict[str, Any] | None:
+        """
+        Get the board position for an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+
+        Returns:
+            Board position dictionary or None
+        """
+        issue_iid = self._parse_issue_key(issue_key)
+        return self._client.get_issue_board_position(issue_iid)
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Time Tracking
+    # -------------------------------------------------------------------------
+
+    def get_issue_time_stats(self, issue_key: str) -> dict[str, Any]:
+        """
+        Get time tracking statistics for an issue.
+
+        Returns time estimate and spent time.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+
+        Returns:
+            Dictionary with time_stats (estimate, spent_time, human_estimate, human_total_spent_time)
+        """
+        issue_iid = self._parse_issue_key(issue_key)
+        return self._client.get_issue_time_stats(issue_iid)
+
+    def add_spent_time(
+        self,
+        issue_key: str,
+        duration: str,
+        summary: str | None = None,
+    ) -> bool:
+        """
+        Add spent time to an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+            duration: Time duration (e.g., "1h 30m", "2h", "45m")
+            summary: Optional summary/note for the time entry
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would add {duration} spent time to {issue_key}")
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        result = self._client.add_spent_time(issue_iid, duration, summary)
+        return isinstance(result, dict)
+
+    def reset_spent_time(self, issue_key: str) -> bool:
+        """
+        Reset spent time for an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would reset spent time for {issue_key}")
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        result = self._client.reset_spent_time(issue_iid)
+        return isinstance(result, dict)
+
+    def estimate_time(self, issue_key: str, duration: str) -> bool:
+        """
+        Set time estimate for an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+            duration: Time estimate (e.g., "3h 30m", "1d", "2w")
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would set time estimate {duration} for {issue_key}")
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        result = self._client.estimate_time(issue_iid, duration)
+        return isinstance(result, dict)
+
+    def reset_time_estimate(self, issue_key: str) -> bool:
+        """
+        Reset time estimate for an issue.
+
+        Args:
+            issue_key: Issue key (e.g., "#123")
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would reset time estimate for {issue_key}")
+            return True
+
+        issue_iid = self._parse_issue_key(issue_key)
+        result = self._client.reset_time_estimate(issue_iid)
+        return isinstance(result, dict)

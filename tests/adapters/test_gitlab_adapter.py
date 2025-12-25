@@ -506,3 +506,166 @@ class TestGitLabAdapter:
         result = adapter.get_issue("#123")
 
         assert result.assignee == "user1"
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Merge Request Linking
+    # -------------------------------------------------------------------------
+
+    def test_get_merge_requests_for_issue(self, adapter, mock_client):
+        """Should get merge requests linked to an issue."""
+        mock_client.get_merge_requests_for_issue.return_value = [
+            {"iid": 1, "title": "MR 1", "state": "opened"},
+            {"iid": 2, "title": "MR 2", "state": "merged"},
+        ]
+
+        result = adapter.get_merge_requests_for_issue("#123")
+
+        assert len(result) == 2
+        assert result[0]["iid"] == 1
+        mock_client.get_merge_requests_for_issue.assert_called_once_with(123)
+
+    def test_link_merge_request(self, adapter, mock_client):
+        """Should link a merge request to an issue."""
+        mock_client.link_merge_request_to_issue.return_value = True
+
+        result = adapter.link_merge_request(5, "#123", action="closes")
+
+        assert result is True
+        mock_client.link_merge_request_to_issue.assert_called_once_with(5, 123, "closes")
+
+    def test_link_merge_request_dry_run(self, adapter, mock_client):
+        """Should not link in dry-run mode."""
+        adapter._dry_run = True
+        result = adapter.link_merge_request(5, "#123")
+        assert result is True
+        mock_client.link_merge_request_to_issue.assert_not_called()
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Issue Boards
+    # -------------------------------------------------------------------------
+
+    def test_list_boards(self, adapter, mock_client):
+        """Should list all boards."""
+        mock_client.list_boards.return_value = [
+            {"id": 1, "name": "Development"},
+            {"id": 2, "name": "Backlog"},
+        ]
+
+        result = adapter.list_boards()
+
+        assert len(result) == 2
+        assert result[0]["name"] == "Development"
+
+    def test_get_board(self, adapter, mock_client):
+        """Should get a single board."""
+        mock_client.get_board.return_value = {"id": 1, "name": "Development"}
+
+        result = adapter.get_board(1)
+
+        assert result["name"] == "Development"
+        mock_client.get_board.assert_called_once_with(1)
+
+    def test_get_board_lists(self, adapter, mock_client):
+        """Should get board lists."""
+        mock_client.get_board_lists.return_value = [
+            {"id": 1, "label": {"name": "To Do"}},
+            {"id": 2, "label": {"name": "In Progress"}},
+        ]
+
+        result = adapter.get_board_lists(1)
+
+        assert len(result) == 2
+        assert result[0]["label"]["name"] == "To Do"
+
+    def test_move_issue_to_board_list(self, adapter, mock_client):
+        """Should move issue to board list."""
+        mock_client.move_issue_to_board_list.return_value = True
+
+        result = adapter.move_issue_to_board_list("#123", board_id=1, list_id=2)
+
+        assert result is True
+        mock_client.move_issue_to_board_list.assert_called_once_with(123, 1, 2)
+
+    def test_move_issue_to_board_list_dry_run(self, adapter, mock_client):
+        """Should not move in dry-run mode."""
+        adapter._dry_run = True
+        result = adapter.move_issue_to_board_list("#123", board_id=1, list_id=2)
+        assert result is True
+        mock_client.move_issue_to_board_list.assert_not_called()
+
+    def test_get_issue_board_position(self, adapter, mock_client):
+        """Should get issue board position."""
+        mock_client.get_issue_board_position.return_value = {
+            "board_id": 1,
+            "list_id": 2,
+            "position": 0,
+        }
+
+        result = adapter.get_issue_board_position("#123")
+
+        assert result["board_id"] == 1
+        assert result["list_id"] == 2
+
+    # -------------------------------------------------------------------------
+    # Advanced Features - Time Tracking
+    # -------------------------------------------------------------------------
+
+    def test_get_issue_time_stats(self, adapter, mock_client):
+        """Should get time tracking stats."""
+        mock_client.get_issue_time_stats.return_value = {
+            "time_estimate": 3600,
+            "total_time_spent": 1800,
+            "human_time_estimate": "1h",
+            "human_total_time_spent": "30m",
+        }
+
+        result = adapter.get_issue_time_stats("#123")
+
+        assert result["time_estimate"] == 3600
+        assert result["total_time_spent"] == 1800
+
+    def test_add_spent_time(self, adapter, mock_client):
+        """Should add spent time to issue."""
+        mock_client.add_spent_time.return_value = {
+            "time_estimate": 3600,
+            "total_time_spent": 1800,
+        }
+
+        result = adapter.add_spent_time("#123", "30m", summary="Worked on feature")
+
+        assert result is True
+        mock_client.add_spent_time.assert_called_once_with(123, "30m", "Worked on feature")
+
+    def test_add_spent_time_dry_run(self, adapter, mock_client):
+        """Should not add time in dry-run mode."""
+        adapter._dry_run = True
+        result = adapter.add_spent_time("#123", "30m")
+        assert result is True
+        mock_client.add_spent_time.assert_not_called()
+
+    def test_reset_spent_time(self, adapter, mock_client):
+        """Should reset spent time."""
+        mock_client.reset_spent_time.return_value = {"total_time_spent": 0}
+
+        result = adapter.reset_spent_time("#123")
+
+        assert result is True
+        mock_client.reset_spent_time.assert_called_once_with(123)
+
+    def test_estimate_time(self, adapter, mock_client):
+        """Should set time estimate."""
+        mock_client.estimate_time.return_value = {"time_estimate": 7200}
+
+        result = adapter.estimate_time("#123", "2h")
+
+        assert result is True
+        mock_client.estimate_time.assert_called_once_with(123, "2h")
+
+    def test_reset_time_estimate(self, adapter, mock_client):
+        """Should reset time estimate."""
+        mock_client.reset_time_estimate.return_value = {"time_estimate": 0}
+
+        result = adapter.reset_time_estimate("#123")
+
+        assert result is True
+        mock_client.reset_time_estimate.assert_called_once_with(123)
