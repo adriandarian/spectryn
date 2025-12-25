@@ -111,11 +111,11 @@ Each tracker adapter requires:
   - [x] `requests` (already in dependencies)
   - [x] Optional: `python-gitlab` SDK ✅ **COMPLETED** - Added as optional dependency `spectra[gitlab]`, adapter supports `use_sdk=True` to use official SDK instead of custom client
 
-- [ ] **Documentation**
-  - [ ] Configuration guide
-  - [ ] API authentication setup
-  - [ ] Self-hosted GitLab setup
-  - [ ] Epic vs Milestone mapping guide
+- [x] **Documentation** ✅ **COMPLETED**
+  - [x] Configuration guide - Added to `docs/guide/gitlab.md` and `docs/guide/configuration.md`
+  - [x] API authentication setup - Personal Access Token guide with scopes
+  - [x] Self-hosted GitLab setup - Configuration and SSL/TLS guidance
+  - [x] Epic vs Milestone mapping guide - Detailed comparison and use cases
 
 **Status**: ✅ **Core implementation complete** - 62 unit tests passing, all linting/type checks passing. Ready for use. Documentation pending.
 

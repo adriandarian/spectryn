@@ -103,6 +103,11 @@ verbose = true
 | `JIRA_EMAIL` | Jira account email |
 | `JIRA_API_TOKEN` | Jira API token ([generate here](https://id.atlassian.com/manage-profile/security/api-tokens)) |
 | `JIRA_PROJECT` | Default project key |
+| `GITLAB_TOKEN` | GitLab Personal Access Token |
+| `GITLAB_PROJECT_ID` | GitLab project ID (numeric or `group/project` path) |
+| `GITLAB_BASE_URL` | GitLab API base URL (default: `https://gitlab.com/api/v4`) |
+| `GITLAB_GROUP_ID` | GitLab group ID for epics (optional) |
+| `GITLAB_USE_SDK` | Use python-gitlab SDK (`true`/`false`) |
 | `MD2JIRA_VERBOSE` | Enable verbose output (`true`/`false`) |
 
 ## .env File
@@ -166,6 +171,23 @@ spectra --markdown epic.md --epic PROJ-123 --project OTHER
 | `jira.api_token` | string | API token |
 | `jira.project` | string | Default project key |
 | `jira.story_points_field` | string | Custom field ID for story points |
+
+### GitLab Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `gitlab.token` | string | GitLab Personal Access Token |
+| `gitlab.project_id` | string | Project ID (numeric or `group/project` path) |
+| `gitlab.base_url` | string | GitLab API base URL (default: `https://gitlab.com/api/v4`) |
+| `gitlab.group_id` | string | Group ID for epics (Premium/Ultimate, optional) |
+| `gitlab.use_epics` | boolean | Use Epics instead of Milestones (default: `false`) |
+| `gitlab.use_sdk` | boolean | Use python-gitlab SDK (default: `false`) |
+| `gitlab.epic_label` | string | Label for epic issues (default: `"epic"`) |
+| `gitlab.story_label` | string | Label for story issues (default: `"story"`) |
+| `gitlab.subtask_label` | string | Label for subtask issues (default: `"subtask"`) |
+| `gitlab.status_labels` | dict | Status to label mapping (optional) |
+
+See [GitLab Integration Guide](/guide/gitlab) for detailed configuration examples.
 
 ### Sync Settings
 
