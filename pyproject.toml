@@ -52,6 +52,9 @@ async = [
 gitlab = [
     "python-gitlab>=4.0.0",  # Official GitLab Python SDK (optional alternative to custom client)
 ]
+bitbucket = [
+    "atlassian-python-api>=3.0.0",  # Atlassian Python API for Bitbucket Server support
+]
 telemetry = [
     "opentelemetry-api>=1.20.0",
     "opentelemetry-sdk>=1.20.0",
@@ -78,6 +81,7 @@ dev = [
 all = [
     "aiohttp>=3.8.0",  # Async HTTP client for parallel API calls
     "python-gitlab>=4.0.0",  # Official GitLab Python SDK
+    "atlassian-python-api>=3.0.0",  # Atlassian Python API for Bitbucket Server
     "opentelemetry-api>=1.20.0",
     "opentelemetry-sdk>=1.20.0",
     "opentelemetry-exporter-otlp>=1.20.0",

@@ -128,6 +128,11 @@ verbose = true
 | `CLICKUP_FOLDER_ID` | ClickUp folder ID (optional, for scoping operations) |
 | `CLICKUP_LIST_ID` | ClickUp list ID (optional, for scoping operations) |
 | `CLICKUP_API_URL` | ClickUp API endpoint (default: `https://api.clickup.com/api/v2`) |
+| `BITBUCKET_USERNAME` | Bitbucket username |
+| `BITBUCKET_APP_PASSWORD` | App Password (Cloud) or PAT (Server) |
+| `BITBUCKET_WORKSPACE` | Workspace slug (Cloud) or project key (Server) |
+| `BITBUCKET_REPO` | Repository slug |
+| `BITBUCKET_BASE_URL` | API base URL (default: `https://api.bitbucket.org/2.0`) |
 | `MD2JIRA_VERBOSE` | Enable verbose output (`true`/`false`) |
 
 ## .env File
@@ -244,6 +249,23 @@ See [Shortcut Integration Guide](/guide/shortcut) for detailed configuration exa
 | `clickup.api_url` | string | API endpoint (default: `https://api.clickup.com/api/v2`) |
 
 See [ClickUp Integration Guide](/guide/clickup) for detailed configuration examples.
+
+### Bitbucket Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `bitbucket.username` | string | Bitbucket username (required) |
+| `bitbucket.app_password` | string | App Password (Cloud) or PAT (Server, required) |
+| `bitbucket.workspace` | string | Workspace slug (Cloud) or project key (Server, required) |
+| `bitbucket.repo` | string | Repository slug (required) |
+| `bitbucket.base_url` | string | API base URL (default: `https://api.bitbucket.org/2.0`) |
+| `bitbucket.epic_label` | string | Label for epic issues (default: `"epic"`) |
+| `bitbucket.story_label` | string | Label for story issues (default: `"story"`) |
+| `bitbucket.subtask_label` | string | Label for subtask issues (default: `"subtask"`) |
+| `bitbucket.status_mapping` | dict | Status to state mapping (optional) |
+| `bitbucket.priority_mapping` | dict | Priority mapping (optional) |
+
+See [Bitbucket Integration Guide](/guide/bitbucket) for detailed configuration examples.
 
 ### Sync Settings
 

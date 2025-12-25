@@ -60,7 +60,7 @@ def create_tracker_factory(
     Create a factory function for the issue tracker.
 
     Args:
-        tracker_type: Type of tracker ('jira', 'github', 'azure', 'linear', 'asana', 'gitlab', 'monday', 'trello', 'shortcut', 'clickup')
+        tracker_type: Type of tracker ('jira', 'github', 'azure', 'linear', 'asana', 'gitlab', 'monday', 'trello', 'shortcut', 'clickup', 'bitbucket')
 
     Returns:
         Factory function that creates the tracker
@@ -181,6 +181,25 @@ def create_tracker_factory(
                 list_id=config.list_id,
                 dry_run=is_dry_run,
                 api_url=config.api_url,
+            )
+        if tracker_type == "bitbucket":
+            from spectra.adapters.bitbucket import BitbucketAdapter
+            from spectra.core.ports.config_provider import BitbucketConfig
+
+            if not isinstance(config, BitbucketConfig):
+                raise ValueError("Bitbucket adapter requires BitbucketConfig")
+            return BitbucketAdapter(
+                username=config.username,
+                app_password=config.app_password,
+                workspace=config.workspace,
+                repo=config.repo,
+                dry_run=is_dry_run,
+                base_url=config.base_url,
+                epic_label=config.epic_label,
+                story_label=config.story_label,
+                subtask_label=config.subtask_label,
+                status_mapping=config.status_mapping,
+                priority_mapping=config.priority_mapping,
             )
         raise ValueError(f"Unknown tracker type: {tracker_type}")
 

@@ -321,45 +321,45 @@ Each tracker adapter requires:
 #### 6. Bitbucket Cloud/Server Adapter
 **Priority: Medium** | **Effort: Medium** | **Complexity: Medium**
 
-- [ ] **Core Implementation**
-  - [ ] Add `BITBUCKET` to `TrackerType` enum
-  - [ ] Create `BitbucketConfig` dataclass (username, app_password, workspace, repo)
-  - [ ] Implement `BitbucketAdapter` with `IssueTrackerPort`
-  - [ ] Create `BitbucketApiClient` using Bitbucket REST API v2
-  - [ ] Map Epic → Milestone or Epic issue
-  - [ ] Map Story → Issue
-  - [ ] Map Subtask → Issue with parent link
-  - [ ] Status mapping → Issue state (new, open, resolved, closed)
-  - [ ] Priority mapping → Issue priority
-  - [ ] Story points → Custom field (if available)
+- [x] **Core Implementation**
+  - [x] Add `BITBUCKET` to `TrackerType` enum
+  - [x] Create `BitbucketConfig` dataclass (username, app_password, workspace, repo)
+  - [x] Implement `BitbucketAdapter` with `IssueTrackerPort`
+  - [x] Create `BitbucketApiClient` using Bitbucket REST API v2
+  - [x] Map Epic → Milestone or Epic issue
+  - [x] Map Story → Issue
+  - [x] Map Subtask → Issue with parent link
+  - [x] Status mapping → Issue state (new, open, resolved, closed)
+  - [x] Priority mapping → Issue priority
+  - [x] Story points → Custom field (if available)
 
-- [ ] **API Integration**
-  - [ ] Authentication: App Password (Cloud) or Personal Access Token (Server)
-  - [ ] Endpoints: `/repositories/:workspace/:repo/issues`, `/milestones`
-  - [ ] Support both Cloud and Server (self-hosted)
-  - [ ] Rate limiting: 1000 requests per hour (Cloud)
-  - [ ] Pagination: Use `page` parameter
+- [x] **API Integration**
+  - [x] Authentication: App Password (Cloud) or Personal Access Token (Server)
+  - [x] Endpoints: `/repositories/:workspace/:repo/issues`, `/milestones`
+  - [x] Support both Cloud and Server (self-hosted)
+  - [x] Rate limiting: 1000 requests per hour (Cloud)
+  - [x] Pagination: Use `page` parameter
 
-- [ ] **Advanced Features**
-  - [ ] Pull request linking
-  - [ ] Comments sync
-  - [ ] Attachments support
-  - [ ] Component and version fields
+- [x] **Advanced Features**
+  - [x] Pull request linking
+  - [x] Comments sync
+  - [x] Attachments support
+  - [x] Component and version fields
 
-- [ ] **Testing**
-  - [ ] Unit tests for adapter methods
-  - [ ] Integration tests with Bitbucket Cloud
-  - [ ] Test self-hosted Bitbucket Server
-  - [ ] Test rate limiting
+- [x] **Testing**
+  - [x] Unit tests for adapter methods
+  - [x] Integration tests with Bitbucket Cloud
+  - [x] Test self-hosted Bitbucket Server
+  - [x] Test rate limiting
 
-- [ ] **Dependencies**
-  - [ ] `requests` (already in dependencies)
-  - [ ] Optional: `atlassian-python-api` (for Server support)
+- [x] **Dependencies**
+  - [x] `requests` (already in dependencies)
+  - [x] Optional: `atlassian-python-api` (for Server support)
 
-- [ ] **Documentation**
-  - [ ] App Password setup (Cloud)
-  - [ ] Personal Access Token setup (Server)
-  - [ ] Workspace and repository configuration
+- [x] **Documentation**
+  - [x] App Password setup (Cloud)
+  - [x] Personal Access Token setup (Server)
+  - [x] Workspace and repository configuration
 
 **Estimated Time**: 2-3 days
 

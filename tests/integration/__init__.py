@@ -10,4 +10,5 @@ using mocked API responses. They cover:
 - Asana integration (test_asana_integration.py)
 - Monday.com integration (test_monday_integration.py)
 - Confluence integration (test_confluence_integration.py)
+- Bitbucket integration (test_bitbucket_integration.py)
 """

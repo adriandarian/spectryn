@@ -25,6 +25,7 @@ class TrackerType(Enum):
     TRELLO = "trello"
     SHORTCUT = "shortcut"
     CLICKUP = "clickup"
+    BITBUCKET = "bitbucket"
 
 
 @dataclass
@@ -215,6 +216,47 @@ class ClickUpConfig:
     def is_valid(self) -> bool:
         """Check if configuration is valid."""
         return bool(self.api_token)
+
+
+@dataclass
+class BitbucketConfig:
+    """Configuration for Bitbucket Cloud/Server tracker."""
+
+    username: str  # Bitbucket username
+    app_password: str  # App Password (Cloud) or Personal Access Token (Server)
+    workspace: str  # Workspace slug (Cloud) or project key (Server)
+    repo: str  # Repository slug
+    base_url: str = "https://api.bitbucket.org/2.0"  # Cloud default, override for Server
+
+    # Label configuration
+    epic_label: str = "epic"
+    story_label: str = "story"
+    subtask_label: str = "subtask"
+
+    # Status mapping (Bitbucket uses: new, open, resolved, closed, on hold, invalid, duplicate, wontfix)
+    status_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "planned": "new",
+            "open": "open",
+            "in progress": "open",  # Bitbucket doesn't have "in progress", use "open"
+            "done": "resolved",
+            "closed": "closed",
+        }
+    )
+
+    # Priority mapping (Bitbucket uses: trivial, minor, major, critical, blocker)
+    priority_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "critical": "critical",
+            "high": "major",
+            "medium": "minor",
+            "low": "trivial",
+        }
+    )
+
+    def is_valid(self) -> bool:
+        """Check if configuration is valid."""
+        return bool(self.username and self.app_password and self.workspace and self.repo)
 
 
 # =============================================================================
