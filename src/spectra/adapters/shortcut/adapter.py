@@ -804,6 +804,105 @@ class ShortcutAdapter(IssueTrackerPort):
             return False
 
     # -------------------------------------------------------------------------
+    # File Attachment Operations
+    # -------------------------------------------------------------------------
+
+    def get_issue_attachments(self, issue_key: str) -> list[dict[str, Any]]:
+        """
+        Get all file attachments for an issue.
+
+        Args:
+            issue_key: Issue key (story ID)
+
+        Returns:
+            List of attachment dictionaries with id, name, url, etc.
+        """
+        story_id = self._parse_story_id(issue_key)
+        files = self._client.get_story_files(story_id)
+        return [
+            {
+                "id": str(f.get("id", "")),
+                "name": f.get("name", ""),
+                "url": f.get("url", ""),
+                "content_type": f.get("content_type", ""),
+                "size": f.get("size", 0),
+                "created": f.get("created_at"),
+            }
+            for f in files
+        ]
+
+    def upload_attachment(
+        self,
+        issue_key: str,
+        file_path: str,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Upload a file attachment to an issue.
+
+        Args:
+            issue_key: Issue key (story ID)
+            file_path: Path to file to upload
+            name: Optional attachment name
+
+        Returns:
+            Attachment information dictionary
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would upload attachment {file_path} to {issue_key}")
+            return {"id": "attachment:dry-run", "name": name or file_path}
+
+        story_id = self._parse_story_id(issue_key)
+
+        # First upload the file
+        file_data = self._client.upload_file(file_path, name)
+        file_id = file_data.get("id")
+
+        if file_id:
+            # Link the file to the story
+            self._client.link_file_to_story(story_id, file_id)
+            self.logger.info(
+                f"Uploaded and linked attachment to {issue_key}: {file_data.get('name')}"
+            )
+
+        return file_data
+
+    def delete_attachment(
+        self,
+        issue_key: str,
+        attachment_id: str,
+    ) -> bool:
+        """
+        Delete a file attachment from an issue.
+
+        Args:
+            issue_key: Issue key (story ID)
+            attachment_id: Attachment ID to delete
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would delete attachment {attachment_id} from {issue_key}")
+            return True
+
+        try:
+            story_id = self._parse_story_id(issue_key)
+            file_id = int(attachment_id)
+
+            # First unlink from story
+            self._client.unlink_file_from_story(story_id, file_id)
+
+            # Then delete the file
+            self._client.delete_file(file_id)
+
+            self.logger.info(f"Deleted attachment {attachment_id} from {issue_key}")
+            return True
+        except (ValueError, NotFoundError, IssueTrackerError) as e:
+            self.logger.error(f"Failed to delete attachment: {e}")
+            return False
+
+    # -------------------------------------------------------------------------
     # Private Methods
     # -------------------------------------------------------------------------
 

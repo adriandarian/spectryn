@@ -818,3 +818,129 @@ class TestTrelloApiClientAttachments:
 
         with pytest.raises(NotFoundError):
             client.delete_card_attachment("att123")
+
+
+# =============================================================================
+# Due Date Tests
+# =============================================================================
+
+
+class TestTrelloAdapterDueDates:
+    """Tests for TrelloAdapter due date operations."""
+
+    @pytest.fixture
+    def config(self):
+        """Create test config."""
+        return TrelloConfig(
+            api_key="test_api_key",
+            api_token="test_api_token",
+            board_id="test_board_id",
+        )
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create a mock client."""
+        with patch("spectra.adapters.trello.adapter.TrelloApiClient") as mock:
+            client = MagicMock()
+            mock.return_value = client
+            yield client
+
+    @pytest.fixture
+    def adapter(self, config, mock_client):
+        """Create adapter with mocked client."""
+        return TrelloAdapter(config=config, dry_run=False)
+
+    def test_get_issue_due_date(self, adapter, mock_client):
+        """Should get due date for an issue."""
+        mock_client.get_card.return_value = {
+            "id": "card123",
+            "name": "Test Card",
+            "due": "2024-01-15T12:00:00.000Z",
+        }
+
+        result = adapter.get_issue_due_date("card123")
+
+        assert result == "2024-01-15T12:00:00.000Z"
+        mock_client.get_card.assert_called_once_with("card123")
+
+    def test_get_issue_due_date_not_set(self, adapter, mock_client):
+        """Should return None when due date not set."""
+        mock_client.get_card.return_value = {
+            "id": "card123",
+            "name": "Test Card",
+        }
+
+        result = adapter.get_issue_due_date("card123")
+
+        assert result is None
+
+    def test_update_issue_due_date(self, adapter, mock_client):
+        """Should set due date for an issue."""
+        mock_client.update_card.return_value = {
+            "id": "card123",
+            "due": "2024-01-15T12:00:00.000Z",
+        }
+
+        result = adapter.update_issue_due_date("card123", "2024-01-15T12:00:00.000Z")
+
+        assert result is True
+        mock_client.update_card.assert_called_once_with("card123", due="2024-01-15T12:00:00.000Z")
+
+    def test_update_issue_due_date_clear(self, adapter, mock_client):
+        """Should clear due date for an issue."""
+        mock_client.update_card.return_value = {
+            "id": "card123",
+            "due": None,
+        }
+
+        result = adapter.update_issue_due_date("card123", None)
+
+        assert result is True
+        mock_client.update_card.assert_called_once_with("card123", due=None)
+
+    def test_update_issue_due_date_dry_run(self, config):
+        """Should not update in dry run mode."""
+        with patch("spectra.adapters.trello.adapter.TrelloApiClient") as mock:
+            mock_client = MagicMock()
+            mock.return_value = mock_client
+            adapter = TrelloAdapter(config=config, dry_run=True)
+
+        result = adapter.update_issue_due_date("card123", "2024-01-15T12:00:00.000Z")
+
+        assert result is True
+        mock_client.update_card.assert_not_called()
+
+    def test_parse_card_with_due_date(self, adapter, mock_client):
+        """Should parse due date from card data."""
+        mock_client.get_card.return_value = {
+            "id": "card123",
+            "name": "Test Card with Due Date",
+            "desc": "Description",
+            "idList": "list123",
+            "due": "2024-01-15T12:00:00.000Z",
+            "checklists": [],
+        }
+        mock_client.get_board_lists.return_value = [
+            {"id": "list123", "name": "To Do"},
+        ]
+
+        result = adapter.get_issue("card123")
+
+        assert result.due_date == "2024-01-15T12:00:00.000Z"
+
+    def test_parse_card_without_due_date(self, adapter, mock_client):
+        """Should handle card without due date."""
+        mock_client.get_card.return_value = {
+            "id": "card123",
+            "name": "Test Card without Due Date",
+            "desc": "Description",
+            "idList": "list123",
+            "checklists": [],
+        }
+        mock_client.get_board_lists.return_value = [
+            {"id": "list123", "name": "To Do"},
+        ]
+
+        result = adapter.get_issue("card123")
+
+        assert result.due_date is None

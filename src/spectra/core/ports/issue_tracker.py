@@ -164,6 +164,7 @@ class IssueData:
     issue_type: str = ""
     assignee: str | None = None
     story_points: float | None = None
+    due_date: str | None = None  # ISO 8601 format (e.g., "2024-01-15T12:00:00Z")
     subtasks: list["IssueData"] = field(default_factory=list)
     comments: list[dict[str, Any]] = field(default_factory=list)
     links: list[IssueLink] = field(default_factory=list)

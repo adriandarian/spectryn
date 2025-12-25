@@ -531,6 +531,7 @@ class ShortcutApiClient:
         owner_ids: list[str] | None = None,
         depends_on: list[int] | None = None,
         iteration_id: int | None = None,
+        file_ids: list[int] | None = None,
     ) -> dict[str, Any]:
         """Update an existing story."""
         payload: dict[str, Any] = {}
@@ -552,6 +553,8 @@ class ShortcutApiClient:
             payload["depends_on"] = depends_on
         if iteration_id is not None:
             payload["iteration_id"] = iteration_id
+        if file_ids is not None:
+            payload["file_ids"] = file_ids
 
         if not payload:
             return {}
@@ -948,6 +951,161 @@ class ShortcutApiClient:
         if isinstance(result, dict):
             return result
         return {}
+
+    # -------------------------------------------------------------------------
+    # Files/Attachments API
+    # -------------------------------------------------------------------------
+
+    def get_story_files(self, story_id: int) -> list[dict[str, Any]]:
+        """
+        Get all files attached to a story.
+
+        Args:
+            story_id: Story ID
+
+        Returns:
+            List of file dictionaries
+        """
+        story = self.get_story(story_id)
+        files = story.get("files", [])
+        return files if isinstance(files, list) else []
+
+    def upload_file(
+        self,
+        file_path: str,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Upload a file to Shortcut.
+
+        Args:
+            file_path: Path to file to upload
+            name: Optional file name (defaults to filename)
+
+        Returns:
+            File information dictionary with id, url, etc.
+
+        Raises:
+            NotFoundError: If file doesn't exist
+            IssueTrackerError: On upload failure
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would upload file {file_path}")
+            return {"id": "file:dry-run", "name": name or file_path}
+
+        from pathlib import Path
+
+        file_path_obj = Path(file_path)
+        if not file_path_obj.exists():
+            raise NotFoundError(f"File not found: {file_path}")
+
+        file_name = name or file_path_obj.name
+        url = f"{self.api_url}/files"
+
+        # Shortcut uses multipart form upload
+        with open(file_path_obj, "rb") as f:
+            files = {"file": (file_name, f)}
+
+            # Remove Content-Type header for multipart upload
+            headers = dict(self._session.headers)
+            headers.pop("Content-Type", None)
+
+            response = self._session.post(
+                url,
+                files=files,
+                headers=headers,
+                timeout=self.timeout,
+            )
+
+        if not response.ok:
+            raise IssueTrackerError(
+                f"Failed to upload file: {response.status_code} - {response.text[:500]}"
+            )
+
+        try:
+            result = response.json()
+            # Shortcut returns a list with one file
+            if isinstance(result, list) and len(result) > 0:
+                first = result[0]
+                return (
+                    dict(first) if isinstance(first, dict) else {"id": "unknown", "name": file_name}
+                )
+            return (
+                dict(result) if isinstance(result, dict) else {"id": "unknown", "name": file_name}
+            )
+        except ValueError:
+            return {"id": "unknown", "name": file_name}
+
+    def link_file_to_story(
+        self,
+        story_id: int,
+        file_id: int,
+    ) -> dict[str, Any]:
+        """
+        Link an uploaded file to a story.
+
+        Args:
+            story_id: Story ID
+            file_id: File ID to link
+
+        Returns:
+            Updated story data
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would link file {file_id} to story {story_id}")
+            return {"id": story_id}
+
+        # Get current file IDs and add the new one
+        story = self.get_story(story_id)
+        current_files = story.get("file_ids", [])
+        if file_id not in current_files:
+            current_files.append(file_id)
+
+        return self.update_story(story_id, file_ids=current_files)
+
+    def unlink_file_from_story(
+        self,
+        story_id: int,
+        file_id: int,
+    ) -> dict[str, Any]:
+        """
+        Unlink a file from a story.
+
+        Args:
+            story_id: Story ID
+            file_id: File ID to unlink
+
+        Returns:
+            Updated story data
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would unlink file {file_id} from story {story_id}")
+            return {"id": story_id}
+
+        # Get current file IDs and remove the one
+        story = self.get_story(story_id)
+        current_files = story.get("file_ids", [])
+        if file_id in current_files:
+            current_files.remove(file_id)
+
+        return self.update_story(story_id, file_ids=current_files)
+
+    def delete_file(self, file_id: int) -> bool:
+        """
+        Delete a file from Shortcut.
+
+        Args:
+            file_id: File ID to delete
+
+        Returns:
+            True if successful
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would delete file {file_id}")
+            return True
+
+        self.request("DELETE", f"/files/{file_id}")
+        return True
 
     # -------------------------------------------------------------------------
     # Resource Cleanup

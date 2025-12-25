@@ -1011,3 +1011,272 @@ class TestShortcutApiClientIterations:
 
         assert result["id"] == 123
         mock_session.request.assert_called_once()
+
+
+# =============================================================================
+# Attachment Tests
+# =============================================================================
+
+
+class TestShortcutAdapterAttachments:
+    """Tests for ShortcutAdapter file attachment operations."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create a mock ShortcutApiClient."""
+        return MagicMock(spec=ShortcutApiClient)
+
+    @pytest.fixture
+    def adapter(self, mock_client):
+        """Create adapter with mock client."""
+        adapter = ShortcutAdapter(
+            api_token="test_token",
+            workspace_id="test_workspace",
+            dry_run=False,
+        )
+        adapter._client = mock_client
+        return adapter
+
+    def test_get_issue_attachments(self, adapter, mock_client):
+        """Should get attachments for an issue."""
+        mock_client.get_story_files.return_value = [
+            {
+                "id": 12345,
+                "name": "design.png",
+                "url": "https://files.shortcut.com/12345",
+                "content_type": "image/png",
+                "size": 50000,
+                "created_at": "2024-01-01T00:00:00Z",
+            }
+        ]
+
+        attachments = adapter.get_issue_attachments("123")
+
+        assert len(attachments) == 1
+        assert attachments[0]["id"] == "12345"
+        assert attachments[0]["name"] == "design.png"
+        assert attachments[0]["url"] == "https://files.shortcut.com/12345"
+        assert attachments[0]["content_type"] == "image/png"
+        mock_client.get_story_files.assert_called_once_with(123)
+
+    def test_upload_attachment(self, adapter, mock_client, tmp_path):
+        """Should upload a file attachment."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        mock_client.upload_file.return_value = {"id": 12345, "name": "test.txt"}
+        mock_client.link_file_to_story.return_value = {"id": 123}
+
+        result = adapter.upload_attachment("123", str(test_file))
+
+        assert result["id"] == 12345
+        assert result["name"] == "test.txt"
+        mock_client.upload_file.assert_called_once_with(str(test_file), None)
+        mock_client.link_file_to_story.assert_called_once_with(123, 12345)
+
+    def test_upload_attachment_with_name(self, adapter, mock_client, tmp_path):
+        """Should upload a file attachment with custom name."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        mock_client.upload_file.return_value = {"id": 12345, "name": "custom-name.txt"}
+        mock_client.link_file_to_story.return_value = {"id": 123}
+
+        result = adapter.upload_attachment("123", str(test_file), name="custom-name.txt")
+
+        assert result["name"] == "custom-name.txt"
+        mock_client.upload_file.assert_called_once_with(str(test_file), "custom-name.txt")
+
+    def test_upload_attachment_dry_run(self):
+        """Should not upload in dry run mode."""
+        mock_client = MagicMock(spec=ShortcutApiClient)
+        adapter = ShortcutAdapter(
+            api_token="test_token",
+            workspace_id="test_workspace",
+            dry_run=True,
+        )
+        adapter._client = mock_client
+
+        result = adapter.upload_attachment("123", "/path/to/file.txt")
+
+        assert result["id"] == "attachment:dry-run"
+        mock_client.upload_file.assert_not_called()
+        mock_client.link_file_to_story.assert_not_called()
+
+    def test_delete_attachment(self, adapter, mock_client):
+        """Should delete a file attachment."""
+        mock_client.unlink_file_from_story.return_value = {"id": 123}
+        mock_client.delete_file.return_value = True
+
+        result = adapter.delete_attachment("123", "12345")
+
+        assert result is True
+        mock_client.unlink_file_from_story.assert_called_once_with(123, 12345)
+        mock_client.delete_file.assert_called_once_with(12345)
+
+    def test_delete_attachment_dry_run(self):
+        """Should not delete in dry run mode."""
+        mock_client = MagicMock(spec=ShortcutApiClient)
+        adapter = ShortcutAdapter(
+            api_token="test_token",
+            workspace_id="test_workspace",
+            dry_run=True,
+        )
+        adapter._client = mock_client
+
+        result = adapter.delete_attachment("123", "12345")
+
+        assert result is True
+        mock_client.unlink_file_from_story.assert_not_called()
+        mock_client.delete_file.assert_not_called()
+
+
+class TestShortcutApiClientAttachments:
+    """Tests for ShortcutApiClient file attachment operations."""
+
+    @pytest.fixture
+    def mock_session(self):
+        """Create a mock session for testing."""
+        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+            session = MagicMock()
+            mock.return_value = session
+            yield session
+
+    @pytest.fixture
+    def client(self, mock_session):
+        """Create a test client with mocked session."""
+        return ShortcutApiClient(
+            api_token="test_token",
+            workspace_id="test_workspace",
+            dry_run=False,
+        )
+
+    def test_get_story_files(self, client, mock_session):
+        """Should get files attached to a story."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "id": 123,
+            "files": [
+                {"id": 12345, "name": "design.png"},
+                {"id": 12346, "name": "notes.pdf"},
+            ],
+        }
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        files = client.get_story_files(123)
+
+        assert len(files) == 2
+        assert files[0]["name"] == "design.png"
+        assert files[1]["name"] == "notes.pdf"
+
+    def test_upload_file(self, client, mock_session, tmp_path):
+        """Should upload a file."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.status_code = 200
+        mock_response.json.return_value = [{"id": 12345, "name": "test.txt"}]
+        mock_response.headers = {}
+        mock_session.post.return_value = mock_response
+
+        result = client.upload_file(str(test_file))
+
+        assert result["id"] == 12345
+        assert result["name"] == "test.txt"
+        mock_session.post.assert_called_once()
+
+    def test_upload_file_dry_run(self):
+        """Should not upload in dry run mode."""
+        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+            mock_session = MagicMock()
+            mock.return_value = mock_session
+            client = ShortcutApiClient(
+                api_token="test_token",
+                workspace_id="test_workspace",
+                dry_run=True,
+            )
+
+        result = client.upload_file("/path/to/file.txt", "custom-name.txt")
+
+        assert result["id"] == "file:dry-run"
+        mock_session.post.assert_not_called()
+
+    def test_link_file_to_story(self, client, mock_session):
+        """Should link file to story."""
+        # Mock get_story to return current file_ids
+        get_response = MagicMock()
+        get_response.ok = True
+        get_response.status_code = 200
+        get_response.json.return_value = {"id": 123, "file_ids": [100, 101]}
+        get_response.headers = {}
+
+        # Mock update_story response
+        update_response = MagicMock()
+        update_response.ok = True
+        update_response.status_code = 200
+        update_response.json.return_value = {"id": 123, "file_ids": [100, 101, 12345]}
+        update_response.headers = {}
+
+        mock_session.request.side_effect = [get_response, update_response]
+
+        result = client.link_file_to_story(123, 12345)
+
+        assert result["id"] == 123
+        assert 12345 in result["file_ids"]
+
+    def test_unlink_file_from_story(self, client, mock_session):
+        """Should unlink file from story."""
+        # Mock get_story to return current file_ids
+        get_response = MagicMock()
+        get_response.ok = True
+        get_response.status_code = 200
+        get_response.json.return_value = {"id": 123, "file_ids": [100, 101, 12345]}
+        get_response.headers = {}
+
+        # Mock update_story response
+        update_response = MagicMock()
+        update_response.ok = True
+        update_response.status_code = 200
+        update_response.json.return_value = {"id": 123, "file_ids": [100, 101]}
+        update_response.headers = {}
+
+        mock_session.request.side_effect = [get_response, update_response]
+
+        result = client.unlink_file_from_story(123, 12345)
+
+        assert result["id"] == 123
+        assert 12345 not in result["file_ids"]
+
+    def test_delete_file(self, client, mock_session):
+        """Should delete a file."""
+        mock_response = MagicMock()
+        mock_response.ok = True
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_response.headers = {}
+        mock_session.request.return_value = mock_response
+
+        result = client.delete_file(12345)
+
+        assert result is True
+
+    def test_delete_file_dry_run(self):
+        """Should not delete in dry run mode."""
+        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+            mock_session = MagicMock()
+            mock.return_value = mock_session
+            client = ShortcutApiClient(
+                api_token="test_token",
+                workspace_id="test_workspace",
+                dry_run=True,
+            )
+
+        result = client.delete_file(12345)
+
+        assert result is True
+        mock_session.request.assert_not_called()

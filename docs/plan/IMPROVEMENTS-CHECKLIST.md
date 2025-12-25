@@ -197,12 +197,12 @@ Each tracker adapter requires:
 - [x] **Advanced Features**
   - [x] Card attachments ✅ **COMPLETED** - Full support for get/upload/delete attachments
   - [x] Comments sync
-  - [ ] Due dates (Trello API supports, not yet mapped in adapter)
+  - [x] Due dates ✅ **COMPLETED** - Full support for get/set/clear due dates with IssueData integration
   - [x] Labels and custom fields
   - [x] Power-Ups integration (list Power-Ups, custom fields support)
 
 - [x] **Testing**
-  - [x] Unit tests for adapter methods (54 tests including webhooks, Power-Ups, and attachments)
+  - [x] Unit tests for adapter methods (61 tests including webhooks, Power-Ups, attachments, and due dates)
   - [x] Integration tests with Trello API (mocked)
   - [x] Test checklist-based subtasks
   - [x] Test webhook operations
@@ -218,7 +218,7 @@ Each tracker adapter requires:
   - [x] Added to main configuration guide (`docs/guide/configuration.md`)
   - [x] Updated homepage to include Trello in supported trackers
 
-**Status**: ✅ **Core implementation complete** - 56 unit tests passing (including webhook, Power-Ups, and attachment support), all linting/type checks passing. Ready for use.
+**Status**: ✅ **Core implementation complete** - 61 unit tests passing (including webhook, Power-Ups, attachments, and due date support), all linting/type checks passing. Ready for use.
 
 **Actual Time**: ~4 hours (faster than estimated due to good patterns from Linear/GitHub adapters)
 
@@ -250,10 +250,10 @@ Each tracker adapter requires:
   - [x] Story types (feature, bug, chore) - supported via API
   - [x] Story dependencies ✅ **COMPLETED** - Full support for get/create/delete dependencies with LinkType mapping
   - [x] Comments sync
-  - [ ] File attachments (not yet implemented)
+  - [x] File attachments ✅ **COMPLETED** - Full support for get/upload/delete attachments
 
 - [x] **Testing**
-  - [x] Unit tests for adapter methods (61 tests including webhooks and iterations)
+  - [x] Unit tests for adapter methods (74 tests including webhooks, iterations, and attachments)
   - [x] Integration tests with Shortcut API (mocked)
   - [x] Test workflow state transitions
 
@@ -265,7 +265,7 @@ Each tracker adapter requires:
   - [x] Workspace configuration - Comprehensive guide with examples
   - [x] Workflow state mapping - Detailed mapping table and custom state guide
 
-**Status**: ✅ **Core implementation complete** - 63 unit tests passing (including webhooks and iterations), all linting/type checks passing. Ready for use.
+**Status**: ✅ **Core implementation complete** - 74 unit tests passing (including webhooks, iterations, and attachments), all linting/type checks passing. Ready for use.
 
 **Actual Time**: ~4 hours (faster than estimated due to good patterns from Linear/GitHub adapters)
 
@@ -299,7 +299,7 @@ Each tracker adapter requires:
   - [x] Time tracking ✅ **COMPLETED** - Full support for time entries, stats, create/update/delete
   - [x] Dependencies and relationships ✅ **COMPLETED** - Full support for task dependencies with LinkType mapping
   - [x] Comments sync
-  - [ ] File attachments (not yet implemented)
+  - [x] File attachments ✅ **COMPLETED** - Full support for get/upload/delete attachments
   - [x] Views (Board, List, Calendar) ✅ **COMPLETED** - Full support for getting views and view tasks
 
 - [x] **Testing**
@@ -316,7 +316,7 @@ Each tracker adapter requires:
   - [x] Custom fields configuration - Detailed instructions for story points and custom fields
   - [x] Added to main configuration guide (`docs/guide/configuration.md`)
 
-**Status**: ✅ **Core implementation complete** - 61 unit tests passing (including 18 webhook tests, 5 time tracking tests, 7 dependency tests, 4 views tests), all linting/type checks passing. Ready for use.
+**Status**: ✅ **Core implementation complete** - 65 unit tests passing (including 18 webhook tests, 5 time tracking tests, 7 dependency tests, 4 views tests, 6 attachment tests), all linting/type checks passing. Ready for use.
 
 **Actual Time**: ~4 hours (faster than estimated due to good patterns from Linear/GitHub adapters)
 

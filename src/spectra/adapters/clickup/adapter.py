@@ -1085,3 +1085,66 @@ class ClickUpAdapter(IssueTrackerPort):
             include_closed=include_closed,
         )
         return [self._parse_task(task) for task in tasks]
+
+    # -------------------------------------------------------------------------
+    # Attachments
+    # -------------------------------------------------------------------------
+
+    def get_task_attachments(self, issue_key: str) -> list[dict[str, Any]]:
+        """
+        Get all attachments for a task.
+
+        Args:
+            issue_key: Task ID
+
+        Returns:
+            List of attachment dictionaries with id, name, url, etc.
+        """
+        return self._client.get_task_attachments(issue_key)
+
+    def upload_task_attachment(
+        self,
+        issue_key: str,
+        file_path: str,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Upload a file attachment to a task.
+
+        Args:
+            issue_key: Task ID
+            file_path: Path to file to upload
+            name: Optional attachment name (defaults to filename)
+
+        Returns:
+            Attachment information dictionary
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would upload attachment {file_path} to task {issue_key}")
+            return {"id": "attachment:dry-run", "name": name or file_path}
+
+        result = self._client.upload_task_attachment(
+            task_id=issue_key,
+            file_path=file_path,
+            name=name,
+        )
+        self.logger.info(f"Uploaded attachment to task {issue_key}")
+        return result
+
+    def delete_task_attachment(self, attachment_id: str) -> bool:
+        """
+        Delete an attachment.
+
+        Args:
+            attachment_id: Attachment ID to delete
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(f"[DRY-RUN] Would delete attachment {attachment_id}")
+            return True
+
+        result = self._client.delete_task_attachment(attachment_id)
+        self.logger.info(f"Deleted attachment {attachment_id}")
+        return result

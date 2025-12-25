@@ -1165,6 +1165,101 @@ class ClickUpApiClient:
         return True
 
     # -------------------------------------------------------------------------
+    # Attachments API
+    # -------------------------------------------------------------------------
+
+    def get_task_attachments(self, task_id: str) -> list[dict[str, Any]]:
+        """
+        Get all attachments for a task.
+
+        Args:
+            task_id: Task ID
+
+        Returns:
+            List of attachment dictionaries
+        """
+        # ClickUp returns attachments as part of the task data
+        task = self.get_task(task_id)
+        attachments = task.get("attachments", [])
+        return attachments if isinstance(attachments, list) else []
+
+    def upload_task_attachment(
+        self,
+        task_id: str,
+        file_path: str,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Upload a file attachment to a task.
+
+        Args:
+            task_id: Task ID
+            file_path: Path to file to upload
+            name: Optional attachment name (defaults to filename)
+
+        Returns:
+            Attachment information dictionary
+
+        Raises:
+            NotFoundError: If file doesn't exist
+            IssueTrackerError: On upload failure
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would upload attachment {file_path} to task {task_id}")
+            return {"id": "attachment:dry-run", "name": name or file_path}
+
+        from pathlib import Path
+
+        file_path_obj = Path(file_path)
+        if not file_path_obj.exists():
+            raise NotFoundError(f"File not found: {file_path}")
+
+        attachment_name = name or file_path_obj.name
+        url = f"{self.api_url}/task/{task_id}/attachment"
+
+        # ClickUp uses multipart form upload
+        with open(file_path_obj, "rb") as f:
+            files = {"attachment": (attachment_name, f)}
+
+            # Remove Content-Type header for multipart upload
+            headers = dict(self._session.headers)
+            headers.pop("Content-Type", None)
+
+            response = self._session.post(
+                url,
+                files=files,
+                headers=headers,
+                timeout=self.timeout,
+            )
+
+        if not response.ok:
+            raise IssueTrackerError(
+                f"Failed to upload attachment: {response.status_code} - {response.text[:500]}"
+            )
+
+        try:
+            return response.json()
+        except ValueError:
+            return {"id": "unknown", "name": attachment_name}
+
+    def delete_task_attachment(self, attachment_id: str) -> bool:
+        """
+        Delete an attachment from a task.
+
+        Args:
+            attachment_id: Attachment ID
+
+        Returns:
+            True if successful
+        """
+        if self.dry_run:
+            self.logger.info(f"[DRY-RUN] Would delete attachment {attachment_id}")
+            return True
+
+        self._request("DELETE", f"/attachment/{attachment_id}")
+        return True
+
+    # -------------------------------------------------------------------------
     # Resource Cleanup
     # -------------------------------------------------------------------------
 

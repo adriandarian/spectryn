@@ -326,6 +326,45 @@ class TrelloAdapter(IssueTrackerPort):
         self.logger.info(f"Updated story points for {issue_key} to {story_points}")
         return True
 
+    def get_issue_due_date(self, issue_key: str) -> str | None:
+        """
+        Get the due date for an issue.
+
+        Args:
+            issue_key: Issue key (card ID)
+
+        Returns:
+            Due date in ISO 8601 format, or None if not set
+        """
+        card = self._client.get_card(issue_key)
+        return card.get("due")
+
+    def update_issue_due_date(
+        self,
+        issue_key: str,
+        due_date: str | None,
+    ) -> bool:
+        """
+        Set or clear the due date for an issue.
+
+        Args:
+            issue_key: Issue key (card ID)
+            due_date: Due date in ISO 8601 format (e.g., "2024-01-15T12:00:00Z"),
+                      or None to clear the due date
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            action = "clear" if due_date is None else f"set to {due_date}"
+            self.logger.info(f"[DRY-RUN] Would {action} due date for {issue_key}")
+            return True
+
+        self._client.update_card(issue_key, due=due_date)
+        action = "Cleared" if due_date is None else f"Set due date to {due_date} for"
+        self.logger.info(f"{action} {issue_key}")
+        return True
+
     def create_subtask(
         self,
         parent_key: str,
@@ -836,6 +875,9 @@ class TrelloAdapter(IssueTrackerPort):
         comments: list[dict[str, Any]] = []
         # Comments are fetched separately via get_card_comments
 
+        # Parse due date
+        due_date = card_data.get("due")  # ISO 8601 format from Trello
+
         return IssueData(
             key=card_data.get("id", ""),
             summary=card_data.get("name", ""),
@@ -844,6 +886,7 @@ class TrelloAdapter(IssueTrackerPort):
             issue_type="Story",
             assignee=None,  # Trello doesn't expose assignee in basic card data
             story_points=story_points,
+            due_date=due_date,
             subtasks=subtasks,
             comments=comments,
         )

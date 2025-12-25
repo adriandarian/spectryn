@@ -971,3 +971,129 @@ class TestClickUpAdapterViews:
             page=0,
             include_closed=False,
         )
+
+
+# =============================================================================
+# Attachment Tests
+# =============================================================================
+
+
+class TestClickUpAdapterAttachments:
+    """Tests for ClickUp attachment operations."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create mock client."""
+        with patch.object(ClickUpAdapter, "_get_statuses", return_value=[]):
+            client = MagicMock(spec=ClickUpApiClient)
+            client.test_connection.return_value = True
+            yield client
+
+    @pytest.fixture
+    def adapter(self, mock_client):
+        """Create adapter with mock client."""
+        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+            adapter = ClickUpAdapter(
+                api_token="test-token",
+                space_id="space123",
+                list_id="list123",
+                dry_run=False,
+            )
+            adapter._client = mock_client
+            return adapter
+
+    def test_get_task_attachments(self, adapter, mock_client):
+        """Should get task attachments."""
+        mock_attachments = [
+            {"id": "att1", "name": "file1.pdf", "url": "https://example.com/file1.pdf"},
+            {"id": "att2", "name": "file2.png", "url": "https://example.com/file2.png"},
+        ]
+        mock_client.get_task_attachments.return_value = mock_attachments
+
+        result = adapter.get_task_attachments("task123")
+
+        assert len(result) == 2
+        assert result[0]["id"] == "att1"
+        assert result[1]["name"] == "file2.png"
+        mock_client.get_task_attachments.assert_called_once_with("task123")
+
+    def test_upload_task_attachment(self, adapter, mock_client, tmp_path):
+        """Should upload attachment to task."""
+        # Create a test file
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        mock_client.upload_task_attachment.return_value = {
+            "id": "att123",
+            "name": "test.txt",
+            "url": "https://example.com/test.txt",
+        }
+
+        result = adapter.upload_task_attachment("task123", str(test_file))
+
+        assert result["id"] == "att123"
+        mock_client.upload_task_attachment.assert_called_once_with(
+            task_id="task123",
+            file_path=str(test_file),
+            name=None,
+        )
+
+    def test_upload_task_attachment_with_name(self, adapter, mock_client, tmp_path):
+        """Should upload attachment with custom name."""
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("test content")
+
+        mock_client.upload_task_attachment.return_value = {
+            "id": "att123",
+            "name": "custom_name.txt",
+        }
+
+        result = adapter.upload_task_attachment("task123", str(test_file), name="custom_name.txt")
+
+        assert result["name"] == "custom_name.txt"
+        mock_client.upload_task_attachment.assert_called_once_with(
+            task_id="task123",
+            file_path=str(test_file),
+            name="custom_name.txt",
+        )
+
+    def test_upload_task_attachment_dry_run(self, mock_client):
+        """Should not upload in dry-run mode."""
+        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+            adapter = ClickUpAdapter(
+                api_token="test-token",
+                space_id="space123",
+                list_id="list123",
+                dry_run=True,
+            )
+            adapter._client = mock_client
+
+        result = adapter.upload_task_attachment("task123", "/path/to/file.txt")
+
+        assert result["id"] == "attachment:dry-run"
+        mock_client.upload_task_attachment.assert_not_called()
+
+    def test_delete_task_attachment(self, adapter, mock_client):
+        """Should delete attachment."""
+        mock_client.delete_task_attachment.return_value = True
+
+        result = adapter.delete_task_attachment("att123")
+
+        assert result is True
+        mock_client.delete_task_attachment.assert_called_once_with("att123")
+
+    def test_delete_task_attachment_dry_run(self, mock_client):
+        """Should not delete in dry-run mode."""
+        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+            adapter = ClickUpAdapter(
+                api_token="test-token",
+                space_id="space123",
+                list_id="list123",
+                dry_run=True,
+            )
+            adapter._client = mock_client
+
+        result = adapter.delete_task_attachment("att123")
+
+        assert result is True
+        mock_client.delete_task_attachment.assert_not_called()
