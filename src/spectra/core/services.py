@@ -60,7 +60,7 @@ def create_tracker_factory(
     Create a factory function for the issue tracker.
 
     Args:
-        tracker_type: Type of tracker ('jira', 'github', 'azure', 'linear', 'asana', 'gitlab', 'monday', 'trello', 'shortcut')
+        tracker_type: Type of tracker ('jira', 'github', 'azure', 'linear', 'asana', 'gitlab', 'monday', 'trello', 'shortcut', 'clickup')
 
     Returns:
         Factory function that creates the tracker
@@ -165,6 +165,20 @@ def create_tracker_factory(
             return ShortcutAdapter(
                 api_token=config.api_token,
                 workspace_id=config.workspace_id,
+                dry_run=is_dry_run,
+                api_url=config.api_url,
+            )
+        if tracker_type == "clickup":
+            from spectra.adapters.clickup import ClickUpAdapter
+            from spectra.core.ports.config_provider import ClickUpConfig
+
+            if not isinstance(config, ClickUpConfig):
+                raise ValueError("ClickUp adapter requires ClickUpConfig")
+            return ClickUpAdapter(
+                api_token=config.api_token,
+                space_id=config.space_id,
+                folder_id=config.folder_id,
+                list_id=config.list_id,
                 dry_run=is_dry_run,
                 api_url=config.api_url,
             )

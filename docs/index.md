@@ -4,7 +4,7 @@ layout: home
 hero:
   name: spectra
   text: Specs to Trackers, Simplified
-  tagline: A production-grade CLI tool for syncing markdown specs to issue trackers. Supports Jira, GitHub Issues, Azure DevOps, Linear, Trello, and more.
+  tagline: A production-grade CLI tool for syncing markdown specs to issue trackers. Supports Jira, GitHub Issues, Azure DevOps, Linear, Trello, ClickUp, and more.
   image:
     src: /hero-illustration.svg
     alt: spectra
@@ -19,7 +19,7 @@ hero:
 features:
   - icon: 🚀
     title: Multi-Platform Sync
-    details: Sync to Jira, GitHub Issues, Azure DevOps, Linear, Trello, GitLab, Monday.com, and Confluence. One tool for all your issue trackers.
+    details: Sync to Jira, GitHub Issues, Azure DevOps, Linear, Trello, GitLab, Monday.com, ClickUp, Shortcut, and Confluence. One tool for all your issue trackers.
   - icon: 📝
     title: Markdown & YAML Native
     details: Write specs in familiar markdown or YAML format. No need to learn new syntax or use clunky web interfaces.

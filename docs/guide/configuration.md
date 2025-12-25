@@ -123,6 +123,11 @@ verbose = true
 | `SHORTCUT_API_TOKEN` | Shortcut API token ([generate here](https://app.shortcut.com/settings/api-tokens)) |
 | `SHORTCUT_WORKSPACE_ID` | Shortcut workspace ID (UUID or slug) |
 | `SHORTCUT_API_URL` | Shortcut API endpoint (default: `https://api.app.shortcut.com/api/v3`) |
+| `CLICKUP_API_TOKEN` | ClickUp API token ([generate here](https://app.clickup.com/settings/apps)) |
+| `CLICKUP_SPACE_ID` | ClickUp space ID (optional, for scoping operations) |
+| `CLICKUP_FOLDER_ID` | ClickUp folder ID (optional, for scoping operations) |
+| `CLICKUP_LIST_ID` | ClickUp list ID (optional, for scoping operations) |
+| `CLICKUP_API_URL` | ClickUp API endpoint (default: `https://api.clickup.com/api/v2`) |
 | `MD2JIRA_VERBOSE` | Enable verbose output (`true`/`false`) |
 
 ## .env File
@@ -227,6 +232,18 @@ See [Monday.com Integration Guide](/guide/monday) for detailed configuration exa
 | `shortcut.api_url` | string | API endpoint (default: `https://api.app.shortcut.com/api/v3`) |
 
 See [Shortcut Integration Guide](/guide/shortcut) for detailed configuration examples.
+
+### ClickUp Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `clickup.api_token` | string | ClickUp API token (required) |
+| `clickup.space_id` | string | Space ID (optional, for scoping operations) |
+| `clickup.folder_id` | string | Folder ID (optional, for scoping operations) |
+| `clickup.list_id` | string | List ID (optional, for scoping operations) |
+| `clickup.api_url` | string | API endpoint (default: `https://api.clickup.com/api/v2`) |
+
+See [ClickUp Integration Guide](/guide/clickup) for detailed configuration examples.
 
 ### Sync Settings
 

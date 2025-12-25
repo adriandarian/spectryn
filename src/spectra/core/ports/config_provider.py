@@ -24,6 +24,7 @@ class TrackerType(Enum):
     MONDAY = "monday"
     TRELLO = "trello"
     SHORTCUT = "shortcut"
+    CLICKUP = "clickup"
 
 
 @dataclass
@@ -199,6 +200,21 @@ class ShortcutConfig:
     def is_valid(self) -> bool:
         """Check if configuration is valid."""
         return bool(self.api_token and self.workspace_id)
+
+
+@dataclass
+class ClickUpConfig:
+    """Configuration for ClickUp tracker."""
+
+    api_token: str
+    space_id: str | None = None
+    folder_id: str | None = None
+    list_id: str | None = None
+    api_url: str = "https://api.clickup.com/api/v2"
+
+    def is_valid(self) -> bool:
+        """Check if configuration is valid."""
+        return bool(self.api_token)
 
 
 # =============================================================================
