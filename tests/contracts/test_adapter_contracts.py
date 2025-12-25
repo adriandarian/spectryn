@@ -304,6 +304,99 @@ class TestLinearAdapterContract(AdapterContractTestBase):
         adapter._client.add_comment.assert_not_called()
 
 
+class TestYouTrackAdapterContract(AdapterContractTestBase):
+    """Contract tests for YouTrackAdapter."""
+
+    def create_adapter(self, dry_run: bool = True) -> IssueTrackerPort:
+        from spectra.adapters.youtrack.adapter import YouTrackAdapter
+        from spectra.core.ports.config_provider import YouTrackConfig
+
+        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
+            mock_client = MagicMock()
+            mock_client.get_current_user.return_value = {"login": "testuser"}
+            mock_client.get_available_states.return_value = [
+                {"name": "Open"},
+                {"name": "In Progress"},
+                {"name": "Done"},
+            ]
+            mock_client.get_available_priorities.return_value = [
+                {"name": "Critical"},
+                {"name": "High"},
+                {"name": "Normal"},
+            ]
+            MockClient.return_value = mock_client
+
+            config = YouTrackConfig(
+                url="https://test.youtrack.com",
+                token="test-token",
+                project_id="PROJ",
+            )
+            adapter = YouTrackAdapter(config=config, dry_run=dry_run)
+            adapter._client = mock_client
+            return adapter
+
+    def mock_issue_data(self) -> dict[str, Any]:
+        return {
+            "idReadable": "PROJ-123",
+            "summary": "Test Issue",
+            "description": "Test description",
+            "type": {"name": "Task"},
+            "customFields": [
+                {"name": "State", "value": {"name": "Open"}},
+            ],
+        }
+
+    def sample_issue_key(self) -> str:
+        return "PROJ-123"
+
+    def test_adapter_has_name_property(self):
+        """Test adapter has name property."""
+        adapter = self.create_adapter()
+        assert hasattr(adapter, "name")
+        assert isinstance(adapter.name, str)
+        assert adapter.name == "YouTrack"
+
+    def test_adapter_has_is_connected_property(self):
+        """Test adapter has is_connected property."""
+        adapter = self.create_adapter()
+        assert hasattr(adapter, "is_connected")
+
+    def test_adapter_has_test_connection_method(self):
+        """Test adapter has test_connection method."""
+        adapter = self.create_adapter()
+        assert hasattr(adapter, "test_connection")
+        assert callable(adapter.test_connection)
+
+    def test_get_issue_returns_issue_data(self):
+        """Test get_issue returns IssueData."""
+        adapter = self.create_adapter()
+        adapter._client.get_issue.return_value = self.mock_issue_data()
+        adapter._client.get_issue_comments.return_value = []
+
+        result = adapter.get_issue(self.sample_issue_key())
+
+        assert isinstance(result, IssueData)
+        assert result.key == "PROJ-123"
+
+    def test_update_description_dry_run(self):
+        """Test update_issue_description in dry run mode."""
+        adapter = self.create_adapter(dry_run=True)
+
+        result = adapter.update_issue_description(self.sample_issue_key(), "New desc")
+
+        assert result is True
+        adapter._client.update_issue.assert_not_called()
+
+    def test_add_comment_dry_run(self):
+        """Test add_comment in dry run mode."""
+        adapter = self.create_adapter(dry_run=True)
+
+        result = adapter.add_comment(self.sample_issue_key(), "Comment")
+
+        assert result is True
+        adapter._client.add_comment.assert_not_called()
+
+
 class TestAdapterContractConsistency:
     """Tests for consistent behavior across all adapters."""
 
@@ -349,6 +442,23 @@ class TestAdapterContractConsistency:
             mock_client.get_team_by_key.return_value = {"id": "t", "key": "ENG"}
             MockClient.return_value = mock_client
             adapters.append(("Linear", LinearAdapter(api_key="test", team_key="ENG", dry_run=True)))
+
+        # YouTrack
+        from spectra.adapters.youtrack.adapter import YouTrackAdapter
+        from spectra.core.ports.config_provider import YouTrackConfig
+
+        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
+            mock_client = MagicMock()
+            mock_client.get_current_user.return_value = {"login": "testuser"}
+            mock_client.get_available_states.return_value = []
+            mock_client.get_available_priorities.return_value = []
+            MockClient.return_value = mock_client
+            config = YouTrackConfig(
+                url="https://test.youtrack.com",
+                token="test-token",
+                project_id="PROJ",
+            )
+            adapters.append(("YouTrack", YouTrackAdapter(config=config, dry_run=True)))
 
         return adapters
 

@@ -201,6 +201,16 @@ def create_tracker_factory(
                 status_mapping=config.status_mapping,
                 priority_mapping=config.priority_mapping,
             )
+        if tracker_type == "youtrack":
+            from spectra.adapters.youtrack import YouTrackAdapter
+            from spectra.core.ports.config_provider import YouTrackConfig
+
+            if not isinstance(config, YouTrackConfig):
+                raise ValueError("YouTrack adapter requires YouTrackConfig")
+            return YouTrackAdapter(
+                config=config,
+                dry_run=is_dry_run,
+            )
         raise ValueError(f"Unknown tracker type: {tracker_type}")
 
     return factory

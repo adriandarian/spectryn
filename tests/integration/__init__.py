@@ -11,4 +11,5 @@ using mocked API responses. They cover:
 - Monday.com integration (test_monday_integration.py)
 - Confluence integration (test_confluence_integration.py)
 - Bitbucket integration (test_bitbucket_integration.py)
+- YouTrack integration (test_youtrack_integration.py)
 """

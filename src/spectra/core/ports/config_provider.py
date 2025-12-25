@@ -26,6 +26,7 @@ class TrackerType(Enum):
     SHORTCUT = "shortcut"
     CLICKUP = "clickup"
     BITBUCKET = "bitbucket"
+    YOUTRACK = "youtrack"
 
 
 @dataclass
@@ -257,6 +258,37 @@ class BitbucketConfig:
     def is_valid(self) -> bool:
         """Check if configuration is valid."""
         return bool(self.username and self.app_password and self.workspace and self.repo)
+
+
+@dataclass
+class YouTrackConfig:
+    """Configuration for YouTrack tracker."""
+
+    url: str  # YouTrack instance URL (e.g., https://youtrack.example.com)
+    token: str  # Permanent Token for authentication
+    project_id: str  # Project ID in YouTrack
+    api_url: str | None = None  # Optional API URL override (defaults to {url}/api)
+
+    # Issue type mappings
+    epic_type: str = "Epic"
+    story_type: str = "Task"  # YouTrack uses "Task" or "User Story" depending on project
+    subtask_type: str = "Subtask"
+
+    # Custom field mappings (optional)
+    story_points_field: str | None = None  # Custom field ID for story points
+    status_field: str = "State"  # Field name for status/state
+    priority_field: str = "Priority"  # Field name for priority
+
+    def is_valid(self) -> bool:
+        """Check if configuration is valid."""
+        return bool(self.url and self.token and self.project_id)
+
+    @property
+    def effective_api_url(self) -> str:
+        """Get the effective API URL."""
+        if self.api_url:
+            return self.api_url.rstrip("/")
+        return f"{self.url.rstrip('/')}/api"
 
 
 # =============================================================================
