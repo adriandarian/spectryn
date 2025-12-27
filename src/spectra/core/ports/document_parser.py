@@ -11,6 +11,16 @@ Implementations:
 - ExcelParser: Parse Excel spreadsheets (.xlsx, .xlsm, .xls)
 - ToonParser: Parse TOON format (.toon) - LLM-optimized notation
 - NotionParser: Parse Notion exports (markdown/CSV/folders)
+- RstParser: Parse reStructuredText files (.rst, .rest)
+- OrgModeParser: Parse Emacs Org-mode files (.org)
+- ObsidianParser: Parse Obsidian-flavored Markdown (wikilinks, dataview)
+- ConfluenceParser: Parse Confluence Cloud pages via API
+- GoogleDocsParser: Parse Google Docs via API
+- ProtobufParser: Parse Protocol Buffer specs (.proto)
+- GraphQLParser: Parse GraphQL schemas (.graphql, .gql)
+- DiagramParser: Parse PlantUML/Mermaid diagrams (.puml, .mmd)
+- OpenAPIParser: Parse OpenAPI/Swagger specs (.yaml, .json)
+- GoogleSheetsParser: Parse Google Sheets via API
 """
 
 from abc import ABC, abstractmethod
