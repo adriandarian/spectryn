@@ -92,6 +92,8 @@ class FormattedError:
         suggestions: List of actionable suggestions to resolve the error.
         docs_url: Optional link to relevant documentation.
         details: Optional additional technical details.
+        commands: Optional CLI commands to run.
+        quick_fix: Optional one-liner fix command.
     """
 
     code: ErrorCode
@@ -100,6 +102,8 @@ class FormattedError:
     suggestions: list[str] = field(default_factory=list)
     docs_url: str | None = None
     details: str | None = None
+    commands: list[str] = field(default_factory=list)  # CLI commands to try
+    quick_fix: str | None = None  # One-liner fix command
 
     def format(self, color: bool = True) -> str:
         """Format the error for terminal display."""
@@ -132,6 +136,16 @@ class FormattedError:
             else:
                 lines.append(f"  Details: {self.details}")
 
+        # Quick fix (prominent single command)
+        if self.quick_fix:
+            lines.append("")
+            if color:
+                lines.append(f"  {Colors.GREEN}{Colors.BOLD}⚡ Quick fix:{Colors.RESET}")
+                lines.append(f"    {Colors.YELLOW}$ {self.quick_fix}{Colors.RESET}")
+            else:
+                lines.append("  ⚡ Quick fix:")
+                lines.append(f"    $ {self.quick_fix}")
+
         # Suggestions
         if self.suggestions:
             lines.append("")
@@ -146,6 +160,22 @@ class FormattedError:
                 else:
                     lines.append(f"    {i}. {suggestion}")
 
+        # Commands to try
+        if self.commands:
+            lines.append("")
+            if color:
+                lines.append(f"  {Colors.CYAN}{Colors.BOLD}Commands to try:{Colors.RESET}")
+            else:
+                lines.append("  Commands to try:")
+
+            for cmd in self.commands:
+                if color:
+                    lines.append(
+                        f"    {Colors.DIM}${Colors.RESET} {Colors.YELLOW}{cmd}{Colors.RESET}"
+                    )
+                else:
+                    lines.append(f"    $ {cmd}")
+
         # Documentation link
         if self.docs_url:
             lines.append("")
@@ -158,6 +188,19 @@ class FormattedError:
                 lines.append(f"  📖 Documentation: {self.docs_url}")
 
         return "\n".join(lines)
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON/YAML output."""
+        return {
+            "code": self.code.value,
+            "title": self.title,
+            "message": self.message,
+            "suggestions": self.suggestions,
+            "commands": self.commands if self.commands else None,
+            "quick_fix": self.quick_fix,
+            "docs_url": self.docs_url,
+            "details": self.details,
+        }
 
 
 class ErrorFormatter:
@@ -269,6 +312,11 @@ class ErrorFormatter:
             suggestions=suggestions,
             docs_url=f"{self.DOCS_BASE}/guide/configuration#authentication",
             details=self._get_cause_details(exc) if self.verbose else None,
+            commands=[
+                "spectra --doctor  # Check configuration",
+                "spectra --init    # Reconfigure credentials",
+            ],
+            quick_fix="spectra --doctor",
         )
 
     def _format_permission_error(self, exc: AccessDeniedError) -> FormattedError:
@@ -306,6 +354,8 @@ class ErrorFormatter:
         code = ErrorCode.RESOURCE_NOT_FOUND
         title = "Resource Not Found"
         suggestions = []
+        commands = []
+        quick_fix = None
 
         if issue_key:
             code = ErrorCode.RESOURCE_ISSUE_NOT_FOUND
@@ -315,6 +365,9 @@ class ErrorFormatter:
                 "Confirm the issue hasn't been deleted or moved",
                 "Check that you have permission to view this issue",
                 "Try searching for the issue in Jira directly",
+            ]
+            commands = [
+                "# Search for similar issues in your tracker",
             ]
         elif "project" in message.lower():
             code = ErrorCode.RESOURCE_PROJECT_NOT_FOUND
@@ -332,6 +385,10 @@ class ErrorFormatter:
                 "Ensure the issue is actually an Epic type",
                 "Check that the epic hasn't been deleted",
             ]
+            commands = [
+                "spectra --doctor  # Verify connection and permissions",
+            ]
+            quick_fix = "spectra --doctor"
         else:
             suggestions = [
                 "Verify the resource identifier is correct",
@@ -345,6 +402,8 @@ class ErrorFormatter:
             message=message,
             suggestions=suggestions,
             details=f"Issue: {issue_key}" if issue_key else None,
+            commands=commands,
+            quick_fix=quick_fix,
         )
 
     # -------------------------------------------------------------------------
@@ -450,7 +509,7 @@ class ErrorFormatter:
 
         suggestions = [
             "Check the file syntax for errors",
-            "Ensure story headings use the correct format (## Story Title)",
+            "Ensure story headings use the correct format (### 🔧 US-001: Story Title)",
             "Verify subtasks are properly indented with '- [ ] Task'",
             "Use --validate to check the file before syncing",
         ]
@@ -467,6 +526,20 @@ class ErrorFormatter:
                 parts.append(f"Line: {line_number}")
             details = ", ".join(parts)
 
+        # Build commands based on source file
+        commands = []
+        quick_fix = None
+        if source:
+            commands = [
+                f"spectra --validate --input {source}  # Validate file",
+                f"spectra --suggest-fix --input {source}  # Get AI fix suggestions",
+            ]
+            quick_fix = f"spectra --validate --input {source}"
+        else:
+            commands = [
+                "spectra --validate --input YOUR_FILE.md  # Validate file",
+            ]
+
         return FormattedError(
             code=code,
             title=title,
@@ -474,6 +547,8 @@ class ErrorFormatter:
             suggestions=suggestions,
             docs_url=f"{self.DOCS_BASE}/guide/schema",
             details=details,
+            commands=commands,
+            quick_fix=quick_fix,
         )
 
     # -------------------------------------------------------------------------
@@ -489,6 +564,8 @@ class ErrorFormatter:
         code = ErrorCode.CONFIG_SYNTAX_ERROR
         title = "Configuration Error"
         suggestions = []
+        commands = []
+        quick_fix = None
 
         message_lower = message.lower()
         if "url" in message_lower:
@@ -499,6 +576,11 @@ class ErrorFormatter:
                 "Add 'jira.url' to your config file (.spectra.yaml)",
                 "Example: export JIRA_URL='https://your-company.atlassian.net'",
             ]
+            commands = [
+                "export JIRA_URL='https://your-company.atlassian.net'",
+                "spectra --init  # Interactive configuration wizard",
+            ]
+            quick_fix = "spectra --init"
         elif "email" in message_lower:
             code = ErrorCode.CONFIG_MISSING_EMAIL
             title = "Missing Jira Email"
@@ -507,6 +589,11 @@ class ErrorFormatter:
                 "Add 'jira.email' to your config file (.spectra.yaml)",
                 "Use your Atlassian account email address",
             ]
+            commands = [
+                "export JIRA_EMAIL='your-email@company.com'",
+                "spectra --init  # Interactive configuration wizard",
+            ]
+            quick_fix = "spectra --init"
         elif "token" in message_lower:
             code = ErrorCode.CONFIG_MISSING_TOKEN
             title = "Missing API Token"
@@ -515,12 +602,22 @@ class ErrorFormatter:
                 "Add 'jira.api_token' to your config file (.spectra.yaml)",
                 "Generate a token at: https://id.atlassian.com/manage-profile/security/api-tokens",
             ]
+            commands = [
+                "export JIRA_API_TOKEN='your-api-token'",
+                "spectra --init  # Interactive configuration wizard",
+            ]
+            quick_fix = "spectra --init"
         else:
             suggestions = [
                 "Check your configuration file syntax",
                 "Verify all required settings are provided",
                 "Run with --verbose for more details",
             ]
+            commands = [
+                "spectra --doctor  # Diagnose configuration issues",
+                "spectra --init  # Reconfigure from scratch",
+            ]
+            quick_fix = "spectra --doctor"
 
         return FormattedError(
             code=code,
@@ -529,6 +626,8 @@ class ErrorFormatter:
             suggestions=suggestions,
             docs_url=f"{self.DOCS_BASE}/guide/configuration",
             details=f"Config file: {config_path}" if config_path else None,
+            commands=commands,
+            quick_fix=quick_fix,
         )
 
     def _format_config_file_error(self, exc: ConfigFileError) -> FormattedError:
@@ -588,6 +687,11 @@ class ErrorFormatter:
                 "Use an absolute path if the relative path isn't working",
             ],
             details=f"Path: {filename}" if filename else None,
+            commands=[
+                f"ls -la {filename}  # Check if file exists",
+                "spectra --generate epic  # Generate a template file",
+            ],
+            quick_fix="spectra --generate epic  # Create a template",
         )
 
     def _format_file_permission_error(self, exc: PermissionError) -> FormattedError:

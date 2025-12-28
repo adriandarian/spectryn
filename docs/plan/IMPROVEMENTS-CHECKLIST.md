@@ -693,8 +693,8 @@ For each new tracker adapter, follow this checklist:
 - [x] **Interactive TUI Dashboard** - Real-time sync progress, epic/story browser, conflict resolution UI
 - [x] **Progress Bars** - Real-time sync progress indicators
 - [x] **Colored Diff Output** - Better visualization of changes
-- [ ] **Better Error Messages** - More actionable error messages
-- [ ] **JSON/YAML/Markdown Output** - Preview output formats for CI pipelines
+- [x] **Better Error Messages** - More actionable error messages
+- [x] **JSON/YAML/Markdown Output** - Preview output formats for CI pipelines
 - [ ] **Emoji Toggle** - Option to disable emojis in output
 - [ ] **Color Themes** - Support different color schemes
 - [ ] **PowerShell Completions** - Windows shell completion

@@ -249,9 +249,9 @@ Environment Variables:
         "--output",
         "-o",
         type=str,
-        choices=["text", "json"],
+        choices=["text", "json", "yaml", "markdown"],
         default="text",
-        help="Output format: text (default) or json for programmatic use",
+        help="Output format: text (default), json, yaml, or markdown for CI pipelines",
     )
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
     parser.add_argument(
@@ -3035,7 +3035,7 @@ def main() -> int:
             color=not args.no_color,
             verbose=args.verbose,
             quiet=args.quiet,
-            json_mode=(args.output == "json"),
+            json_mode=(args.output in ("json", "yaml", "markdown")),
         )
         dir_path = Path(input_dir)
         if not dir_path.is_dir():
@@ -3097,7 +3097,7 @@ def main() -> int:
             color=not args.no_color,
             verbose=args.verbose,
             quiet=args.quiet,
-            json_mode=(args.output == "json"),
+            json_mode=(args.output in ("json", "yaml", "markdown")),
         )
         try:
             return validate_markdown(
@@ -3252,7 +3252,7 @@ def main() -> int:
         color=not args.no_color,
         verbose=args.verbose,
         quiet=args.quiet,
-        json_mode=(args.output == "json"),
+        json_mode=(args.output in ("json", "yaml", "markdown")),
     )
 
     try:
