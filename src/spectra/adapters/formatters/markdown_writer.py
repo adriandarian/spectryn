@@ -338,3 +338,88 @@ class MarkdownUpdater:
             new_content = content.rstrip() + "\n\n---\n\n" + new_story_md + "\n"
 
         return new_content
+
+    def update_stories(
+        self,
+        content: str,
+        updates: dict[str, dict[str, object]],
+    ) -> str:
+        """
+        Update multiple stories with field changes from tracker.
+
+        This is used in bidirectional sync to pull remote changes
+        into the markdown file.
+
+        Args:
+            content: Original markdown content.
+            updates: Dictionary mapping story IDs to field updates.
+                     Example: {"US-001": {"status": "Done", "story_points": 5}}
+
+        Returns:
+            Updated markdown content with all changes applied.
+        """
+        import re
+
+        from spectra.core.domain.enums import Priority, Status
+
+        updated_content = content
+
+        for story_id, field_updates in updates.items():
+            for field, value in field_updates.items():
+                if field == "status":
+                    # Convert status value to display format
+                    if isinstance(value, str):
+                        status = Status.from_string(value)
+                        display_value = f"{status.emoji} {status.display_name}"
+                    elif isinstance(value, int):
+                        status = Status(value)
+                        display_value = f"{status.emoji} {status.display_name}"
+                    else:
+                        display_value = str(value)
+                    updated_content = self.update_field_in_story(
+                        updated_content, story_id, "Status", display_value
+                    )
+
+                elif field == "story_points":
+                    if isinstance(value, (int, float)):
+                        sp = int(value)
+                    elif value:
+                        sp = int(str(value))
+                    else:
+                        sp = 0
+                    updated_content = self.update_field_in_story(
+                        updated_content, story_id, "Story Points", str(sp)
+                    )
+
+                elif field == "priority":
+                    if isinstance(value, str):
+                        priority = Priority.from_string(value)
+                        display_value = f"{priority.emoji} {priority.display_name}"
+                    elif isinstance(value, int):
+                        priority = Priority(value)
+                        display_value = f"{priority.emoji} {priority.display_name}"
+                    else:
+                        display_value = str(value)
+                    updated_content = self.update_field_in_story(
+                        updated_content, story_id, "Priority", display_value
+                    )
+
+                elif field == "assignee":
+                    updated_content = self.update_field_in_story(
+                        updated_content, story_id, "Assignee", str(value) if value else "Unassigned"
+                    )
+
+                elif field == "title":
+                    # Update story title in header
+                    pattern = rf"(### [^\n]+ {re.escape(story_id)}: )[^\n]+"
+                    replacement = rf"\g<1>{value}"
+                    updated_content = re.sub(pattern, replacement, updated_content)
+
+        # Update the last synced timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        footer_pattern = r">\s*\*Last synced[^\n]*\*"
+        new_footer = f"> *Last synced from Jira: {timestamp}*"
+        if re.search(footer_pattern, updated_content):
+            updated_content = re.sub(footer_pattern, new_footer, updated_content)
+
+        return updated_content

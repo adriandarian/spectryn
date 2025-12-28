@@ -165,6 +165,12 @@ Pull issues from tracker to local file (reverse sync).
 .TP
 .B \\-\\-pull\\-output " " \\fIFILE\\fR
 Output file for pulled content.
+.TP
+.B \\-\\-bidirectional, \\-\\-two\\-way
+Two-way sync: push local changes AND pull remote changes with conflict detection.
+.TP
+.B \\-\\-conflict\\-strategy " " \\fISTRATEGY\\fR
+How to resolve conflicts: ask (interactive), force-local (take markdown), force-remote (take tracker), skip (skip conflicts), abort (fail on conflicts).
 .SS "Watch & Schedule"
 .TP
 .B \\-\\-watch
@@ -310,6 +316,15 @@ User-level configuration file.
 .SS "Pull from Tracker"
 .nf
 .B spectra --pull -e PROJ-123 --pull-output EPIC.md --execute
+.fi
+.SS "Bidirectional Sync"
+.nf
+.B spectra --bidirectional -f EPIC.md -e PROJ-123 --execute
+.fi
+.PP
+Two-way sync that pushes local changes AND pulls remote changes with conflict detection:
+.nf
+.B spectra --bidirectional -f EPIC.md -e PROJ-123 --conflict-strategy force-local --execute
 .fi
 .SS "Watch Mode"
 .nf

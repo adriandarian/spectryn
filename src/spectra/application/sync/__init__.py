@@ -12,6 +12,10 @@ from .backup import (
     create_pre_sync_backup,
     restore_from_backup,
 )
+from .bidirectional import (
+    BidirectionalSyncOrchestrator,
+    BidirectionalSyncResult,
+)
 from .conflict import (
     Conflict,
     ConflictDetector,
@@ -101,6 +105,8 @@ __all__ = [
     "AuditTrailRecorder",
     "Backup",
     "BackupManager",
+    "BidirectionalSyncOrchestrator",
+    "BidirectionalSyncResult",
     "ChangeDetail",
     "ChangeDetectionResult",
     "ChangeTracker",

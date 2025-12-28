@@ -705,8 +705,8 @@ For each new tracker adapter, follow this checklist:
 ## 🟤 Advanced Sync Features
 
 ### Sync Capabilities
-- [ ] **Bidirectional Sync** - Pull tracker changes back into markdown with conflict detection
-- [ ] **Incremental Sync Optimization** - Only sync changed items (content hash + persisted state)
+- [x] **Bidirectional Sync** - Pull tracker changes back into markdown with conflict detection
+im
 - [ ] **Delta Sync** - Only fetch/sync changed fields
 - [ ] **Partial Sync by Field** - Sync only specific fields (e.g., just status)
 - [ ] **Multi-Tracker Sync** - Sync same markdown to multiple trackers simultaneously
