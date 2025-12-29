@@ -239,8 +239,13 @@ class Epic:
     status: Status = Status.PLANNED
     priority: Priority = Priority.MEDIUM
 
+    # Hierarchy
+    parent_key: IssueKey | None = None  # Parent epic for multi-level hierarchies
+    level: str = "epic"  # Hierarchy level (portfolio, initiative, epic, feature)
+
     # Children
     stories: list[UserStory] = field(default_factory=list)
+    child_epics: list["Epic"] = field(default_factory=list)  # Child epics
 
     # Timestamps
     created_at: datetime | None = None
@@ -282,7 +287,10 @@ class Epic:
             "description": self.description,
             "status": self.status.name,
             "priority": self.priority.name,
+            "parent_key": str(self.parent_key) if self.parent_key else None,
+            "level": self.level,
             "stories": [s.to_dict() for s in self.stories],
+            "child_epics": [e.to_dict() for e in self.child_epics],
             "total_story_points": self.total_story_points,
             "completion_percentage": self.completion_percentage,
         }

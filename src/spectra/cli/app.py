@@ -913,6 +913,31 @@ Environment Variables:
         help="Fail if circular dependencies are detected",
     )
 
+    # Epic hierarchy options
+    parser.add_argument(
+        "--sync-hierarchy",
+        action="store_true",
+        help="Enable epic hierarchy synchronization (parent/child epics)",
+    )
+    parser.add_argument(
+        "--parent-epic",
+        type=str,
+        metavar="KEY",
+        help="Parent epic key for this epic (creates hierarchy)",
+    )
+    parser.add_argument(
+        "--epic-level",
+        type=str,
+        choices=["portfolio", "initiative", "theme", "epic", "feature"],
+        default="epic",
+        help="Hierarchy level of this epic (default: epic)",
+    )
+    parser.add_argument(
+        "--show-hierarchy",
+        action="store_true",
+        help="Display epic hierarchy as a tree",
+    )
+
     # New CLI commands
     new_commands = parser.add_argument_group("Commands")
     new_commands.add_argument("--doctor", action="store_true", help="Diagnose common setup issues")

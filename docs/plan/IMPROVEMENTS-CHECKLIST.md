@@ -720,7 +720,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Time Tracking Sync** - Parse/sync time estimates and logged time
 - [x] **Sprint/Iteration Sync** - Parse and sync sprint assignments
 - [x] **Story Dependencies/Relationships** - Parse blocks/depends-on relationships
-- [ ] **Epic Hierarchy** - Support multi-level epic hierarchies
+- [x] **Epic Hierarchy** - Support multi-level epic hierarchies
 - [ ] **Worklog Sync** - Sync time logs
 
 ### Automation
