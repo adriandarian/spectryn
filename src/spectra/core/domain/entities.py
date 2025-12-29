@@ -245,7 +245,7 @@ class Epic:
 
     # Children
     stories: list[UserStory] = field(default_factory=list)
-    child_epics: list["Epic"] = field(default_factory=list)  # Child epics
+    child_epics: list[Epic] = field(default_factory=list)  # Child epics
 
     # Timestamps
     created_at: datetime | None = None

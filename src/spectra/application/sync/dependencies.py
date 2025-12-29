@@ -193,11 +193,7 @@ class DependencyGraph:
 
     def get_all_for_story(self, story_id: str) -> list[Dependency]:
         """Get all dependencies involving a story."""
-        return [
-            d
-            for d in self.dependencies
-            if story_id in (d.source_id, d.target_id)
-        ]
+        return [d for d in self.dependencies if story_id in (d.source_id, d.target_id)]
 
     def detect_cycles(self) -> list[list[str]]:
         """

@@ -794,9 +794,16 @@ Environment Variables:
     parser.add_argument(
         "--llm-provider",
         type=str,
-        choices=["anthropic", "openai", "google"],
+        choices=[
+            "anthropic",
+            "openai",
+            "google",
+            "ollama",
+            "lm-studio",
+            "openai-compatible",
+        ],
         metavar="PROVIDER",
-        help="LLM provider to use (anthropic, openai, google)",
+        help="LLM provider: anthropic, openai, google (cloud) or ollama, lm-studio (local)",
     )
     parser.add_argument(
         "--anthropic-api-key",
@@ -820,7 +827,7 @@ Environment Variables:
         "--llm-model",
         type=str,
         metavar="MODEL",
-        help="LLM model to use (e.g., claude-3-5-sonnet, gpt-4o, gemini-1.5-pro)",
+        help="LLM model (e.g., claude-3-5-sonnet, gpt-4o, llama3.2, codellama)",
     )
     parser.add_argument(
         "--llm-temperature",
@@ -833,6 +840,31 @@ Environment Variables:
         "--list-llm-providers",
         action="store_true",
         help="List available LLM providers and models",
+    )
+
+    # Local LLM options
+    parser.add_argument(
+        "--ollama-host",
+        type=str,
+        metavar="URL",
+        help="Ollama server URL (default: http://localhost:11434)",
+    )
+    parser.add_argument(
+        "--ollama-model",
+        type=str,
+        metavar="MODEL",
+        help="Ollama model (e.g., llama3.2, mistral, codellama)",
+    )
+    parser.add_argument(
+        "--openai-compatible-url",
+        type=str,
+        metavar="URL",
+        help="OpenAI-compatible server URL (e.g., http://localhost:1234/v1 for LM Studio)",
+    )
+    parser.add_argument(
+        "--prefer-local-llm",
+        action="store_true",
+        help="Prefer local LLM providers (Ollama, LM Studio) over cloud providers",
     )
 
     # Multi-epic support
@@ -3552,7 +3584,12 @@ def run_list_sprints(args) -> int:
             by_state[sprint.state].append(sprint)
 
         # Display sprints
-        state_order = [SprintState.ACTIVE, SprintState.FUTURE, SprintState.CLOSED, SprintState.UNKNOWN]
+        state_order = [
+            SprintState.ACTIVE,
+            SprintState.FUTURE,
+            SprintState.CLOSED,
+            SprintState.UNKNOWN,
+        ]
 
         for state in state_order:
             if state not in by_state:
@@ -4398,6 +4435,64 @@ def main() -> int:
             console.info("  • llm: pip install llm")
             console.info("  • sgpt: pip install shell-gpt")
             console.info("  • mods: https://github.com/charmbracelet/mods")
+        return ExitCode.SUCCESS
+
+    # Handle list-llm-providers (no other args needed)
+    if getattr(args, "list_llm_providers", False):
+        from spectra.adapters.llm import create_llm_manager
+
+        console = Console(color=not getattr(args, "no_color", False))
+        console.header("spectra LLM Providers")
+        console.print()
+
+        # Create manager with all options to detect all available providers
+        manager = create_llm_manager(
+            ollama_host=getattr(args, "ollama_host", None),
+            openai_compatible_url=getattr(args, "openai_compatible_url", None),
+        )
+        status = manager.get_status()
+
+        # Display cloud providers
+        console.info("☁️  Cloud Providers (require API keys):")
+        for name, info in status.get("cloud_providers", {}).items():
+            if info.get("available"):
+                models = info.get("models", [])
+                model_str = ", ".join(models[:3]) + ("..." if len(models) > 3 else "")
+                console.success(f"  ✓ {name}: {model_str}")
+            else:
+                console.print(f"    ○ {name}: not configured")
+
+        console.print()
+
+        # Display local providers
+        console.info("🖥️  Local Providers (no API keys needed):")
+        for name, info in status.get("local_providers", {}).items():
+            if info.get("available"):
+                models = info.get("models", [])
+                model_str = ", ".join(models[:3]) + ("..." if len(models) > 3 else "")
+                console.success(f"  ✓ {name}: {model_str}")
+            else:
+                console.print(f"    ○ {name}: not running")
+
+        console.print()
+
+        # Show primary provider
+        if status.get("primary"):
+            console.info(f"Primary provider: {status['primary']}")
+        else:
+            console.warning("No LLM providers available")
+            console.print()
+            console.info("To use cloud providers:")
+            console.info("  • Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY")
+            console.print()
+            console.info("To use local providers:")
+            console.info("  • Ollama: Install from https://ollama.ai, run 'ollama serve'")
+            console.info("  • LM Studio: Download from https://lmstudio.ai, start server")
+
+        console.print()
+        console.info("Usage: spectra --llm-provider <name> --llm-model <model> ...")
+        console.info("       spectra --prefer-local-llm ...  (prefer local over cloud)")
+
         return ExitCode.SUCCESS
 
     # Handle --list-files mode (preview which files would be processed)

@@ -2,6 +2,8 @@
 LLM Manager - Unified interface for multiple LLM providers.
 
 Provides automatic provider selection, fallback, and common use cases.
+Supports both cloud providers (Anthropic, OpenAI, Google) and local
+providers (Ollama, LM Studio, LocalAI, vLLM).
 """
 
 import logging
@@ -19,28 +21,45 @@ logger = logging.getLogger(__name__)
 class ProviderName(Enum):
     """Supported LLM provider names."""
 
+    # Cloud providers
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
     GOOGLE = "google"
+
+    # Local providers
+    OLLAMA = "ollama"
+    LM_STUDIO = "lm-studio"
+    OPENAI_COMPATIBLE = "openai-compatible"
 
 
 @dataclass
 class LLMManagerConfig:
     """Configuration for LLM Manager."""
 
-    # Provider preference order
+    # Provider preference order (can include local providers)
     provider_order: list[ProviderName] = field(
         default_factory=lambda: [
             ProviderName.ANTHROPIC,
             ProviderName.OPENAI,
             ProviderName.GOOGLE,
+            ProviderName.OLLAMA,
+            ProviderName.LM_STUDIO,
         ]
     )
 
-    # API keys (optional, will use env vars if not set)
+    # Cloud API keys (optional, will use env vars if not set)
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
     google_api_key: str | None = None
+
+    # Local provider settings
+    ollama_host: str | None = None  # e.g., http://localhost:11434
+    ollama_model: str | None = None  # e.g., llama3.2
+
+    # OpenAI-compatible server settings
+    openai_compatible_url: str | None = None  # e.g., http://localhost:1234/v1
+    openai_compatible_model: str | None = None
+    openai_compatible_api_key: str | None = None
 
     # Default settings
     max_tokens: int = 4096
@@ -48,6 +67,9 @@ class LLMManagerConfig:
 
     # Fallback behavior
     enable_fallback: bool = True
+
+    # Whether to prefer local providers over cloud
+    prefer_local: bool = False
 
 
 class LLMManager:
@@ -70,7 +92,17 @@ class LLMManager:
 
     def _initialize_providers(self) -> None:
         """Initialize available providers based on configuration."""
-        # Try Anthropic
+        # Cloud providers
+        self._init_anthropic()
+        self._init_openai()
+        self._init_google()
+
+        # Local providers
+        self._init_ollama()
+        self._init_openai_compatible()
+
+    def _init_anthropic(self) -> None:
+        """Initialize Anthropic provider."""
         anthropic_key = self.config.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         if anthropic_key:
             try:
@@ -89,7 +121,8 @@ class LLMManager:
             except ImportError:
                 self.logger.debug("Anthropic SDK not installed")
 
-        # Try OpenAI
+    def _init_openai(self) -> None:
+        """Initialize OpenAI provider."""
         openai_key = self.config.openai_api_key or os.environ.get("OPENAI_API_KEY")
         if openai_key:
             try:
@@ -108,7 +141,8 @@ class LLMManager:
             except ImportError:
                 self.logger.debug("OpenAI SDK not installed")
 
-        # Try Google
+    def _init_google(self) -> None:
+        """Initialize Google provider."""
         google_key = self.config.google_api_key or os.environ.get("GOOGLE_API_KEY")
         if google_key:
             try:
@@ -127,6 +161,62 @@ class LLMManager:
             except ImportError:
                 self.logger.debug("Google SDK not installed")
 
+    def _init_ollama(self) -> None:
+        """Initialize Ollama provider for local models."""
+        # Ollama doesn't require an API key - just check if server is available
+        ollama_host = self.config.ollama_host or os.environ.get("OLLAMA_HOST")
+        ollama_model = self.config.ollama_model or os.environ.get("OLLAMA_MODEL")
+
+        try:
+            from .ollama import OllamaProvider
+
+            provider = OllamaProvider(
+                LLMConfig(
+                    base_url=ollama_host,
+                    model=ollama_model or OllamaProvider.DEFAULT_MODEL,
+                    max_tokens=self.config.max_tokens,
+                    temperature=self.config.temperature,
+                )
+            )
+            if provider.is_available():
+                self.providers[ProviderName.OLLAMA] = provider
+                self.logger.debug("Ollama provider initialized")
+        except Exception as e:
+            self.logger.debug(f"Ollama not available: {e}")
+
+    def _init_openai_compatible(self) -> None:
+        """Initialize OpenAI-compatible provider for local servers."""
+        compat_url = self.config.openai_compatible_url or os.environ.get("OPENAI_COMPATIBLE_URL")
+        compat_model = self.config.openai_compatible_model or os.environ.get(
+            "OPENAI_COMPATIBLE_MODEL"
+        )
+        compat_key = self.config.openai_compatible_api_key or os.environ.get(
+            "OPENAI_COMPATIBLE_API_KEY"
+        )
+
+        if compat_url:
+            try:
+                from .openai_compatible import OpenAICompatibleProvider
+
+                provider = OpenAICompatibleProvider(
+                    LLMConfig(
+                        base_url=compat_url,
+                        model=compat_model or "local-model",
+                        api_key=compat_key,
+                        max_tokens=self.config.max_tokens,
+                        temperature=self.config.temperature,
+                    )
+                )
+                if provider.is_available():
+                    self.providers[ProviderName.OPENAI_COMPATIBLE] = provider
+                    self.logger.debug("OpenAI-compatible provider initialized")
+
+                    # Also register as LM Studio if it's the default port
+                    if "1234" in compat_url:
+                        self.providers[ProviderName.LM_STUDIO] = provider
+            except Exception as e:
+                self.logger.debug(f"OpenAI-compatible provider not available: {e}")
+
     @property
     def available_providers(self) -> list[ProviderName]:
         """Get list of available providers."""
@@ -135,10 +225,42 @@ class LLMManager:
     @property
     def primary_provider(self) -> LLMProvider | None:
         """Get the primary (first available) provider."""
+        # If prefer_local is set, try local providers first
+        if self.config.prefer_local:
+            local_providers = [
+                ProviderName.OLLAMA,
+                ProviderName.LM_STUDIO,
+                ProviderName.OPENAI_COMPATIBLE,
+            ]
+            for name in local_providers:
+                if name in self.providers:
+                    return self.providers[name]
+
+        # Follow configured order
         for name in self.config.provider_order:
             if name in self.providers:
                 return self.providers[name]
         return None
+
+    @property
+    def has_local_provider(self) -> bool:
+        """Check if any local provider is available."""
+        local_names = {
+            ProviderName.OLLAMA,
+            ProviderName.LM_STUDIO,
+            ProviderName.OPENAI_COMPATIBLE,
+        }
+        return bool(local_names & set(self.providers.keys()))
+
+    @property
+    def has_cloud_provider(self) -> bool:
+        """Check if any cloud provider is available."""
+        cloud_names = {
+            ProviderName.ANTHROPIC,
+            ProviderName.OPENAI,
+            ProviderName.GOOGLE,
+        }
+        return bool(cloud_names & set(self.providers.keys()))
 
     def get_provider(self, name: ProviderName | str) -> LLMProvider | None:
         """Get a specific provider by name."""
@@ -184,8 +306,9 @@ class LLMManager:
         llm = self.primary_provider
         if not llm:
             raise RuntimeError(
-                "No LLM providers available. Set one of: "
-                "ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY"
+                "No LLM providers available. Options:\n"
+                "  Cloud: Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY\n"
+                "  Local: Run Ollama (ollama serve) or LM Studio"
             )
 
         # Try with fallback
@@ -245,21 +368,28 @@ class LLMManager:
 
     def get_status(self) -> dict[str, Any]:
         """Get status of all providers."""
-        status = {
+        status: dict[str, Any] = {
             "available": self.is_available(),
-            "providers": {},
+            "has_cloud": self.has_cloud_provider,
+            "has_local": self.has_local_provider,
+            "cloud_providers": {},
+            "local_providers": {},
         }
+
+        cloud_names = {ProviderName.ANTHROPIC, ProviderName.OPENAI, ProviderName.GOOGLE}
 
         for name in ProviderName:
             provider = self.providers.get(name)
+            category = "cloud_providers" if name in cloud_names else "local_providers"
+
             if provider:
-                status["providers"][name.value] = {
+                status[category][name.value] = {
                     "available": True,
-                    "models": provider.available_models,
+                    "models": provider.available_models[:5],  # Limit for display
                     "default_model": provider.default_model,
                 }
             else:
-                status["providers"][name.value] = {"available": False}
+                status[category][name.value] = {"available": False}
 
         if self.primary_provider:
             status["primary"] = self.primary_provider.name
@@ -268,10 +398,18 @@ class LLMManager:
 
 
 def create_llm_manager(
+    # Cloud provider keys
     anthropic_api_key: str | None = None,
     openai_api_key: str | None = None,
     google_api_key: str | None = None,
+    # Local provider settings
+    ollama_host: str | None = None,
+    ollama_model: str | None = None,
+    openai_compatible_url: str | None = None,
+    openai_compatible_model: str | None = None,
+    # General settings
     prefer_provider: str | None = None,
+    prefer_local: bool = False,
     max_tokens: int = 4096,
     temperature: float = 0.7,
     enable_fallback: bool = True,
@@ -279,41 +417,82 @@ def create_llm_manager(
     """
     Create an LLM manager with the given settings.
 
+    Supports both cloud providers (Anthropic, OpenAI, Google) and local
+    providers (Ollama, LM Studio, LocalAI, vLLM).
+
     Args:
         anthropic_api_key: Anthropic API key.
         openai_api_key: OpenAI API key.
         google_api_key: Google API key.
-        prefer_provider: Preferred provider name (anthropic, openai, google).
+        ollama_host: Ollama server URL (default: http://localhost:11434).
+        ollama_model: Ollama model to use (default: llama3.2).
+        openai_compatible_url: OpenAI-compatible server URL.
+        openai_compatible_model: Model name for OpenAI-compatible server.
+        prefer_provider: Preferred provider name.
+        prefer_local: If True, prefer local providers over cloud.
         max_tokens: Maximum tokens to generate.
         temperature: Sampling temperature.
         enable_fallback: Enable fallback to other providers on failure.
 
     Returns:
         Configured LLMManager.
+
+    Examples:
+        # Use cloud providers (auto-detected from env vars)
+        manager = create_llm_manager()
+
+        # Prefer local Ollama
+        manager = create_llm_manager(prefer_local=True)
+
+        # Use specific Ollama model
+        manager = create_llm_manager(
+            ollama_model="codellama",
+            prefer_provider="ollama",
+        )
+
+        # Use LM Studio
+        manager = create_llm_manager(
+            openai_compatible_url="http://localhost:1234/v1",
+            prefer_provider="openai-compatible",
+        )
     """
     # Determine provider order
     provider_order = [
         ProviderName.ANTHROPIC,
         ProviderName.OPENAI,
         ProviderName.GOOGLE,
+        ProviderName.OLLAMA,
+        ProviderName.LM_STUDIO,
+        ProviderName.OPENAI_COMPATIBLE,
     ]
 
     if prefer_provider:
         try:
-            preferred = ProviderName(prefer_provider.lower())
-            provider_order.remove(preferred)
+            # Handle both enum values and string names
+            provider_name = prefer_provider.lower().replace("_", "-")
+            preferred = ProviderName(provider_name)
+            if preferred in provider_order:
+                provider_order.remove(preferred)
             provider_order.insert(0, preferred)
         except ValueError:
             pass
 
     config = LLMManagerConfig(
         provider_order=provider_order,
+        # Cloud keys
         anthropic_api_key=anthropic_api_key,
         openai_api_key=openai_api_key,
         google_api_key=google_api_key,
+        # Local settings
+        ollama_host=ollama_host,
+        ollama_model=ollama_model,
+        openai_compatible_url=openai_compatible_url,
+        openai_compatible_model=openai_compatible_model,
+        # General
         max_tokens=max_tokens,
         temperature=temperature,
         enable_fallback=enable_fallback,
+        prefer_local=prefer_local,
     )
 
     return LLMManager(config)

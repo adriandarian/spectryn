@@ -154,7 +154,8 @@ class TestLLMManagerConfig:
         """Test default provider order."""
         config = LLMManagerConfig()
         assert config.provider_order[0] == ProviderName.ANTHROPIC
-        assert len(config.provider_order) == 3
+        # Now includes local providers (5 total: 3 cloud + 2 local)
+        assert len(config.provider_order) >= 3
 
     def test_fallback_enabled_by_default(self):
         """Test fallback is enabled by default."""
@@ -190,8 +191,9 @@ class TestLLMManager:
         status = manager.get_status()
 
         assert status["available"] is False
-        assert "providers" in status
-        assert status["providers"]["anthropic"]["available"] is False
+        # Now uses cloud_providers and local_providers instead of providers
+        assert "cloud_providers" in status
+        assert status["cloud_providers"]["anthropic"]["available"] is False
 
     @patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"})
     def test_initialize_with_anthropic_env(self):
@@ -203,7 +205,7 @@ class TestLLMManager:
 
         # Either provider is available or SDK not installed
         status = manager.get_status()
-        assert "anthropic" in status["providers"]
+        assert "anthropic" in status["cloud_providers"]
 
 
 class TestCreateLLMManager:

@@ -1160,7 +1160,9 @@ class JiraAdapter(IssueTrackerPort):
                 # Convert minutes to Jira format
                 hours = original_estimate // 60
                 minutes = original_estimate % 60
-                time_tracking["originalEstimate"] = f"{hours}h {minutes}m" if minutes else f"{hours}h"
+                time_tracking["originalEstimate"] = (
+                    f"{hours}h {minutes}m" if minutes else f"{hours}h"
+                )
             else:
                 time_tracking["originalEstimate"] = original_estimate
 
@@ -1168,7 +1170,9 @@ class JiraAdapter(IssueTrackerPort):
             if isinstance(remaining_estimate, int):
                 hours = remaining_estimate // 60
                 minutes = remaining_estimate % 60
-                time_tracking["remainingEstimate"] = f"{hours}h {minutes}m" if minutes else f"{hours}h"
+                time_tracking["remainingEstimate"] = (
+                    f"{hours}h {minutes}m" if minutes else f"{hours}h"
+                )
             else:
                 time_tracking["remainingEstimate"] = remaining_estimate
 
@@ -1205,7 +1209,10 @@ class JiraAdapter(IssueTrackerPort):
                     "timeSpentSeconds": wl.get("timeSpentSeconds", 0),
                     "timeSpent": wl.get("timeSpent"),
                     "started": wl.get("started"),
-                    "comment": wl.get("comment", {}).get("content", [{}])[0].get("content", [{}])[0].get("text", "")
+                    "comment": wl.get("comment", {})
+                    .get("content", [{}])[0]
+                    .get("content", [{}])[0]
+                    .get("text", "")
                     if isinstance(wl.get("comment"), dict)
                     else str(wl.get("comment", "")),
                     "author": {
@@ -1239,9 +1246,7 @@ class JiraAdapter(IssueTrackerPort):
             Created work log data, or None on failure
         """
         if self._dry_run:
-            self.logger.info(
-                f"[DRY-RUN] Would add work log to {issue_key}: {time_spent}"
-            )
+            self.logger.info(f"[DRY-RUN] Would add work log to {issue_key}: {time_spent}")
             return {"id": "worklog:dry-run", "timeSpent": str(time_spent)}
 
         payload: dict[str, Any] = {}
@@ -1399,9 +1404,7 @@ class JiraAdapter(IssueTrackerPort):
             True if successful
         """
         if self._dry_run:
-            self.logger.info(
-                f"[DRY-RUN] Would move {issue_key} to sprint {sprint_id}"
-            )
+            self.logger.info(f"[DRY-RUN] Would move {issue_key} to sprint {sprint_id}")
             return True
 
         try:
