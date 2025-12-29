@@ -144,6 +144,19 @@ from .source_updater import (
     detect_sync_conflicts,
 )
 from .state import OperationRecord, StateStore, SyncPhase, SyncState
+from .time_tracking import (
+    TimeTrackingExtractor,
+    TimeTrackingInfo,
+    TimeTrackingSyncConfig,
+    TimeTrackingSyncer,
+    TimeTrackingSyncResult,
+    TimeUnit,
+    TimeValue,
+    WorkLogEntry,
+    extract_time_tracking,
+    format_time_for_markdown,
+    parse_time_estimate,
+)
 from .transaction import OperationType as TransactionOperationType
 from .transaction import (
     RollbackResult,
@@ -261,6 +274,13 @@ __all__ = [
     "SyncStrategy",
     "SyncableField",
     "ThreeWayMerger",
+    "TimeTrackingExtractor",
+    "TimeTrackingInfo",
+    "TimeTrackingSyncConfig",
+    "TimeTrackingSyncResult",
+    "TimeTrackingSyncer",
+    "TimeUnit",
+    "TimeValue",
     "TrackerFieldMappingConfig",
     "TrackerInfo",
     "TrackerSyncStatus",
@@ -271,6 +291,7 @@ __all__ = [
     "TransactionResult",
     "TransactionState",
     "TransactionalSync",
+    "WorkLogEntry",
     "check_idempotency",
     "compare_backup_to_current",
     "compute_content_hash",
@@ -287,7 +308,10 @@ __all__ = [
     "create_transactional_sync",
     "detect_sync_conflicts",
     "extract_attachments_from_markdown",
+    "extract_time_tracking",
+    "format_time_for_markdown",
     "is_content_unchanged",
+    "parse_time_estimate",
     "resolve_conflict_with_merge",
     "restore_from_backup",
     "stories_differ",

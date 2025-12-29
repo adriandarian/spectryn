@@ -838,6 +838,30 @@ Environment Variables:
         help="Generate a field mapping template YAML file",
     )
 
+    # Time tracking sync options
+    parser.add_argument(
+        "--sync-time",
+        action="store_true",
+        help="Enable time tracking synchronization (estimates and work logs)",
+    )
+    parser.add_argument(
+        "--time-estimates",
+        action="store_true",
+        help="Sync time estimates (original and remaining)",
+    )
+    parser.add_argument(
+        "--work-logs",
+        action="store_true",
+        help="Pull work logs from tracker",
+    )
+    parser.add_argument(
+        "--hours-per-day",
+        type=int,
+        default=8,
+        metavar="HOURS",
+        help="Hours per work day for time calculations (default: 8)",
+    )
+
     # New CLI commands
     new_commands = parser.add_argument_group("Commands")
     new_commands.add_argument("--doctor", action="store_true", help="Diagnose common setup issues")

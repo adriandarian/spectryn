@@ -1082,3 +1082,198 @@ class JiraAdapter(IssueTrackerPort):
         if success:
             self.logger.info(f"Deleted attachment {attachment_id} from {issue_key}")
         return success
+
+    # -------------------------------------------------------------------------
+    # Time Tracking Operations
+    # -------------------------------------------------------------------------
+
+    def get_time_tracking(self, issue_key: str) -> dict[str, Any]:
+        """
+        Get time tracking information for an issue.
+
+        Args:
+            issue_key: Issue key
+
+        Returns:
+            Time tracking info with estimates and time spent
+        """
+        try:
+            data = self._client.get(
+                f"issue/{issue_key}",
+                params={"fields": "timetracking"},
+            )
+            time_tracking = data.get("fields", {}).get("timetracking", {})
+
+            return {
+                "original_estimate": time_tracking.get("originalEstimate"),
+                "original_estimate_minutes": (
+                    time_tracking.get("originalEstimateSeconds", 0) // 60
+                    if time_tracking.get("originalEstimateSeconds")
+                    else None
+                ),
+                "remaining_estimate": time_tracking.get("remainingEstimate"),
+                "remaining_estimate_minutes": (
+                    time_tracking.get("remainingEstimateSeconds", 0) // 60
+                    if time_tracking.get("remainingEstimateSeconds")
+                    else None
+                ),
+                "time_spent": time_tracking.get("timeSpent"),
+                "time_spent_minutes": (
+                    time_tracking.get("timeSpentSeconds", 0) // 60
+                    if time_tracking.get("timeSpentSeconds")
+                    else None
+                ),
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to get time tracking for {issue_key}: {e}")
+            return {}
+
+    def set_time_estimate(
+        self,
+        issue_key: str,
+        original_estimate: str | int | None = None,
+        remaining_estimate: str | int | None = None,
+    ) -> bool:
+        """
+        Set time estimates for an issue.
+
+        Args:
+            issue_key: Issue key
+            original_estimate: Original estimate (Jira format "2h" or minutes as int)
+            remaining_estimate: Remaining estimate (Jira format "1h 30m" or minutes as int)
+
+        Returns:
+            True if successful
+        """
+        if self._dry_run:
+            self.logger.info(
+                f"[DRY-RUN] Would set time estimate for {issue_key}: "
+                f"original={original_estimate}, remaining={remaining_estimate}"
+            )
+            return True
+
+        time_tracking: dict[str, Any] = {}
+
+        if original_estimate is not None:
+            if isinstance(original_estimate, int):
+                # Convert minutes to Jira format
+                hours = original_estimate // 60
+                minutes = original_estimate % 60
+                time_tracking["originalEstimate"] = f"{hours}h {minutes}m" if minutes else f"{hours}h"
+            else:
+                time_tracking["originalEstimate"] = original_estimate
+
+        if remaining_estimate is not None:
+            if isinstance(remaining_estimate, int):
+                hours = remaining_estimate // 60
+                minutes = remaining_estimate % 60
+                time_tracking["remainingEstimate"] = f"{hours}h {minutes}m" if minutes else f"{hours}h"
+            else:
+                time_tracking["remainingEstimate"] = remaining_estimate
+
+        if not time_tracking:
+            return True
+
+        try:
+            self._client.put(
+                f"issue/{issue_key}",
+                json={"fields": {"timetracking": time_tracking}},
+            )
+            self.logger.info(f"Set time estimate for {issue_key}: {time_tracking}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to set time estimate for {issue_key}: {e}")
+            return False
+
+    def get_work_logs(self, issue_key: str) -> list[dict[str, Any]]:
+        """
+        Get work log entries for an issue.
+
+        Args:
+            issue_key: Issue key
+
+        Returns:
+            List of work log entries
+        """
+        try:
+            data = self._client.get(f"issue/{issue_key}/worklog")
+            worklogs = data.get("worklogs", [])
+            return [
+                {
+                    "id": wl.get("id"),
+                    "timeSpentSeconds": wl.get("timeSpentSeconds", 0),
+                    "timeSpent": wl.get("timeSpent"),
+                    "started": wl.get("started"),
+                    "comment": wl.get("comment", {}).get("content", [{}])[0].get("content", [{}])[0].get("text", "")
+                    if isinstance(wl.get("comment"), dict)
+                    else str(wl.get("comment", "")),
+                    "author": {
+                        "displayName": wl.get("author", {}).get("displayName", ""),
+                        "accountId": wl.get("author", {}).get("accountId", ""),
+                    },
+                }
+                for wl in worklogs
+            ]
+        except Exception as e:
+            self.logger.error(f"Failed to get work logs for {issue_key}: {e}")
+            return []
+
+    def add_work_log(
+        self,
+        issue_key: str,
+        time_spent: str | int,
+        started: str | None = None,
+        comment: str | None = None,
+    ) -> dict[str, Any] | None:
+        """
+        Add a work log entry to an issue.
+
+        Args:
+            issue_key: Issue key
+            time_spent: Time spent (Jira format "2h" or seconds as int)
+            started: Start time (ISO 8601, defaults to now)
+            comment: Optional comment
+
+        Returns:
+            Created work log data, or None on failure
+        """
+        if self._dry_run:
+            self.logger.info(
+                f"[DRY-RUN] Would add work log to {issue_key}: {time_spent}"
+            )
+            return {"id": "worklog:dry-run", "timeSpent": str(time_spent)}
+
+        payload: dict[str, Any] = {}
+
+        if isinstance(time_spent, int):
+            payload["timeSpentSeconds"] = time_spent
+        else:
+            payload["timeSpent"] = time_spent
+
+        if started:
+            payload["started"] = started
+        else:
+            from datetime import datetime
+
+            payload["started"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+0000")
+
+        if comment:
+            # Use ADF format for comment
+            payload["comment"] = {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [{"type": "text", "text": comment}],
+                    }
+                ],
+            }
+
+        try:
+            result = self._client.post(f"issue/{issue_key}/worklog", json=payload)
+            self.logger.info(f"Added work log to {issue_key}")
+            return result if isinstance(result, dict) else None
+        except Exception as e:
+            self.logger.error(f"Failed to add work log to {issue_key}: {e}")
+            return None

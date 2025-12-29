@@ -168,6 +168,13 @@ class IssueData:
     subtasks: list["IssueData"] = field(default_factory=list)
     comments: list[dict[str, Any]] = field(default_factory=list)
     links: list[IssueLink] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)
+
+    # Time tracking fields
+    original_estimate: int | None = None  # In minutes
+    remaining_estimate: int | None = None  # In minutes
+    time_spent: int | None = None  # In minutes
+    work_logs: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def project_key(self) -> str:
@@ -532,3 +539,79 @@ class IssueTrackerPort(ABC):
             True if successful
         """
         return False
+
+    # -------------------------------------------------------------------------
+    # Time Tracking Operations (Optional - default implementations provided)
+    # -------------------------------------------------------------------------
+
+    def get_time_tracking(self, issue_key: str) -> dict[str, Any]:
+        """
+        Get time tracking information for an issue.
+
+        Args:
+            issue_key: Issue key
+
+        Returns:
+            Dictionary with time tracking info:
+            - original_estimate_minutes: Original estimate in minutes
+            - remaining_estimate_minutes: Remaining estimate in minutes
+            - time_spent_minutes: Time spent in minutes
+        """
+        return {}
+
+    def set_time_estimate(
+        self,
+        issue_key: str,
+        original_estimate: str | int | None = None,
+        remaining_estimate: str | int | None = None,
+    ) -> bool:
+        """
+        Set time estimates for an issue.
+
+        Args:
+            issue_key: Issue key
+            original_estimate: Original estimate (Jira format "2h" or minutes)
+            remaining_estimate: Remaining estimate (Jira format "1h 30m" or minutes)
+
+        Returns:
+            True if successful
+        """
+        return False
+
+    def get_work_logs(self, issue_key: str) -> list[dict[str, Any]]:
+        """
+        Get work log entries for an issue.
+
+        Args:
+            issue_key: Issue key
+
+        Returns:
+            List of work log dictionaries with:
+            - id: Work log ID
+            - timeSpentSeconds: Duration in seconds
+            - started: Start time (ISO 8601)
+            - comment: Optional comment
+            - author: Author info
+        """
+        return []
+
+    def add_work_log(
+        self,
+        issue_key: str,
+        time_spent: str | int,
+        started: str | None = None,
+        comment: str | None = None,
+    ) -> dict[str, Any] | None:
+        """
+        Add a work log entry to an issue.
+
+        Args:
+            issue_key: Issue key
+            time_spent: Time spent (Jira format "2h" or seconds)
+            started: Start time (ISO 8601, defaults to now)
+            comment: Optional comment
+
+        Returns:
+            Created work log data, or None on failure
+        """
+        return None
