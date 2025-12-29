@@ -199,6 +199,15 @@ from .transaction import (
     TransactionState,
     create_transactional_sync,
 )
+from .worklog_sync import (
+    WorklogChange,
+    WorklogExtractor,
+    WorklogSyncConfig,
+    WorklogSyncer,
+    WorklogSyncResult,
+    extract_worklogs,
+    format_worklogs_as_markdown,
+)
 
 
 # Parallel operations (optional, requires aiohttp)
@@ -346,6 +355,11 @@ __all__ = [
     "TransactionState",
     "TransactionalSync",
     "WorkLogEntry",
+    "WorklogChange",
+    "WorklogExtractor",
+    "WorklogSyncConfig",
+    "WorklogSyncResult",
+    "WorklogSyncer",
     "build_dependency_graph",
     "build_hierarchy_from_epics",
     "check_idempotency",
@@ -368,7 +382,9 @@ __all__ = [
     "extract_epic_hierarchy",
     "extract_sprint",
     "extract_time_tracking",
+    "extract_worklogs",
     "format_time_for_markdown",
+    "format_worklogs_as_markdown",
     "is_content_unchanged",
     "parse_sprint_name",
     "parse_time_estimate",

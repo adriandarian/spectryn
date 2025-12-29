@@ -861,6 +861,27 @@ Environment Variables:
         metavar="HOURS",
         help="Hours per work day for time calculations (default: 8)",
     )
+    parser.add_argument(
+        "--sync-worklogs",
+        action="store_true",
+        help="Enable worklog/time log synchronization",
+    )
+    parser.add_argument(
+        "--push-worklogs",
+        action="store_true",
+        help="Push local worklogs to tracker",
+    )
+    parser.add_argument(
+        "--pull-worklogs",
+        action="store_true",
+        help="Pull worklogs from tracker to markdown",
+    )
+    parser.add_argument(
+        "--worklog-author",
+        type=str,
+        metavar="NAME",
+        help="Filter worklogs by author name",
+    )
 
     # Sprint sync options
     parser.add_argument(
