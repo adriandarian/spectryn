@@ -713,7 +713,38 @@ Environment Variables:
         "--webhook-secret",
         type=str,
         metavar="SECRET",
-        help="Webhook secret for signature verification",
+        help="Webhook secret for signature verification (Jira)",
+    )
+
+    # Multi-tracker webhook secrets
+    parser.add_argument(
+        "--github-webhook-secret",
+        type=str,
+        metavar="SECRET",
+        help="GitHub webhook secret for signature verification",
+    )
+    parser.add_argument(
+        "--gitlab-webhook-secret",
+        type=str,
+        metavar="SECRET",
+        help="GitLab webhook secret/token for verification",
+    )
+    parser.add_argument(
+        "--azure-webhook-secret",
+        type=str,
+        metavar="SECRET",
+        help="Azure DevOps webhook secret",
+    )
+    parser.add_argument(
+        "--linear-webhook-secret",
+        type=str,
+        metavar="SECRET",
+        help="Linear webhook secret for signature verification",
+    )
+    parser.add_argument(
+        "--multi-tracker-webhook",
+        action="store_true",
+        help="Enable multi-tracker webhook mode (listen for multiple sources)",
     )
 
     # Multi-epic support

@@ -46,10 +46,27 @@ from .webhook import (
     WebhookServer,
     WebhookStats,
 )
+from .webhook_multi import (
+    AzureDevOpsWebhookParser,
+    GitHubWebhookParser,
+    GitLabWebhookParser,
+    JiraWebhookParser,
+    LinearWebhookParser,
+    MultiTrackerEvent,
+    MultiTrackerStats,
+    MultiTrackerWebhookConfig,
+    MultiTrackerWebhookServer,
+    TrackerType,
+    WebhookEventCategory,
+    WebhookPayloadParser,
+    create_multi_tracker_server,
+)
 
 
 __all__ = [
     "AddCommentCommand",
+    # Multi-tracker webhooks
+    "AzureDevOpsWebhookParser",
     "Command",
     "CommandResult",
     "CreateSubtaskCommand",
@@ -58,8 +75,16 @@ __all__ = [
     "FileChange",
     # Watch mode
     "FileWatcher",
+    "GitHubWebhookParser",
+    "GitLabWebhookParser",
     "HourlySchedule",
     "IntervalSchedule",
+    "JiraWebhookParser",
+    "LinearWebhookParser",
+    "MultiTrackerEvent",
+    "MultiTrackerStats",
+    "MultiTrackerWebhookConfig",
+    "MultiTrackerWebhookServer",
     # Scheduled sync
     "Schedule",
     "ScheduleDisplay",
@@ -68,6 +93,7 @@ __all__ = [
     "ScheduledSyncRunner",
     "SyncOrchestrator",
     "SyncResult",
+    "TrackerType",
     "TransitionStatusCommand",
     "UpdateDescriptionCommand",
     "WatchDisplay",
@@ -76,11 +102,14 @@ __all__ = [
     "WatchStats",
     "WebhookDisplay",
     "WebhookEvent",
+    "WebhookEventCategory",
     "WebhookEventType",
     "WebhookHandler",
     "WebhookParser",
+    "WebhookPayloadParser",
     # Webhook receiver
     "WebhookServer",
     "WebhookStats",
+    "create_multi_tracker_server",
     "parse_schedule",
 ]
