@@ -719,7 +719,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Custom Field Mapping** - Map custom fields per tracker (via config)
 - [x] **Time Tracking Sync** - Parse/sync time estimates and logged time
 - [x] **Sprint/Iteration Sync** - Parse and sync sprint assignments
-- [ ] **Story Dependencies/Relationships** - Parse blocks/depends-on relationships
+- [x] **Story Dependencies/Relationships** - Parse blocks/depends-on relationships
 - [ ] **Epic Hierarchy** - Support multi-level epic hierarchies
 - [ ] **Worklog Sync** - Sync time logs
 

@@ -891,6 +891,28 @@ Environment Variables:
         help="Assign to active sprint if none specified",
     )
 
+    # Dependency sync options
+    parser.add_argument(
+        "--sync-dependencies",
+        action="store_true",
+        help="Enable dependency/relationship synchronization (blocks, depends-on)",
+    )
+    parser.add_argument(
+        "--validate-dependencies",
+        action="store_true",
+        help="Validate dependency graph for cycles without syncing",
+    )
+    parser.add_argument(
+        "--detect-cycles",
+        action="store_true",
+        help="Detect circular dependencies in the graph",
+    )
+    parser.add_argument(
+        "--fail-on-cycle",
+        action="store_true",
+        help="Fail if circular dependencies are detected",
+    )
+
     # New CLI commands
     new_commands = parser.add_argument_group("Commands")
     new_commands.add_argument("--doctor", action="store_true", help="Diagnose common setup issues")
