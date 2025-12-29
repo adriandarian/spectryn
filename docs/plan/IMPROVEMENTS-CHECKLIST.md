@@ -726,7 +726,7 @@ For each new tracker adapter, follow this checklist:
 ### Automation
 - [x] **Workflow Automation Rules** - If all subtasks Done → Story Done, etc.
 - [x] **Webhooks for Real-time Sync** - Listen for tracker webhooks
-- [ ] **Change Notifications** - Slack/Discord/Teams notifications on sync
+- [x] **Change Notifications** - Slack/Discord/Teams notifications on sync
 
 ---
 

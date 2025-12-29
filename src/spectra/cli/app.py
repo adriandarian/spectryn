@@ -747,6 +747,49 @@ Environment Variables:
         help="Enable multi-tracker webhook mode (listen for multiple sources)",
     )
 
+    # Notification options
+    parser.add_argument(
+        "--slack-webhook",
+        type=str,
+        metavar="URL",
+        help="Slack incoming webhook URL for sync notifications",
+    )
+    parser.add_argument(
+        "--discord-webhook",
+        type=str,
+        metavar="URL",
+        help="Discord webhook URL for sync notifications",
+    )
+    parser.add_argument(
+        "--teams-webhook",
+        type=str,
+        metavar="URL",
+        help="Microsoft Teams webhook URL for sync notifications",
+    )
+    parser.add_argument(
+        "--notify-webhook",
+        type=str,
+        metavar="URL",
+        help="Generic webhook URL for sync notifications",
+    )
+    parser.add_argument(
+        "--notify-on-success",
+        action="store_true",
+        default=True,
+        help="Send notifications on successful sync (default: True)",
+    )
+    parser.add_argument(
+        "--notify-on-failure",
+        action="store_true",
+        default=True,
+        help="Send notifications on failed sync (default: True)",
+    )
+    parser.add_argument(
+        "--no-notify-on-success",
+        action="store_true",
+        help="Disable notifications on successful sync",
+    )
+
     # Multi-epic support
     parser.add_argument(
         "--multi-epic",
