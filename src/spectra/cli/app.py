@@ -314,6 +314,15 @@ Examples:
   # Execute directory sync
   spectra -d ./docs/plan -e PROJ-123 --execute
 
+  # Parallel file processing - process multiple files concurrently
+  spectra --parallel-files -d ./docs/epics --workers 8
+
+  # Parallel file processing with specific files
+  spectra --parallel-files -f EPIC1.md -f EPIC2.md -f EPIC3.md --workers 4
+
+  # Parallel file processing with fail-fast and timeout
+  spectra --parallel-files -d ./docs --fail-fast --file-timeout 300
+
 Environment Variables:
   JIRA_URL         Jira instance URL (e.g., https://company.atlassian.net)
   JIRA_EMAIL       Jira account email
@@ -1870,16 +1879,41 @@ Environment Variables:
         help="Enable parallel sync for multiple epics",
     )
     new_commands.add_argument(
+        "--parallel-files",
+        action="store_true",
+        help="Enable parallel file processing for multiple files concurrently",
+    )
+    new_commands.add_argument(
         "--workers",
         type=int,
         default=4,
         metavar="N",
-        help="Number of parallel workers for multi-epic sync (default: 4)",
+        help="Number of parallel workers for multi-epic/file sync (default: 4)",
     )
     new_commands.add_argument(
         "--fail-fast",
         action="store_true",
         help="Stop parallel sync on first failure",
+    )
+    new_commands.add_argument(
+        "--file-timeout",
+        type=float,
+        default=600.0,
+        metavar="SECS",
+        help="Timeout in seconds per file in parallel mode (default: 600)",
+    )
+    new_commands.add_argument(
+        "--skip-empty",
+        action="store_true",
+        default=True,
+        help="Skip files with no epics in parallel mode (default: True)",
+    )
+    new_commands.add_argument(
+        "--input-files",
+        type=str,
+        nargs="+",
+        metavar="FILE",
+        help="Multiple input files for parallel processing",
     )
     new_commands.add_argument(
         "--archive",
@@ -2771,6 +2805,195 @@ def run_multi_epic(args) -> int:
         console.error(f"Errors ({len(result.errors)}):")
         for error in result.errors[:5]:
             console.item(error, "fail")
+
+    return ExitCode.SUCCESS if result.success else ExitCode.SYNC_ERROR
+
+
+def run_parallel_files(args) -> int:
+    """
+    Run parallel file processing mode.
+
+    Processes multiple markdown files concurrently for improved performance.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code.
+    """
+    from spectra.adapters import ADFFormatter, EnvironmentConfigProvider
+    from spectra.adapters.parsers import MarkdownParser
+    from spectra.adapters.trackers import JiraAdapter
+    from spectra.application.sync.parallel_files import (
+        ParallelFileProcessor,
+        ParallelFilesConfig,
+    )
+
+    from .logging import setup_logging
+
+    # Setup logging
+    log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
+    log_format = getattr(args, "log_format", "text")
+    setup_logging(level=log_level, log_format=log_format)
+
+    # Create console
+    console = Console(
+        color=not getattr(args, "no_color", False),
+        verbose=getattr(args, "verbose", False),
+        quiet=getattr(args, "quiet", False),
+    )
+
+    dry_run = not getattr(args, "execute", False)
+
+    console.header("spectra Parallel File Processing")
+
+    if dry_run:
+        console.dry_run_banner()
+
+    # Determine files to process
+    file_paths: list[str] = []
+
+    # From --input-files
+    if getattr(args, "input_files", None):
+        file_paths.extend(args.input_files)
+
+    # From --input
+    if args.input:
+        file_paths.append(args.input)
+
+    # From --input-dir
+    input_dir = getattr(args, "input_dir", None)
+    directory_mode = bool(input_dir) and not file_paths
+
+    if not file_paths and not directory_mode:
+        console.error("No input files specified")
+        return ExitCode.FILE_NOT_FOUND
+
+    # Load configuration
+    config_file = Path(args.config) if getattr(args, "config", None) else None
+    config_provider = EnvironmentConfigProvider(
+        config_file=config_file,
+        cli_overrides=vars(args),
+    )
+
+    errors = config_provider.validate()
+    if errors:
+        console.config_errors(errors)
+        return ExitCode.CONFIG_ERROR
+
+    config = config_provider.load()
+    config.sync.dry_run = dry_run
+
+    # Create tracker
+    tracker = JiraAdapter(
+        url=config.tracker.url,
+        email=config.tracker.email,
+        api_token=config.tracker.api_token,
+        project_key=args.epic.split("-")[0] if args.epic else None,
+    )
+
+    # Test connection
+    console.section("Connecting to Jira")
+    if not tracker.test_connection():
+        console.connection_error(config.tracker.url)
+        return ExitCode.CONNECTION_ERROR
+
+    user = tracker.get_current_user()
+    console.success(f"Connected as: {user.get('displayName', user.get('emailAddress', 'Unknown'))}")
+
+    # Create parser and formatter
+    parser_inst = MarkdownParser()
+    formatter = ADFFormatter()
+
+    # Configure parallel processing
+    parallel_config = ParallelFilesConfig(
+        max_workers=getattr(args, "workers", 4),
+        timeout_per_file=getattr(args, "file_timeout", 600.0),
+        fail_fast=getattr(args, "fail_fast", False),
+        skip_empty_files=getattr(args, "skip_empty", True),
+    )
+
+    # Create processor
+    processor = ParallelFileProcessor(
+        tracker=tracker,
+        parser=parser_inst,
+        formatter=formatter,
+        config=config.sync,
+        parallel_config=parallel_config,
+    )
+
+    # Progress callback
+    def progress_callback(file_path: str, status: str, progress: float) -> None:
+        if not getattr(args, "quiet", False):
+            file_name = Path(file_path).name
+            if status == "running":
+                console.info(f"  Processing: {file_name}")
+            elif status == "completed":
+                console.success(f"  Completed: {file_name}")
+            elif status == "failed":
+                console.error(f"  Failed: {file_name}")
+            elif status == "skipped":
+                console.warning(f"  Skipped: {file_name} (empty)")
+
+    # Execute processing
+    console.section("Processing Files")
+
+    if directory_mode:
+        console.info(f"Scanning directory: {input_dir}")
+        result = processor.process_directory(
+            directory=input_dir,
+            recursive=True,
+            progress_callback=progress_callback,
+        )
+    else:
+        console.info(f"Processing {len(file_paths)} file(s)")
+        result = processor.process(
+            file_paths=file_paths,
+            progress_callback=progress_callback,
+        )
+
+    # Display results
+    print()
+    console.section("Results")
+
+    if result.success:
+        console.success("Parallel processing completed successfully!")
+    else:
+        console.error("Parallel processing completed with errors")
+
+    print()
+    console.info(f"Files: {result.files_succeeded}/{result.files_total} succeeded")
+
+    if result.files_failed:
+        console.info(f"  Failed: {result.files_failed}")
+    if result.files_skipped:
+        console.info(f"  Skipped: {result.files_skipped}")
+
+    print()
+    console.info(f"Epics: {result.total_epics}")
+    console.info(f"Stories: {result.total_stories} total, {result.total_stories_updated} updated")
+    console.info(f"Subtasks: {result.total_subtasks_created} created")
+
+    print()
+    console.section("Performance")
+    console.info(f"Workers: {result.workers_used}")
+    console.info(f"Peak concurrency: {result.peak_concurrency}")
+    console.info(f"Duration: {result.duration_seconds:.1f}s")
+
+    # Speedup estimate
+    if result.file_results:
+        sequential_time = sum(r.duration_seconds for r in result.file_results)
+        if sequential_time > 0 and result.duration_seconds > 0:
+            speedup = sequential_time / result.duration_seconds
+            console.info(f"Estimated speedup: {speedup:.1f}x")
+
+    if result.errors:
+        print()
+        console.error(f"Errors ({len(result.errors)}):")
+        for error in result.errors[:5]:
+            console.item(error, "fail")
+        if len(result.errors) > 5:
+            console.info(f"  ... and {len(result.errors) - 5} more")
 
     return ExitCode.SUCCESS if result.success else ExitCode.SYNC_ERROR
 
@@ -5303,6 +5526,16 @@ def main() -> int:
         if not args.input:
             parser.error("--multi-epic and --list-epics require --input/-i to be specified")
         return run_multi_epic(args)
+
+    # Handle parallel file processing
+    if getattr(args, "parallel_files", False):
+        input_dir = getattr(args, "input_dir", None)
+        input_files = getattr(args, "input_files", None)
+        if not input_dir and not args.input and not input_files:
+            parser.error(
+                "--parallel-files requires --input-dir, --input, or --input-files to be specified"
+            )
+        return run_parallel_files(args)
 
     # Handle multi-tracker sync
     if getattr(args, "multi_tracker", False) or getattr(args, "trackers", None):
