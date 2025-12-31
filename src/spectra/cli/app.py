@@ -139,6 +139,18 @@ Examples:
   # Apply generated AC to file
   spectra --generate-ac -f EPIC.md --apply-ac
 
+  # AI dependency detection
+  spectra --dependencies -f EPIC.md
+
+  # Dependency detection with graph output
+  spectra --dependencies -f EPIC.md --show-graph
+
+  # Export dependencies as Mermaid diagram
+  spectra --dependencies -f EPIC.md -o mermaid
+
+  # Dependency detection with architecture context
+  spectra --dependencies -f EPIC.md --architecture microservices
+
   # Show status dashboard (static)
   spectra --dashboard -f EPIC.md --epic PROJ-123
 
@@ -1617,6 +1629,42 @@ Environment Variables:
         "--apply-ac",
         action="store_true",
         help="Apply generated acceptance criteria to the markdown file",
+    )
+    new_commands.add_argument(
+        "--dependencies",
+        action="store_true",
+        help="AI-powered detection of blocked-by relationships between stories",
+    )
+    new_commands.add_argument(
+        "--no-technical-deps",
+        action="store_true",
+        help="Skip technical dependency detection",
+    )
+    new_commands.add_argument(
+        "--no-data-deps",
+        action="store_true",
+        help="Skip data dependency detection",
+    )
+    new_commands.add_argument(
+        "--no-feature-deps",
+        action="store_true",
+        help="Skip feature dependency detection",
+    )
+    new_commands.add_argument(
+        "--no-circular-check",
+        action="store_true",
+        help="Skip circular dependency detection",
+    )
+    new_commands.add_argument(
+        "--architecture",
+        type=str,
+        metavar="ARCH",
+        help="Architecture type (e.g., 'microservices', 'monolith')",
+    )
+    new_commands.add_argument(
+        "--show-graph",
+        action="store_true",
+        help="Show ASCII dependency graph",
     )
     new_commands.add_argument(
         "--archive",
@@ -4769,6 +4817,30 @@ def main() -> int:
             tech_stack=getattr(args, "tech_stack", None),
             output_format=getattr(args, "output", "text") or "text",
             apply_changes=getattr(args, "apply_ac", False),
+        )
+
+    # Handle dependencies command (AI dependency detection)
+    if getattr(args, "dependencies", False):
+        from .ai_dependency import run_ai_dependency
+
+        console = Console(
+            color=not getattr(args, "no_color", False),
+            verbose=getattr(args, "verbose", False),
+        )
+
+        return run_ai_dependency(
+            console=console,
+            markdown_path=args.input or getattr(args, "markdown", None),
+            detect_technical=not getattr(args, "no_technical_deps", False),
+            detect_data=not getattr(args, "no_data_deps", False),
+            detect_feature=not getattr(args, "no_feature_deps", False),
+            detect_related=True,
+            check_circular=not getattr(args, "no_circular_check", False),
+            project_context=getattr(args, "project_context", None),
+            tech_stack=getattr(args, "tech_stack", None),
+            architecture=getattr(args, "architecture", None),
+            output_format=getattr(args, "output", "text") or "text",
+            show_graph=getattr(args, "show_graph", False),
         )
 
     # Handle archive command

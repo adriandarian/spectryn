@@ -740,7 +740,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **AI Labeling/Auto-categorization** - Suggest labels/categories based on content
 - [x] **Smart Splitting** - AI suggests splitting large stories
 - [x] **Acceptance Criteria Generation** - AI writes AC from story description
-- [ ] **Dependency Detection** - AI identifies blocked-by relationships
+- [x] **Dependency Detection** - AI identifies blocked-by relationships
 - [ ] **Story Quality Scoring** - Rate story quality (well-written, testable)
 - [ ] **Duplicate Detection** - Find similar stories across trackers
 - [ ] **Gap Analysis** - Identify missing requirements
