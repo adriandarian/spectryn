@@ -163,6 +163,18 @@ Examples:
   # Quality scoring without details
   spectra --quality -f EPIC.md --no-details
 
+  # AI duplicate detection
+  spectra --duplicates -f EPIC.md
+
+  # Compare multiple files for duplicates
+  spectra --duplicates -f EPIC1.md --compare-files EPIC2.md,EPIC3.md
+
+  # Duplicate detection with custom threshold
+  spectra --duplicates -f EPIC.md --min-similarity 0.60
+
+  # Text-based only (no LLM)
+  spectra --duplicates -f EPIC.md --no-llm-duplicates
+
   # Show status dashboard (static)
   spectra --dashboard -f EPIC.md --epic PROJ-123
 
@@ -1700,6 +1712,29 @@ Environment Variables:
         "--no-details",
         action="store_true",
         help="Hide detailed dimension scores",
+    )
+    new_commands.add_argument(
+        "--duplicates",
+        action="store_true",
+        help="AI-powered detection of duplicate/similar stories",
+    )
+    new_commands.add_argument(
+        "--compare-files",
+        type=str,
+        metavar="FILES",
+        help="Comma-separated additional files to compare for duplicates",
+    )
+    new_commands.add_argument(
+        "--min-similarity",
+        type=float,
+        default=0.40,
+        metavar="N",
+        help="Minimum similarity threshold 0.0-1.0 (default: 0.40)",
+    )
+    new_commands.add_argument(
+        "--no-llm-duplicates",
+        action="store_true",
+        help="Use text-based similarity only, skip LLM analysis",
     )
     new_commands.add_argument(
         "--archive",
@@ -4899,6 +4934,34 @@ def main() -> int:
             show_details=not getattr(args, "no_details", False),
             project_context=getattr(args, "project_context", None),
             tech_stack=getattr(args, "tech_stack", None),
+            output_format=getattr(args, "output", "text") or "text",
+        )
+
+    # Handle duplicates command (AI duplicate detection)
+    if getattr(args, "duplicates", False):
+        from .ai_duplicate import run_ai_duplicate
+
+        console = Console(
+            color=not getattr(args, "no_color", False),
+            verbose=getattr(args, "verbose", False),
+        )
+
+        # Collect all files to compare
+        markdown_paths = []
+        main_file = args.input or getattr(args, "markdown", None)
+        if main_file:
+            markdown_paths.append(main_file)
+
+        if getattr(args, "compare_files", None):
+            additional = [f.strip() for f in args.compare_files.split(",")]
+            markdown_paths.extend(additional)
+
+        return run_ai_duplicate(
+            console=console,
+            markdown_paths=markdown_paths,
+            min_similarity=getattr(args, "min_similarity", 0.40),
+            use_llm=not getattr(args, "no_llm_duplicates", False),
+            project_context=getattr(args, "project_context", None),
             output_format=getattr(args, "output", "text") or "text",
         )
 

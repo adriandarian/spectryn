@@ -742,7 +742,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Acceptance Criteria Generation** - AI writes AC from story description
 - [x] **Dependency Detection** - AI identifies blocked-by relationships
 - [x] **Story Quality Scoring** - Rate story quality (well-written, testable)
-- [ ] **Duplicate Detection** - Find similar stories across trackers
+- [x] **Duplicate Detection** - Find similar stories across trackers
 - [ ] **Gap Analysis** - Identify missing requirements
 - [ ] **AI-Generated Sync Summaries** - Human-readable summary of what was synced
 - [ ] **Custom Prompts Config** - Let users customize AI prompts
