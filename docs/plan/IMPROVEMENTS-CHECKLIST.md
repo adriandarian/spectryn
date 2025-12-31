@@ -793,7 +793,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Parallel File Processing** - Process multiple files concurrently
 - [x] **Streaming Parser** - Handle very large files without loading all in memory
 - [x] **Connection Pooling Tuning** - Optimize HTTP connection reuse
-- [ ] **GraphQL Batching** - For GitHub/Linear - batch multiple queries
+- [x] **GraphQL Batching** - For GitHub/Linear - batch multiple queries
 - [ ] **Lazy Loading** - Load story details only when needed
 - [ ] **Configurable Caching Backends** - Redis support for high-concurrency environments
 - [ ] **Smart Caching** - Cache tracker metadata more aggressively with TTL
