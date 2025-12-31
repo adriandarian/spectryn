@@ -745,7 +745,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Duplicate Detection** - Find similar stories across trackers
 - [x] **Gap Analysis** - Identify missing requirements
 - [x] **AI-Generated Sync Summaries** - Human-readable summary of what was synced
-- [ ] **Custom Prompts Config** - Let users customize AI prompts
+- [x] **Custom Prompts Config** - Let users customize AI prompts
 
 ---
 

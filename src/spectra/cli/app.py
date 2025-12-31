@@ -193,6 +193,18 @@ Examples:
   # Sync summary as Slack message
   spectra --sync-summary --sync-log sync_results.json --output slack --copy-summary
 
+  # List AI prompts
+  spectra --prompts list
+
+  # View a specific prompt
+  spectra --prompts view --prompt-type story_generation
+
+  # Export default prompts for customization
+  spectra --export-prompts my-prompts.json
+
+  # Use custom prompts config
+  spectra --prompts-config my-prompts.json --generate-stories -d "Feature X"
+
   # Show status dashboard (static)
   spectra --dashboard -f EPIC.md --epic PROJ-123
 
@@ -1810,6 +1822,38 @@ Environment Variables:
         "--copy-summary",
         action="store_true",
         help="Copy generated summary to clipboard",
+    )
+    new_commands.add_argument(
+        "--prompts",
+        type=str,
+        nargs="?",
+        const="list",
+        metavar="ACTION",
+        help="Manage AI prompts (list, view, export, init, types)",
+    )
+    new_commands.add_argument(
+        "--prompt-name",
+        type=str,
+        metavar="NAME",
+        help="Name of specific prompt to view",
+    )
+    new_commands.add_argument(
+        "--prompt-type",
+        type=str,
+        metavar="TYPE",
+        help="Type of prompt to filter by",
+    )
+    new_commands.add_argument(
+        "--prompts-config",
+        type=str,
+        metavar="PATH",
+        help="Path to custom prompts configuration file",
+    )
+    new_commands.add_argument(
+        "--export-prompts",
+        type=str,
+        metavar="PATH",
+        help="Export default prompts to file for customization",
     )
     new_commands.add_argument(
         "--archive",
@@ -5089,6 +5133,41 @@ def main() -> int:
             audience=getattr(args, "audience", "technical"),
             output_format=getattr(args, "output", "text") or "text",
             copy_to_clipboard=getattr(args, "copy_summary", False),
+        )
+
+    # Handle prompts command (AI prompts management)
+    if getattr(args, "prompts", None):
+        from .ai_prompts import run_ai_prompts
+
+        console = Console(
+            color=not getattr(args, "no_color", False),
+            verbose=getattr(args, "verbose", False),
+        )
+
+        return run_ai_prompts(
+            console=console,
+            action=args.prompts,
+            prompt_name=getattr(args, "prompt_name", None),
+            prompt_type=getattr(args, "prompt_type", None),
+            config_path=getattr(args, "prompts_config", None),
+            export_path=getattr(args, "export_prompts", None),
+            output_format=getattr(args, "output", "text") or "text",
+        )
+
+    # Handle export-prompts shortcut
+    if getattr(args, "export_prompts", None):
+        from .ai_prompts import run_ai_prompts
+
+        console = Console(
+            color=not getattr(args, "no_color", False),
+            verbose=getattr(args, "verbose", False),
+        )
+
+        return run_ai_prompts(
+            console=console,
+            action="export",
+            export_path=args.export_prompts,
+            output_format=getattr(args, "output", "text") or "text",
         )
 
     # Handle archive command
