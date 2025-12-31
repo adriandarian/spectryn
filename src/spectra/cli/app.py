@@ -184,6 +184,15 @@ Examples:
   # Gap analysis with expected personas
   spectra --gaps -f EPIC.md --expected-personas admin,support,guest
 
+  # AI sync summary from log file
+  spectra --sync-summary --sync-log sync_results.json
+
+  # Sync summary for managers
+  spectra --sync-summary --sync-log sync_results.json --audience manager
+
+  # Sync summary as Slack message
+  spectra --sync-summary --sync-log sync_results.json --output slack --copy-summary
+
   # Show status dashboard (static)
   spectra --dashboard -f EPIC.md --epic PROJ-123
 
@@ -1778,6 +1787,29 @@ Environment Variables:
         "--no-suggestions",
         action="store_true",
         help="Skip generating story suggestions for gaps",
+    )
+    new_commands.add_argument(
+        "--sync-summary",
+        action="store_true",
+        help="Generate AI-powered human-readable sync summary",
+    )
+    new_commands.add_argument(
+        "--sync-log",
+        type=str,
+        metavar="PATH",
+        help="Path to sync log file (JSON) for summary generation",
+    )
+    new_commands.add_argument(
+        "--audience",
+        type=str,
+        choices=["technical", "manager", "stakeholder"],
+        default="technical",
+        help="Target audience for sync summary (default: technical)",
+    )
+    new_commands.add_argument(
+        "--copy-summary",
+        action="store_true",
+        help="Copy generated summary to clipboard",
     )
     new_commands.add_argument(
         "--archive",
@@ -5040,6 +5072,23 @@ def main() -> int:
             compliance=compliance,
             no_suggestions=getattr(args, "no_suggestions", False),
             output_format=getattr(args, "output", "text") or "text",
+        )
+
+    # Handle sync-summary command (AI sync summary generation)
+    if getattr(args, "sync_summary", False):
+        from .ai_sync_summary import run_ai_sync_summary
+
+        console = Console(
+            color=not getattr(args, "no_color", False),
+            verbose=getattr(args, "verbose", False),
+        )
+
+        return run_ai_sync_summary(
+            console=console,
+            sync_log_path=getattr(args, "sync_log", None),
+            audience=getattr(args, "audience", "technical"),
+            output_format=getattr(args, "output", "text") or "text",
+            copy_to_clipboard=getattr(args, "copy_summary", False),
         )
 
     # Handle archive command
