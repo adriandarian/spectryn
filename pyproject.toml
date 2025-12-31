@@ -49,6 +49,9 @@ dependencies = [
 async = [
     "aiohttp>=3.8.0",  # Async HTTP client for parallel API calls
 ]
+redis = [
+    "redis>=4.5.0",  # Redis client for distributed caching in high-concurrency environments
+]
 gitlab = [
     "python-gitlab>=4.0.0",  # Official GitLab Python SDK (optional alternative to custom client)
 ]
@@ -77,9 +80,12 @@ dev = [
     "ruff>=0.1.0",
     "pre-commit>=3.0",
     "types-PyYAML>=6.0",  # Type stubs for PyYAML
+    "redis>=4.5.0",  # For testing Redis cache functionality
+    "types-redis>=4.5.0",  # Type stubs for redis
 ]
 all = [
     "aiohttp>=3.8.0",  # Async HTTP client for parallel API calls
+    "redis>=4.5.0",  # Redis client for distributed caching
     "python-gitlab>=4.0.0",  # Official GitLab Python SDK
     "atlassian-python-api>=3.0.0",  # Atlassian Python API for Bitbucket Server
     "opentelemetry-api>=1.20.0",
