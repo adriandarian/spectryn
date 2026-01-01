@@ -1,0 +1,72 @@
+# Spectra Pull Template for Azure Pipelines
+# Reverse sync: Pull from tracker to markdown
+
+parameters:
+  - name: epicKey
+    type: string
+    displayName: 'Epic key to pull from'
+
+  - name: outputFile
+    type: string
+    displayName: 'Output markdown file path'
+
+  - name: tracker
+    type: string
+    default: 'jira'
+    values:
+      - jira
+      - github
+      - azure-devops
+      - linear
+      - gitlab
+    displayName: 'Issue tracker type'
+
+  - name: verbose
+    type: boolean
+    default: false
+    displayName: 'Verbose output'
+
+  - name: pythonVersion
+    type: string
+    default: '3.11'
+    displayName: 'Python version'
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python ${{ parameters.pythonVersion }}'
+    inputs:
+      versionSpec: '${{ parameters.pythonVersion }}'
+      addToPath: true
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install spectra
+      spectra --version
+    displayName: 'Install Spectra'
+
+  - script: |
+      echo "🔄 Spectra Pull (Reverse Sync)"
+      echo "=============================="
+
+      CMD="spectra pull --epic ${{ parameters.epicKey }} --output ${{ parameters.outputFile }} --tracker ${{ parameters.tracker }}"
+
+      if [ "${{ parameters.verbose }}" = "True" ]; then
+        CMD="$CMD --verbose"
+      fi
+
+      echo "Running: $CMD"
+      eval $CMD
+
+      echo "✅ Pull complete!"
+    displayName: 'Pull from Tracker'
+    env:
+      JIRA_URL: $(JIRA_URL)
+      JIRA_EMAIL: $(JIRA_EMAIL)
+      JIRA_API_TOKEN: $(JIRA_API_TOKEN)
+      GITHUB_TOKEN: $(GITHUB_TOKEN)
+      AZURE_PAT: $(AZURE_PAT)
+      LINEAR_API_KEY: $(LINEAR_API_KEY)
+
+  - publish: ${{ parameters.outputFile }}
+    artifact: PulledMarkdown
+    displayName: 'Publish Markdown'

@@ -1,0 +1,248 @@
+# Spectra GitLab CI Template
+# Include this template in your .gitlab-ci.yml to sync markdown to issue trackers
+
+# Base image with Python
+.spectra-base:
+  image: python:3.11-slim
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    SPECTRA_VERSION: "latest"
+  cache:
+    key: spectra-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install --upgrade pip
+    - |
+      if [ "$SPECTRA_VERSION" = "latest" ]; then
+        pip install spectra
+      else
+        pip install spectra==$SPECTRA_VERSION
+      fi
+    - spectra --version
+
+# Main sync job template
+.spectra-sync:
+  extends: .spectra-base
+  stage: deploy
+  variables:
+    # Required
+    MARKDOWN_FILE: ""
+    EPIC_KEY: ""
+    # Tracker config (Jira default)
+    TRACKER: "jira"
+    JIRA_URL: ""
+    JIRA_EMAIL: ""
+    JIRA_API_TOKEN: ""
+    # Optional
+    DRY_RUN: "false"
+    EXECUTE: "true"
+    PHASE: "all"
+    INCREMENTAL: "false"
+    MULTI_EPIC: "false"
+    EPIC_FILTER: ""
+    BACKUP: "true"
+    VERBOSE: "false"
+    EXPORT_RESULTS: ""
+  script:
+    - |
+      echo "🚀 Spectra GitLab CI"
+      echo "===================="
+
+      # Validate required inputs
+      if [ -z "$MARKDOWN_FILE" ]; then
+        echo "❌ Error: MARKDOWN_FILE is required"
+        exit 1
+      fi
+
+      if [ ! -f "$MARKDOWN_FILE" ]; then
+        echo "❌ Error: Markdown file not found: $MARKDOWN_FILE"
+        exit 1
+      fi
+
+      if [ -z "$EPIC_KEY" ] && [ "$MULTI_EPIC" != "true" ]; then
+        echo "❌ Error: EPIC_KEY is required (unless using multi-epic mode)"
+        exit 1
+      fi
+
+      # Build command
+      CMD="spectra sync"
+      CMD="$CMD --markdown $MARKDOWN_FILE"
+      CMD="$CMD --tracker $TRACKER"
+
+      # Add epic key if provided
+      if [ -n "$EPIC_KEY" ]; then
+        CMD="$CMD --epic $EPIC_KEY"
+      fi
+
+      # Execution mode
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "📋 Mode: Dry-run"
+      elif [ "$EXECUTE" = "true" ]; then
+        CMD="$CMD --execute --no-confirm"
+        echo "⚡ Mode: Execute"
+      fi
+
+      # Sync phase
+      if [ "$PHASE" != "all" ]; then
+        CMD="$CMD --phase $PHASE"
+        echo "📌 Phase: $PHASE"
+      fi
+
+      # Incremental mode
+      if [ "$INCREMENTAL" = "true" ]; then
+        CMD="$CMD --incremental"
+        echo "🔄 Incremental sync enabled"
+      fi
+
+      # Multi-epic mode
+      if [ "$MULTI_EPIC" = "true" ]; then
+        CMD="$CMD --multi-epic"
+        echo "📚 Multi-epic mode enabled"
+        if [ -n "$EPIC_FILTER" ]; then
+          CMD="$CMD --epic-filter $EPIC_FILTER"
+        fi
+      fi
+
+      # Backup
+      if [ "$BACKUP" = "true" ]; then
+        CMD="$CMD --backup"
+      fi
+
+      # Verbose
+      if [ "$VERBOSE" = "true" ]; then
+        CMD="$CMD --verbose"
+      fi
+
+      # Export results
+      if [ -n "$EXPORT_RESULTS" ]; then
+        CMD="$CMD --export $EXPORT_RESULTS"
+      fi
+
+      # Set tracker-specific environment variables
+      case "$TRACKER" in
+        jira)
+          export JIRA_URL="$JIRA_URL"
+          export JIRA_EMAIL="$JIRA_EMAIL"
+          export JIRA_API_TOKEN="$JIRA_API_TOKEN"
+          ;;
+        github)
+          export GITHUB_TOKEN="$GITHUB_TOKEN"
+          export GITHUB_OWNER="$GITHUB_OWNER"
+          export GITHUB_REPO="$GITHUB_REPO"
+          ;;
+        azure-devops)
+          export AZURE_PAT="$AZURE_PAT"
+          export AZURE_ORGANIZATION="$AZURE_ORGANIZATION"
+          export AZURE_PROJECT="$AZURE_PROJECT"
+          ;;
+        linear)
+          export LINEAR_API_KEY="$LINEAR_API_KEY"
+          export LINEAR_TEAM_ID="$LINEAR_TEAM_ID"
+          ;;
+        gitlab)
+          export GITLAB_TOKEN="$GITLAB_TOKEN"
+          export GITLAB_PROJECT_ID="$GITLAB_PROJECT_ID"
+          ;;
+      esac
+
+      echo ""
+      echo "Running: $CMD"
+      echo ""
+
+      # Execute
+      eval $CMD
+
+      echo ""
+      echo "✅ Spectra sync complete!"
+
+# Pull (reverse sync) job template
+.spectra-pull:
+  extends: .spectra-base
+  stage: deploy
+  variables:
+    EPIC_KEY: ""
+    OUTPUT_FILE: ""
+    TRACKER: "jira"
+    VERBOSE: "false"
+  script:
+    - |
+      echo "🔄 Spectra Pull (Reverse Sync)"
+      echo "=============================="
+
+      if [ -z "$EPIC_KEY" ]; then
+        echo "❌ Error: EPIC_KEY is required for pull"
+        exit 1
+      fi
+
+      if [ -z "$OUTPUT_FILE" ]; then
+        echo "❌ Error: OUTPUT_FILE is required for pull"
+        exit 1
+      fi
+
+      CMD="spectra pull"
+      CMD="$CMD --epic $EPIC_KEY"
+      CMD="$CMD --output $OUTPUT_FILE"
+      CMD="$CMD --tracker $TRACKER"
+
+      if [ "$VERBOSE" = "true" ]; then
+        CMD="$CMD --verbose"
+      fi
+
+      # Set environment variables based on tracker
+      case "$TRACKER" in
+        jira)
+          export JIRA_URL="$JIRA_URL"
+          export JIRA_EMAIL="$JIRA_EMAIL"
+          export JIRA_API_TOKEN="$JIRA_API_TOKEN"
+          ;;
+        github)
+          export GITHUB_TOKEN="$GITHUB_TOKEN"
+          ;;
+        azure-devops)
+          export AZURE_PAT="$AZURE_PAT"
+          ;;
+        linear)
+          export LINEAR_API_KEY="$LINEAR_API_KEY"
+          ;;
+      esac
+
+      echo "Running: $CMD"
+      eval $CMD
+
+      echo "✅ Pull complete! Output: $OUTPUT_FILE"
+
+# Validation job template
+.spectra-validate:
+  extends: .spectra-base
+  stage: test
+  variables:
+    MARKDOWN_FILE: ""
+  script:
+    - |
+      echo "✔️ Spectra Validation"
+      echo "===================="
+
+      if [ -z "$MARKDOWN_FILE" ]; then
+        echo "❌ Error: MARKDOWN_FILE is required"
+        exit 1
+      fi
+
+      spectra validate --markdown "$MARKDOWN_FILE"
+
+      echo "✅ Validation passed!"
+
+# Diff job template (compare local vs tracker)
+.spectra-diff:
+  extends: .spectra-base
+  stage: test
+  variables:
+    MARKDOWN_FILE: ""
+    EPIC_KEY: ""
+    TRACKER: "jira"
+  script:
+    - |
+      echo "📊 Spectra Diff"
+      echo "==============="
+
+      spectra diff --markdown "$MARKDOWN_FILE" --epic "$EPIC_KEY" --tracker "$TRACKER"

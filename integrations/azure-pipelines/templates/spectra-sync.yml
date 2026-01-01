@@ -1,0 +1,202 @@
+# Spectra Azure Pipelines Template
+# Include this template in your azure-pipelines.yml
+
+parameters:
+  - name: markdownFile
+    type: string
+    displayName: 'Markdown file path'
+
+  - name: epicKey
+    type: string
+    default: ''
+    displayName: 'Epic key (e.g., PROJ-123)'
+
+  - name: tracker
+    type: string
+    default: 'jira'
+    values:
+      - jira
+      - github
+      - azure-devops
+      - linear
+      - gitlab
+      - trello
+      - asana
+      - monday
+      - shortcut
+      - clickup
+      - youtrack
+      - plane
+      - pivotal
+      - basecamp
+      - bitbucket
+    displayName: 'Issue tracker type'
+
+  - name: dryRun
+    type: boolean
+    default: false
+    displayName: 'Dry-run mode (no changes)'
+
+  - name: execute
+    type: boolean
+    default: true
+    displayName: 'Execute changes'
+
+  - name: phase
+    type: string
+    default: 'all'
+    values:
+      - all
+      - descriptions
+      - subtasks
+      - comments
+      - statuses
+    displayName: 'Sync phase'
+
+  - name: incremental
+    type: boolean
+    default: false
+    displayName: 'Incremental sync only'
+
+  - name: multiEpic
+    type: boolean
+    default: false
+    displayName: 'Multi-epic mode'
+
+  - name: epicFilter
+    type: string
+    default: ''
+    displayName: 'Epic filter (comma-separated)'
+
+  - name: backup
+    type: boolean
+    default: true
+    displayName: 'Create backup'
+
+  - name: verbose
+    type: boolean
+    default: false
+    displayName: 'Verbose output'
+
+  - name: exportResults
+    type: string
+    default: ''
+    displayName: 'Export results file path'
+
+  - name: pythonVersion
+    type: string
+    default: '3.11'
+    displayName: 'Python version'
+
+  - name: spectraVersion
+    type: string
+    default: 'latest'
+    displayName: 'Spectra version'
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python ${{ parameters.pythonVersion }}'
+    inputs:
+      versionSpec: '${{ parameters.pythonVersion }}'
+      addToPath: true
+
+  - script: |
+      python -m pip install --upgrade pip
+      if [ "${{ parameters.spectraVersion }}" = "latest" ]; then
+        pip install spectra
+      else
+        pip install spectra==${{ parameters.spectraVersion }}
+      fi
+      spectra --version
+    displayName: 'Install Spectra'
+
+  - script: |
+      echo "🚀 Spectra Azure Pipelines"
+      echo "=========================="
+
+      # Build command
+      CMD="spectra sync --markdown ${{ parameters.markdownFile }} --tracker ${{ parameters.tracker }}"
+
+      # Add epic key if provided
+      if [ -n "${{ parameters.epicKey }}" ]; then
+        CMD="$CMD --epic ${{ parameters.epicKey }}"
+      fi
+
+      # Execution mode
+      if [ "${{ parameters.dryRun }}" = "True" ]; then
+        echo "📋 Mode: Dry-run"
+      elif [ "${{ parameters.execute }}" = "True" ]; then
+        CMD="$CMD --execute --no-confirm"
+        echo "⚡ Mode: Execute"
+      fi
+
+      # Sync phase
+      if [ "${{ parameters.phase }}" != "all" ]; then
+        CMD="$CMD --phase ${{ parameters.phase }}"
+        echo "📌 Phase: ${{ parameters.phase }}"
+      fi
+
+      # Incremental mode
+      if [ "${{ parameters.incremental }}" = "True" ]; then
+        CMD="$CMD --incremental"
+        echo "🔄 Incremental sync enabled"
+      fi
+
+      # Multi-epic mode
+      if [ "${{ parameters.multiEpic }}" = "True" ]; then
+        CMD="$CMD --multi-epic"
+        echo "📚 Multi-epic mode enabled"
+        if [ -n "${{ parameters.epicFilter }}" ]; then
+          CMD="$CMD --epic-filter ${{ parameters.epicFilter }}"
+        fi
+      fi
+
+      # Backup
+      if [ "${{ parameters.backup }}" = "True" ]; then
+        CMD="$CMD --backup"
+      fi
+
+      # Verbose
+      if [ "${{ parameters.verbose }}" = "True" ]; then
+        CMD="$CMD --verbose"
+      fi
+
+      # Export results
+      if [ -n "${{ parameters.exportResults }}" ]; then
+        CMD="$CMD --export ${{ parameters.exportResults }}"
+      fi
+
+      echo ""
+      echo "Running: $CMD"
+      echo ""
+
+      eval $CMD
+
+      echo ""
+      echo "✅ Spectra sync complete!"
+    displayName: 'Run Spectra Sync'
+    env:
+      # Jira credentials (from pipeline variables or variable groups)
+      JIRA_URL: $(JIRA_URL)
+      JIRA_EMAIL: $(JIRA_EMAIL)
+      JIRA_API_TOKEN: $(JIRA_API_TOKEN)
+      # GitHub credentials
+      GITHUB_TOKEN: $(GITHUB_TOKEN)
+      GITHUB_OWNER: $(GITHUB_OWNER)
+      GITHUB_REPO: $(GITHUB_REPO)
+      # Azure DevOps credentials
+      AZURE_PAT: $(AZURE_PAT)
+      AZURE_ORGANIZATION: $(AZURE_ORGANIZATION)
+      AZURE_PROJECT: $(AZURE_PROJECT)
+      # Linear credentials
+      LINEAR_API_KEY: $(LINEAR_API_KEY)
+      LINEAR_TEAM_ID: $(LINEAR_TEAM_ID)
+      # GitLab credentials
+      GITLAB_TOKEN: $(GITLAB_TOKEN)
+      GITLAB_PROJECT_ID: $(GITLAB_PROJECT_ID)
+
+  - ${{ if ne(parameters.exportResults, '') }}:
+      - publish: ${{ parameters.exportResults }}
+        artifact: SpectraSyncResults
+        condition: always()
+        displayName: 'Publish Sync Results'

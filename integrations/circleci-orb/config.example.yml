@@ -1,0 +1,113 @@
+# Example CircleCI config using Spectra orb
+# Copy to your repository as .circleci/config.yml
+
+version: 2.1
+
+orbs:
+  spectra: spectra/spectra@1.0.0
+
+# Workflow definitions
+workflows:
+  # Main workflow for all branches
+  main:
+    jobs:
+      # Always validate markdown
+      - spectra/validate:
+          name: validate
+          markdown-file: docs/user-stories.md
+
+      # Preview changes on feature branches
+      - spectra/sync:
+          name: preview
+          markdown-file: docs/user-stories.md
+          epic-key: ${EPIC_KEY}
+          dry-run: true
+          verbose: true
+          requires:
+            - validate
+          filters:
+            branches:
+              ignore: main
+          context: jira-credentials
+
+      # Show diff on feature branches
+      - spectra/diff:
+          name: diff
+          markdown-file: docs/user-stories.md
+          epic-key: ${EPIC_KEY}
+          requires:
+            - validate
+          filters:
+            branches:
+              ignore: main
+          context: jira-credentials
+
+      # Execute sync on main branch
+      - spectra/sync:
+          name: deploy
+          markdown-file: docs/user-stories.md
+          epic-key: ${EPIC_KEY}
+          execute: true
+          backup: true
+          export-results: sync-results.json
+          requires:
+            - validate
+          filters:
+            branches:
+              only: main
+          context: jira-credentials
+
+  # Nightly incremental sync
+  nightly-sync:
+    triggers:
+      - schedule:
+          cron: "0 6 * * 1-5"  # 6 AM weekdays
+          filters:
+            branches:
+              only: main
+    jobs:
+      - spectra/sync:
+          name: incremental-sync
+          markdown-file: docs/user-stories.md
+          epic-key: ${EPIC_KEY}
+          incremental: true
+          execute: true
+          context: jira-credentials
+
+  # Weekly pull from Jira
+  weekly-pull:
+    triggers:
+      - schedule:
+          cron: "0 0 * * 0"  # Sunday midnight
+          filters:
+            branches:
+              only: main
+    jobs:
+      - spectra/pull:
+          name: pull-from-jira
+          epic-key: ${EPIC_KEY}
+          output-file: docs/imported-stories.md
+          context: jira-credentials
+
+# Alternative: Using commands directly for more control
+# workflows:
+#   custom:
+#     jobs:
+#       - custom-sync
+#
+# jobs:
+#   custom-sync:
+#     executor: spectra/python
+#     steps:
+#       - checkout
+#       - spectra/install:
+#           version: "1.0.0"
+#       - spectra/validate-command:
+#           markdown-file: docs/user-stories.md
+#       - spectra/sync-command:
+#           markdown-file: docs/user-stories.md
+#           epic-key: ${EPIC_KEY}
+#           execute: true
+#       - store_artifacts:
+#           path: backups/
+#           destination: backups

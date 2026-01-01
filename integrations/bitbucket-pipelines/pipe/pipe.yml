@@ -1,0 +1,130 @@
+# Spectra Bitbucket Pipe Definition
+# This defines the spectra-sync pipe for Bitbucket Pipelines
+
+name: Spectra Sync
+image: python:3.11-slim
+description: Sync markdown specifications to issue trackers (Jira, GitHub, Azure DevOps, Linear)
+
+repository: spectra/spectra-sync
+
+variables:
+  - name: MARKDOWN_FILE
+    description: Path to the markdown file to sync
+    required: true
+
+  - name: EPIC_KEY
+    description: Epic key to sync to (e.g., PROJ-123)
+    required: false
+
+  - name: TRACKER
+    description: Issue tracker type
+    default: jira
+    allowed_values:
+      - jira
+      - github
+      - azure-devops
+      - linear
+      - gitlab
+      - trello
+      - asana
+      - monday
+      - shortcut
+      - clickup
+      - youtrack
+      - plane
+      - pivotal
+      - basecamp
+      - bitbucket
+
+  # Jira configuration
+  - name: JIRA_URL
+    description: Jira instance URL
+    required: false
+
+  - name: JIRA_EMAIL
+    description: Jira account email
+    required: false
+
+  - name: JIRA_API_TOKEN
+    description: Jira API token
+    required: false
+    secure: true
+
+  # GitHub configuration
+  - name: GITHUB_TOKEN
+    description: GitHub personal access token
+    required: false
+    secure: true
+
+  - name: GITHUB_OWNER
+    description: GitHub repository owner
+    required: false
+
+  - name: GITHUB_REPO
+    description: GitHub repository name
+    required: false
+
+  # Azure DevOps configuration
+  - name: AZURE_PAT
+    description: Azure DevOps personal access token
+    required: false
+    secure: true
+
+  - name: AZURE_ORGANIZATION
+    description: Azure DevOps organization
+    required: false
+
+  - name: AZURE_PROJECT
+    description: Azure DevOps project
+    required: false
+
+  # Linear configuration
+  - name: LINEAR_API_KEY
+    description: Linear API key
+    required: false
+    secure: true
+
+  - name: LINEAR_TEAM_ID
+    description: Linear team ID
+    required: false
+
+  # Execution options
+  - name: DRY_RUN
+    description: Run without making changes
+    default: "false"
+
+  - name: EXECUTE
+    description: Execute changes
+    default: "true"
+
+  - name: PHASE
+    description: Sync phase (all, descriptions, subtasks, comments, statuses)
+    default: all
+
+  - name: INCREMENTAL
+    description: Only sync changed stories
+    default: "false"
+
+  - name: MULTI_EPIC
+    description: Enable multi-epic mode
+    default: "false"
+
+  - name: EPIC_FILTER
+    description: Comma-separated list of epic keys to sync
+    required: false
+
+  - name: BACKUP
+    description: Create backup before sync
+    default: "true"
+
+  - name: VERBOSE
+    description: Enable verbose output
+    default: "false"
+
+  - name: EXPORT_RESULTS
+    description: Export results to JSON file
+    required: false
+
+  - name: DEBUG
+    description: Enable debug mode
+    default: "false"

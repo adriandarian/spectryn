@@ -1,0 +1,155 @@
+# Spectra Complete Pipeline Template
+# Use this as a starting point for your spectra pipeline
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - 'docs/*.md'
+      - 'specs/*.md'
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - 'docs/*.md'
+      - 'specs/*.md'
+
+schedules:
+  - cron: '0 6 * * 1-5'
+    displayName: 'Weekday morning sync'
+    branches:
+      include:
+        - main
+    always: false
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: spectra-credentials
+  - name: MARKDOWN_FILE
+    value: 'docs/user-stories.md'
+
+stages:
+  # Stage 1: Validation
+  - stage: Validate
+    displayName: 'Validate Specifications'
+    jobs:
+      - job: ValidateMarkdown
+        displayName: 'Validate Markdown'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+
+          - script: |
+              pip install spectra
+              spectra validate --markdown $(MARKDOWN_FILE)
+            displayName: 'Validate'
+
+  # Stage 2: Preview (PRs only)
+  - stage: Preview
+    displayName: 'Preview Changes'
+    dependsOn: Validate
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: PreviewSync
+        displayName: 'Preview Sync'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+
+          - script: |
+              pip install spectra
+              echo "## 📋 Sync Preview" >> $(System.DefaultWorkingDirectory)/preview.md
+              echo "" >> $(System.DefaultWorkingDirectory)/preview.md
+              spectra diff --markdown $(MARKDOWN_FILE) --epic $(EPIC_KEY) >> $(System.DefaultWorkingDirectory)/preview.md 2>&1 || true
+            displayName: 'Generate Preview'
+            env:
+              JIRA_URL: $(JIRA_URL)
+              JIRA_EMAIL: $(JIRA_EMAIL)
+              JIRA_API_TOKEN: $(JIRA_API_TOKEN)
+
+          - task: GitHubComment@0
+            condition: and(succeeded(), eq(variables['Build.Repository.Provider'], 'GitHub'))
+            inputs:
+              gitHubConnection: 'github-connection'
+              repositoryName: '$(Build.Repository.Name)'
+              comment: |
+                $(cat $(System.DefaultWorkingDirectory)/preview.md)
+            displayName: 'Post Preview Comment'
+
+  # Stage 3: Deploy (main branch only)
+  - stage: Deploy
+    displayName: 'Sync to Tracker'
+    dependsOn: Validate
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - deployment: SyncToJira
+        displayName: 'Sync to Jira'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: '3.11'
+
+                - script: |
+                    pip install spectra
+                    spectra sync \
+                      --markdown $(MARKDOWN_FILE) \
+                      --epic $(EPIC_KEY) \
+                      --tracker jira \
+                      --execute \
+                      --no-confirm \
+                      --backup \
+                      --export sync-results.json
+                  displayName: 'Sync to Jira'
+                  env:
+                    JIRA_URL: $(JIRA_URL)
+                    JIRA_EMAIL: $(JIRA_EMAIL)
+                    JIRA_API_TOKEN: $(JIRA_API_TOKEN)
+
+                - publish: sync-results.json
+                  artifact: SyncResults
+                  condition: always()
+                  displayName: 'Publish Results'
+
+  # Stage 4: Scheduled Incremental (scheduled runs only)
+  - stage: ScheduledSync
+    displayName: 'Scheduled Incremental Sync'
+    dependsOn: []
+    condition: eq(variables['Build.Reason'], 'Schedule')
+    jobs:
+      - job: IncrementalSync
+        displayName: 'Incremental Sync'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+
+          - script: |
+              pip install spectra
+              spectra sync \
+                --markdown $(MARKDOWN_FILE) \
+                --epic $(EPIC_KEY) \
+                --tracker jira \
+                --incremental \
+                --execute \
+                --no-confirm
+            displayName: 'Incremental Sync'
+            env:
+              JIRA_URL: $(JIRA_URL)
+              JIRA_EMAIL: $(JIRA_EMAIL)
+              JIRA_API_TOKEN: $(JIRA_API_TOKEN)

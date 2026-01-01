@@ -1,0 +1,101 @@
+// Example Jenkinsfile for Spectra
+// Copy this to your repository and customize
+
+@Library('spectra') _
+
+pipeline {
+    agent {
+        docker {
+            image 'python:3.11-slim'
+        }
+    }
+
+    parameters {
+        string(name: 'MARKDOWN_FILE', defaultValue: 'docs/user-stories.md', description: 'Path to markdown file')
+        string(name: 'EPIC_KEY', defaultValue: '', description: 'Epic key to sync (e.g., PROJ-123)')
+        choice(name: 'TRACKER', choices: ['jira', 'github', 'azure-devops', 'linear'], description: 'Issue tracker')
+        booleanParam(name: 'DRY_RUN', defaultValue: false, description: 'Preview changes without executing')
+        booleanParam(name: 'INCREMENTAL', defaultValue: false, description: 'Only sync changed items')
+    }
+
+    environment {
+        JIRA_URL = credentials('jira-url')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+
+    stages {
+        stage('Validate') {
+            steps {
+                spectraValidate(
+                    markdownFile: params.MARKDOWN_FILE
+                )
+            }
+        }
+
+        stage('Preview') {
+            when {
+                anyOf {
+                    expression { params.DRY_RUN }
+                    changeRequest()
+                }
+            }
+            steps {
+                script {
+                    if (params.EPIC_KEY) {
+                        spectraDiff(
+                            markdownFile: params.MARKDOWN_FILE,
+                            epicKey: params.EPIC_KEY,
+                            tracker: params.TRACKER
+                        )
+                    }
+                }
+
+                spectraSync(
+                    markdownFile: params.MARKDOWN_FILE,
+                    epicKey: params.EPIC_KEY,
+                    tracker: params.TRACKER,
+                    dryRun: true,
+                    verbose: true
+                )
+            }
+        }
+
+        stage('Sync') {
+            when {
+                allOf {
+                    not { expression { params.DRY_RUN } }
+                    not { changeRequest() }
+                    branch 'main'
+                }
+            }
+            steps {
+                spectraSync(
+                    markdownFile: params.MARKDOWN_FILE,
+                    epicKey: params.EPIC_KEY,
+                    tracker: params.TRACKER,
+                    execute: true,
+                    incremental: params.INCREMENTAL,
+                    backup: true,
+                    exportResults: 'sync-results.json'
+                )
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+        }
+        success {
+            echo "✅ Spectra pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Spectra pipeline failed!"
+        }
+    }
+}

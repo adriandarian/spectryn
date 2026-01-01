@@ -1,0 +1,477 @@
+# Spectra CircleCI Orb
+# https://circleci.com/docs/creating-orbs/
+
+version: 2.1
+
+description: |
+  Sync markdown specifications to issue trackers (Jira, GitHub, Azure DevOps, Linear).
+  Source: https://github.com/spectra/spectra
+
+display:
+  home_url: https://github.com/spectra/spectra
+  source_url: https://github.com/spectra/spectra/tree/main/integrations/circleci-orb
+
+# Executors
+executors:
+  python:
+    description: Python executor for running spectra
+    parameters:
+      python-version:
+        type: string
+        default: "3.11"
+    docker:
+      - image: cimg/python:<< parameters.python-version >>
+
+# Commands
+commands:
+  install:
+    description: Install spectra CLI
+    parameters:
+      version:
+        type: string
+        default: "latest"
+        description: Spectra version to install
+    steps:
+      - run:
+          name: Install Spectra
+          command: |
+            pip install --upgrade pip
+            if [ "<< parameters.version >>" = "latest" ]; then
+              pip install spectra
+            else
+              pip install spectra==<< parameters.version >>
+            fi
+            spectra --version
+
+  sync-command:
+    description: Sync markdown to tracker
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+      epic-key:
+        type: string
+        default: ""
+        description: Epic key to sync
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab", "trello", "asana", "monday", "shortcut", "clickup", "youtrack", "plane", "pivotal", "basecamp", "bitbucket"]
+        default: "jira"
+        description: Issue tracker type
+      dry-run:
+        type: boolean
+        default: false
+        description: Run without making changes
+      execute:
+        type: boolean
+        default: true
+        description: Execute changes
+      phase:
+        type: enum
+        enum: ["all", "descriptions", "subtasks", "comments", "statuses"]
+        default: "all"
+        description: Sync phase
+      incremental:
+        type: boolean
+        default: false
+        description: Only sync changed items
+      multi-epic:
+        type: boolean
+        default: false
+        description: Enable multi-epic mode
+      epic-filter:
+        type: string
+        default: ""
+        description: Comma-separated list of epic keys (multi-epic mode)
+      backup:
+        type: boolean
+        default: true
+        description: Create backup before sync
+      verbose:
+        type: boolean
+        default: false
+        description: Enable verbose output
+      export-results:
+        type: string
+        default: ""
+        description: Export results to JSON file
+    steps:
+      - run:
+          name: Spectra Sync
+          command: |
+            echo "🚀 Spectra CircleCI Orb"
+            echo "======================="
+
+            # Validate required inputs
+            if [ -z "<< parameters.markdown-file >>" ]; then
+              echo "❌ Error: markdown-file is required"
+              exit 1
+            fi
+
+            if [ ! -f "<< parameters.markdown-file >>" ]; then
+              echo "❌ Error: Markdown file not found: << parameters.markdown-file >>"
+              exit 1
+            fi
+
+            # Build command
+            CMD="spectra sync --markdown << parameters.markdown-file >> --tracker << parameters.tracker >>"
+
+            # Add epic key if provided
+            if [ -n "<< parameters.epic-key >>" ]; then
+              CMD="$CMD --epic << parameters.epic-key >>"
+            fi
+
+            # Execution mode
+            if [ "<< parameters.dry-run >>" = "true" ]; then
+              echo "📋 Mode: Dry-run"
+            elif [ "<< parameters.execute >>" = "true" ]; then
+              CMD="$CMD --execute --no-confirm"
+              echo "⚡ Mode: Execute"
+            fi
+
+            # Sync phase
+            if [ "<< parameters.phase >>" != "all" ]; then
+              CMD="$CMD --phase << parameters.phase >>"
+              echo "📌 Phase: << parameters.phase >>"
+            fi
+
+            # Incremental mode
+            if [ "<< parameters.incremental >>" = "true" ]; then
+              CMD="$CMD --incremental"
+              echo "🔄 Incremental sync enabled"
+            fi
+
+            # Multi-epic mode
+            if [ "<< parameters.multi-epic >>" = "true" ]; then
+              CMD="$CMD --multi-epic"
+              echo "📚 Multi-epic mode enabled"
+              if [ -n "<< parameters.epic-filter >>" ]; then
+                CMD="$CMD --epic-filter << parameters.epic-filter >>"
+              fi
+            fi
+
+            # Backup
+            if [ "<< parameters.backup >>" = "true" ]; then
+              CMD="$CMD --backup"
+            fi
+
+            # Verbose
+            if [ "<< parameters.verbose >>" = "true" ]; then
+              CMD="$CMD --verbose"
+            fi
+
+            # Export results
+            if [ -n "<< parameters.export-results >>" ]; then
+              CMD="$CMD --export << parameters.export-results >>"
+            fi
+
+            echo ""
+            echo "Running: $CMD"
+            echo ""
+
+            eval $CMD
+
+            echo ""
+            echo "✅ Spectra sync complete!"
+
+  validate-command:
+    description: Validate markdown file
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+    steps:
+      - run:
+          name: Validate Markdown
+          command: |
+            echo "✔️ Spectra Validation"
+            echo "===================="
+            spectra validate --markdown << parameters.markdown-file >>
+            echo "✅ Validation passed!"
+
+  pull-command:
+    description: Pull from tracker to markdown
+    parameters:
+      epic-key:
+        type: string
+        description: Epic key to pull from
+      output-file:
+        type: string
+        description: Output markdown file path
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab"]
+        default: "jira"
+        description: Issue tracker type
+      verbose:
+        type: boolean
+        default: false
+        description: Enable verbose output
+    steps:
+      - run:
+          name: Pull from Tracker
+          command: |
+            echo "🔄 Spectra Pull"
+            echo "==============="
+
+            CMD="spectra pull --epic << parameters.epic-key >> --output << parameters.output-file >> --tracker << parameters.tracker >>"
+
+            if [ "<< parameters.verbose >>" = "true" ]; then
+              CMD="$CMD --verbose"
+            fi
+
+            eval $CMD
+            echo "✅ Pull complete!"
+
+  diff-command:
+    description: Show diff between local and tracker
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+      epic-key:
+        type: string
+        description: Epic key to compare
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab"]
+        default: "jira"
+        description: Issue tracker type
+    steps:
+      - run:
+          name: Show Diff
+          command: |
+            echo "📊 Spectra Diff"
+            echo "==============="
+            spectra diff --markdown << parameters.markdown-file >> --epic << parameters.epic-key >> --tracker << parameters.tracker >>
+
+# Jobs
+jobs:
+  sync:
+    description: Sync markdown to issue tracker
+    executor:
+      name: python
+      python-version: << parameters.python-version >>
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+      epic-key:
+        type: string
+        default: ""
+        description: Epic key to sync
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab", "trello", "asana", "monday", "shortcut", "clickup", "youtrack", "plane", "pivotal", "basecamp", "bitbucket"]
+        default: "jira"
+      dry-run:
+        type: boolean
+        default: false
+      execute:
+        type: boolean
+        default: true
+      phase:
+        type: enum
+        enum: ["all", "descriptions", "subtasks", "comments", "statuses"]
+        default: "all"
+      incremental:
+        type: boolean
+        default: false
+      multi-epic:
+        type: boolean
+        default: false
+      epic-filter:
+        type: string
+        default: ""
+      backup:
+        type: boolean
+        default: true
+      verbose:
+        type: boolean
+        default: false
+      export-results:
+        type: string
+        default: ""
+      python-version:
+        type: string
+        default: "3.11"
+      spectra-version:
+        type: string
+        default: "latest"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - spectra-pip-{{ checksum "requirements.txt" }}
+            - spectra-pip-
+      - install:
+          version: << parameters.spectra-version >>
+      - sync-command:
+          markdown-file: << parameters.markdown-file >>
+          epic-key: << parameters.epic-key >>
+          tracker: << parameters.tracker >>
+          dry-run: << parameters.dry-run >>
+          execute: << parameters.execute >>
+          phase: << parameters.phase >>
+          incremental: << parameters.incremental >>
+          multi-epic: << parameters.multi-epic >>
+          epic-filter: << parameters.epic-filter >>
+          backup: << parameters.backup >>
+          verbose: << parameters.verbose >>
+          export-results: << parameters.export-results >>
+      - save_cache:
+          key: spectra-pip-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/.cache/pip
+      - when:
+          condition: << parameters.export-results >>
+          steps:
+            - store_artifacts:
+                path: << parameters.export-results >>
+                destination: sync-results
+
+  validate:
+    description: Validate markdown file
+    executor:
+      name: python
+      python-version: << parameters.python-version >>
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+      python-version:
+        type: string
+        default: "3.11"
+      spectra-version:
+        type: string
+        default: "latest"
+    steps:
+      - checkout
+      - install:
+          version: << parameters.spectra-version >>
+      - validate-command:
+          markdown-file: << parameters.markdown-file >>
+
+  pull:
+    description: Pull from tracker to markdown
+    executor:
+      name: python
+      python-version: << parameters.python-version >>
+    parameters:
+      epic-key:
+        type: string
+        description: Epic key to pull from
+      output-file:
+        type: string
+        description: Output markdown file path
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab"]
+        default: "jira"
+      verbose:
+        type: boolean
+        default: false
+      python-version:
+        type: string
+        default: "3.11"
+      spectra-version:
+        type: string
+        default: "latest"
+    steps:
+      - checkout
+      - install:
+          version: << parameters.spectra-version >>
+      - pull-command:
+          epic-key: << parameters.epic-key >>
+          output-file: << parameters.output-file >>
+          tracker: << parameters.tracker >>
+          verbose: << parameters.verbose >>
+      - store_artifacts:
+          path: << parameters.output-file >>
+          destination: pulled-markdown
+
+  diff:
+    description: Show diff between local and tracker
+    executor:
+      name: python
+      python-version: << parameters.python-version >>
+    parameters:
+      markdown-file:
+        type: string
+        description: Path to markdown file
+      epic-key:
+        type: string
+        description: Epic key to compare
+      tracker:
+        type: enum
+        enum: ["jira", "github", "azure-devops", "linear", "gitlab"]
+        default: "jira"
+      python-version:
+        type: string
+        default: "3.11"
+      spectra-version:
+        type: string
+        default: "latest"
+    steps:
+      - checkout
+      - install:
+          version: << parameters.spectra-version >>
+      - diff-command:
+          markdown-file: << parameters.markdown-file >>
+          epic-key: << parameters.epic-key >>
+          tracker: << parameters.tracker >>
+
+# Example usage
+examples:
+  basic-sync:
+    description: Basic sync to Jira
+    usage:
+      version: 2.1
+      orbs:
+        spectra: spectra/spectra@1.0.0
+      workflows:
+        sync:
+          jobs:
+            - spectra/sync:
+                markdown-file: docs/user-stories.md
+                epic-key: PROJ-123
+                context: jira-credentials
+
+  validate-and-sync:
+    description: Validate then sync
+    usage:
+      version: 2.1
+      orbs:
+        spectra: spectra/spectra@1.0.0
+      workflows:
+        main:
+          jobs:
+            - spectra/validate:
+                markdown-file: docs/user-stories.md
+            - spectra/sync:
+                requires:
+                  - spectra/validate
+                markdown-file: docs/user-stories.md
+                epic-key: PROJ-123
+                context: jira-credentials
+
+  incremental-sync:
+    description: Incremental sync for faster updates
+    usage:
+      version: 2.1
+      orbs:
+        spectra: spectra/spectra@1.0.0
+      workflows:
+        nightly:
+          triggers:
+            - schedule:
+                cron: "0 6 * * *"
+                filters:
+                  branches:
+                    only: main
+          jobs:
+            - spectra/sync:
+                markdown-file: docs/user-stories.md
+                epic-key: PROJ-123
+                incremental: true
+                context: jira-credentials

@@ -1,0 +1,172 @@
+# Spectra Bitbucket Pipelines Example
+# Copy this file to your repository as bitbucket-pipelines.yml
+
+image: python:3.11-slim
+
+definitions:
+  caches:
+    spectra: ~/.cache/pip
+
+  steps:
+    # Base sync step
+    - step: &spectra-sync
+        name: Spectra Sync
+        caches:
+          - spectra
+        script:
+          - pip install --upgrade pip
+          - pip install spectra
+          - spectra --version
+          - |
+            # Build command based on variables
+            CMD="spectra sync --markdown $MARKDOWN_FILE"
+
+            # Add epic key if provided
+            if [ -n "$EPIC_KEY" ]; then
+              CMD="$CMD --epic $EPIC_KEY"
+            fi
+
+            # Tracker selection
+            CMD="$CMD --tracker ${TRACKER:-jira}"
+
+            # Execution mode
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "📋 Running in dry-run mode"
+            else
+              CMD="$CMD --execute --no-confirm"
+            fi
+
+            # Optional flags
+            if [ "$INCREMENTAL" = "true" ]; then
+              CMD="$CMD --incremental"
+            fi
+
+            if [ "$VERBOSE" = "true" ]; then
+              CMD="$CMD --verbose"
+            fi
+
+            if [ -n "$PHASE" ] && [ "$PHASE" != "all" ]; then
+              CMD="$CMD --phase $PHASE"
+            fi
+
+            if [ -n "$EXPORT_FILE" ]; then
+              CMD="$CMD --export $EXPORT_FILE"
+            fi
+
+            echo "Running: $CMD"
+            eval $CMD
+
+    # Validation step
+    - step: &spectra-validate
+        name: Validate Markdown
+        caches:
+          - spectra
+        script:
+          - pip install spectra
+          - spectra validate --markdown $MARKDOWN_FILE
+
+    # Pull (reverse sync) step
+    - step: &spectra-pull
+        name: Spectra Pull
+        caches:
+          - spectra
+        script:
+          - pip install spectra
+          - spectra pull --epic $EPIC_KEY --output $OUTPUT_FILE --tracker ${TRACKER:-jira}
+        artifacts:
+          - $OUTPUT_FILE
+
+pipelines:
+  # Default pipeline (runs on all pushes)
+  default:
+    - step:
+        <<: *spectra-validate
+        name: Validate Specs
+
+  # Branch-specific pipelines
+  branches:
+    main:
+      - step:
+          <<: *spectra-sync
+          name: Sync to Jira
+          deployment: production
+
+    develop:
+      - step:
+          <<: *spectra-sync
+          name: Sync to Jira (Preview)
+          script:
+            - pip install spectra
+            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
+            # Dry-run only on develop
+
+  # Pull request pipelines
+  pull-requests:
+    '**':
+      - step:
+          <<: *spectra-validate
+          name: Validate Changes
+      - step:
+          name: Preview Sync
+          caches:
+            - spectra
+          script:
+            - pip install spectra
+            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
+            - spectra diff --markdown $MARKDOWN_FILE --epic $EPIC_KEY
+
+  # Custom pipelines (triggered manually)
+  custom:
+    full-sync:
+      - variables:
+          - name: MARKDOWN_FILE
+            default: "docs/user-stories.md"
+          - name: EPIC_KEY
+          - name: TRACKER
+            default: "jira"
+      - step:
+          <<: *spectra-sync
+          name: Full Sync
+
+    pull-from-tracker:
+      - variables:
+          - name: EPIC_KEY
+          - name: OUTPUT_FILE
+            default: "docs/imported-stories.md"
+          - name: TRACKER
+            default: "jira"
+      - step:
+          <<: *spectra-pull
+          name: Pull from Tracker
+
+    multi-epic-sync:
+      - variables:
+          - name: MARKDOWN_FILE
+            default: "docs/all-epics.md"
+          - name: EPIC_FILTER
+      - step:
+          name: Multi-Epic Sync
+          caches:
+            - spectra
+          script:
+            - pip install spectra
+            - spectra sync --markdown $MARKDOWN_FILE --multi-epic --epic-filter $EPIC_FILTER --execute --no-confirm
+
+    incremental-sync:
+      - variables:
+          - name: MARKDOWN_FILE
+            default: "docs/user-stories.md"
+          - name: EPIC_KEY
+      - step:
+          <<: *spectra-sync
+          name: Incremental Sync
+          script:
+            - pip install spectra
+            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --incremental --execute --no-confirm
+
+# Note: Set the following repository variables in Bitbucket settings:
+# - JIRA_URL: Your Jira instance URL
+# - JIRA_EMAIL: Your Jira account email
+# - JIRA_API_TOKEN: Your Jira API token (secured)
+# - MARKDOWN_FILE: Path to your markdown file
+# - EPIC_KEY: Your Jira epic key

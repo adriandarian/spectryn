@@ -1,0 +1,30 @@
+# Spectra Validation Template for Azure Pipelines
+
+parameters:
+  - name: markdownFile
+    type: string
+    displayName: 'Markdown file to validate'
+
+  - name: pythonVersion
+    type: string
+    default: '3.11'
+    displayName: 'Python version'
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python ${{ parameters.pythonVersion }}'
+    inputs:
+      versionSpec: '${{ parameters.pythonVersion }}'
+      addToPath: true
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install spectra
+    displayName: 'Install Spectra'
+
+  - script: |
+      echo "✔️ Spectra Validation"
+      echo "===================="
+      spectra validate --markdown ${{ parameters.markdownFile }}
+      echo "✅ Validation passed!"
+    displayName: 'Validate Markdown'

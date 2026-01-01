@@ -805,11 +805,11 @@ For each new tracker adapter, follow this checklist:
 ## 🔹 Infrastructure & DevOps
 
 ### CI/CD Templates
-- [ ] **GitLab CI Template** - Like GitHub Action but for GitLab
-- [ ] **Bitbucket Pipelines Template** - Pipeline template
-- [ ] **Azure Pipelines Template** - YAML template
-- [ ] **Jenkins Plugin** - Jenkins integration
-- [ ] **CircleCI Orb** - CircleCI integration
+- [x] **GitLab CI Template** - Like GitHub Action but for GitLab
+- [x] **Bitbucket Pipelines Template** - Pipeline template
+- [x] **Azure Pipelines Template** - YAML template
+- [x] **Jenkins Plugin** - Jenkins integration
+- [x] **CircleCI Orb** - CircleCI integration
 
 ### Deployment
 - [x] **Kubernetes Operator** - Custom resource for scheduled syncs
