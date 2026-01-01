@@ -72,6 +72,8 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
     "pytest-asyncio>=0.21.0",  # Async test support
+    "pytest-xdist>=3.5.0",  # Parallel test execution
+    "pytest-timeout>=2.3.0",  # Prevent test hangs
     "pytest-benchmark>=4.0",  # Performance benchmarking
     "hypothesis>=6.0",  # Property-based testing
     "mutmut>=2.4",  # Mutation testing
@@ -134,9 +136,14 @@ python_functions = ["test_*"]
 asyncio_mode = "auto"
 addopts = [
     "-ra",
-    "-q",
+    "-v",
+    "--tb=short",
     "--strict-markers",
     "--strict-config",
+    # Parallel execution with 4 workers (safe for memory)
+    "-n", "4",
+    # Timeout per test to prevent hangs (30 seconds)
+    "--timeout", "30",
     # Skip slow/heavy tests by default - run explicitly with -m "slow" etc
     "-m", "not (slow or stress or chaos or e2e or benchmark)",
 ]

@@ -35,6 +35,7 @@ class TestClickUpRateLimiter:
         # Should not raise
         assert len(limiter.request_times) == 3
 
+    @pytest.mark.slow
     def test_rate_limit_enforcement(self):
         """Should wait when rate limit is reached."""
         limiter = ClickUpRateLimiter(requests_per_minute=2.0)  # Very low limit

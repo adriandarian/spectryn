@@ -4,34 +4,32 @@ This file provides instructions for AI coding assistants (Claude, Cursor, Copilo
 
 ## Before Submitting Changes
 
-**Always run these commands to ensure code quality:**
+**For quick iterations, use the "Quick Check" task (no tests):**
 
 ```bash
-# Format code
-ruff format src tests
-
-# Lint and auto-fix
-ruff check src tests --fix
-
-# Type checking
-mypy src/spectra
-
-# Run tests
-pytest
+# Fast validation (~5 seconds): Format, lint, type check
+ruff format src tests && ruff check src tests --fix && mypy src/spectra
 ```
 
-## Quick Validation
-
-Run all checks in sequence:
+**For full validation with tests (~40 seconds):**
 
 ```bash
+# Full checks with parallel tests
 ruff format src tests && ruff check src tests --fix && mypy src/spectra && pytest
 ```
+
+## ⚡ Performance Notes
+
+- Tests run in **parallel** using `pytest-xdist` (auto-detects CPU cores)
+- Tests have a **30-second timeout** to prevent hangs
+- Heavy tests (slow, stress, chaos, e2e, benchmark) are **skipped by default**
+- Use "Quick Check" task for rapid iteration, "All Checks" for final validation
 
 ## Command Reference
 
 | Task | Command |
 |------|---------|
+| **Quick Check** | `ruff format src tests && ruff check src tests --fix && mypy src/spectra` |
 | Format | `ruff format src tests` |
 | Lint | `ruff check src tests` |
 | Lint + Fix | `ruff check src tests --fix` |

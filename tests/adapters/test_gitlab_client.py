@@ -365,6 +365,7 @@ class TestGitLabApiClient:
         with pytest.raises(NotFoundError):
             gitlab_client.get_issue(999)
 
+    @pytest.mark.slow
     def test_handle_response_rate_limit_error(self, gitlab_client, mock_session):
         """Should raise RateLimitError on 429."""
         mock_response = MagicMock()
