@@ -1,0 +1,260 @@
+{{/*
+Copyright (c) spectra
+SPDX-License-Identifier: MIT
+*/}}
+
+{{- if .Values.crds.install }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: spectrasyncs.spectra.io
+  labels:
+    {{- include "spectra.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.crds.keep }}
+    "helm.sh/resource-policy": keep
+    {{- end }}
+spec:
+  group: spectra.io
+  names:
+    kind: SpectraSync
+    listKind: SpectraSyncList
+    plural: spectrasyncs
+    singular: spectrasync
+    shortNames:
+      - ss
+      - sync
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Tracker
+          type: string
+          jsonPath: .spec.tracker.type
+        - name: Schedule
+          type: string
+          jsonPath: .spec.schedule
+        - name: Last Sync
+          type: date
+          jsonPath: .status.lastSyncTime
+        - name: Status
+          type: string
+          jsonPath: .status.lastSyncResult
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - source
+                - tracker
+              properties:
+                source:
+                  type: object
+                  required:
+                    - type
+                  properties:
+                    type:
+                      type: string
+                      enum: [configmap, git, pvc]
+                    configMap:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        key:
+                          type: string
+                    git:
+                      type: object
+                      properties:
+                        repository:
+                          type: string
+                        branch:
+                          type: string
+                        path:
+                          type: string
+                        credentialsSecret:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            usernameKey:
+                              type: string
+                            passwordKey:
+                              type: string
+                    pvc:
+                      type: object
+                      properties:
+                        claimName:
+                          type: string
+                        path:
+                          type: string
+                tracker:
+                  type: object
+                  required:
+                    - type
+                    - credentialsSecret
+                  properties:
+                    type:
+                      type: string
+                      enum: [jira, github, azure-devops, linear, gitlab, trello, asana, monday, shortcut, clickup, youtrack, plane, pivotal, basecamp, bitbucket]
+                    url:
+                      type: string
+                    project:
+                      type: string
+                    epicKey:
+                      type: string
+                    owner:
+                      type: string
+                    repo:
+                      type: string
+                    organization:
+                      type: string
+                    teamId:
+                      type: string
+                    workspace:
+                      type: string
+                    apiUrl:
+                      type: string
+                    credentialsSecret:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        emailKey:
+                          type: string
+                        tokenKey:
+                          type: string
+                        passwordKey:
+                          type: string
+                schedule:
+                  type: string
+                dryRun:
+                  type: boolean
+                phases:
+                  type: array
+                  items:
+                    type: string
+                    enum: [all, descriptions, subtasks, comments, statuses, attachments]
+                incremental:
+                  type: boolean
+                bidirectional:
+                  type: boolean
+                suspend:
+                  type: boolean
+                concurrencyPolicy:
+                  type: string
+                  enum: [Allow, Forbid, Replace]
+                successfulSyncsHistoryLimit:
+                  type: integer
+                failedSyncsHistoryLimit:
+                  type: integer
+                backoffLimit:
+                  type: integer
+                activeDeadlineSeconds:
+                  type: integer
+                notifications:
+                  type: object
+                  properties:
+                    slack:
+                      type: object
+                      properties:
+                        webhookUrl:
+                          type: string
+                        channel:
+                          type: string
+                        onSuccess:
+                          type: boolean
+                        onFailure:
+                          type: boolean
+                    email:
+                      type: object
+                      properties:
+                        recipients:
+                          type: array
+                          items:
+                            type: string
+                        onSuccess:
+                          type: boolean
+                        onFailure:
+                          type: boolean
+            status:
+              type: object
+              properties:
+                lastSyncTime:
+                  type: string
+                  format: date-time
+                lastSuccessfulSyncTime:
+                  type: string
+                  format: date-time
+                lastSyncResult:
+                  type: string
+                nextSyncTime:
+                  type: string
+                  format: date-time
+                observedGeneration:
+                  type: integer
+                syncCount:
+                  type: integer
+                successCount:
+                  type: integer
+                failureCount:
+                  type: integer
+                lastSyncStats:
+                  type: object
+                  properties:
+                    storiesCreated:
+                      type: integer
+                    storiesUpdated:
+                      type: integer
+                    subtasksCreated:
+                      type: integer
+                    subtasksUpdated:
+                      type: integer
+                    duration:
+                      type: string
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                syncHistory:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      syncTime:
+                        type: string
+                        format: date-time
+                      result:
+                        type: string
+                      duration:
+                        type: string
+                      message:
+                        type: string
+{{- end }}

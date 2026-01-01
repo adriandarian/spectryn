@@ -1,0 +1,260 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Spectra - Lambda deployment for scheduled markdown to tracker sync'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Spectra Configuration"
+        Parameters:
+          - SpectraImage
+          - Schedule
+          - DryRun
+          - Timeout
+      - Label:
+          default: "Jira Configuration"
+        Parameters:
+          - JiraUrl
+          - JiraEmail
+          - JiraApiToken
+          - ProjectKey
+          - EpicKey
+      - Label:
+          default: "General Settings"
+        Parameters:
+          - Environment
+          - LogRetentionDays
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Environment name
+
+  SpectraImage:
+    Type: String
+    Default: spectra/spectra:latest
+    Description: Spectra Docker image for Lambda container
+
+  Schedule:
+    Type: String
+    Default: 'rate(6 hours)'
+    Description: EventBridge schedule expression
+
+  DryRun:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Enable dry-run mode
+
+  Timeout:
+    Type: Number
+    Default: 300
+    MinValue: 30
+    MaxValue: 900
+    Description: Lambda function timeout (seconds)
+
+  JiraUrl:
+    Type: String
+    Description: Jira instance URL
+
+  JiraEmail:
+    Type: String
+    NoEcho: true
+    Description: Jira account email
+
+  JiraApiToken:
+    Type: String
+    NoEcho: true
+    Description: Jira API token
+
+  ProjectKey:
+    Type: String
+    Default: ''
+    Description: Jira project key
+
+  EpicKey:
+    Type: String
+    Description: Epic key to sync to
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    Description: CloudWatch Logs retention period
+
+Globals:
+  Function:
+    Timeout: !Ref Timeout
+    MemorySize: 1024
+    Runtime: python3.11
+    Architectures:
+      - x86_64
+
+Resources:
+  # Secrets Manager for credentials
+  JiraCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}/jira-credentials'
+      Description: Jira credentials for Spectra
+      SecretString: !Sub |
+        {
+          "email": "${JiraEmail}",
+          "apiToken": "${JiraApiToken}"
+        }
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Lambda Function
+  SpectraSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sync'
+      Description: Spectra sync function
+      PackageType: Image
+      ImageUri: !Ref SpectraImage
+      ImageConfig:
+        Command:
+          - spectra
+          - sync
+          - --tracker
+          - jira
+          - --markdown
+          - /data/spec.md
+          - --epic-key
+          - !Ref EpicKey
+      Environment:
+        Variables:
+          JIRA_URL: !Ref JiraUrl
+          JIRA_PROJECT: !Ref ProjectKey
+          EPIC_KEY: !Ref EpicKey
+          DRY_RUN: !Ref DryRun
+          SECRETS_ARN: !Ref JiraCredentialsSecret
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref JiraCredentialsSecret
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+      Events:
+        ScheduledSync:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref Schedule
+            Description: Scheduled Spectra sync
+            Enabled: true
+      Tags:
+        Environment: !Ref Environment
+        Application: spectra
+
+  # Lambda Log Group
+  SpectraLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${SpectraSyncFunction}'
+      RetentionInDays: !Ref LogRetentionDays
+
+  # CloudWatch Alarm for failures
+  SyncFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-sync-failures'
+      AlarmDescription: Alert when Spectra sync fails
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref SpectraSyncFunction
+      TreatMissingData: notBreaching
+
+  # CloudWatch Dashboard
+  SyncDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub '${AWS::StackName}-dashboard'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${SpectraSyncFunction}"],
+                  [".", "Errors", ".", "."],
+                  [".", "Duration", ".", ".", {"stat": "Average"}]
+                ],
+                "title": "Spectra Sync Metrics",
+                "region": "${AWS::Region}",
+                "period": 300
+              }
+            },
+            {
+              "type": "log",
+              "x": 0,
+              "y": 6,
+              "width": 24,
+              "height": 6,
+              "properties": {
+                "query": "SOURCE '/aws/lambda/${SpectraSyncFunction}' | fields @timestamp, @message | sort @timestamp desc | limit 100",
+                "region": "${AWS::Region}",
+                "title": "Recent Logs"
+              }
+            }
+          ]
+        }
+
+Outputs:
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt SpectraSyncFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionArn'
+
+  FunctionName:
+    Description: Lambda function name
+    Value: !Ref SpectraSyncFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionName'
+
+  SecretArn:
+    Description: Secrets Manager Secret ARN
+    Value: !Ref JiraCredentialsSecret
+    Export:
+      Name: !Sub '${AWS::StackName}-SecretArn'
+
+  LogGroupName:
+    Description: CloudWatch Log Group
+    Value: !Ref SpectraLogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroupName'
+
+  DashboardUrl:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${AWS::StackName}-dashboard'

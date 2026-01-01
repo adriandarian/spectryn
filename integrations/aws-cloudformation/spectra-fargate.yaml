@@ -1,0 +1,432 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Spectra - Fargate deployment for scheduled markdown to tracker sync'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Spectra Configuration"
+        Parameters:
+          - SpectraImage
+          - Schedule
+          - DryRun
+      - Label:
+          default: "Jira Configuration"
+        Parameters:
+          - JiraUrl
+          - JiraEmail
+          - JiraApiToken
+          - ProjectKey
+          - EpicKey
+      - Label:
+          default: "Network Configuration"
+        Parameters:
+          - VpcId
+          - SubnetIds
+      - Label:
+          default: "General Settings"
+        Parameters:
+          - Environment
+          - LogRetentionDays
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Environment name
+
+  SpectraImage:
+    Type: String
+    Default: spectra/spectra:latest
+    Description: Spectra Docker image
+
+  Schedule:
+    Type: String
+    Default: 'rate(6 hours)'
+    Description: EventBridge schedule expression (rate or cron)
+
+  DryRun:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Enable dry-run mode
+
+  JiraUrl:
+    Type: String
+    Description: Jira instance URL (e.g., https://company.atlassian.net)
+
+  JiraEmail:
+    Type: String
+    Description: Jira account email
+    NoEcho: true
+
+  JiraApiToken:
+    Type: String
+    Description: Jira API token
+    NoEcho: true
+
+  ProjectKey:
+    Type: String
+    Default: ''
+    Description: Jira project key
+
+  EpicKey:
+    Type: String
+    Description: Epic key to sync to
+
+  VpcId:
+    Type: String
+    Default: ''
+    Description: Existing VPC ID (leave empty to create new)
+
+  SubnetIds:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: Subnet IDs for Fargate tasks (comma-separated)
+
+  LogRetentionDays:
+    Type: Number
+    Default: 30
+    AllowedValues:
+      - 7
+      - 14
+      - 30
+      - 60
+      - 90
+      - 180
+      - 365
+    Description: CloudWatch Logs retention period
+
+Conditions:
+  CreateVpc: !Equals [!Ref VpcId, '']
+  IsDryRun: !Equals [!Ref DryRun, 'true']
+
+Resources:
+  # VPC (if not provided)
+  VPC:
+    Type: AWS::EC2::VPC
+    Condition: CreateVpc
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-vpc'
+        - Key: Environment
+          Value: !Ref Environment
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Condition: CreateVpc
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-igw'
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Condition: CreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Condition: CreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-public-1'
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Condition: CreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-public-2'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-public-rt'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Condition: CreateVpc
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateVpc
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateVpc
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # Secrets Manager
+  JiraCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}/jira-credentials'
+      Description: Jira credentials for Spectra
+      SecretString: !Sub |
+        {
+          "email": "${JiraEmail}",
+          "apiToken": "${JiraApiToken}"
+        }
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # CloudWatch Log Group
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${AWS::StackName}'
+      RetentionInDays: !Ref LogRetentionDays
+
+  # ECS Cluster
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${AWS::StackName}-cluster'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ECS Task Execution Role
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref JiraCredentialsSecret
+
+  # ECS Task Role
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt LogGroup.Arn
+
+  # Security Group
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${AWS::StackName}-sg'
+      GroupDescription: Security group for Spectra Fargate tasks
+      VpcId: !If [CreateVpc, !Ref VPC, !Ref VpcId]
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS outbound
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-sg'
+
+  # ECS Task Definition
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${AWS::StackName}-task'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '512'
+      Memory: '1024'
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: spectra
+          Image: !Ref SpectraImage
+          Essential: true
+          Command:
+            - spectra
+            - sync
+            - --tracker
+            - jira
+            - --markdown
+            - /data/spec.md
+            - --epic-key
+            - !Ref EpicKey
+            - !If [IsDryRun, '--dry-run', '--execute']
+          Environment:
+            - Name: JIRA_URL
+              Value: !Ref JiraUrl
+            - Name: JIRA_PROJECT
+              Value: !Ref ProjectKey
+          Secrets:
+            - Name: JIRA_EMAIL
+              ValueFrom: !Sub '${JiraCredentialsSecret}:email::'
+            - Name: JIRA_API_TOKEN
+              ValueFrom: !Sub '${JiraCredentialsSecret}:apiToken::'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: spectra
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # EventBridge Rule for scheduling
+  ScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${AWS::StackName}-schedule'
+      Description: Schedule for Spectra sync
+      ScheduleExpression: !Ref Schedule
+      State: ENABLED
+      Targets:
+        - Id: SpectraSyncTask
+          Arn: !GetAtt ECSCluster.Arn
+          RoleArn: !GetAtt EventsRole.Arn
+          EcsParameters:
+            TaskDefinitionArn: !Ref TaskDefinition
+            LaunchType: FARGATE
+            NetworkConfiguration:
+              AwsVpcConfiguration:
+                AssignPublicIp: ENABLED
+                SecurityGroups:
+                  - !Ref SecurityGroup
+                Subnets: !If
+                  - CreateVpc
+                  - - !Ref PublicSubnet1
+                    - !Ref PublicSubnet2
+                  - !Ref SubnetIds
+
+  # IAM Role for EventBridge
+  EventsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-events-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RunTask
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:RunTask
+                Resource: !Ref TaskDefinition
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt ECSTaskExecutionRole.Arn
+                  - !GetAtt ECSTaskRole.Arn
+
+Outputs:
+  ClusterArn:
+    Description: ECS Cluster ARN
+    Value: !GetAtt ECSCluster.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ClusterArn'
+
+  TaskDefinitionArn:
+    Description: Task Definition ARN
+    Value: !Ref TaskDefinition
+    Export:
+      Name: !Sub '${AWS::StackName}-TaskDefinitionArn'
+
+  LogGroupName:
+    Description: CloudWatch Log Group
+    Value: !Ref LogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroupName'
+
+  SecretArn:
+    Description: Secrets Manager Secret ARN
+    Value: !Ref JiraCredentialsSecret
+    Export:
+      Name: !Sub '${AWS::StackName}-SecretArn'
+
+  VpcId:
+    Description: VPC ID
+    Value: !If [CreateVpc, !Ref VPC, !Ref VpcId]
+    Export:
+      Name: !Sub '${AWS::StackName}-VpcId'
+
+  ScheduleRuleArn:
+    Description: EventBridge Schedule Rule ARN
+    Value: !GetAtt ScheduleRule.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ScheduleRuleArn'

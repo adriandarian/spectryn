@@ -812,11 +812,11 @@ For each new tracker adapter, follow this checklist:
 - [ ] **CircleCI Orb** - CircleCI integration
 
 ### Deployment
-- [ ] **Kubernetes Operator** - Custom resource for scheduled syncs
-- [ ] **Helm Chart** - Easy K8s deployment
-- [ ] **ARM/Bicep Templates** - Azure deployment
-- [ ] **CloudFormation Templates** - AWS deployment
-- [ ] **Pulumi Provider** - Modern IaC alternative
+- [x] **Kubernetes Operator** - Custom resource for scheduled syncs
+- [x] **Helm Chart** - Easy K8s deployment
+- [x] **ARM/Bicep Templates** - Azure deployment
+- [x] **CloudFormation Templates** - AWS deployment
+- [x] **Pulumi Provider** - Modern IaC alternative
 
 ---
 

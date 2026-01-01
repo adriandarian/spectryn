@@ -1,0 +1,62 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+# Basic example of SpectraSync with Jira
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jira-credentials
+  namespace: default
+type: Opaque
+stringData:
+  email: your-email@company.com
+  api-token: your-jira-api-token
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-stories
+  namespace: default
+data:
+  spec.md: |
+    # User Stories
+
+    ## Epic: User Authentication
+
+    ### Story: US-001 - User Login
+    **Status:** To Do
+    **Priority:** High
+    **Points:** 3
+
+    As a user, I want to log in to the application so that I can access my account.
+
+    #### Acceptance Criteria
+    - [ ] User can enter email and password
+    - [ ] System validates credentials
+    - [ ] User sees error on invalid credentials
+    - [ ] User is redirected to dashboard on success
+---
+apiVersion: spectra.io/v1alpha1
+kind: SpectraSync
+metadata:
+  name: my-project-sync
+  namespace: default
+spec:
+  source:
+    type: configmap
+    configMap:
+      name: user-stories
+      key: spec.md
+  tracker:
+    type: jira
+    url: https://company.atlassian.net
+    project: PROJ
+    epicKey: PROJ-123
+    credentialsSecret:
+      name: jira-credentials
+      emailKey: email
+      tokenKey: api-token
+  schedule: "0 */6 * * *"  # Every 6 hours
+  dryRun: false
+  phases:
+    - all

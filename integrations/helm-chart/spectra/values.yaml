@@ -1,0 +1,261 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+# Default values for Spectra Helm chart
+
+# -- Override the name of the chart
+nameOverride: ""
+# -- Override the full name of the chart
+fullnameOverride: ""
+
+# Global settings
+global:
+  # -- Image pull secrets for all images
+  imagePullSecrets: []
+  # -- Storage class for persistent volumes
+  storageClass: ""
+
+# Operator configuration
+operator:
+  # -- Enable the Spectra operator
+  enabled: true
+
+  # -- Number of operator replicas
+  replicaCount: 1
+
+  image:
+    # -- Operator image repository
+    repository: spectra/operator
+    # -- Operator image tag
+    tag: latest
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Service account configuration
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Service account name (auto-generated if empty)
+    name: ""
+    # -- Service account annotations
+    annotations: {}
+
+  # -- Pod annotations
+  podAnnotations: {}
+
+  # -- Pod security context
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- Container security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+  # -- Node selector
+  nodeSelector: {}
+
+  # -- Tolerations
+  tolerations: []
+
+  # -- Affinity rules
+  affinity: {}
+
+  # Leader election
+  leaderElection:
+    # -- Enable leader election
+    enabled: true
+    # -- Leader election lease duration
+    leaseDuration: 15s
+    # -- Leader election renew deadline
+    renewDeadline: 10s
+    # -- Leader election retry period
+    retryPeriod: 2s
+
+# Spectra container image (used by sync jobs)
+spectra:
+  image:
+    # -- Spectra image repository
+    repository: spectra/spectra
+    # -- Spectra image tag
+    tag: latest
+    # -- Image pull policy
+    pullPolicy: IfNotPresent
+
+# Sync jobs configuration
+syncs: []
+# Example:
+# - name: jira-sync
+#   source:
+#     type: configmap
+#     configMap:
+#       name: user-stories
+#       key: spec.md
+#   tracker:
+#     type: jira
+#     url: https://company.atlassian.net
+#     project: PROJ
+#     epicKey: PROJ-123
+#   schedule: "0 */6 * * *"
+#   dryRun: false
+#   phases:
+#     - all
+#   credentials:
+#     existingSecret: jira-credentials
+#     emailKey: email
+#     tokenKey: api-token
+
+# Jira configuration (shorthand)
+jira:
+  # -- Enable Jira integration
+  enabled: false
+  # -- Jira instance URL
+  url: ""
+  # -- Jira project key
+  project: ""
+  # -- Epic key to sync to
+  epicKey: ""
+  # -- Jira email (if not using existingSecret)
+  email: ""
+  # -- Jira API token (if not using existingSecret)
+  apiToken: ""
+  # -- Use existing secret for credentials
+  existingSecret: ""
+  # -- Key in secret for email
+  emailKey: "email"
+  # -- Key in secret for API token
+  tokenKey: "api-token"
+
+# GitHub configuration (shorthand)
+github:
+  # -- Enable GitHub integration
+  enabled: false
+  # -- GitHub repository owner
+  owner: ""
+  # -- GitHub repository name
+  repo: ""
+  # -- GitHub token (if not using existingSecret)
+  token: ""
+  # -- Use existing secret for credentials
+  existingSecret: ""
+  # -- Key in secret for token
+  tokenKey: "token"
+
+# Linear configuration (shorthand)
+linear:
+  # -- Enable Linear integration
+  enabled: false
+  # -- Linear team ID
+  teamId: ""
+  # -- Linear API key (if not using existingSecret)
+  apiKey: ""
+  # -- Use existing secret for credentials
+  existingSecret: ""
+  # -- Key in secret for API key
+  tokenKey: "api-key"
+
+# Azure DevOps configuration (shorthand)
+azureDevOps:
+  # -- Enable Azure DevOps integration
+  enabled: false
+  # -- Azure DevOps organization
+  organization: ""
+  # -- Azure DevOps project
+  project: ""
+  # -- Personal access token (if not using existingSecret)
+  pat: ""
+  # -- Use existing secret for credentials
+  existingSecret: ""
+  # -- Key in secret for PAT
+  tokenKey: "pat"
+
+# Secrets to create
+secrets: {}
+# Example:
+# jira-credentials:
+#   email: user@company.com
+#   api-token: your-api-token
+
+# ConfigMaps for markdown sources
+configMaps: {}
+# Example:
+# user-stories:
+#   spec.md: |
+#     # User Stories
+#     ...
+
+# Metrics configuration
+metrics:
+  # -- Enable Prometheus metrics
+  enabled: true
+
+  # -- Metrics service port
+  port: 8080
+
+  # ServiceMonitor for Prometheus Operator
+  serviceMonitor:
+    # -- Create ServiceMonitor resource
+    enabled: false
+    # -- Additional labels for ServiceMonitor
+    labels: {}
+    # -- Scrape interval
+    interval: 30s
+    # -- Scrape timeout
+    scrapeTimeout: 10s
+
+# Network policies
+networkPolicy:
+  # -- Enable network policies
+  enabled: false
+
+  # -- Ingress rules
+  ingress: []
+
+  # -- Egress rules (for API access)
+  egress:
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+
+# Pod disruption budget
+podDisruptionBudget:
+  # -- Enable PDB
+  enabled: false
+  # -- Minimum available pods
+  minAvailable: 1
+  # -- Maximum unavailable pods
+  maxUnavailable: ""
+
+# Logging configuration
+logging:
+  # -- Log level (debug, info, warn, error)
+  level: info
+  # -- Log format (json, console)
+  format: json
+
+# RBAC configuration
+rbac:
+  # -- Create RBAC resources
+  create: true
+
+# CRD configuration
+crds:
+  # -- Install CRDs
+  install: true
+  # -- Keep CRDs on uninstall
+  keep: true

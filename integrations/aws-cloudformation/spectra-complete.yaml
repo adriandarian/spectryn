@@ -1,0 +1,407 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Spectra - Complete infrastructure stack with all options'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Deployment Configuration"
+        Parameters:
+          - DeploymentType
+          - Environment
+      - Label:
+          default: "Spectra Configuration"
+        Parameters:
+          - SpectraImage
+          - Schedule
+          - DryRun
+      - Label:
+          default: "Tracker Configuration"
+        Parameters:
+          - TrackerType
+          - JiraUrl
+          - JiraEmail
+          - JiraApiToken
+          - GitHubToken
+          - GitHubOwner
+          - GitHubRepo
+          - ProjectKey
+          - EpicKey
+      - Label:
+          default: "Source Configuration"
+        Parameters:
+          - SourceType
+          - GitRepoUrl
+          - GitBranch
+          - MarkdownPath
+      - Label:
+          default: "Network Configuration"
+        Parameters:
+          - VpcCidr
+          - CreateVpc
+
+Parameters:
+  DeploymentType:
+    Type: String
+    Default: fargate
+    AllowedValues:
+      - fargate
+      - lambda
+      - ecs
+    Description: Deployment type
+
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - development
+      - staging
+      - production
+
+  SpectraImage:
+    Type: String
+    Default: spectra/spectra:latest
+
+  Schedule:
+    Type: String
+    Default: 'rate(6 hours)'
+
+  DryRun:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+
+  TrackerType:
+    Type: String
+    Default: jira
+    AllowedValues:
+      - jira
+      - github
+      - azure-devops
+      - linear
+      - gitlab
+
+  JiraUrl:
+    Type: String
+    Default: ''
+
+  JiraEmail:
+    Type: String
+    Default: ''
+    NoEcho: true
+
+  JiraApiToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+
+  GitHubToken:
+    Type: String
+    Default: ''
+    NoEcho: true
+
+  GitHubOwner:
+    Type: String
+    Default: ''
+
+  GitHubRepo:
+    Type: String
+    Default: ''
+
+  ProjectKey:
+    Type: String
+    Default: ''
+
+  EpicKey:
+    Type: String
+    Default: ''
+
+  SourceType:
+    Type: String
+    Default: s3
+    AllowedValues:
+      - s3
+      - git
+      - inline
+
+  GitRepoUrl:
+    Type: String
+    Default: ''
+
+  GitBranch:
+    Type: String
+    Default: main
+
+  MarkdownPath:
+    Type: String
+    Default: docs/user-stories.md
+
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+
+  CreateVpc:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+
+Conditions:
+  IsJira: !Equals [!Ref TrackerType, 'jira']
+  IsGitHub: !Equals [!Ref TrackerType, 'github']
+  IsFargate: !Equals [!Ref DeploymentType, 'fargate']
+  IsLambda: !Equals [!Ref DeploymentType, 'lambda']
+  ShouldCreateVpc: !Equals [!Ref CreateVpc, 'true']
+  IsGitSource: !Equals [!Ref SourceType, 'git']
+
+Resources:
+  # Secrets for all tracker types
+  TrackerCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}/tracker-credentials'
+      SecretString: !If
+        - IsJira
+        - !Sub '{"email":"${JiraEmail}","apiToken":"${JiraApiToken}"}'
+        - !Sub '{"token":"${GitHubToken}"}'
+
+  # S3 Bucket for markdown sources
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-sources-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # VPC
+  VPC:
+    Type: AWS::EC2::VPC
+    Condition: ShouldCreateVpc
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-vpc'
+
+  # Subnets
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Condition: ShouldCreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select [0, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Condition: ShouldCreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select [1, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Condition: ShouldCreateVpc
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Condition: ShouldCreateVpc
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Table
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: ShouldCreateVpc
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Condition: ShouldCreateVpc
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ShouldCreateVpc
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ShouldCreateVpc
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # Log Group
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/spectra/${AWS::StackName}'
+      RetentionInDays: 30
+
+  # ECS Cluster (for Fargate)
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Condition: IsFargate
+    Properties:
+      ClusterName: !Sub '${AWS::StackName}-cluster'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  # Security Group
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: IsFargate
+    Properties:
+      GroupDescription: Spectra security group
+      VpcId: !If [ShouldCreateVpc, !Ref VPC, !Ref 'AWS::NoValue']
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  # Task Execution Role
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsAndS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref TrackerCredentialsSecret
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt SourceBucket.Arn
+                  - !Sub '${SourceBucket.Arn}/*'
+
+  # Task Definition (Fargate)
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Condition: IsFargate
+    Properties:
+      Family: !Sub '${AWS::StackName}-task'
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '512'
+      Memory: '1024'
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: spectra
+          Image: !Ref SpectraImage
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: spectra
+
+  # EventBridge Rule
+  ScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${AWS::StackName}-schedule'
+      ScheduleExpression: !Ref Schedule
+      State: ENABLED
+      Targets:
+        - !If
+          - IsFargate
+          - Id: FargateTarget
+            Arn: !GetAtt ECSCluster.Arn
+            RoleArn: !GetAtt EventsRole.Arn
+            EcsParameters:
+              TaskDefinitionArn: !Ref TaskDefinition
+              LaunchType: FARGATE
+              NetworkConfiguration:
+                AwsVpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  SecurityGroups: [!Ref SecurityGroup]
+                  Subnets:
+                    - !Ref PublicSubnet1
+                    - !Ref PublicSubnet2
+          - !Ref 'AWS::NoValue'
+
+  EventsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RunTasks
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecs:RunTask
+                Resource: '*'
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt TaskExecutionRole.Arn
+
+Outputs:
+  SourceBucketName:
+    Description: S3 bucket for markdown sources
+    Value: !Ref SourceBucket
+
+  SecretArn:
+    Description: Tracker credentials secret
+    Value: !Ref TrackerCredentialsSecret
+
+  ClusterArn:
+    Condition: IsFargate
+    Description: ECS Cluster ARN
+    Value: !GetAtt ECSCluster.Arn
+
+  LogGroupName:
+    Description: CloudWatch Log Group
+    Value: !Ref LogGroup

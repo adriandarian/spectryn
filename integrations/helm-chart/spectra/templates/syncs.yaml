@@ -1,0 +1,103 @@
+{{/*
+Copyright (c) spectra
+SPDX-License-Identifier: MIT
+*/}}
+
+{{- range .Values.syncs }}
+---
+apiVersion: spectra.io/v1alpha1
+kind: SpectraSync
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "spectra.labels" $ | nindent 4 }}
+spec:
+  source:
+    type: {{ .source.type }}
+    {{- if eq .source.type "configmap" }}
+    configMap:
+      name: {{ .source.configMap.name }}
+      key: {{ .source.configMap.key }}
+    {{- else if eq .source.type "git" }}
+    git:
+      repository: {{ .source.git.repository }}
+      {{- if .source.git.branch }}
+      branch: {{ .source.git.branch }}
+      {{- end }}
+      path: {{ .source.git.path }}
+      {{- if .source.git.credentialsSecret }}
+      credentialsSecret:
+        name: {{ .source.git.credentialsSecret.name }}
+        {{- if .source.git.credentialsSecret.usernameKey }}
+        usernameKey: {{ .source.git.credentialsSecret.usernameKey }}
+        {{- end }}
+        {{- if .source.git.credentialsSecret.passwordKey }}
+        passwordKey: {{ .source.git.credentialsSecret.passwordKey }}
+        {{- end }}
+      {{- end }}
+    {{- else if eq .source.type "pvc" }}
+    pvc:
+      claimName: {{ .source.pvc.claimName }}
+      path: {{ .source.pvc.path }}
+    {{- end }}
+  tracker:
+    type: {{ .tracker.type }}
+    {{- if .tracker.url }}
+    url: {{ .tracker.url }}
+    {{- end }}
+    {{- if .tracker.project }}
+    project: {{ .tracker.project }}
+    {{- end }}
+    {{- if .tracker.epicKey }}
+    epicKey: {{ .tracker.epicKey }}
+    {{- end }}
+    {{- if .tracker.owner }}
+    owner: {{ .tracker.owner }}
+    {{- end }}
+    {{- if .tracker.repo }}
+    repo: {{ .tracker.repo }}
+    {{- end }}
+    {{- if .tracker.organization }}
+    organization: {{ .tracker.organization }}
+    {{- end }}
+    {{- if .tracker.teamId }}
+    teamId: {{ .tracker.teamId }}
+    {{- end }}
+    {{- if .tracker.workspace }}
+    workspace: {{ .tracker.workspace }}
+    {{- end }}
+    {{- if .tracker.apiUrl }}
+    apiUrl: {{ .tracker.apiUrl }}
+    {{- end }}
+    credentialsSecret:
+      name: {{ .credentials.existingSecret }}
+      {{- if .credentials.emailKey }}
+      emailKey: {{ .credentials.emailKey }}
+      {{- end }}
+      {{- if .credentials.tokenKey }}
+      tokenKey: {{ .credentials.tokenKey }}
+      {{- end }}
+  {{- if .schedule }}
+  schedule: {{ .schedule | quote }}
+  {{- end }}
+  {{- if .dryRun }}
+  dryRun: {{ .dryRun }}
+  {{- end }}
+  {{- if .phases }}
+  phases:
+    {{- toYaml .phases | nindent 4 }}
+  {{- end }}
+  {{- if .incremental }}
+  incremental: {{ .incremental }}
+  {{- end }}
+  {{- if .bidirectional }}
+  bidirectional: {{ .bidirectional }}
+  {{- end }}
+  {{- if .suspend }}
+  suspend: {{ .suspend }}
+  {{- end }}
+  {{- if .concurrencyPolicy }}
+  concurrencyPolicy: {{ .concurrencyPolicy }}
+  {{- end }}
+{{- end }}

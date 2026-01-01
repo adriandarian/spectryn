@@ -1,0 +1,38 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+# Example: Multi-tracker sync with Linear
+apiVersion: v1
+kind: Secret
+metadata:
+  name: linear-credentials
+  namespace: default
+type: Opaque
+stringData:
+  api-key: lin_api_your_linear_api_key
+---
+apiVersion: spectra.io/v1alpha1
+kind: SpectraSync
+metadata:
+  name: linear-sync
+  namespace: default
+spec:
+  source:
+    type: pvc
+    pvc:
+      claimName: specs-volume
+      path: stories/sprint-42.md
+  tracker:
+    type: linear
+    teamId: TEAM-123
+    credentialsSecret:
+      name: linear-credentials
+      tokenKey: api-key
+  schedule: "@hourly"
+  dryRun: false
+  bidirectional: true
+  concurrencyPolicy: Forbid
+  backoffLimit: 5
+  activeDeadlineSeconds: 1800
+  successfulSyncsHistoryLimit: 5
+  failedSyncsHistoryLimit: 5

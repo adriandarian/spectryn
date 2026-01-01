@@ -1,0 +1,404 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: spectrasyncs.spectra.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  labels:
+    app.kubernetes.io/name: spectra-operator
+    app.kubernetes.io/part-of: spectra
+spec:
+  group: spectra.io
+  names:
+    kind: SpectraSync
+    listKind: SpectraSyncList
+    plural: spectrasyncs
+    singular: spectrasync
+    shortNames:
+      - ss
+      - sync
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Tracker
+          type: string
+          jsonPath: .spec.tracker.type
+        - name: Schedule
+          type: string
+          jsonPath: .spec.schedule
+        - name: Last Sync
+          type: date
+          jsonPath: .status.lastSyncTime
+        - name: Status
+          type: string
+          jsonPath: .status.lastSyncResult
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: SpectraSync defines a scheduled sync between markdown and issue trackers
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              required:
+                - source
+                - tracker
+              properties:
+                source:
+                  type: object
+                  description: Source of markdown specifications
+                  required:
+                    - type
+                  properties:
+                    type:
+                      type: string
+                      description: Source type (configmap, git, pvc)
+                      enum:
+                        - configmap
+                        - git
+                        - pvc
+                    configMap:
+                      type: object
+                      description: ConfigMap source configuration
+                      required:
+                        - name
+                        - key
+                      properties:
+                        name:
+                          type: string
+                          description: ConfigMap name
+                        key:
+                          type: string
+                          description: Key containing markdown content
+                    git:
+                      type: object
+                      description: Git repository source configuration
+                      required:
+                        - repository
+                        - path
+                      properties:
+                        repository:
+                          type: string
+                          description: Git repository URL
+                        branch:
+                          type: string
+                          description: Branch to clone
+                          default: main
+                        path:
+                          type: string
+                          description: Path to markdown file in repository
+                        credentialsSecret:
+                          type: object
+                          description: Secret containing git credentials
+                          required:
+                            - name
+                          properties:
+                            name:
+                              type: string
+                            usernameKey:
+                              type: string
+                              default: username
+                            passwordKey:
+                              type: string
+                              default: password
+                    pvc:
+                      type: object
+                      description: PersistentVolumeClaim source configuration
+                      required:
+                        - claimName
+                        - path
+                      properties:
+                        claimName:
+                          type: string
+                          description: PVC name
+                        path:
+                          type: string
+                          description: Path to markdown file in volume
+                tracker:
+                  type: object
+                  description: Target issue tracker configuration
+                  required:
+                    - type
+                    - credentialsSecret
+                  properties:
+                    type:
+                      type: string
+                      description: Tracker type
+                      enum:
+                        - jira
+                        - github
+                        - azure-devops
+                        - linear
+                        - gitlab
+                        - trello
+                        - asana
+                        - monday
+                        - shortcut
+                        - clickup
+                        - youtrack
+                        - plane
+                        - pivotal
+                        - basecamp
+                        - bitbucket
+                    # Jira-specific
+                    url:
+                      type: string
+                      description: Jira instance URL
+                    project:
+                      type: string
+                      description: Project key
+                    epicKey:
+                      type: string
+                      description: Epic key for sync
+                    # GitHub/GitLab-specific
+                    owner:
+                      type: string
+                      description: Repository owner/organization
+                    repo:
+                      type: string
+                      description: Repository name
+                    # Azure DevOps-specific
+                    organization:
+                      type: string
+                      description: Azure DevOps organization
+                    # Linear-specific
+                    teamId:
+                      type: string
+                      description: Linear team ID
+                    # Generic
+                    workspace:
+                      type: string
+                      description: Workspace identifier (for supported trackers)
+                    apiUrl:
+                      type: string
+                      description: Custom API URL (for self-hosted instances)
+                    credentialsSecret:
+                      type: object
+                      description: Secret containing tracker credentials
+                      required:
+                        - name
+                      properties:
+                        name:
+                          type: string
+                          description: Secret name
+                        emailKey:
+                          type: string
+                          description: Key for email/username
+                          default: email
+                        tokenKey:
+                          type: string
+                          description: Key for API token
+                          default: token
+                        passwordKey:
+                          type: string
+                          description: Key for password (if applicable)
+                          default: password
+                schedule:
+                  type: string
+                  description: Cron schedule expression
+                  pattern: '^(@(annually|yearly|monthly|weekly|daily|hourly))|(((([\d]+,)+[\d]+|([\d]+(\/|-)[\d]+)|[\d]+|\*) ?){5})$'
+                dryRun:
+                  type: boolean
+                  description: Run in dry-run mode (no changes made)
+                  default: false
+                phases:
+                  type: array
+                  description: Sync phases to execute
+                  items:
+                    type: string
+                    enum:
+                      - all
+                      - descriptions
+                      - subtasks
+                      - comments
+                      - statuses
+                      - attachments
+                  default:
+                    - all
+                incremental:
+                  type: boolean
+                  description: Only sync changed items
+                  default: false
+                bidirectional:
+                  type: boolean
+                  description: Enable bidirectional sync
+                  default: false
+                suspend:
+                  type: boolean
+                  description: Suspend scheduled syncs
+                  default: false
+                concurrencyPolicy:
+                  type: string
+                  description: How to handle concurrent sync runs
+                  enum:
+                    - Allow
+                    - Forbid
+                    - Replace
+                  default: Forbid
+                successfulSyncsHistoryLimit:
+                  type: integer
+                  description: Number of successful sync records to keep
+                  minimum: 0
+                  default: 3
+                failedSyncsHistoryLimit:
+                  type: integer
+                  description: Number of failed sync records to keep
+                  minimum: 0
+                  default: 3
+                backoffLimit:
+                  type: integer
+                  description: Number of retries before marking sync as failed
+                  minimum: 0
+                  default: 3
+                activeDeadlineSeconds:
+                  type: integer
+                  description: Maximum duration for sync job
+                  minimum: 0
+                  default: 3600
+                notifications:
+                  type: object
+                  description: Notification configuration
+                  properties:
+                    slack:
+                      type: object
+                      properties:
+                        webhookUrl:
+                          type: string
+                          description: Slack webhook URL
+                        channel:
+                          type: string
+                          description: Slack channel
+                        onSuccess:
+                          type: boolean
+                          default: false
+                        onFailure:
+                          type: boolean
+                          default: true
+                    email:
+                      type: object
+                      properties:
+                        recipients:
+                          type: array
+                          items:
+                            type: string
+                        onSuccess:
+                          type: boolean
+                          default: false
+                        onFailure:
+                          type: boolean
+                          default: true
+            status:
+              type: object
+              description: SpectraSync status
+              properties:
+                lastSyncTime:
+                  type: string
+                  format: date-time
+                  description: Time of last sync attempt
+                lastSuccessfulSyncTime:
+                  type: string
+                  format: date-time
+                  description: Time of last successful sync
+                lastSyncResult:
+                  type: string
+                  description: Result of last sync
+                  enum:
+                    - Success
+                    - Failed
+                    - Running
+                    - Pending
+                nextSyncTime:
+                  type: string
+                  format: date-time
+                  description: Next scheduled sync time
+                observedGeneration:
+                  type: integer
+                  description: Last observed generation
+                syncCount:
+                  type: integer
+                  description: Total number of sync attempts
+                successCount:
+                  type: integer
+                  description: Number of successful syncs
+                failureCount:
+                  type: integer
+                  description: Number of failed syncs
+                lastSyncStats:
+                  type: object
+                  description: Statistics from last sync
+                  properties:
+                    storiesCreated:
+                      type: integer
+                    storiesUpdated:
+                      type: integer
+                    subtasksCreated:
+                      type: integer
+                    subtasksUpdated:
+                      type: integer
+                    duration:
+                      type: string
+                      description: Sync duration
+                conditions:
+                  type: array
+                  description: Status conditions
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        type: string
+                        description: Condition type
+                      status:
+                        type: string
+                        description: Condition status
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                syncHistory:
+                  type: array
+                  description: Recent sync history
+                  items:
+                    type: object
+                    properties:
+                      syncTime:
+                        type: string
+                        format: date-time
+                      result:
+                        type: string
+                      duration:
+                        type: string
+                      message:
+                        type: string
+                      stats:
+                        type: object
+                        properties:
+                          storiesCreated:
+                            type: integer
+                          storiesUpdated:
+                            type: integer

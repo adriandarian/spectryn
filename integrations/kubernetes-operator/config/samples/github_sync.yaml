@@ -1,0 +1,58 @@
+# Copyright (c) spectra
+# SPDX-License-Identifier: MIT
+
+# Example: Sync from Git repository to GitHub Issues
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-credentials
+  namespace: default
+type: Opaque
+stringData:
+  token: ghp_your_github_token_here
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-credentials
+  namespace: default
+type: Opaque
+stringData:
+  username: git
+  password: ghp_your_github_token_here
+---
+apiVersion: spectra.io/v1alpha1
+kind: SpectraSync
+metadata:
+  name: github-sync
+  namespace: default
+spec:
+  source:
+    type: git
+    git:
+      repository: https://github.com/myorg/specs-repo.git
+      branch: main
+      path: docs/user-stories.md
+      credentialsSecret:
+        name: git-credentials
+        usernameKey: username
+        passwordKey: password
+  tracker:
+    type: github
+    owner: myorg
+    repo: myproject
+    credentialsSecret:
+      name: github-credentials
+      tokenKey: token
+  schedule: "*/30 * * * *"  # Every 30 minutes
+  dryRun: false
+  incremental: true
+  phases:
+    - descriptions
+    - subtasks
+  notifications:
+    slack:
+      webhookUrl: https://hooks.slack.com/services/xxx/yyy/zzz
+      channel: "#engineering"
+      onSuccess: false
+      onFailure: true
