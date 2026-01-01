@@ -68,7 +68,14 @@ class StoryId:
 
     @property
     def prefix(self) -> str:
-        """Extract the prefix portion (e.g., 'US' from 'US-001')."""
+        """Extract the prefix portion of the story ID.
+
+        For IDs like 'US-001', returns 'US'. For numeric IDs like
+        '#123' or '123', returns an empty string.
+
+        Returns:
+            The prefix string, or empty string for numeric IDs.
+        """
         # Check for any separator
         for sep in self.SEPARATORS:
             if sep in self.value:
@@ -200,7 +207,19 @@ class Description:
 
     @classmethod
     def from_markdown(cls, text: str) -> Description | None:
-        """Parse description from markdown format."""
+        """Parse a Description from markdown formatted text.
+
+        Looks for the standard user story format:
+        - **As a** role
+        - **I want** feature
+        - **So that** benefit
+
+        Args:
+            text: Markdown text containing the user story description.
+
+        Returns:
+            Description instance if parsing succeeds, None otherwise.
+        """
         pattern = r"\*\*As a\*\*\s*(.+?)\s*\n\s*\*\*I want\*\*\s*(.+?)\s*\n\s*\*\*So that\*\*\s*(.+?)(?:\n|$)"
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
 
@@ -257,7 +276,14 @@ class AcceptanceCriteria:
         )
 
     def to_markdown(self) -> str:
-        """Convert to markdown checkbox format."""
+        """Convert acceptance criteria to markdown checkbox format.
+
+        Generates a list of markdown checkboxes, with [x] for completed
+        items and [ ] for incomplete items.
+
+        Returns:
+            Markdown formatted string with one checkbox per line.
+        """
         lines = []
         for item, is_checked in zip(self.items, self.checked, strict=False):
             checkbox = "[x]" if is_checked else "[ ]"
@@ -272,7 +298,12 @@ class AcceptanceCriteria:
 
     @property
     def completion_ratio(self) -> float:
-        """Get ratio of completed criteria."""
+        """Calculate the ratio of completed acceptance criteria.
+
+        Returns:
+            Float between 0.0 and 1.0 representing completion percentage.
+            Returns 1.0 if there are no criteria defined.
+        """
         if not self.items:
             return 1.0
         return sum(self.checked) / len(self.items)

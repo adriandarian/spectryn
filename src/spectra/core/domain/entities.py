@@ -44,13 +44,31 @@ class Subtask:
     external_key: IssueKey | None = None
 
     def normalize_name(self) -> str:
-        """Normalize name for matching."""
+        """Normalize the subtask name for fuzzy matching.
+
+        Converts the name to lowercase and normalizes whitespace and
+        punctuation to enable reliable comparison between subtasks
+        from different sources.
+
+        Returns:
+            Normalized name string with consistent formatting.
+        """
         name = self.name.lower()
         name = re.sub(r"[^\w\s]", " ", name)
         return " ".join(name.split())
 
     def matches(self, other: Subtask) -> bool:
-        """Check if this subtask matches another (fuzzy match on name)."""
+        """Check if this subtask matches another using fuzzy name matching.
+
+        Performs a case-insensitive comparison of the first 30 characters
+        of normalized names, checking if either name contains the other.
+
+        Args:
+            other: The subtask to compare against.
+
+        Returns:
+            True if the subtasks are considered a match.
+        """
         self_normalized = self.normalize_name()[:30]
         other_normalized = other.normalize_name()[:30]
         return self_normalized in other_normalized or other_normalized in self_normalized
@@ -147,7 +165,17 @@ class UserStory:
     content_hash: str | None = None
 
     def normalize_title(self) -> str:
-        """Normalize title for matching with external issues."""
+        """Normalize the title for matching with external issues.
+
+        Performs several normalizations:
+        - Converts to lowercase
+        - Removes common suffixes like '(future)'
+        - Normalizes punctuation to spaces
+        - Collapses multiple whitespace
+
+        Returns:
+            Normalized title suitable for fuzzy matching.
+        """
         title = self.title.lower()
         # Remove common suffixes
         title = re.sub(r"\s*\(future\)\s*$", "", title)
@@ -156,7 +184,17 @@ class UserStory:
         return " ".join(title.split())
 
     def matches_title(self, other_title: str) -> bool:
-        """Check if this story matches an external title."""
+        """Check if this story matches an external title using fuzzy matching.
+
+        Normalizes both titles and checks for equality or substring match
+        in either direction.
+
+        Args:
+            other_title: The external issue title to compare against.
+
+        Returns:
+            True if titles are considered a match.
+        """
         self_normalized = self.normalize_title()
         other_normalized = re.sub(r"[^\w\s]", " ", other_title.lower())
         other_normalized = " ".join(other_normalized.split())
@@ -168,7 +206,16 @@ class UserStory:
         )
 
     def get_full_description(self) -> str:
-        """Get complete description with acceptance criteria."""
+        """Get the complete description including acceptance criteria and notes.
+
+        Assembles a full markdown description by combining:
+        - The main story description
+        - Acceptance criteria section
+        - Technical notes section
+
+        Returns:
+            Complete markdown-formatted description string.
+        """
         parts = []
 
         if self.description:
@@ -184,7 +231,18 @@ class UserStory:
         return "\n".join(parts)
 
     def find_subtask(self, name: str) -> Subtask | None:
-        """Find a subtask by name (fuzzy match)."""
+        """Find a subtask by name using fuzzy matching.
+
+        Searches through the story's subtasks and returns the first one
+        whose normalized name matches the given name (case-insensitive,
+        first 30 characters).
+
+        Args:
+            name: The subtask name to search for.
+
+        Returns:
+            The matching Subtask, or None if not found.
+        """
         name_lower = name.lower()[:30]
         for subtask in self.subtasks:
             subtask_lower = subtask.normalize_name()[:30]
@@ -252,14 +310,31 @@ class Epic:
     updated_at: datetime | None = None
 
     def find_story(self, story_id: StoryId) -> UserStory | None:
-        """Find a story by ID."""
+        """Find a story by its unique identifier.
+
+        Args:
+            story_id: The StoryId to search for.
+
+        Returns:
+            The matching UserStory, or None if not found.
+        """
         for story in self.stories:
             if story.id == story_id:
                 return story
         return None
 
     def find_story_by_title(self, title: str) -> UserStory | None:
-        """Find a story by title (fuzzy match)."""
+        """Find a story by title using fuzzy matching.
+
+        Searches through the epic's stories and returns the first one
+        whose title matches using normalized comparison.
+
+        Args:
+            title: The story title to search for.
+
+        Returns:
+            The matching UserStory, or None if not found.
+        """
         for story in self.stories:
             if story.matches_title(title):
                 return story

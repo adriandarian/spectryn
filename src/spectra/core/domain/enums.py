@@ -1,5 +1,16 @@
 """
 Domain enums - Status, Priority, and other enumerated types.
+
+Provides enum classes for strongly-typed domain values with parsing
+and display capabilities.
+
+Example:
+    >>> status = Status.from_string("in progress")
+    >>> print(status.emoji)  # 🔄
+    >>> print(status.display_name)  # In Progress
+
+    >>> priority = Priority.from_string("P0")
+    >>> print(priority.jira_name)  # Highest
 """
 
 from __future__ import annotations
@@ -8,7 +19,19 @@ from enum import Enum, auto
 
 
 class Status(Enum):
-    """Status of a story or subtask."""
+    """Status of a story or subtask.
+
+    Represents the workflow state of an issue. Provides parsing from
+    various string formats including emoji indicators.
+
+    Attributes:
+        PLANNED: Not yet started (📋)
+        OPEN: Ready to start (📂)
+        IN_PROGRESS: Currently being worked on (🔄)
+        IN_REVIEW: Under review or testing (👀)
+        DONE: Completed successfully (✅)
+        CANCELLED: Will not be completed (❌)
+    """
 
     PLANNED = auto()
     OPEN = auto()
@@ -19,10 +42,21 @@ class Status(Enum):
 
     @classmethod
     def from_string(cls, value: str) -> Status:
-        """
-        Parse status from various string formats.
+        """Parse status from various string formats.
 
-        Handles emoji prefixes, different naming conventions, etc.
+        Handles emoji prefixes, different naming conventions, and
+        common variations like 'in-progress', 'To Do', etc.
+
+        Args:
+            value: Status string to parse (case-insensitive).
+
+        Returns:
+            Matching Status enum value, defaults to PLANNED.
+
+        Examples:
+            >>> Status.from_string("done")  # Status.DONE
+            >>> Status.from_string("✅ Complete")  # Status.DONE
+            >>> Status.from_string("in-progress")  # Status.IN_PROGRESS
         """
         value = value.strip().lower()
 
@@ -87,7 +121,17 @@ class Status(Enum):
 
 
 class Priority(Enum):
-    """Priority level for stories."""
+    """Priority level for stories.
+
+    Represents the importance/urgency of an issue. Provides parsing from
+    P0-P3 notation, names, and emoji indicators.
+
+    Attributes:
+        CRITICAL: Highest priority, blockers (🔴, P0)
+        HIGH: Important items (🟡, P1)
+        MEDIUM: Normal priority (🟢, P2)
+        LOW: Nice to have (⚪, P3)
+    """
 
     CRITICAL = auto()
     HIGH = auto()
@@ -96,7 +140,21 @@ class Priority(Enum):
 
     @classmethod
     def from_string(cls, value: str) -> Priority:
-        """Parse priority from string."""
+        """Parse priority from various string formats.
+
+        Supports P0-P3 notation, emoji indicators, and descriptive names.
+
+        Args:
+            value: Priority string to parse (case-insensitive).
+
+        Returns:
+            Matching Priority enum value, defaults to MEDIUM.
+
+        Examples:
+            >>> Priority.from_string("P0")  # Priority.CRITICAL
+            >>> Priority.from_string("high")  # Priority.HIGH
+            >>> Priority.from_string("🔴")  # Priority.CRITICAL
+        """
         value = value.strip().lower()
 
         if any(x in value for x in ["critical", "blocker", "🔴", "p0"]):
@@ -137,7 +195,18 @@ class Priority(Enum):
 
 
 class IssueType(Enum):
-    """Type of issue in the tracker."""
+    """Type of issue in the tracker.
+
+    Represents the category of work item in an issue tracker.
+
+    Attributes:
+        EPIC: Large feature/initiative containing multiple stories.
+        STORY: User-facing feature described in user story format.
+        TASK: Technical work item.
+        SUBTASK: Child task within a story.
+        BUG: Defect or issue to fix.
+        SPIKE: Research or investigation task.
+    """
 
     EPIC = auto()
     STORY = auto()

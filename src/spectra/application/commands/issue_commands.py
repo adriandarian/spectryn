@@ -19,7 +19,23 @@ from .base import Command, CommandResult
 
 @dataclass
 class UpdateDescriptionCommand(Command):
-    """Update an issue's description."""
+    """Update an issue's description.
+
+    This command updates the description field of an issue in the tracker.
+    It supports undo by storing the original description before modification.
+
+    Attributes:
+        issue_key: The unique identifier of the issue (e.g., "PROJ-123").
+        description: The new description content (markdown string or ADF).
+
+    Example:
+        >>> cmd = UpdateDescriptionCommand(
+        ...     tracker=tracker,
+        ...     issue_key="PROJ-123",
+        ...     description="# New Description\n\nUpdated content.",
+        ... )
+        >>> result = cmd.execute()
+    """
 
     issue_key: str = ""
     description: Any = None  # Can be markdown string or ADF
@@ -93,7 +109,32 @@ class UpdateDescriptionCommand(Command):
 
 @dataclass
 class CreateSubtaskCommand(Command):
-    """Create a subtask under a parent issue."""
+    """Create a subtask under a parent issue.
+
+    Creates a new subtask (child issue) linked to a parent story or issue.
+    The subtask inherits the project context from the parent.
+
+    Attributes:
+        parent_key: The issue key of the parent (e.g., "PROJ-123").
+        project_key: The project key for the new subtask.
+        summary: The title/summary of the subtask.
+        description: Optional description content.
+        story_points: Optional story point estimate.
+        assignee: Optional username to assign the subtask to.
+        priority: Optional priority level.
+
+    Example:
+        >>> cmd = CreateSubtaskCommand(
+        ...     tracker=tracker,
+        ...     parent_key="PROJ-123",
+        ...     project_key="PROJ",
+        ...     summary="Implement login form",
+        ...     story_points=2,
+        ... )
+        >>> result = cmd.execute()
+        >>> if result.success:
+        ...     new_key = result.data  # e.g., "PROJ-456"
+    """
 
     parent_key: str = ""
     project_key: str = ""
@@ -177,7 +218,27 @@ class CreateSubtaskCommand(Command):
 
 @dataclass
 class UpdateSubtaskCommand(Command):
-    """Update an existing subtask."""
+    """Update an existing subtask.
+
+    Updates one or more fields on an existing subtask. At least one field
+    must be provided for the update.
+
+    Attributes:
+        issue_key: The subtask's issue key (e.g., "PROJ-456").
+        description: Optional new description content.
+        story_points: Optional new story point estimate.
+        assignee: Optional new assignee username.
+        priority_id: Optional new priority ID.
+
+    Example:
+        >>> cmd = UpdateSubtaskCommand(
+        ...     tracker=tracker,
+        ...     issue_key="PROJ-456",
+        ...     story_points=3,
+        ...     assignee="jdoe",
+        ... )
+        >>> result = cmd.execute()
+    """
 
     issue_key: str = ""
     description: Any | None = None
@@ -237,7 +298,24 @@ class UpdateSubtaskCommand(Command):
 
 @dataclass
 class AddCommentCommand(Command):
-    """Add a comment to an issue."""
+    """Add a comment to an issue.
+
+    Adds a new comment to an existing issue. The comment body can be
+    plain text, markdown, or ADF (Atlassian Document Format) depending
+    on the tracker's requirements.
+
+    Attributes:
+        issue_key: The issue key to comment on (e.g., "PROJ-123").
+        body: The comment content (text, markdown, or ADF).
+
+    Example:
+        >>> cmd = AddCommentCommand(
+        ...     tracker=tracker,
+        ...     issue_key="PROJ-123",
+        ...     body="This has been reviewed and approved.",
+        ... )
+        >>> result = cmd.execute()
+    """
 
     issue_key: str = ""
     body: Any = None
@@ -292,7 +370,29 @@ class AddCommentCommand(Command):
 
 @dataclass
 class TransitionStatusCommand(Command):
-    """Transition an issue to a new status."""
+    """Transition an issue to a new status.
+
+    Executes a workflow transition to move an issue to a new status.
+    The available transitions depend on the issue's current status and
+    the tracker's workflow configuration.
+
+    Supports undo by storing the original status and reversing the
+    transition (if the workflow allows).
+
+    Attributes:
+        issue_key: The issue key to transition (e.g., "PROJ-123").
+        target_status: The desired status name (e.g., "In Progress", "Done").
+
+    Example:
+        >>> cmd = TransitionStatusCommand(
+        ...     tracker=tracker,
+        ...     issue_key="PROJ-123",
+        ...     target_status="In Progress",
+        ... )
+        >>> result = cmd.execute()
+        >>> # Later, undo the transition:
+        >>> cmd.undo()  # Returns to original status
+    """
 
     issue_key: str = ""
     target_status: str = ""
