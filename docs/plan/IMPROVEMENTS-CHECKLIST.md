@@ -853,7 +853,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **Upgrade Python 3.14 Support** - Updated from 3.11 minimum to support 3.11-3.14
 
 ### Architecture
-- [ ] **Event Sourcing** - Store all changes as events
+- [x] **Event Sourcing** - Store all changes as events. Implemented `EventStorePort` interface with `FileEventStore` (JSON Lines persistence) and `MemoryEventStore` adapters. Added `EventSourcedBus` for automatic persistence, `EventReplayer` for state reconstruction, and projections for analytics (`SyncSessionProjection`, `EpicHistoryProjection`)
 - [ ] **Database Backend Option** - SQLite/PostgreSQL for large-scale state management
 - [ ] **Sync History Database** - SQLite for audit trail, rollback, analytics
 - [ ] **Plugin Marketplace/Registry** - Discover and install community plugins
