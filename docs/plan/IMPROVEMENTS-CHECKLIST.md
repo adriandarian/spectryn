@@ -849,8 +849,8 @@ For each new tracker adapter, follow this checklist:
 - [ ] **Type Coverage 100%** - Reduce `Any` usage, improve type hints
 - [x] **More Specific Exception Types** - Better error handling
 - [x] **More Docstrings** - Better code documentation
-- [ ] **Refactor Large Files** - e.g., `app.py`
-- [ ] **Upgrade Python 3.12 Support** - Current target is 3.11
+- [x] **Refactor Large Files** - e.g., `app.py` reduced from ~5,900 to ~1,600 lines; ~4,300 lines extracted to command modules
+- [x] **Upgrade Python 3.14 Support** - Updated from 3.11 minimum to support 3.11-3.14
 
 ### Architecture
 - [ ] **Event Sourcing** - Store all changes as events
