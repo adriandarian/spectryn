@@ -863,7 +863,7 @@ For each new tracker adapter, follow this checklist:
 - [x] **WebSocket Support** - Real-time sync updates. Implemented `WebSocketServerPort` interface with `SimpleWebSocketServer` (stdlib-based, RFC 6455 compliant, no dependencies) and `AioHttpWebSocketServer` (async/aiohttp for production). Features: room-based message routing, 25+ message types for sync/story/conflict events, `SyncEventBroadcaster` for EventBus integration, `WebSocketBridge` high-level interface. CLI: `spectra --websocket` with `--websocket-host`, `--websocket-port`, `--use-aiohttp` options. 82 unit tests passing.
 
 ### Reliability
-- [ ] **Rate Limiting + Retries** - Centralized backoff strategy per adapter
+- [x] **Rate Limiting + Retries** - Centralized backoff strategy per adapter. Implemented `RateLimiterPort`, `RetryPolicyPort`, `CircuitBreakerPort`, and unified `ResiliencePort` interfaces in `core/ports/rate_limiting.py`. Features: 5 backoff strategies (exponential, linear, constant, fibonacci, decorrelated jitter), token bucket & sliding window rate limiters, circuit breaker pattern (closed/open/half-open states), 18 tracker presets (Jira, GitHub, GitLab, Linear, etc.) with sensible defaults. Adapters: `TokenBucketRateLimiter`, `SlidingWindowRateLimiter`, `RetryPolicy`, `AdaptiveRetryPolicy`, `CircuitBreaker`, `ResilienceManager` in `adapters/resilience/`. Factory: `create_resilience_manager(TrackerType|str)`. Zero dependencies. 115 unit tests passing.
 - [ ] **Rollback by Timestamp** - Restore to specific point in time
 
 ---

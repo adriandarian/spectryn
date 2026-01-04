@@ -77,6 +77,37 @@ from .plugin_marketplace import (
     SearchQuery,
     SearchResult,
 )
+from .rate_limiting import (
+    TRACKER_PRESETS,
+    CircuitBreakerConfig,
+    CircuitBreakerPort,
+    CircuitOpenError,
+    CircuitState,
+    RateLimitConfig,
+    RateLimitContext,
+    RateLimiterPort,
+    RateLimitScope,
+    RateLimitStats,
+    ResiliencePort,
+    RetryAttempt,
+    RetryConfig,
+    RetryExhaustedError,
+    RetryPolicyPort,
+    RetryStrategy,
+    TrackerRateLimits,
+    calculate_backoff_delay,
+    get_preset_for_name,
+    get_tracker_preset,
+    is_retryable_exception,
+    is_retryable_status_code,
+    parse_retry_after,
+)
+from .rate_limiting import (
+    RateLimitError as ResilienceRateLimitError,
+)
+from .rate_limiting import (
+    TrackerType as ResilienceTrackerType,
+)
 from .rest_api import (
     ConflictError as RestConflictError,
 )
@@ -253,4 +284,30 @@ __all__ = [
     "RestServerStats",
     "RestValidationError",
     "RouteInfo",
+    # Rate Limiting & Resilience
+    "CircuitBreakerConfig",
+    "CircuitBreakerPort",
+    "CircuitOpenError",
+    "CircuitState",
+    "RateLimitConfig",
+    "RateLimitContext",
+    "RateLimiterPort",
+    "RateLimitScope",
+    "RateLimitStats",
+    "ResiliencePort",
+    "ResilienceRateLimitError",
+    "ResilienceTrackerType",
+    "RetryAttempt",
+    "RetryConfig",
+    "RetryExhaustedError",
+    "RetryPolicyPort",
+    "RetryStrategy",
+    "TRACKER_PRESETS",
+    "TrackerRateLimits",
+    "calculate_backoff_delay",
+    "get_preset_for_name",
+    "get_tracker_preset",
+    "is_retryable_exception",
+    "is_retryable_status_code",
+    "parse_retry_after",
 ]

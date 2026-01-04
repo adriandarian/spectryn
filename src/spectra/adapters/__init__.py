@@ -58,6 +58,15 @@ except ImportError:
     ASYNC_AVAILABLE = False
 
 # WebSocket (real-time sync updates)
+# Resilience (rate limiting, retry, circuit breaker)
+from .resilience import (
+    CircuitBreaker,
+    ResilienceManager,
+    RetryPolicy,
+    SlidingWindowRateLimiter,
+    TokenBucketRateLimiter,
+    create_resilience_manager,
+)
 from .websocket import (
     AioHttpWebSocketServer,
     SimpleWebSocketServer,
@@ -101,4 +110,11 @@ __all__ = [
     "SyncEventBroadcaster",
     "WebSocketBridge",
     "create_websocket_server",
+    # Resilience
+    "CircuitBreaker",
+    "ResilienceManager",
+    "RetryPolicy",
+    "SlidingWindowRateLimiter",
+    "TokenBucketRateLimiter",
+    "create_resilience_manager",
 ]
