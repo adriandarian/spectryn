@@ -882,7 +882,7 @@ For each new tracker adapter, follow this checklist:
 
 - [x] **Stronger Markdown Parsing** - Tolerate formatting variants; precise parse errors ✅ **COMPLETED**
 - [x] **Round-trip Edits** - Modify source markdown while preserving formatting ✅ **COMPLETED** - Implemented `RoundtripParser` for span-tracking parse, `RoundtripEditor` for surgical edits. Supports field updates, title changes, AC toggling, and batch updates. 43 unit tests passing.
-- [ ] **Schema Validation** - Optional strict mode for required fields
+- [x] **Schema Validation** - Optional strict mode for required fields ✅ **COMPLETED** - Implemented `SchemaValidator` with configurable validation modes (lenient, normal, strict). Supports `FieldSchema`, `StorySchema`, `SubtaskSchema`, `EpicSchema` with built-in validators (min/max length/value, patterns, required fields). Includes `ValidatingParser` wrapper, `SchemaPreset` for domain-specific validation (Agile, Kanban, QA, Documentation). 74 unit tests passing.
 - [ ] **Extensible Frontmatter** - YAML frontmatter as alternative to tables
 - [ ] **Inline Task References** - Parse `[ ]` checkboxes as subtasks
 - [ ] **Image Embedding** - Handle images in descriptions
