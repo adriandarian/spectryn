@@ -914,9 +914,9 @@ For each new tracker adapter, follow this checklist:
 
 ## 🏠 Housekeeping
 
-- [ ] **Audit & Update Backlog** - Mark completed items in `BACKLOG.md`
-- [ ] **Update `FLEXIBILITY-PLAN.md`** - Mark "Remaining Work" as complete if done
-- [ ] **Verify Asana Implementation** - Check if `batch.py` and `async_adapter.py` work
+- [x] **Audit & Update Backlog** - Mark completed items in `BACKLOG.md` ✅ (January 2026 - Marked 6 items complete: #3 Asana parity, #5 docs, #7 AI prompts, #8 parameterized tests, #9 TrackerType, #10 telemetry)
+- [x] **Update `FLEXIBILITY-PLAN.md`** - Mark "Remaining Work" as complete ✅ (January 2026 - Custom separators and `#123` support verified complete)
+- [x] **Verify Asana Implementation** - Check if `batch.py` and `async_adapter.py` work ✅ (January 2026 - 41 tests pass: 16 unit + 25 integration)
 
 ---
 

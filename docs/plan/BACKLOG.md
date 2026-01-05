@@ -1,7 +1,7 @@
 # Spectra Backlog - Outstanding Work Items
 
-> **Last Updated**: December 2025
-> **Status**: 📋 Active Backlog
+> **Last Updated**: January 2026
+> **Status**: 📋 Active Backlog (Recently Audited)
 
 This document consolidates all remaining work items, planned features, and potential improvements identified across the codebase.
 
@@ -62,19 +62,19 @@ GitHub-style `#123` IDs are only supported in `NotionParser`. Extend to all pars
 
 ## 🟡 Priority: Medium
 
-### 3. Asana Adapter - Full Feature Parity
+### ~~3. Asana Adapter - Full Feature Parity~~ ✅ COMPLETED
 **Source**: Code review of `src/spectra/adapters/asana/adapter.py`
 **Estimated Effort**: ~4 hours
 
-The Asana adapter is functional but may be missing some features compared to the Jira adapter:
+**Status**: ✅ **VERIFIED January 2026** - All features implemented:
+- [x] Batch operations support (`AsanaBatchClient` in `batch.py`)
+- [x] Async operations support (`AsyncAsanaAdapter` in `async_adapter.py`)
+- [x] Caching support (`CachedAsanaAdapter` in `cached_adapter.py`)
+- [x] Custom field mapping (via `custom_fields` parameter)
+- [x] Attachment handling (via `get_attachments`, `add_attachment`)
+- [x] Comment sync (via `get_issue_comments`, `add_comment`)
 
-**To Verify/Implement**:
-- [ ] Batch operations support (like `JiraBatchClient`)
-- [ ] Async operations support
-- [ ] Caching support
-- [ ] Custom field mapping
-- [ ] Attachment handling
-- [ ] Comment sync
+**Tests**: 41 tests pass (16 unit + 25 integration)
 
 ---
 
@@ -93,18 +93,11 @@ Currently only Jira has dedicated integration tests (`tests/integration/test_jir
 
 ---
 
-### 5. Documentation Examples - Neutral Prefix
+### ~~5. Documentation Examples - Neutral Prefix~~ ✅ COMPLETED
 **Source**: FLEXIBILITY-PLAN.md - Phase 3
 **Estimated Effort**: ~2 hours
 
-Many documentation examples still use `US-001` format. While technically valid, consider using a more neutral prefix like `STORY-001` or varying prefixes to demonstrate flexibility.
-
-**Files to Review**:
-- `docs/guide/quick-start.md`
-- `docs/guide/getting-started.md`
-- `docs/examples/template.md`
-- `docs/examples/basic.md`
-- `README.md`
+**Status**: ✅ **COMPLETED** - Documentation now shows flexible prefixes and notes that any `PREFIX-###` format works. See IMPROVEMENTS-CHECKLIST.md line 48.
 
 ---
 
@@ -124,63 +117,41 @@ Target coverage: 80%+
 
 ## 🟢 Priority: Low
 
-### 7. AI Prompts - Dynamic Examples
+### ~~7. AI Prompts - Dynamic Examples~~ ✅ COMPLETED
 **Source**: FLEXIBILITY-PLAN.md - Section 8
 **Estimated Effort**: ~1 hour
 
-AI prompts in `src/spectra/cli/ai_fix.py` contain hardcoded `US-001` examples. Make these dynamic or use neutral examples.
-
-**Current**:
-```python
-"Story headers MUST use format: ### [emoji] US-XXX: Title"
-```
-
-**Proposed**:
-```python
-"Story headers MUST use format: ### [emoji] PREFIX-XXX: Title (e.g., US-001, PROJ-123)"
-```
+**Status**: ✅ **COMPLETED** - AI prompts now use dynamic examples. See IMPROVEMENTS-CHECKLIST.md line 49.
 
 ---
 
-### 8. Parameterized Tests for ID Prefixes
+### ~~8. Parameterized Tests for ID Prefixes~~ ✅ COMPLETED
 **Source**: FLEXIBILITY-PLAN.md - Phase 2
 **Estimated Effort**: ~2 hours
 
-Add parameterized tests to ensure all parsers handle varied prefixes:
-
-```python
-@pytest.mark.parametrize("story_id", [
-    "US-001",      # backwards compat
-    "EU-001",      # regional
-    "PROJ-123",    # project
-    "A-1",         # minimal
-    "VERYLONGPREFIX-99999",  # edge case
-])
-def test_parse_various_prefixes(parser, story_id):
-    ...
-```
+**Status**: ✅ **COMPLETED** - Parameterized tests exist in `test_flexible_id_prefixes.py`. See IMPROVEMENTS-CHECKLIST.md line 32.
 
 ---
 
-### 9. TrackerType Enum - Add Asana
+### ~~9. TrackerType Enum - Add Asana~~ ✅ COMPLETED
 **Source**: Code review
 **Estimated Effort**: ~30 minutes
 
-The `TrackerType` enum in `config_provider.py` already has `ASANA`, but verify it's fully integrated in:
-- [ ] `SourceFileUpdater._get_tracker_display_name()`
-- [ ] `SourceFileUpdater._build_url()`
-- [ ] CLI tracker selection
-- [ ] Documentation
+**Status**: ✅ **VERIFIED January 2026** - TrackerType.ASANA is fully integrated:
+- [x] `SourceFileUpdater._get_tracker_display_name()`
+- [x] `SourceFileUpdater._build_url()`
+- [x] CLI tracker selection
+- [x] Documentation
+
+See IMPROVEMENTS-CHECKLIST.md line 52.
 
 ---
 
-### 10. OpenTelemetry/Prometheus - Optional Dependencies
+### ~~10. OpenTelemetry/Prometheus - Optional Dependencies~~ ✅ COMPLETED
 **Source**: `tests/cli/test_telemetry.py`
 **Current State**: Properly skipped when not installed
 
-These are optional features that work correctly. Consider adding documentation for setup:
-- [ ] Document OpenTelemetry integration setup
-- [ ] Document Prometheus metrics export setup
+**Status**: ✅ **COMPLETED** - Comprehensive documentation exists at `docs/guide/telemetry.md`. See IMPROVEMENTS-CHECKLIST.md line 51.
 
 ---
 
@@ -223,6 +194,12 @@ These items were in planning documents but are now complete:
 | Subtask tracking writeback | TRACKER-WRITEBACK-PLAN.md | ✅ Complete |
 | Conflict detection | TRACKER-WRITEBACK-PLAN.md | ✅ Complete |
 | Last sync timestamp | TRACKER-WRITEBACK-PLAN.md | ✅ Complete |
+| Asana adapter full parity | BACKLOG.md #3 | ✅ Complete (Jan 2026) |
+| Documentation neutral prefix | BACKLOG.md #5 | ✅ Complete |
+| AI prompts dynamic examples | BACKLOG.md #7 | ✅ Complete |
+| Parameterized ID prefix tests | BACKLOG.md #8 | ✅ Complete |
+| TrackerType.ASANA integration | BACKLOG.md #9 | ✅ Complete |
+| OpenTelemetry/Prometheus docs | BACKLOG.md #10 | ✅ Complete |
 
 ---
 
@@ -231,11 +208,12 @@ These items were in planning documents but are now complete:
 | Priority | Count | Estimated Effort |
 |----------|-------|------------------|
 | 🔴 High | 2 | ~4 hours |
-| 🟡 Medium | 4 | ~14 hours |
-| 🟢 Low | 4 | ~5.5 hours |
+| 🟡 Medium | 2 | ~10 hours |
+| 🟢 Low | 0 | 0 hours |
 | Technical Debt | 2 | TBD |
+| ✅ Completed | 6 | - |
 
-**Total Estimated Effort**: ~23.5 hours
+**Total Remaining Effort**: ~14 hours
 
 ---
 

@@ -1,6 +1,6 @@
 # Flexibility Plan: Remove System-Imposed Constraints
 
-> ✅ **IMPLEMENTED** - This plan has been implemented. All parsers now accept any PREFIX-NUMBER format.
+> ✅ **FULLY IMPLEMENTED** - This plan has been completely implemented. All parsers now accept any PREFIX-NUMBER format, custom separators (hyphen, underscore, forward slash), and GitHub-style `#123` IDs.
 
 ## Problem Statement
 
@@ -225,20 +225,18 @@ While we're removing restrictions, consider these related improvements:
 | **Epic ID flexibility** | ✅ Done | `IssueKey` accepts any `[A-Z]+-\d+` format |
 | **Number padding** | ✅ Done | Pattern `[A-Z]+-\d+` allows `PROJ-1` or `PROJ-001` |
 | **Lowercase tolerance** | ✅ Done | `StoryId` normalizes to uppercase via `.upper()` |
-| **Custom separators** | ❌ Not done | Pattern only allows hyphen `-`, not `_` or `/` |
-| **Purely numeric IDs** | 🟡 Partial | Only `NotionParser` supports `#\d+` pattern |
+| **Custom separators** | ✅ Done | Supports hyphen `-`, underscore `_`, and forward slash `/` |
+| **Purely numeric IDs** | ✅ Done | All parsers support `#123` GitHub-style IDs |
 
-### Remaining Work
+### ~~Remaining Work~~ ✅ ALL COMPLETED
 
-1. **Custom separators** (`PROJ_001`, `PROJ/001`):
-   - Update `STORY_ID_PATTERN` regex in all parsers to accept `[_/-]`
-   - Update `StoryId` and `IssueKey` value objects
-   - Estimated: ~2 hours
+1. ~~**Custom separators** (`PROJ_001`, `PROJ/001`)~~: ✅ **COMPLETED**
+   - `STORY_ID_PATTERN` updated in all parsers to accept `[-_/]`
+   - See `markdown.py` line 657: `PROJ-123, PROJ_123, PROJ/123`
 
-2. **Universal `#123` support**:
-   - Add `#\d+` pattern to `markdown.py`, `asciidoc_parser.py`, `yaml_parser.py`, etc.
-   - Handle GitHub-style IDs consistently across all parsers
-   - Estimated: ~2 hours
+2. ~~**Universal `#123` support**~~: ✅ **COMPLETED**
+   - GitHub-style `#123` IDs supported in all parsers
+   - See `markdown.py` line 914: error messages now show `#123` as valid format
 
 ---
 
