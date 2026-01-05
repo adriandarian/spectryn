@@ -347,6 +347,9 @@ class Colors(metaclass=_ColorsMeta):
 # Global emoji toggle (module-level for persistence)
 _emoji_enabled: bool = True
 
+# Global accessibility mode (module-level for persistence)
+_accessibility_mode: bool = False
+
 # Emoji versions of symbols
 _EMOJI_SYMBOLS = {
     "CHECK": "✓",
@@ -398,6 +401,424 @@ _ASCII_SYMBOLS = {
     "SYNC": "[~]",
     "DIFF": "[D]",
 }
+
+
+# =============================================================================
+# Accessibility Mode - Color-blind Friendly Output
+# =============================================================================
+
+
+# Status indicators with different shapes (not just colors)
+# These use distinct Unicode shapes recognizable without color
+_STATUS_SHAPES = {
+    "success": "●",  # Filled circle
+    "error": "■",  # Filled square
+    "warning": "▲",  # Triangle
+    "info": "◆",  # Diamond
+    "pending": "○",  # Empty circle
+    "blocked": "▣",  # Square with fill
+    "progress": "◐",  # Half-filled circle
+}
+
+# Text labels for accessibility mode
+_STATUS_LABELS = {
+    "success": "OK",
+    "error": "ERROR",
+    "warning": "WARN",
+    "info": "INFO",
+    "pending": "TODO",
+    "blocked": "BLOCKED",
+    "progress": "RUNNING",
+    "done": "DONE",
+    "in_progress": "IN PROGRESS",
+    "planned": "PLANNED",
+    "open": "OPEN",
+    "in_review": "IN REVIEW",
+    "cancelled": "CANCELLED",
+    "critical": "CRITICAL",
+    "high": "HIGH",
+    "medium": "MEDIUM",
+    "low": "LOW",
+}
+
+
+def set_accessibility_mode(enabled: bool) -> None:
+    """
+    Enable or disable accessibility mode for color-blind friendly output.
+
+    When enabled, output includes text labels alongside or instead of
+    color-only indicators, and uses distinct shapes to differentiate
+    status types.
+
+    Args:
+        enabled: True to enable accessibility mode, False to disable.
+    """
+    global _accessibility_mode
+    _accessibility_mode = enabled
+
+
+def get_accessibility_mode() -> bool:
+    """
+    Get the current accessibility mode state.
+
+    Returns:
+        True if accessibility mode is enabled, False otherwise.
+    """
+    return _accessibility_mode
+
+
+def get_status_indicator(
+    status: str,
+    include_label: bool | None = None,
+    use_color: bool = True,
+) -> str:
+    """
+    Get a status indicator that works without color.
+
+    Returns a shape-based indicator with optional text label for
+    accessibility. When accessibility mode is enabled, always includes
+    the text label.
+
+    Args:
+        status: Status type ('success', 'error', 'warning', 'info', 'pending', etc.)
+        include_label: Whether to include text label. If None, uses accessibility mode.
+        use_color: Whether to apply color codes.
+
+    Returns:
+        Formatted status indicator string.
+
+    Examples:
+        >>> get_status_indicator("success")
+        "●"  # or "● OK" in accessibility mode
+        >>> get_status_indicator("error", include_label=True)
+        "■ ERROR"
+    """
+    # Determine if we should include the label
+    show_label = include_label if include_label is not None else _accessibility_mode
+
+    # Get shape (defaults to dot if unknown status)
+    shape = _STATUS_SHAPES.get(status.lower(), "•")
+
+    # Get label if needed
+    label = _STATUS_LABELS.get(status.lower(), status.upper()) if show_label else ""
+
+    # Apply color if enabled
+    if use_color:
+        color_map = {
+            "success": Colors.SUCCESS,
+            "error": Colors.ERROR,
+            "warning": Colors.WARNING,
+            "info": Colors.INFO,
+            "pending": Colors.MUTED,
+            "blocked": Colors.WARNING,
+            "progress": Colors.INFO,
+            "done": Colors.SUCCESS,
+            "in_progress": Colors.WARNING,
+            "planned": Colors.INFO,
+            "open": Colors.INFO,
+            "in_review": Colors.WARNING,
+            "cancelled": Colors.MUTED,
+            "critical": Colors.ERROR,
+            "high": Colors.WARNING,
+            "medium": Colors.SUCCESS,
+            "low": Colors.INFO,
+        }
+        color = color_map.get(status.lower(), "")
+        if color:
+            if show_label:
+                return f"{color}{shape} {label}{Colors.RESET}"
+            return f"{color}{shape}{Colors.RESET}"
+
+    # No color
+    if show_label:
+        return f"{shape} {label}"
+    return shape
+
+
+def format_status_text(
+    status: str,
+    use_color: bool = True,
+    include_indicator: bool = True,
+) -> str:
+    """
+    Format a status string with optional color and indicator.
+
+    Always includes the text status name, making it accessible
+    without relying on color alone.
+
+    Args:
+        status: Status name (e.g., 'Done', 'In Progress', 'Error')
+        use_color: Whether to apply color codes.
+        include_indicator: Whether to include shape indicator prefix.
+
+    Returns:
+        Formatted status string.
+
+    Examples:
+        >>> format_status_text("Done")
+        "● Done"
+        >>> format_status_text("Error", include_indicator=False)
+        "Error"  # with color if enabled
+    """
+    normalized = status.lower().replace(" ", "_").replace("-", "_")
+
+    # Map common status variations
+    status_map = {
+        "done": "success",
+        "completed": "success",
+        "passed": "success",
+        "ok": "success",
+        "error": "error",
+        "failed": "error",
+        "failure": "error",
+        "warn": "warning",
+        "warning": "warning",
+        "caution": "warning",
+        "in_progress": "progress",
+        "running": "progress",
+        "syncing": "progress",
+        "pending": "pending",
+        "todo": "pending",
+        "planned": "pending",
+        "open": "info",
+        "info": "info",
+        "blocked": "blocked",
+        "cancelled": "blocked",
+        "in_review": "warning",
+    }
+
+    status_type = status_map.get(normalized, "info")
+
+    if include_indicator:
+        indicator = get_status_indicator(status_type, use_color=use_color)
+        if use_color:
+            color_map = {
+                "success": Colors.SUCCESS,
+                "error": Colors.ERROR,
+                "warning": Colors.WARNING,
+                "info": Colors.INFO,
+                "pending": Colors.MUTED,
+                "blocked": Colors.WARNING,
+                "progress": Colors.INFO,
+            }
+            color = color_map.get(status_type, "")
+            return f"{indicator} {color}{status}{Colors.RESET}"
+        return f"{indicator} {status}"
+
+    # No indicator, just colored text
+    if use_color:
+        color_map = {
+            "success": Colors.SUCCESS,
+            "error": Colors.ERROR,
+            "warning": Colors.WARNING,
+            "info": Colors.INFO,
+            "pending": Colors.MUTED,
+            "blocked": Colors.WARNING,
+            "progress": Colors.INFO,
+        }
+        color = color_map.get(status_type, "")
+        return f"{color}{status}{Colors.RESET}"
+
+    return status
+
+
+def format_priority_text(
+    priority: str,
+    use_color: bool = True,
+    include_indicator: bool = True,
+) -> str:
+    """
+    Format a priority string with optional color and indicator.
+
+    Uses distinct shapes for each priority level and always includes
+    the text label, making it accessible without color.
+
+    Args:
+        priority: Priority name (e.g., 'Critical', 'High', 'Medium', 'Low')
+        use_color: Whether to apply color codes.
+        include_indicator: Whether to include shape indicator prefix.
+
+    Returns:
+        Formatted priority string.
+
+    Examples:
+        >>> format_priority_text("Critical")
+        "▲▲ Critical"  # Double triangle for critical
+        >>> format_priority_text("Low")
+        "▽ Low"  # Down triangle for low
+    """
+    normalized = priority.lower().strip()
+
+    # Priority indicators (shape-based, distinguishable without color)
+    indicators = {
+        "critical": "▲▲",  # Double up triangle
+        "high": "▲",  # Up triangle
+        "medium": "►",  # Right triangle (neutral)
+        "low": "▽",  # Down triangle
+        "none": "○",  # Empty circle
+    }
+
+    indicator = indicators.get(normalized, "►")
+
+    if use_color:
+        color_map = {
+            "critical": Colors.ERROR,
+            "high": Colors.WARNING,
+            "medium": Colors.SUCCESS,
+            "low": Colors.INFO,
+            "none": Colors.MUTED,
+        }
+        color = color_map.get(normalized, "")
+        if include_indicator:
+            return f"{color}{indicator} {priority}{Colors.RESET}"
+        return f"{color}{priority}{Colors.RESET}"
+
+    if include_indicator:
+        return f"{indicator} {priority}"
+    return priority
+
+
+def format_score_text(
+    score: int | float,
+    max_score: int = 100,
+    use_color: bool = True,
+    show_bar: bool = True,
+    bar_width: int = 10,
+) -> str:
+    """
+    Format a numeric score with optional color and visual bar.
+
+    Uses both color and text/shape indicators for accessibility.
+    The bar uses different fill characters for different score ranges.
+
+    Args:
+        score: Numeric score value.
+        max_score: Maximum possible score (default 100).
+        use_color: Whether to apply color codes.
+        show_bar: Whether to show a visual progress bar.
+        bar_width: Width of the progress bar in characters.
+
+    Returns:
+        Formatted score string with optional bar.
+
+    Examples:
+        >>> format_score_text(85)
+        "████████░░ 85/100 (Good)"
+        >>> format_score_text(45, show_bar=False)
+        "45/100 (Poor)"
+    """
+    # Calculate percentage
+    pct = (score / max_score) * 100 if max_score > 0 else 0
+
+    # Determine level (text label for accessibility)
+    if pct >= 80:
+        level = "Excellent"
+        level_type = "success"
+        fill_char = "█"
+    elif pct >= 60:
+        level = "Good"
+        level_type = "success"
+        fill_char = "█"
+    elif pct >= 40:
+        level = "Fair"
+        level_type = "warning"
+        fill_char = "▓"
+    else:
+        level = "Poor"
+        level_type = "error"
+        fill_char = "▒"
+
+    # Build the output
+    parts = []
+
+    if show_bar:
+        filled = int((pct / 100) * bar_width)
+        empty = bar_width - filled
+        bar = fill_char * filled + "░" * empty
+
+        if use_color:
+            color_map = {
+                "success": Colors.SUCCESS,
+                "warning": Colors.WARNING,
+                "error": Colors.ERROR,
+            }
+            color = color_map.get(level_type, "")
+            parts.append(f"{color}{bar}{Colors.RESET}")
+        else:
+            parts.append(bar)
+
+    # Add numeric score
+    score_text = f"{score:.0f}/{max_score}"
+    if use_color:
+        color_map = {
+            "success": Colors.SUCCESS,
+            "warning": Colors.WARNING,
+            "error": Colors.ERROR,
+        }
+        color = color_map.get(level_type, "")
+        parts.append(f"{color}{score_text}{Colors.RESET}")
+    else:
+        parts.append(score_text)
+
+    # Add text level for accessibility
+    parts.append(f"({level})")
+
+    return " ".join(parts)
+
+
+def format_diff_indicator(
+    change_type: str,
+    use_color: bool = True,
+) -> str:
+    """
+    Format a diff change indicator that's accessible without color.
+
+    Uses both symbols and text labels to indicate add/remove/modify.
+
+    Args:
+        change_type: Type of change ('add', 'remove', 'modify', 'unchanged')
+        use_color: Whether to apply color codes.
+
+    Returns:
+        Formatted diff indicator.
+
+    Examples:
+        >>> format_diff_indicator("add")
+        "+ ADD"
+        >>> format_diff_indicator("remove")
+        "- DEL"
+    """
+    indicators = {
+        "add": ("+", "ADD", Colors.SUCCESS),
+        "added": ("+", "ADD", Colors.SUCCESS),
+        "new": ("+", "NEW", Colors.SUCCESS),
+        "create": ("+", "NEW", Colors.SUCCESS),
+        "remove": ("-", "DEL", Colors.ERROR),
+        "removed": ("-", "DEL", Colors.ERROR),
+        "delete": ("-", "DEL", Colors.ERROR),
+        "deleted": ("-", "DEL", Colors.ERROR),
+        "modify": ("~", "MOD", Colors.WARNING),
+        "modified": ("~", "MOD", Colors.WARNING),
+        "change": ("~", "CHG", Colors.WARNING),
+        "changed": ("~", "CHG", Colors.WARNING),
+        "update": ("~", "UPD", Colors.WARNING),
+        "unchanged": ("=", "===", Colors.MUTED),
+        "same": ("=", "===", Colors.MUTED),
+    }
+
+    normalized = change_type.lower().strip()
+    symbol, label, color = indicators.get(normalized, ("?", "???", Colors.MUTED))
+
+    # In accessibility mode, always show the label
+    if _accessibility_mode:
+        if use_color:
+            return f"{color}{symbol} {label}{Colors.RESET}"
+        return f"{symbol} {label}"
+
+    # Normal mode - just the symbol (with color)
+    if use_color:
+        return f"{color}{symbol}{Colors.RESET}"
+    return symbol
 
 
 def set_emoji_mode(use_emoji: bool) -> None:
@@ -542,6 +963,7 @@ class Console:
         verbose: Whether to print debug messages.
         quiet: Whether to suppress most output (for CI/scripting).
         json_mode: Whether to output JSON format for programmatic use.
+        accessible: Whether to enable accessibility mode (text labels with status).
     """
 
     def __init__(
@@ -550,6 +972,7 @@ class Console:
         verbose: bool = False,
         quiet: bool = False,
         json_mode: bool = False,
+        accessible: bool = False,
     ):
         """
         Initialize the console output helper.
@@ -559,11 +982,19 @@ class Console:
             verbose: Enable verbose debug output.
             quiet: Suppress most output, only show errors and final summary.
             json_mode: Output JSON format instead of text.
+            accessible: Enable accessibility mode with text labels alongside colors.
+                       When enabled, status indicators include text labels and use
+                       distinct shapes to convey meaning without relying on color.
         """
         self.json_mode = json_mode
         self.color = color and sys.stdout.isatty() and not json_mode
         self.verbose = verbose
         self.quiet = quiet or json_mode  # JSON mode implies quiet for intermediate output
+        self.accessible = accessible
+
+        # Set global accessibility mode
+        if accessible:
+            set_accessibility_mode(True)
 
         # JSON mode collects messages for final output
         self._json_messages: list[dict] = []
@@ -639,18 +1070,25 @@ class Console:
         """
         Print a success message with checkmark.
 
+        In accessibility mode, includes "[OK]" text label for color-blind users.
+
         Args:
             text: Success message to display.
         """
         if self.quiet:
             return
-        self.print(self._c(f"  {Symbols.CHECK} {text}", Colors.GREEN))
+        if self.accessible:
+            indicator = get_status_indicator("success", include_label=True, use_color=self.color)
+            self.print(f"  {indicator} {text}")
+        else:
+            self.print(self._c(f"  {Symbols.CHECK} {text}", Colors.GREEN))
 
     def error(self, text: str) -> None:
         """
         Print an error message with cross symbol.
 
         Always prints, even in quiet mode. Collected in JSON mode.
+        In accessibility mode, includes "[ERROR]" text label.
 
         Args:
             text: Error message to display.
@@ -659,7 +1097,11 @@ class Console:
             self._json_errors.append(text)
             return
         # Errors always print, even in quiet mode
-        print(self._c(f"  {Symbols.CROSS} {text}", Colors.RED))
+        if self.accessible:
+            indicator = get_status_indicator("error", include_label=True, use_color=self.color)
+            print(f"  {indicator} {text}")
+        else:
+            print(self._c(f"  {Symbols.CROSS} {text}", Colors.RED))
 
     def error_rich(self, exc: Exception) -> None:
         """
@@ -722,23 +1164,35 @@ class Console:
         """
         Print a warning message with warning symbol.
 
+        In accessibility mode, includes "[WARN]" text label.
+
         Args:
             text: Warning message to display.
         """
         if self.quiet:
             return
-        self.print(self._c(f"  {Symbols.WARN} {text}", Colors.YELLOW))
+        if self.accessible:
+            indicator = get_status_indicator("warning", include_label=True, use_color=self.color)
+            self.print(f"  {indicator} {text}")
+        else:
+            self.print(self._c(f"  {Symbols.WARN} {text}", Colors.YELLOW))
 
     def info(self, text: str) -> None:
         """
         Print an info message with info symbol.
+
+        In accessibility mode, includes "[INFO]" text label.
 
         Args:
             text: Info message to display.
         """
         if self.quiet:
             return
-        self.print(self._c(f"  {Symbols.INFO} {text}", Colors.CYAN))
+        if self.accessible:
+            indicator = get_status_indicator("info", include_label=True, use_color=self.color)
+            self.print(f"  {indicator} {text}")
+        else:
+            self.print(self._c(f"  {Symbols.INFO} {text}", Colors.CYAN))
 
     def detail(self, text: str) -> None:
         """

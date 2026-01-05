@@ -55,6 +55,34 @@ from .output import Console, Symbols
 from .parser import create_parser
 
 
+def _create_console(args: argparse.Namespace, **overrides: bool) -> Console:
+    """
+    Create a Console instance from parsed CLI arguments.
+
+    Extracts common console settings from args and allows overrides.
+
+    Args:
+        args: Parsed command line arguments.
+        **overrides: Override specific Console settings (color, verbose, etc.)
+
+    Returns:
+        Configured Console instance.
+    """
+    color = not getattr(args, "no_color", False)
+    verbose = getattr(args, "verbose", False)
+    quiet = getattr(args, "quiet", False)
+    json_mode = getattr(args, "output", "text") == "json"
+    accessible = getattr(args, "accessible", False)
+
+    return Console(
+        color=overrides.get("color", color),
+        verbose=overrides.get("verbose", verbose),
+        quiet=overrides.get("quiet", quiet),
+        json_mode=overrides.get("json_mode", json_mode),
+        accessible=overrides.get("accessible", accessible),
+    )
+
+
 def validate_markdown(
     console: Console,
     markdown_path: str,
@@ -455,30 +483,21 @@ def main() -> int:
     if args.init:
         from .init import run_init
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_init(console)
 
     # Handle doctor command
     if getattr(args, "doctor", False):
         from .doctor import run_doctor
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_doctor(console, verbose=getattr(args, "verbose", False))
 
     # Handle stats command
     if getattr(args, "stats", False):
         from .stats import run_stats
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_stats(
             console,
             input_path=getattr(args, "input", None),
@@ -492,10 +511,7 @@ def main() -> int:
             parser.error("--diff requires --input/-f and --epic/-e to be specified")
         from .diff_cmd import run_diff as run_diff_cmd
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_diff_cmd(
             console,
             input_path=args.input,
@@ -509,10 +525,7 @@ def main() -> int:
             parser.error("--import requires --epic/-e to be specified")
         from .import_cmd import run_import
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_import(
             console,
             epic_key=args.epic,
@@ -526,10 +539,7 @@ def main() -> int:
             parser.error("--plan requires --input/-f and --epic/-e to be specified")
         from .plan_cmd import run_plan
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_plan(
             console,
             input_path=args.input,
@@ -542,10 +552,7 @@ def main() -> int:
     if getattr(args, "migrate", False):
         from .migrate import run_migrate
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_migrate(
             console,
             source_type=getattr(args, "migrate_source", "jira") or "jira",
@@ -560,10 +567,7 @@ def main() -> int:
             parser.error("--visualize requires --input/-f to be specified")
         from .visualize import run_visualize
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_visualize(
             console,
             input_path=args.input,
@@ -575,10 +579,7 @@ def main() -> int:
     if getattr(args, "velocity", False) or getattr(args, "velocity_add", False):
         from .velocity import run_velocity
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         action = "add" if getattr(args, "velocity_add", False) else "show"
         return run_velocity(
             console,
@@ -594,10 +595,7 @@ def main() -> int:
             parser.error("--report requires --input/-f to be specified")
         from .report import run_report
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_report(
             console,
             input_path=args.input,
@@ -610,10 +608,7 @@ def main() -> int:
     if getattr(args, "config_validate", False):
         from .config_cmd import run_config_validate
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         return run_config_validate(
             console,
             config_file=getattr(args, "config", None),
@@ -622,7 +617,7 @@ def main() -> int:
 
     # Handle version check command
     if getattr(args, "version_check", False):
-        console = Console(color=not getattr(args, "no_color", False))
+        console = _create_console(args)
         console.header("spectra Version Check")
         console.print()
         console.info("Current version: 2.0.0")
@@ -635,10 +630,7 @@ def main() -> int:
     if getattr(args, "hook", None):
         from .hook import run_hook_install, run_hook_status, run_hook_uninstall
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
         hook_action = args.hook
         hook_type = getattr(args, "hook_type", "pre-commit")
 
@@ -669,10 +661,7 @@ def main() -> int:
     if getattr(args, "bulk_update", False):
         from .bulk import run_bulk_update
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         input_path = Path(args.markdown) if args.markdown else None
         return run_bulk_update(
@@ -688,10 +677,7 @@ def main() -> int:
     if getattr(args, "bulk_assign", False):
         from .bulk import run_bulk_assign
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         input_path = Path(args.markdown) if args.markdown else None
         return run_bulk_assign(
@@ -707,10 +693,7 @@ def main() -> int:
     if getattr(args, "split", False) or getattr(args, "split_story", None):
         from .split import run_split
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         input_path = Path(args.markdown) if args.markdown else None
         return run_split(
@@ -726,10 +709,7 @@ def main() -> int:
     if getattr(args, "generate_stories", False):
         from .ai_generate import run_ai_generate
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         return run_ai_generate(
             console=console,
@@ -749,10 +729,7 @@ def main() -> int:
     if getattr(args, "refine", False) or getattr(args, "refine_story", None):
         from .ai_refine import run_ai_refine
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         story_ids = None
         if getattr(args, "refine_story", None):
@@ -780,10 +757,7 @@ def main() -> int:
     if getattr(args, "estimate", False) or getattr(args, "estimate_story", None):
         from .ai_estimate import run_ai_estimate
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         story_ids = None
         if getattr(args, "estimate_story", None):
@@ -807,10 +781,7 @@ def main() -> int:
     if getattr(args, "label", False) or getattr(args, "label_story", None):
         from .ai_label import run_ai_label
 
-        console = Console(
-            color=not getattr(args, "no_color", False),
-            verbose=getattr(args, "verbose", False),
-        )
+        console = _create_console(args)
 
         story_ids = None
         if getattr(args, "label_story", None):

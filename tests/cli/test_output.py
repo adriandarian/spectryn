@@ -13,11 +13,18 @@ from spectra.cli.output import (
     Console,
     Symbols,
     ThemeName,
+    format_diff_indicator,
+    format_priority_text,
+    format_score_text,
+    format_status_text,
+    get_accessibility_mode,
     get_emoji_mode,
+    get_status_indicator,
     get_symbol,
     get_theme,
     get_theme_name,
     list_themes,
+    set_accessibility_mode,
     set_emoji_mode,
     set_theme,
 )
@@ -622,3 +629,309 @@ class TestConsolePrompt:
             result = console.confirm("Continue?")
 
         assert result is False
+
+class TestAccessibilityMode:
+    """Tests for accessibility mode (color-blind friendly output)."""
+
+    @pytest.fixture(autouse=True)
+    def reset_accessibility_mode(self):
+        """Reset accessibility mode to default before and after each test."""
+
+        set_accessibility_mode(False)
+        yield
+        set_accessibility_mode(False)
+
+    def test_accessibility_mode_disabled_by_default(self):
+        """Test that accessibility mode is disabled by default."""
+
+        assert get_accessibility_mode() is False
+
+    def test_set_accessibility_mode_on(self):
+        """Test enabling accessibility mode."""
+
+        set_accessibility_mode(True)
+        assert get_accessibility_mode() is True
+
+    def test_set_accessibility_mode_off(self):
+        """Test disabling accessibility mode."""
+
+        set_accessibility_mode(True)
+        set_accessibility_mode(False)
+        assert get_accessibility_mode() is False
+
+    def test_console_accessible_parameter(self):
+        """Test Console with accessible parameter."""
+        console = Console(accessible=True)
+        assert console.accessible is True
+
+    def test_console_sets_global_accessibility_mode(self):
+        """Test that Console sets global accessibility mode."""
+
+        Console(accessible=True)
+        assert get_accessibility_mode() is True
+
+
+class TestStatusIndicator:
+    """Tests for status indicator functions."""
+
+    @pytest.fixture(autouse=True)
+    def reset_accessibility_mode(self):
+        """Reset accessibility mode before and after each test."""
+
+        set_accessibility_mode(False)
+        yield
+        set_accessibility_mode(False)
+
+    def test_get_status_indicator_success(self):
+        """Test success status indicator returns filled circle."""
+
+        indicator = get_status_indicator("success", use_color=False)
+        assert "●" in indicator
+
+    def test_get_status_indicator_error(self):
+        """Test error status indicator returns filled square."""
+
+        indicator = get_status_indicator("error", use_color=False)
+        assert "■" in indicator
+
+    def test_get_status_indicator_warning(self):
+        """Test warning status indicator returns triangle."""
+
+        indicator = get_status_indicator("warning", use_color=False)
+        assert "▲" in indicator
+
+    def test_get_status_indicator_info(self):
+        """Test info status indicator returns diamond."""
+
+        indicator = get_status_indicator("info", use_color=False)
+        assert "◆" in indicator
+
+    def test_get_status_indicator_with_label(self):
+        """Test status indicator includes label when requested."""
+
+        indicator = get_status_indicator("success", include_label=True, use_color=False)
+        assert "● OK" in indicator
+
+    def test_get_status_indicator_accessibility_mode(self):
+        """Test status indicator includes label in accessibility mode."""
+
+        set_accessibility_mode(True)
+        indicator = get_status_indicator("error", use_color=False)
+        assert "■ ERROR" in indicator
+
+
+class TestFormatStatusText:
+    """Tests for format_status_text function."""
+
+    def test_format_done_status(self):
+        """Test formatting Done status."""
+
+        result = format_status_text("Done", use_color=False)
+        assert "Done" in result
+        assert "●" in result  # Success shape
+
+    def test_format_in_progress_status(self):
+        """Test formatting In Progress status."""
+
+        result = format_status_text("In Progress", use_color=False)
+        assert "In Progress" in result
+        assert "◐" in result  # Progress shape
+
+    def test_format_error_status(self):
+        """Test formatting error status."""
+
+        result = format_status_text("Failed", use_color=False)
+        assert "Failed" in result
+        assert "■" in result  # Error shape
+
+    def test_format_status_without_indicator(self):
+        """Test formatting status without indicator."""
+
+        result = format_status_text("Done", use_color=False, include_indicator=False)
+        assert "Done" in result
+        assert "●" not in result
+
+
+class TestFormatPriorityText:
+    """Tests for format_priority_text function."""
+
+    def test_format_critical_priority(self):
+        """Test formatting critical priority with double triangle."""
+
+        result = format_priority_text("Critical", use_color=False)
+        assert "Critical" in result
+        assert "▲▲" in result
+
+    def test_format_high_priority(self):
+        """Test formatting high priority with single up triangle."""
+
+        result = format_priority_text("High", use_color=False)
+        assert "High" in result
+        assert "▲ " in result  # Single triangle (not double)
+
+    def test_format_medium_priority(self):
+        """Test formatting medium priority with right triangle."""
+
+        result = format_priority_text("Medium", use_color=False)
+        assert "Medium" in result
+        assert "►" in result
+
+    def test_format_low_priority(self):
+        """Test formatting low priority with down triangle."""
+
+        result = format_priority_text("Low", use_color=False)
+        assert "Low" in result
+        assert "▽" in result
+
+    def test_format_priority_without_indicator(self):
+        """Test formatting priority without indicator."""
+
+        result = format_priority_text("High", use_color=False, include_indicator=False)
+        assert "High" in result
+        assert "▲" not in result
+
+
+class TestFormatScoreText:
+    """Tests for format_score_text function."""
+
+    def test_format_excellent_score(self):
+        """Test formatting excellent score (>= 80%)."""
+
+        result = format_score_text(90, max_score=100, use_color=False)
+        assert "90/100" in result
+        assert "(Excellent)" in result
+
+    def test_format_good_score(self):
+        """Test formatting good score (>= 60%)."""
+
+        result = format_score_text(70, max_score=100, use_color=False)
+        assert "70/100" in result
+        assert "(Good)" in result
+
+    def test_format_fair_score(self):
+        """Test formatting fair score (>= 40%)."""
+
+        result = format_score_text(50, max_score=100, use_color=False)
+        assert "50/100" in result
+        assert "(Fair)" in result
+
+    def test_format_poor_score(self):
+        """Test formatting poor score (< 40%)."""
+
+        result = format_score_text(20, max_score=100, use_color=False)
+        assert "20/100" in result
+        assert "(Poor)" in result
+
+    def test_format_score_without_bar(self):
+        """Test formatting score without progress bar."""
+
+        result = format_score_text(80, max_score=100, show_bar=False, use_color=False)
+        assert "80/100" in result
+        assert "█" not in result
+
+    def test_format_score_with_bar(self):
+        """Test formatting score with progress bar."""
+
+        result = format_score_text(80, max_score=100, show_bar=True, use_color=False)
+        assert "█" in result  # Filled portion of bar
+
+
+class TestFormatDiffIndicator:
+    """Tests for format_diff_indicator function."""
+
+    @pytest.fixture(autouse=True)
+    def reset_accessibility_mode(self):
+        """Reset accessibility mode before and after each test."""
+
+        set_accessibility_mode(False)
+        yield
+        set_accessibility_mode(False)
+
+    def test_add_indicator(self):
+        """Test add indicator shows + symbol."""
+
+        result = format_diff_indicator("add", use_color=False)
+        assert "+" in result
+
+    def test_remove_indicator(self):
+        """Test remove indicator shows - symbol."""
+
+        result = format_diff_indicator("remove", use_color=False)
+        assert "-" in result
+
+    def test_modify_indicator(self):
+        """Test modify indicator shows ~ symbol."""
+
+        result = format_diff_indicator("modify", use_color=False)
+        assert "~" in result
+
+    def test_accessibility_mode_shows_label(self):
+        """Test accessibility mode shows full label."""
+
+        set_accessibility_mode(True)
+        result = format_diff_indicator("add", use_color=False)
+        assert "+ ADD" in result
+
+    def test_accessibility_mode_remove_label(self):
+        """Test accessibility mode shows DEL label for remove."""
+
+        set_accessibility_mode(True)
+        result = format_diff_indicator("remove", use_color=False)
+        assert "- DEL" in result
+
+
+class TestConsoleAccessibleOutput:
+    """Tests for Console class with accessibility mode."""
+
+    @pytest.fixture(autouse=True)
+    def reset_accessibility_mode(self):
+        """Reset accessibility mode before and after each test."""
+
+        set_accessibility_mode(False)
+        yield
+        set_accessibility_mode(False)
+
+    def test_success_message_accessible(self, capsys):
+        """Test success message includes text label in accessible mode."""
+        console = Console(color=False, accessible=True)
+        console.success("Test passed")
+
+        captured = capsys.readouterr()
+        assert "OK" in captured.out
+        assert "Test passed" in captured.out
+
+    def test_error_message_accessible(self, capsys):
+        """Test error message includes text label in accessible mode."""
+        console = Console(color=False, accessible=True)
+        console.error("Test failed")
+
+        captured = capsys.readouterr()
+        assert "ERROR" in captured.out
+        assert "Test failed" in captured.out
+
+    def test_warning_message_accessible(self, capsys):
+        """Test warning message includes text label in accessible mode."""
+        console = Console(color=False, accessible=True)
+        console.warning("Test warning")
+
+        captured = capsys.readouterr()
+        assert "WARN" in captured.out
+        assert "Test warning" in captured.out
+
+    def test_info_message_accessible(self, capsys):
+        """Test info message includes text label in accessible mode."""
+        console = Console(color=False, accessible=True)
+        console.info("Test info")
+
+        captured = capsys.readouterr()
+        assert "INFO" in captured.out
+        assert "Test info" in captured.out
+
+    def test_non_accessible_mode_no_labels(self, capsys):
+        """Test non-accessible mode doesn't include text labels."""
+        console = Console(color=False, accessible=False)
+        console.success("Test passed")
+
+        captured = capsys.readouterr()
+        assert "OK" not in captured.out
+        assert "Test passed" in captured.out

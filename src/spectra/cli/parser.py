@@ -295,6 +295,12 @@ def _add_output_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
     parser.add_argument(
+        "--accessible",
+        action="store_true",
+        help="Enable accessibility mode with text labels alongside status indicators. "
+        "Makes output readable for color-blind users and screen readers",
+    )
+    parser.add_argument(
         "--no-emoji",
         action="store_true",
         help="Disable emojis in output (use ASCII alternatives)",
