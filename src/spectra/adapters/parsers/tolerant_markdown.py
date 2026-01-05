@@ -1332,6 +1332,629 @@ def extract_images_from_section(
 
 
 # =============================================================================
+# Table Parsing - Extract and parse markdown tables from content
+# =============================================================================
+
+
+class TableAlignment(Enum):
+    """Column alignment in markdown tables."""
+
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
+    NONE = "none"
+
+
+@dataclass
+class TableCell:
+    """
+    A single cell in a markdown table.
+
+    Attributes:
+        content: Raw cell content
+        cleaned: Content with markdown formatting removed
+        row: Row index (0-indexed, excluding header)
+        column: Column index (0-indexed)
+        is_header: Whether this is a header cell
+        alignment: Column alignment
+        colspan: Column span (1 for normal cells)
+        original_text: Original text before cleaning
+    """
+
+    content: str
+    cleaned: str = ""
+    row: int = 0
+    column: int = 0
+    is_header: bool = False
+    alignment: TableAlignment = TableAlignment.NONE
+    colspan: int = 1
+    original_text: str = ""
+
+    def __post_init__(self) -> None:
+        """Clean content after initialization."""
+        if not self.cleaned:
+            self.cleaned = self._clean_content(self.content)
+        if not self.original_text:
+            self.original_text = self.content
+
+    @staticmethod
+    def _clean_content(content: str) -> str:
+        """Remove markdown formatting from cell content."""
+        text = content.strip()
+        # Remove bold
+        text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+        # Remove italic
+        text = re.sub(r"\*(.+?)\*", r"\1", text)
+        text = re.sub(r"_(.+?)_", r"\1", text)
+        # Remove code
+        text = re.sub(r"`(.+?)`", r"\1", text)
+        # Remove links, keep text
+        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+        # Remove strikethrough
+        text = re.sub(r"~~(.+?)~~", r"\1", text)
+        return text.strip()
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if cell is empty or whitespace only."""
+        return not self.cleaned or self.cleaned.isspace()
+
+    @property
+    def as_int(self) -> int | None:
+        """Try to parse cell as integer."""
+        cleaned = re.sub(r"[^\d-]", "", self.cleaned)
+        try:
+            return int(cleaned) if cleaned else None
+        except ValueError:
+            return None
+
+    @property
+    def as_float(self) -> float | None:
+        """Try to parse cell as float."""
+        cleaned = re.sub(r"[^\d.-]", "", self.cleaned)
+        try:
+            return float(cleaned) if cleaned else None
+        except ValueError:
+            return None
+
+    @property
+    def as_bool(self) -> bool | None:
+        """Try to parse cell as boolean."""
+        lower = self.cleaned.lower()
+        if lower in ("yes", "true", "1", "✓", "✔", "x", "done"):
+            return True
+        if lower in ("no", "false", "0", "", "-", "n/a"):
+            return False
+        return None
+
+
+@dataclass
+class ParsedTable:
+    """
+    A parsed markdown table with headers and data rows.
+
+    Attributes:
+        headers: List of header cell contents
+        rows: List of data rows, each row is a list of TableCell
+        alignments: Column alignments from separator row
+        line_number: Starting line number in source
+        source: Source file path
+        raw_content: Original table markdown
+    """
+
+    headers: list[str]
+    rows: list[list[TableCell]]
+    alignments: list[TableAlignment] = field(default_factory=list)
+    line_number: int = 0
+    source: str | None = None
+    raw_content: str = ""
+
+    @property
+    def column_count(self) -> int:
+        """Get the number of columns."""
+        return len(self.headers)
+
+    @property
+    def row_count(self) -> int:
+        """Get the number of data rows (excluding header)."""
+        return len(self.rows)
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if table has no data rows."""
+        return len(self.rows) == 0
+
+    def get_column(self, index: int) -> list[TableCell]:
+        """Get all cells in a column by index."""
+        if index < 0 or index >= self.column_count:
+            return []
+        return [row[index] for row in self.rows if index < len(row)]
+
+    def get_column_by_header(self, header: str) -> list[TableCell]:
+        """Get all cells in a column by header name (case-insensitive)."""
+        header_lower = header.lower().strip()
+        for i, h in enumerate(self.headers):
+            if h.lower().strip() == header_lower:
+                return self.get_column(i)
+        return []
+
+    def get_row(self, index: int) -> list[TableCell]:
+        """Get a row by index."""
+        if index < 0 or index >= len(self.rows):
+            return []
+        return self.rows[index]
+
+    def to_dicts(self) -> list[dict[str, str]]:
+        """Convert table to list of dictionaries (header -> value)."""
+        result = []
+        for row in self.rows:
+            row_dict = {}
+            for i, cell in enumerate(row):
+                if i < len(self.headers):
+                    header = self.headers[i].lower().strip()
+                    row_dict[header] = cell.cleaned
+            if any(row_dict.values()):
+                result.append(row_dict)
+        return result
+
+    def find_column_index(self, *names: str) -> int | None:
+        """Find column index by any of the given names (case-insensitive)."""
+        names_lower = {n.lower().strip() for n in names}
+        for i, h in enumerate(self.headers):
+            if h.lower().strip() in names_lower:
+                return i
+        return None
+
+    def get_cell(self, row: int, column: int | str) -> TableCell | None:
+        """Get a specific cell by row index and column index or name."""
+        if row < 0 or row >= len(self.rows):
+            return None
+
+        if isinstance(column, str):
+            col_idx = self.find_column_index(column)
+            if col_idx is None:
+                return None
+            column = col_idx
+
+        if column < 0 or column >= len(self.rows[row]):
+            return None
+
+        return self.rows[row][column]
+
+
+def parse_markdown_table(
+    content: str,
+    source: str | None = None,
+    start_line: int = 1,
+) -> tuple[ParsedTable | None, list[ParseWarning]]:
+    """
+    Parse a markdown table from content.
+
+    Supports:
+    - Standard GFM tables with pipe delimiters
+    - Column alignment (:---, :---:, ---:)
+    - Cells with markdown formatting (bold, italic, code, links)
+    - Compact format without leading/trailing pipes
+    - Multi-line cells (escaped newlines)
+
+    Args:
+        content: Markdown content containing a table
+        source: Source file for error reporting
+        start_line: Line number offset for error reporting
+
+    Returns:
+        Tuple of (ParsedTable or None, list of warnings)
+
+    Examples:
+        >>> content = '''
+        ... | Name | Status | Points |
+        ... |:-----|:------:|-------:|
+        ... | Task 1 | Done | 5 |
+        ... | Task 2 | Todo | 3 |
+        ... '''
+        >>> table, warnings = parse_markdown_table(content)
+        >>> table.headers
+        ['Name', 'Status', 'Points']
+        >>> table.row_count
+        2
+    """
+    warnings: list[ParseWarning] = []
+    lines = content.strip().split("\n")
+
+    if len(lines) < 2:
+        return None, warnings
+
+    # Find table start (first line with |)
+    table_start = -1
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("|") or ("|" in stripped and _looks_like_table_row(stripped)):
+            table_start = i
+            break
+
+    if table_start == -1:
+        return None, warnings
+
+    # Parse header row
+    header_line = lines[table_start].strip()
+    headers = _parse_table_row(header_line)
+
+    if not headers or len(headers) < 1:
+        return None, warnings
+
+    # Parse separator row (if present)
+    alignments: list[TableAlignment] = []
+    data_start = table_start + 1
+
+    if data_start < len(lines):
+        separator_line = lines[data_start].strip()
+        if _is_separator_row(separator_line):
+            alignments = _parse_alignments(separator_line)
+            data_start += 1
+
+    # Ensure alignments match header count
+    while len(alignments) < len(headers):
+        alignments.append(TableAlignment.NONE)
+
+    # Parse data rows
+    rows: list[list[TableCell]] = []
+    row_lines = []
+
+    for i in range(data_start, len(lines)):
+        line = lines[i].strip()
+
+        # Stop at empty line or non-table content
+        if not line or (not line.startswith("|") and "|" not in line):
+            break
+
+        # Skip additional separator rows
+        if _is_separator_row(line):
+            continue
+
+        row_lines.append((i, line))
+
+    # Parse each data row
+    for row_idx, (line_idx, line) in enumerate(row_lines):
+        cells_content = _parse_table_row(line)
+        cells: list[TableCell] = []
+
+        for col_idx, cell_content in enumerate(cells_content):
+            alignment = alignments[col_idx] if col_idx < len(alignments) else TableAlignment.NONE
+            cells.append(
+                TableCell(
+                    content=cell_content,
+                    row=row_idx,
+                    column=col_idx,
+                    is_header=False,
+                    alignment=alignment,
+                )
+            )
+
+        # Warn about column count mismatch
+        if len(cells) != len(headers):
+            warnings.append(
+                ParseWarning(
+                    message=f"Row has {len(cells)} columns, expected {len(headers)}",
+                    location=ParseLocation(line=start_line + line_idx, source=source),
+                    suggestion="Ensure all rows have the same number of columns",
+                    code="TABLE_COLUMN_MISMATCH",
+                )
+            )
+
+        # Pad or trim to match header count
+        while len(cells) < len(headers):
+            cells.append(
+                TableCell(
+                    content="",
+                    row=row_idx,
+                    column=len(cells),
+                    alignment=alignments[len(cells)]
+                    if len(cells) < len(alignments)
+                    else TableAlignment.NONE,
+                )
+            )
+        cells = cells[: len(headers)]
+
+        rows.append(cells)
+
+    if not rows and not headers:
+        return None, warnings
+
+    # Build raw content for reference
+    table_lines = lines[table_start : data_start + len(rows)]
+    raw_content = "\n".join(table_lines)
+
+    return ParsedTable(
+        headers=[h.strip() for h in headers],
+        rows=rows,
+        alignments=alignments[: len(headers)],
+        line_number=start_line + table_start,
+        source=source,
+        raw_content=raw_content,
+    ), warnings
+
+
+def _looks_like_table_row(line: str) -> bool:
+    """Check if a line looks like a table row."""
+    # Must have at least one pipe that's not at the start/end only
+    pipe_count = line.count("|")
+    if pipe_count < 1:
+        return False
+    # Should have multiple cells or pipe-delimited content
+    return pipe_count >= 2 or ("|" in line and line.strip() not in ("|", "||"))
+
+
+def _parse_table_row(line: str) -> list[str]:
+    """Parse a table row into cell contents."""
+    line = line.strip()
+
+    # Remove leading/trailing pipes
+    if line.startswith("|"):
+        line = line[1:]
+    if line.endswith("|"):
+        line = line[:-1]
+
+    # Split by pipe, handling escaped pipes
+    cells = []
+    current = ""
+    i = 0
+    while i < len(line):
+        if line[i] == "\\" and i + 1 < len(line) and line[i + 1] == "|":
+            # Escaped pipe
+            current += "|"
+            i += 2
+        elif line[i] == "|":
+            cells.append(current.strip())
+            current = ""
+            i += 1
+        else:
+            current += line[i]
+            i += 1
+
+    # Don't forget the last cell
+    if current or cells:
+        cells.append(current.strip())
+
+    return cells
+
+
+def _is_separator_row(line: str) -> bool:
+    """Check if a line is a table separator row."""
+    line = line.strip()
+    if not line:
+        return False
+
+    # Remove leading/trailing pipes
+    if line.startswith("|"):
+        line = line[1:]
+    if line.endswith("|"):
+        line = line[:-1]
+
+    # Split by pipe
+    cells = line.split("|")
+
+    # Each cell should be mostly dashes with optional colons
+    for cell in cells:
+        cell = cell.strip()
+        if not cell:
+            continue
+        # Remove alignment indicators
+        cell = cell.strip(":")
+        # Should be only dashes
+        if not cell or not all(c == "-" for c in cell):
+            return False
+
+    return True
+
+
+def _parse_alignments(separator_line: str) -> list[TableAlignment]:
+    """Parse column alignments from separator row."""
+    alignments = []
+
+    line = separator_line.strip()
+    if line.startswith("|"):
+        line = line[1:]
+    if line.endswith("|"):
+        line = line[:-1]
+
+    for cell in line.split("|"):
+        cell = cell.strip()
+        if cell.startswith(":") and cell.endswith(":"):
+            alignments.append(TableAlignment.CENTER)
+        elif cell.endswith(":"):
+            alignments.append(TableAlignment.RIGHT)
+        elif cell.startswith(":"):
+            alignments.append(TableAlignment.LEFT)
+        else:
+            alignments.append(TableAlignment.NONE)
+
+    return alignments
+
+
+def extract_tables_from_content(
+    content: str,
+    source: str | None = None,
+) -> tuple[list[ParsedTable], list[ParseWarning]]:
+    """
+    Extract all markdown tables from content.
+
+    Args:
+        content: Markdown content potentially containing multiple tables
+        source: Source file for error reporting
+
+    Returns:
+        Tuple of (list of ParsedTable, list of warnings)
+
+    Examples:
+        >>> content = '''
+        ... # Section 1
+        ...
+        ... | A | B |
+        ... |---|---|
+        ... | 1 | 2 |
+        ...
+        ... # Section 2
+        ...
+        ... | X | Y |
+        ... |---|---|
+        ... | a | b |
+        ... '''
+        >>> tables, warnings = extract_tables_from_content(content)
+        >>> len(tables)
+        2
+    """
+    tables: list[ParsedTable] = []
+    all_warnings: list[ParseWarning] = []
+    lines = content.split("\n")
+
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+
+        # Look for table start
+        if line.startswith("|") or (_looks_like_table_row(line) and "|" in line):
+            # Find table extent
+            table_start = i
+            table_end = i + 1
+
+            while table_end < len(lines):
+                next_line = lines[table_end].strip()
+                if not next_line or (not next_line.startswith("|") and "|" not in next_line):
+                    break
+                if next_line.startswith("#"):
+                    break
+                table_end += 1
+
+            # Parse this table
+            table_content = "\n".join(lines[table_start:table_end])
+            table, warnings = parse_markdown_table(
+                table_content,
+                source=source,
+                start_line=table_start + 1,
+            )
+
+            if table:
+                tables.append(table)
+            all_warnings.extend(warnings)
+
+            i = table_end
+        else:
+            i += 1
+
+    return tables, all_warnings
+
+
+def extract_table_from_section(
+    content: str,
+    section_name: str,
+    source: str | None = None,
+) -> tuple[ParsedTable | None, list[ParseWarning]]:
+    """
+    Extract a table from a specific markdown section.
+
+    Args:
+        content: Full markdown content
+        section_name: Name of section to extract from (e.g., "Subtasks", "Metadata")
+        source: Source file for error reporting
+
+    Returns:
+        Tuple of (ParsedTable or None, list of warnings)
+    """
+    # Build pattern parts - avoid f-string issues with braces
+    section_start = r"#{2,4}\s*" + re.escape(section_name) + r"\s*\n"
+    section_body = r"([\s\S]*?)"
+    section_end = r"(?=\n#{2,4}|\Z)"
+
+    section_pattern = re.compile(
+        section_start + section_body + section_end,
+        re.IGNORECASE,
+    )
+
+    match = section_pattern.search(content)
+    if not match:
+        return None, []
+
+    section_content = match.group(1)
+    section_line = get_line_number(content, match.start())
+
+    return parse_markdown_table(section_content, source=source, start_line=section_line)
+
+
+def table_to_markdown(
+    table: ParsedTable,
+    alignment: bool = True,
+    padding: int = 1,
+) -> str:
+    """
+    Convert a ParsedTable back to markdown format.
+
+    Args:
+        table: ParsedTable to convert
+        alignment: Include alignment indicators in separator
+        padding: Minimum padding around cell content
+
+    Returns:
+        Markdown table string
+    """
+    if not table.headers:
+        return ""
+
+    # Calculate column widths
+    widths = [len(h) for h in table.headers]
+    for row in table.rows:
+        for i, cell in enumerate(row):
+            if i < len(widths):
+                widths[i] = max(widths[i], len(cell.cleaned))
+
+    # Add minimum padding
+    widths = [w + padding * 2 for w in widths]
+
+    lines = []
+
+    # Header row
+    header_cells = []
+    for i, h in enumerate(table.headers):
+        width = widths[i] if i < len(widths) else len(h) + padding * 2
+        header_cells.append(h.center(width))
+    lines.append("| " + " | ".join(header_cells) + " |")
+
+    # Separator row
+    sep_cells = []
+    for i, width in enumerate(widths):
+        align = table.alignments[i] if i < len(table.alignments) else TableAlignment.NONE
+        if alignment:
+            if align == TableAlignment.CENTER:
+                sep_cells.append(":" + "-" * (width - 2) + ":")
+            elif align == TableAlignment.RIGHT:
+                sep_cells.append("-" * (width - 1) + ":")
+            elif align == TableAlignment.LEFT:
+                sep_cells.append(":" + "-" * (width - 1))
+            else:
+                sep_cells.append("-" * width)
+        else:
+            sep_cells.append("-" * width)
+    lines.append("|" + "|".join(sep_cells) + "|")
+
+    # Data rows
+    for row in table.rows:
+        row_cells = []
+        for i, cell in enumerate(row):
+            width = widths[i] if i < len(widths) else len(cell.cleaned) + padding * 2
+            align = table.alignments[i] if i < len(table.alignments) else TableAlignment.NONE
+
+            if align == TableAlignment.CENTER:
+                row_cells.append(cell.cleaned.center(width))
+            elif align == TableAlignment.RIGHT:
+                row_cells.append(cell.cleaned.rjust(width))
+            else:
+                row_cells.append(cell.cleaned.ljust(width))
+
+        lines.append("| " + " | ".join(row_cells) + " |")
+
+    return "\n".join(lines)
+
+
+# =============================================================================
 # Error Code Definitions
 # =============================================================================
 
@@ -1361,6 +1984,7 @@ class ParseErrorCode:
     NONSTANDARD_CHECKBOX = "W007"
     SHORT_SUBTASK_NAME = "W008"
     NONSTANDARD_SUBTASK_CHECKBOX = "W009"
+    TABLE_COLUMN_MISMATCH = "W010"
 
 
 # =============================================================================
@@ -1396,4 +2020,12 @@ __all__ = [
     "EmbeddedImage",
     "parse_embedded_images",
     "extract_images_from_section",
+    # Table Parsing
+    "TableAlignment",
+    "TableCell",
+    "ParsedTable",
+    "parse_markdown_table",
+    "extract_tables_from_content",
+    "extract_table_from_section",
+    "table_to_markdown",
 ]
