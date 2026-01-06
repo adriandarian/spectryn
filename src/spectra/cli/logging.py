@@ -4,6 +4,7 @@ Structured Logging - JSON and text logging formatters for spectra.
 Provides flexible logging configuration with support for:
 - Text format: Human-readable output for terminal usage
 - JSON format: Structured output for log aggregation (ELK, Splunk, CloudWatch, etc.)
+- Secrets redaction: Automatic redaction of sensitive values in logs
 """
 
 import json
@@ -12,7 +13,11 @@ import sys
 import traceback
 from datetime import datetime, timezone
 from types import TracebackType
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+
+if TYPE_CHECKING:
+    from spectra.core.security.redactor import SecretRedactor
 
 
 class JSONFormatter(logging.Formatter):
@@ -491,3 +496,173 @@ def suppress_logs_for_progress(
             run_sync_with_progress_bar()
     """
     return SuppressLogsForProgress(logger_names=logger_names)
+
+
+# -------------------------------------------------------------------------
+# Secrets Redaction Filter
+# -------------------------------------------------------------------------
+
+
+class RedactingFilter(logging.Filter):
+    """
+    Logging filter that redacts sensitive values from log messages.
+
+    Automatically redacts:
+    - Registered secrets (API tokens, passwords, etc.)
+    - Pattern-matched secrets (Bearer tokens, JWTs, etc.)
+    - Sensitive fields in structured log data
+
+    Example:
+        # Add to existing logging setup
+        redact_filter = RedactingFilter()
+        redact_filter.register_secret(api_token)
+        handler.addFilter(redact_filter)
+
+        # Or use with setup_logging
+        setup_logging(level=logging.DEBUG, redact_secrets=True)
+    """
+
+    def __init__(self, redactor: "SecretRedactor | None" = None) -> None:
+        """
+        Initialize the filter.
+
+        Args:
+            redactor: Optional SecretRedactor instance. Uses global if not specified.
+        """
+        super().__init__()
+        self._redactor = redactor
+
+    @property
+    def redactor(self) -> "SecretRedactor":
+        """Get the redactor instance (lazy initialization)."""
+        if self._redactor is None:
+            from spectra.core.security.redactor import get_global_redactor
+
+            self._redactor = get_global_redactor()
+        return self._redactor
+
+    def register_secret(self, secret: str) -> None:
+        """Register a secret to be redacted from logs."""
+        self.redactor.register_secret(secret)
+
+    def register_secrets(self, *secrets: str) -> None:
+        """Register multiple secrets."""
+        self.redactor.register_secrets(*secrets)
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """
+        Filter and redact the log record.
+
+        Always returns True (logs are never dropped), but modifies
+        the record to redact sensitive values.
+        """
+        # Redact the message
+        if record.msg:
+            if isinstance(record.msg, str):
+                record.msg = self.redactor.redact_string(record.msg)
+
+        # Redact args if present
+        if record.args:
+            record.args = self._redact_args(record.args)
+
+        # Redact exception info if present
+        if record.exc_info and record.exc_info[1]:
+            # Create a new exception with redacted message
+            exc_type, exc_value, exc_tb = record.exc_info
+            if exc_value:
+                redacted_msg = self.redactor.redact_string(str(exc_value))
+                # We can't modify the exception, but we can redact exc_text
+                record.exc_text = self.redactor.redact_string(
+                    "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+                )
+
+        # Redact any extra fields
+        for key, value in list(record.__dict__.items()):
+            if key.startswith("_") or key in JSONFormatter.RESERVED_ATTRS:
+                continue
+            if isinstance(value, str):
+                setattr(record, key, self.redactor.redact_string(value))
+            elif isinstance(value, dict):
+                setattr(record, key, self.redactor.redact_dict(value))
+
+        return True
+
+    def _redact_args(self, args: Any) -> Any:
+        """Redact log message arguments."""
+        if isinstance(args, dict):
+            return self.redactor.redact_dict(args)
+        if isinstance(args, tuple):
+            return tuple(self._redact_arg(arg) for arg in args)
+        if isinstance(args, list):
+            return [self._redact_arg(arg) for arg in args]
+        return self._redact_arg(args)
+
+    def _redact_arg(self, arg: Any) -> Any:
+        """Redact a single argument."""
+        if isinstance(arg, str):
+            return self.redactor.redact_string(arg)
+        if isinstance(arg, dict):
+            return self.redactor.redact_dict(arg)
+        return arg
+
+
+def setup_secure_logging(
+    level: int = logging.INFO,
+    log_format: str = "text",
+    log_file: str | None = None,
+    include_location: bool = False,
+    static_fields: dict[str, Any] | None = None,
+    noisy_loggers: list[str] | None = None,
+    secrets: list[str] | None = None,
+) -> RedactingFilter:
+    """
+    Configure logging with automatic secrets redaction.
+
+    This is the recommended way to set up logging when handling sensitive data.
+    All registered secrets will be automatically redacted from log output.
+
+    Args:
+        level: Log level (e.g., logging.DEBUG, logging.INFO)
+        log_format: Output format - "text" or "json"
+        log_file: Path to log file (if provided, logs are written to file)
+        include_location: Include file/line info in JSON logs
+        static_fields: Static fields to add to every JSON log record
+        noisy_loggers: Logger names to suppress to WARNING level
+        secrets: List of secret values to redact from logs
+
+    Returns:
+        RedactingFilter instance for registering additional secrets.
+
+    Example:
+        # Set up secure logging with known secrets
+        redact_filter = setup_secure_logging(
+            level=logging.DEBUG,
+            secrets=[api_token, password]
+        )
+
+        # Register additional secrets later
+        redact_filter.register_secret(another_token)
+    """
+    # First, set up normal logging
+    setup_logging(
+        level=level,
+        log_format=log_format,
+        log_file=log_file,
+        include_location=include_location,
+        static_fields=static_fields,
+        noisy_loggers=noisy_loggers,
+    )
+
+    # Create and add redacting filter to all handlers
+    redact_filter = RedactingFilter()
+
+    # Register provided secrets
+    if secrets:
+        redact_filter.register_secrets(*secrets)
+
+    # Add filter to root logger's handlers
+    root = logging.getLogger()
+    for handler in root.handlers:
+        handler.addFilter(redact_filter)
+
+    return redact_filter

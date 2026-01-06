@@ -434,12 +434,13 @@ class BackupManager:
         logger.info(f"Backup created: {backup_id} ({backup.issue_count} issues)")
         return backup
 
-    def save_backup(self, backup: Backup) -> Path:
+    def save_backup(self, backup: Backup, sanitize: bool = True) -> Path:
         """
         Save a backup to disk.
 
         Args:
             backup: The backup to save.
+            sanitize: Whether to sanitize sensitive data before saving.
 
         Returns:
             Path to the saved backup file.
@@ -450,8 +451,24 @@ class BackupManager:
 
         backup_file = epic_dir / f"{backup.backup_id}.json"
 
+        # Convert to dict
+        data = backup.to_dict()
+
+        # Sanitize to remove any secrets before saving
+        if sanitize:
+            try:
+                from spectra.core.security.backup_sanitizer import BackupSanitizer
+
+                sanitizer = BackupSanitizer()
+                result = sanitizer.sanitize_dict(data)
+                if result.was_sanitized:
+                    logger.info(f"Sanitized {result.fields_sanitized} sensitive fields in backup")
+            except ImportError:
+                # Security module not available, continue without sanitization
+                pass
+
         with open(backup_file, "w") as f:
-            json.dump(backup.to_dict(), f, indent=2, default=str)
+            json.dump(data, f, indent=2, default=str)
 
         logger.debug(f"Saved backup to {backup_file}")
         return backup_file

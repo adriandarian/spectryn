@@ -630,6 +630,7 @@ class TestConsolePrompt:
 
         assert result is False
 
+
 class TestAccessibilityMode:
     """Tests for accessibility mode (color-blind friendly output)."""
 
