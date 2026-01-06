@@ -181,7 +181,7 @@ spectra --markdown epic.md --epic PROJ-123 --project OTHER
 
 ### Example `.gitignore` entries
 
-```gitignore
+```bash
 # spectra config with secrets
 .env
 .spectra.yaml

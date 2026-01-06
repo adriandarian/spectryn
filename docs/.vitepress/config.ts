@@ -197,6 +197,31 @@ export default defineConfig({
     /plan\//,
   ],
 
+  // Build optimization - split chunks for better caching
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            // Split shiki (syntax highlighter) - usually the largest
+            if (id.includes('shiki') || id.includes('@shikijs')) {
+              return 'shiki'
+            }
+            // Split search related modules
+            if (id.includes('minisearch') || id.includes('mark.js')) {
+              return 'search'
+            }
+            // Split vueuse utilities
+            if (id.includes('@vueuse')) {
+              return 'vueuse'
+            }
+          }
+        }
+      }
+    }
+  },
+
   lastUpdated: true,
 })
 

@@ -77,7 +77,7 @@ spectra automatically loads `.env` files from:
 **Never commit `.env` files to version control!**
 
 Add to your `.gitignore`:
-```gitignore
+```bash
 .env
 .env.local
 .env.*.local
