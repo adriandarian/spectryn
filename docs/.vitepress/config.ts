@@ -1,5 +1,8 @@
 import { defineConfig } from 'vitepress'
 
+// Use base path for GitHub Pages, root for Vercel/custom domains
+const base = process.env.VITEPRESS_BASE || '/'
+
 export default defineConfig({
   title: 'spectra',
   description: 'Sync markdown documentation to Jira with ease',
@@ -10,10 +13,10 @@ export default defineConfig({
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'spectra - Markdown to Jira Sync' }],
     ['meta', { property: 'og:description', content: 'A production-grade CLI tool for synchronizing markdown documentation with Jira' }],
-    ['meta', { property: 'og:url', content: 'https://adriandarian.github.io/spectra/' }],
+    ['meta', { property: 'og:url', content: 'https://spectra.dev/' }],
   ],
 
-  base: '/spectra/',
+  base,
 
   themeConfig: {
     logo: '/logo.svg',
@@ -66,6 +69,17 @@ export default defineConfig({
             { text: 'Adapter Development', link: '/guide/adapter-development' },
             { text: 'Docker', link: '/guide/docker' },
             { text: 'AI Agents', link: '/guide/agents' },
+            { text: 'Performance Tuning', link: '/guide/performance' },
+          ]
+        },
+        {
+          text: 'Resources',
+          items: [
+            { text: 'Best Practices', link: '/guide/best-practices' },
+            { text: 'Recipes', link: '/guide/recipes' },
+            { text: 'Case Studies', link: '/guide/case-studies' },
+            { text: 'Troubleshooting', link: '/guide/troubleshooting' },
+            { text: 'FAQ', link: '/guide/faq' },
           ]
         }
       ],
@@ -176,6 +190,12 @@ export default defineConfig({
     },
     lineNumbers: true
   },
+
+  // Ignore dead links in internal planning docs
+  ignoreDeadLinks: [
+    /^\/docs\//,
+    /plan\//,
+  ],
 
   lastUpdated: true,
 })

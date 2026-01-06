@@ -5,6 +5,9 @@ node_modules/
 .vitepress/dist/
 .vitepress/cache/
 
+# Vercel
+.vercel/
+
 # Editor directories
 .idea/
 .vscode/

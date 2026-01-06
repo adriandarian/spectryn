@@ -3,6 +3,9 @@
  * A bold, modern theme inspired by Jira's aesthetic with unique character
  */
 
+/* Import custom fonts - must be at top */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
 :root {
   /* Brand Colors - Jira-inspired blue with warmer accents */
   --vp-c-brand-1: #0052cc;
@@ -69,9 +72,6 @@
   --vp-home-hero-name-background: linear-gradient(135deg, #2684ff 0%, #4c9aff 50%, #36b37e 100%);
   --vp-home-hero-image-background-image: linear-gradient(135deg, rgba(38, 132, 255, 0.4) 0%, rgba(54, 179, 126, 0.4) 100%);
 }
-
-/* Import custom fonts */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 /* Custom styling for the home hero */
 .VPHero {

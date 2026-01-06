@@ -823,22 +823,16 @@ For each new tracker adapter, follow this checklist:
 ## 📚 Documentation & Community
 
 ### Guides
-- [ ] **Troubleshooting Guide** - Common issues & solutions
-- [ ] **Video Tutorials** - Setup, sync workflow, advanced features
-- [ ] **Case Studies** - Real-world usage examples
-- [ ] **API Reference** - For programmatic embedding
-- [ ] **Architecture Deep Dive** - Design pattern explanations
-- [ ] **Performance Tuning Guide** - Optimization tips
-- [ ] **Migration Guides** - Moving from other tools
-- [ ] **Recipes Guide** - Common setups with field mapping examples
-- [ ] **Best Practices Guide** - Recommended workflows
-- [ ] **FAQ Section** - Common questions and answers
-
-### Community
-- [ ] **Example Repository** - GitHub repo with real examples users can clone
-- [ ] **Interactive Playground** - Web-based demo
-- [ ] **Blog/Announcement Site** - Updates, tips, community
-- [ ] **Discord/Slack Community** - User community
+- [x] **Troubleshooting Guide** - Common issues & solutions ✅ **COMPLETED** - Added `/guide/troubleshooting.md` with authentication, connection, parsing, sync, and CLI troubleshooting sections
+- [x] **Video Tutorials** - Setup, sync workflow, advanced features ✅ **EXISTING** - Already at `/tutorials/` with first-sync, interactive-mode, backup-restore, cicd-setup
+- [x] **Case Studies** - Real-world usage examples ✅ **COMPLETED** - Added `/guide/case-studies.md` with FinTech, E-commerce, and Healthcare case studies
+- [x] **API Reference** - For programmatic embedding ✅ **EXISTING** - Already at `/reference/api/` with domain, ports, hooks documentation
+- [x] **Architecture Deep Dive** - Design pattern explanations ✅ **EXISTING** - Already at `/guide/architecture.md` with Clean/Hexagonal architecture
+- [x] **Performance Tuning Guide** - Optimization tips ✅ **COMPLETED** - Added `/guide/performance.md` with parallel processing, caching, network optimization, memory management
+- [x] **Migration Guides** - Moving from other tools ✅ **EXISTING** - Already at `/cookbook/migration.md` for tracker migrations
+- [x] **Recipes Guide** - Common setups with field mapping examples ✅ **COMPLETED** - Added `/guide/recipes.md` with Jira, GitHub, custom fields, multi-team, sprint, bug tracking recipes
+- [x] **Best Practices Guide** - Recommended workflows ✅ **COMPLETED** - Added `/guide/best-practices.md` with workflows, team collaboration, error prevention
+- [x] **FAQ Section** - Common questions and answers ✅ **COMPLETED** - Added `/guide/faq.md` with comprehensive FAQ covering general, installation, config, syncing, troubleshooting
 
 ---
 

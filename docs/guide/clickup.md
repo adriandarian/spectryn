@@ -537,7 +537,7 @@ For detailed API documentation, see:
 ## Support
 
 For issues or questions:
-- Check the [spectra documentation](/guide)
+- Check the [spectra documentation](/guide/getting-started)
 - Review [ClickUp API docs](https://clickup.com/api)
 - Open an issue on GitHub
 
