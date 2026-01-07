@@ -17,16 +17,16 @@ File structure:
 """
 
 import contextlib
-import fcntl
 import json
 import logging
 import os
 import re
+import sys
 from collections.abc import Iterator
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import IO, Any
 
 from spectra.core.domain.events import DomainEvent
 from spectra.core.ports.event_store import (
@@ -36,6 +36,38 @@ from spectra.core.ports.event_store import (
     StoredEvent,
     StreamInfo,
 )
+
+
+# Platform-specific file locking
+if sys.platform == "win32":
+    import msvcrt
+
+    def _lock_file_exclusive(f: IO[Any]) -> None:
+        """Acquire exclusive lock on Windows."""
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+
+    def _lock_file_shared(f: IO[Any]) -> None:
+        """Acquire shared lock on Windows (same as exclusive - Windows limitation)."""
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+
+    def _unlock_file(f: IO[Any]) -> None:
+        """Release lock on Windows."""
+        with contextlib.suppress(OSError):
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+else:
+    import fcntl
+
+    def _lock_file_exclusive(f: IO[Any]) -> None:
+        """Acquire exclusive lock on Unix."""
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+    def _lock_file_shared(f: IO[Any]) -> None:
+        """Acquire shared lock on Unix."""
+        fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+
+    def _unlock_file(f: IO[Any]) -> None:
+        """Release lock on Unix."""
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
 logger = logging.getLogger(__name__)
@@ -248,7 +280,7 @@ class FileEventStore(EventStorePort):
 
         with open(file_path, mode, encoding="utf-8") as f:
             # Acquire exclusive lock
-            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+            _lock_file_exclusive(f)
 
             try:
                 # Get current sequence number
@@ -286,7 +318,7 @@ class FileEventStore(EventStorePort):
                 os.fsync(f.fileno())  # Ensure durability
 
             finally:
-                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                _unlock_file(f)
 
         # Save global position periodically
         if self._global_position % 100 == 0:
@@ -313,7 +345,7 @@ class FileEventStore(EventStorePort):
 
         with open(file_path, encoding="utf-8") as f:
             # Acquire shared lock for reading
-            fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+            _lock_file_shared(f)
 
             try:
                 for line_num, line in enumerate(f):
@@ -353,7 +385,7 @@ class FileEventStore(EventStorePort):
                         continue
 
             finally:
-                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                _unlock_file(f)
 
     def query(self, query: EventQuery) -> Iterator[StoredEvent]:
         """Query events across streams."""
