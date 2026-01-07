@@ -242,6 +242,77 @@ See [Monday.com Integration Guide](/guide/monday) for detailed configuration exa
 
 See [Shortcut Integration Guide](/guide/shortcut) for detailed configuration examples.
 
+### GitHub Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `github.token` | string | GitHub Personal Access Token (required) |
+| `github.owner` | string | Repository owner (user or org, required) |
+| `github.repo` | string | Repository name (required) |
+| `github.base_url` | string | API base URL (default: `https://api.github.com`) |
+| `github.project_number` | number | GitHub Projects v2 number (optional) |
+| `github.epic_label` | string | Label for epics (default: `"epic"`) |
+| `github.story_label` | string | Label for stories (default: `"user-story"`) |
+| `github.priority_labels` | dict | Priority to label mapping (optional) |
+| `github.status_labels` | dict | Status to label mapping (optional) |
+
+See [GitHub Integration Guide](/guide/github) for detailed configuration examples.
+
+### Azure DevOps Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `azure_devops.organization` | string | Azure DevOps organization (required) |
+| `azure_devops.project` | string | Project name (required) |
+| `azure_devops.pat` | string | Personal Access Token (required) |
+| `azure_devops.base_url` | string | Base URL (default: `https://dev.azure.com`) |
+| `azure_devops.area_path` | string | Area path for work items (optional) |
+| `azure_devops.iteration_path` | string | Iteration/sprint path (optional) |
+| `azure_devops.work_item_types` | dict | Type mapping (epic, story, subtask) |
+| `azure_devops.state_mapping` | dict | Status to state mapping (optional) |
+
+See [Azure DevOps Integration Guide](/guide/azure-devops) for detailed configuration examples.
+
+### Linear Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `linear.api_key` | string | Linear API key (required) |
+| `linear.team_id` | string | Team key or UUID (required) |
+| `linear.project_id` | string | Project UUID (optional) |
+| `linear.cycle_id` | string | Cycle/sprint UUID (optional) |
+| `linear.state_mapping` | dict | Status to state mapping (optional) |
+| `linear.priority_mapping` | dict | Priority mapping (1-4, optional) |
+| `linear.estimate_scale` | string | Estimate type: `linear`, `exponential` |
+
+See [Linear Integration Guide](/guide/linear) for detailed configuration examples.
+
+### Asana Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `asana.access_token` | string | Asana Personal Access Token (required) |
+| `asana.workspace_id` | string | Workspace GID (required) |
+| `asana.project_id` | string | Project GID (required) |
+| `asana.team_id` | string | Team GID (optional) |
+| `asana.sections` | dict | Status to section mapping (optional) |
+| `asana.custom_fields` | dict | Custom field GID mapping (optional) |
+| `asana.priority_mapping` | dict | Priority to enum value mapping (optional) |
+
+See [Asana Integration Guide](/guide/asana) for detailed configuration examples.
+
+### Pivotal Tracker Settings
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `pivotal.api_token` | string | Pivotal API token (required) |
+| `pivotal.project_id` | number | Project ID (required) |
+| `pivotal.story_types` | dict | Type mapping (story, bug, chore) |
+| `pivotal.state_mapping` | dict | Status to state mapping (optional) |
+| `pivotal.create_epics` | boolean | Create epics from markdown (default: `true`) |
+
+See [Pivotal Tracker Integration Guide](/guide/pivotal) for detailed configuration examples.
+
 ### ClickUp Settings
 
 | Setting | Type | Description |

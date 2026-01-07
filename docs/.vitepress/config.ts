@@ -73,6 +73,26 @@ export default defineConfig({
           ]
         },
         {
+          text: 'Trackers',
+          collapsed: true,
+          items: [
+            { text: 'GitHub', link: '/guide/github' },
+            { text: 'GitLab', link: '/guide/gitlab' },
+            { text: 'Azure DevOps', link: '/guide/azure-devops' },
+            { text: 'Linear', link: '/guide/linear' },
+            { text: 'Asana', link: '/guide/asana' },
+            { text: 'Trello', link: '/guide/trello' },
+            { text: 'ClickUp', link: '/guide/clickup' },
+            { text: 'Shortcut', link: '/guide/shortcut' },
+            { text: 'Monday.com', link: '/guide/monday' },
+            { text: 'Plane', link: '/guide/plane' },
+            { text: 'YouTrack', link: '/guide/youtrack' },
+            { text: 'Basecamp', link: '/guide/basecamp' },
+            { text: 'Bitbucket', link: '/guide/bitbucket' },
+            { text: 'Pivotal Tracker', link: '/guide/pivotal' },
+          ]
+        },
+        {
           text: 'Resources',
           items: [
             { text: 'Best Practices', link: '/guide/best-practices' },

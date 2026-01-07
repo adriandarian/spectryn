@@ -2,31 +2,141 @@
 
 spectra uses environment variables for sensitive configuration like API credentials. This page covers all supported variables and best practices.
 
-## Required Variables
+## Tracker Credentials
 
-These are required for spectra to connect to Jira:
+### Jira
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `JIRA_URL` | Your Jira instance URL | `https://company.atlassian.net` |
 | `JIRA_EMAIL` | Your Jira account email | `you@company.com` |
 | `JIRA_API_TOKEN` | Jira API token | `ATATT3xFf...` |
+| `JIRA_PROJECT` | Default project key (optional) | `PROJ` |
 
-## Optional Variables
+### GitHub
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GITHUB_TOKEN` | Personal Access Token | `ghp_xxxx...` |
+| `GITHUB_OWNER` | Repository owner | `your-org` |
+| `GITHUB_REPO` | Repository name | `your-repo` |
+| `GITHUB_BASE_URL` | API URL (optional) | `https://api.github.com` |
+| `GITHUB_PROJECT_NUMBER` | Projects v2 number (optional) | `1` |
+
+### GitLab
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GITLAB_TOKEN` | Personal Access Token | `glpat-xxxx...` |
+| `GITLAB_PROJECT_ID` | Project ID or path | `12345` or `group/project` |
+| `GITLAB_BASE_URL` | API URL (optional) | `https://gitlab.com/api/v4` |
+| `GITLAB_GROUP_ID` | Group ID for epics (optional) | `mygroup` |
+
+### Azure DevOps
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `AZURE_DEVOPS_ORG` | Organization name | `your-org` |
+| `AZURE_DEVOPS_PROJECT` | Project name | `your-project` |
+| `AZURE_DEVOPS_PAT` | Personal Access Token | `xxxx...` |
+| `AZURE_DEVOPS_BASE_URL` | Base URL (optional) | `https://dev.azure.com` |
+
+### Linear
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `LINEAR_API_KEY` | API key | `lin_api_xxxx...` |
+| `LINEAR_TEAM_ID` | Team key or UUID | `ENG` |
+| `LINEAR_PROJECT_ID` | Project UUID (optional) | `uuid...` |
+
+### Asana
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `ASANA_ACCESS_TOKEN` | Personal Access Token | `1/xxxx...` |
+| `ASANA_WORKSPACE_ID` | Workspace GID | `1234567890` |
+| `ASANA_PROJECT_ID` | Project GID | `0987654321` |
+
+### Trello
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `TRELLO_API_KEY` | API key | `xxxx...` |
+| `TRELLO_API_TOKEN` | API token | `xxxx...` |
+| `TRELLO_BOARD_ID` | Board ID | `abc123def` |
+
+### ClickUp
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `CLICKUP_API_TOKEN` | API token | `pk_xxxx...` |
+| `CLICKUP_LIST_ID` | List ID (optional) | `123456` |
+| `CLICKUP_SPACE_ID` | Space ID (optional) | `789012` |
+
+### Shortcut
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SHORTCUT_API_TOKEN` | API token | `xxxx...` |
+| `SHORTCUT_WORKSPACE_ID` | Workspace UUID or slug | `my-workspace` |
+
+### Monday.com
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `MONDAY_API_TOKEN` | API token (v2) | `xxxx...` |
+| `MONDAY_BOARD_ID` | Board ID | `1234567890` |
+| `MONDAY_WORKSPACE_ID` | Workspace ID (optional) | `9876543` |
+
+### Plane
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PLANE_API_TOKEN` | API token | `xxxx...` |
+| `PLANE_WORKSPACE_SLUG` | Workspace slug | `my-workspace` |
+| `PLANE_PROJECT_ID` | Project UUID | `uuid...` |
+| `PLANE_API_URL` | API URL (optional) | `https://app.plane.so/api/v1` |
+
+### YouTrack
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `YOUTRACK_URL` | YouTrack URL | `https://youtrack.mycompany.com` |
+| `YOUTRACK_TOKEN` | Permanent token | `perm:xxxx...` |
+| `YOUTRACK_PROJECT_ID` | Project ID | `PROJ` |
+
+### Bitbucket
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `BITBUCKET_USERNAME` | Username | `your-username` |
+| `BITBUCKET_APP_PASSWORD` | App Password | `xxxx...` |
+| `BITBUCKET_WORKSPACE` | Workspace slug | `my-workspace` |
+| `BITBUCKET_REPO` | Repository slug | `my-repo` |
+
+### Basecamp
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `BASECAMP_ACCESS_TOKEN` | OAuth access token | `xxxx...` |
+| `BASECAMP_ACCOUNT_ID` | Account ID | `1234567` |
+| `BASECAMP_PROJECT_ID` | Project ID | `7654321` |
+
+### Pivotal Tracker
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PIVOTAL_API_TOKEN` | API token | `xxxx...` |
+| `PIVOTAL_PROJECT_ID` | Project ID | `1234567` |
+
+## General Settings
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `JIRA_PROJECT` | Default project key | None |
-| `MONDAY_API_TOKEN` | Monday.com API token (v2) | None |
-| `MONDAY_BOARD_ID` | Monday.com board ID | None |
-| `MONDAY_WORKSPACE_ID` | Monday.com workspace ID | None |
-| `PLANE_API_TOKEN` | Plane.so API token | None |
-| `PLANE_WORKSPACE_SLUG` | Plane.so workspace slug | None |
-| `PLANE_PROJECT_ID` | Plane.so project ID | None |
-| `PLANE_API_URL` | Plane.so API endpoint (for self-hosted) | `https://app.plane.so/api/v1` |
 | `SPECTRA_VERBOSE` | Enable verbose output | `false` |
 | `SPECTRA_LOG_LEVEL` | Logging level | `INFO` |
 | `SPECTRA_NO_COLOR` | Disable colored output | `false` |
+| `SPECTRA_CONFIG` | Config file path | `.spectra.yaml` |
 
 ## Setting Environment Variables
 
@@ -35,21 +145,21 @@ These are required for spectra to connect to Jira:
 ::: code-group
 
 ```bash [Bash/Zsh]
-export JIRA_URL=https://your-company.atlassian.net
-export JIRA_EMAIL=your.email@company.com
-export JIRA_API_TOKEN=your-api-token
+export GITHUB_TOKEN=ghp_your-token
+export GITHUB_OWNER=your-org
+export GITHUB_REPO=your-repo
 ```
 
 ```fish [Fish]
-set -x JIRA_URL https://your-company.atlassian.net
-set -x JIRA_EMAIL your.email@company.com
-set -x JIRA_API_TOKEN your-api-token
+set -x GITHUB_TOKEN ghp_your-token
+set -x GITHUB_OWNER your-org
+set -x GITHUB_REPO your-repo
 ```
 
 ```powershell [PowerShell]
-$env:JIRA_URL = "https://your-company.atlassian.net"
-$env:JIRA_EMAIL = "your.email@company.com"
-$env:JIRA_API_TOKEN = "your-api-token"
+$env:GITHUB_TOKEN = "ghp_your-token"
+$env:GITHUB_OWNER = "your-org"
+$env:GITHUB_REPO = "your-repo"
 ```
 
 :::
@@ -59,13 +169,23 @@ $env:JIRA_API_TOKEN = "your-api-token"
 Create a `.env` file in your project directory:
 
 ```bash
-# .env
-JIRA_URL=https://your-company.atlassian.net
-JIRA_EMAIL=your.email@company.com
-JIRA_API_TOKEN=your-api-token
+# .env - Choose your tracker
 
-# Optional
-JIRA_PROJECT=MYPROJ
+# GitHub
+GITHUB_TOKEN=ghp_your-token
+GITHUB_OWNER=your-org
+GITHUB_REPO=your-repo
+
+# Or Jira
+# JIRA_URL=https://your-company.atlassian.net
+# JIRA_EMAIL=your.email@company.com
+# JIRA_API_TOKEN=your-api-token
+
+# Or Linear
+# LINEAR_API_KEY=lin_api_your-key
+# LINEAR_TEAM_ID=ENG
+
+# General settings
 SPECTRA_VERBOSE=true
 ```
 
@@ -84,12 +204,46 @@ Add to your `.gitignore`:
 ```
 :::
 
-## Getting a Jira API Token
+## Getting API Tokens
+
+### Jira
 
 1. Go to [Atlassian Account Settings](https://id.atlassian.com/manage-profile/security/api-tokens)
 2. Click **Create API token**
 3. Give it a descriptive name (e.g., "spectra CLI")
-4. Copy the token immediately (you won't see it again)
+4. Copy the token immediately
+
+### GitHub
+
+1. Go to **Settings** → **Developer settings** → **Personal access tokens**
+2. Click **Generate new token (classic)**
+3. Select scopes: `repo`, `project` (if using Projects)
+4. Copy the token (starts with `ghp_`)
+
+### GitLab
+
+1. Go to **User Settings** → **Access Tokens**
+2. Create a new token with `api` scope
+3. Copy the token (starts with `glpat-`)
+
+### Linear
+
+1. Go to **Settings** → **API** → **Personal API keys**
+2. Click **Create key**
+3. Copy the key (starts with `lin_api_`)
+
+### Azure DevOps
+
+1. Go to **User Settings** → **Personal access tokens**
+2. Click **+ New Token**
+3. Select scopes: Work Items (Read & Write)
+4. Copy the token
+
+### Asana
+
+1. Go to **My Settings** → **Apps** → **Developer Console**
+2. Click **Create new token**
+3. Copy the token
 
 ::: tip Token Best Practices
 - Create a dedicated token for spectra

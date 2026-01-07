@@ -2,15 +2,67 @@
 
 Get up and running with spectra in 5 minutes.
 
-## Step 1: Set Up Credentials
+## Step 1: Choose Your Tracker
 
-Create a `.env` file in your project directory:
+spectra supports many issue trackers. Set up credentials for your tracker:
 
-```bash
+::: code-group
+
+```bash [Jira]
+# .env
 JIRA_URL=https://your-company.atlassian.net
 JIRA_EMAIL=your.email@company.com
 JIRA_API_TOKEN=your-api-token
 ```
+
+```bash [GitHub]
+# .env
+GITHUB_TOKEN=ghp_your-personal-access-token
+GITHUB_OWNER=your-username-or-org
+GITHUB_REPO=your-repo
+```
+
+```bash [GitLab]
+# .env
+GITLAB_TOKEN=glpat-your-personal-access-token
+GITLAB_PROJECT_ID=12345  # or group/project
+GITLAB_BASE_URL=https://gitlab.com/api/v4  # or your self-hosted URL
+```
+
+```bash [Linear]
+# .env
+LINEAR_API_KEY=lin_api_your-api-key
+LINEAR_TEAM_ID=TEAM
+```
+
+```bash [Azure DevOps]
+# .env
+AZURE_DEVOPS_ORG=your-organization
+AZURE_DEVOPS_PROJECT=your-project
+AZURE_DEVOPS_PAT=your-personal-access-token
+```
+
+```bash [Asana]
+# .env
+ASANA_ACCESS_TOKEN=your-personal-access-token
+ASANA_WORKSPACE_ID=1234567890
+ASANA_PROJECT_ID=0987654321
+```
+
+```bash [Trello]
+# .env
+TRELLO_API_KEY=your-api-key
+TRELLO_API_TOKEN=your-api-token
+TRELLO_BOARD_ID=your-board-id
+```
+
+```bash [ClickUp]
+# .env
+CLICKUP_API_TOKEN=pk_your-api-token
+CLICKUP_LIST_ID=your-list-id
+```
+
+:::
 
 ::: warning
 Add `.env` to your `.gitignore` to avoid committing secrets!
@@ -121,23 +173,52 @@ See the [AI Fix Guide](/guide/ai-fix) for detailed help with fixing formatting i
 
 Run spectra in dry-run mode (default) to see what would change:
 
-```bash
-spectra --markdown EPIC.md --epic PROJ-123
+::: code-group
+
+```bash [Jira]
+spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123
 ```
+
+```bash [GitHub]
+spectra sync --tracker github --markdown EPIC.md --repo owner/repo
+```
+
+```bash [GitLab]
+spectra sync --tracker gitlab --markdown EPIC.md --project group/project
+```
+
+```bash [Linear]
+spectra sync --tracker linear --markdown EPIC.md --team TEAM
+```
+
+```bash [Azure DevOps]
+spectra sync --tracker azure --markdown EPIC.md --project MyProject
+```
+
+```bash [Asana]
+spectra sync --tracker asana --markdown EPIC.md --project 1234567890
+```
+
+```bash [Trello]
+spectra sync --tracker trello --markdown EPIC.md --board abc123
+```
+
+:::
 
 You'll see a detailed preview:
 
 ```
 ╭──────────────────────────────────────────────╮
-│  spectra - Jira Sync Preview                 │
+│  spectra - Sync Preview                      │
 ╰──────────────────────────────────────────────╯
 
+Tracker: jira
 Epic: PROJ-123
 Stories found: 2
 Mode: DRY RUN (no changes will be made)
 
 ┌─────────────────────────────────────────────┐
-│ STORY-001: Set Up Project Infrastructure       │
+│ STORY-001: Set Up Project Infrastructure    │
 ├─────────────────────────────────────────────┤
 │ ➕ Would create 3 subtasks                  │
 │ 📝 Would update description                 │
@@ -145,7 +226,7 @@ Mode: DRY RUN (no changes will be made)
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
-│ STORY-002: User Authentication                 │
+│ STORY-002: User Authentication              │
 ├─────────────────────────────────────────────┤
 │ ➕ Would create 3 subtasks                  │
 │ 📝 Would update description                 │
@@ -157,24 +238,40 @@ Summary: 2 stories, 6 subtasks to create
 
 ## Step 5: Execute Sync
 
-When you're happy with the preview, execute the sync:
+When you're happy with the preview, add `--execute`:
 
-```bash
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+::: code-group
+
+```bash [Jira]
+spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
 ```
+
+```bash [GitHub]
+spectra sync --tracker github --markdown EPIC.md --repo owner/repo --execute
+```
+
+```bash [GitLab]
+spectra sync --tracker gitlab --markdown EPIC.md --project group/project --execute
+```
+
+```bash [Linear]
+spectra sync --tracker linear --markdown EPIC.md --team TEAM --execute
+```
+
+:::
 
 You'll be asked for confirmation:
 
 ```
-This will modify 2 stories and create 6 subtasks in Jira.
+This will modify 2 stories and create 6 subtasks.
 Proceed? [y/N]: y
 ```
 
-## Step 6: Verify in Jira
+## Step 6: Verify in Your Tracker
 
-Check your Jira epic to see the synced issues:
+Check your tracker to see the synced issues:
 
-- ✅ Stories linked to the epic
+- ✅ Stories linked to the epic/project
 - ✅ Descriptions updated with As a/I want/So that format
 - ✅ Subtasks created under each story
 - ✅ Story points and status set
@@ -183,22 +280,22 @@ Check your Jira epic to see the synced issues:
 
 ```bash
 # Sync descriptions only
-spectra -m EPIC.md -e PROJ-123 -x --phase descriptions
+spectra sync -m EPIC.md --epic PROJ-123 -x --phase descriptions
 
 # Sync subtasks only
-spectra -m EPIC.md -e PROJ-123 -x --phase subtasks
+spectra sync -m EPIC.md --epic PROJ-123 -x --phase subtasks
 
 # Sync specific story
-spectra -m EPIC.md -e PROJ-123 -x --story STORY-001
+spectra sync -m EPIC.md --epic PROJ-123 -x --story STORY-001
 
 # Skip confirmation prompts (for CI/CD)
-spectra -m EPIC.md -e PROJ-123 -x --no-confirm
+spectra sync -m EPIC.md --epic PROJ-123 -x --no-confirm
 
 # Verbose output
-spectra -m EPIC.md -e PROJ-123 -v
+spectra sync -m EPIC.md --epic PROJ-123 -v
 
 # Export results to JSON
-spectra -m EPIC.md -e PROJ-123 -x --export results.json
+spectra sync -m EPIC.md --epic PROJ-123 -x --export results.json
 ```
 
 ## Backup & Rollback
@@ -207,19 +304,35 @@ spectra automatically creates backups before sync:
 
 ```bash
 # List backups
-spectra --list-backups
+spectra backup list
 
 # View diff from backup
-spectra --diff-latest --epic PROJ-123
+spectra backup diff --epic PROJ-123
 
 # Rollback to previous state
-spectra --rollback --epic PROJ-123 --execute
+spectra backup rollback --epic PROJ-123 --execute
 ```
 
 ## Next Steps
 
 - [Markdown Schema](/guide/schema) - Complete format reference
 - [AI Fix](/guide/ai-fix) - Fix formatting issues with AI assistance
-- [Configuration](/guide/configuration) - Config file options
+- [Configuration](/guide/configuration) - Config file options for all trackers
 - [CLI Reference](/reference/cli) - All command options
+
+## Tracker-Specific Guides
+
+For detailed setup instructions for each tracker:
+
+| Tracker | Guide |
+|---------|-------|
+| GitLab | [GitLab Guide](/guide/gitlab) |
+| Trello | [Trello Guide](/guide/trello) |
+| ClickUp | [ClickUp Guide](/guide/clickup) |
+| Shortcut | [Shortcut Guide](/guide/shortcut) |
+| Monday.com | [Monday Guide](/guide/monday) |
+| Plane | [Plane Guide](/guide/plane) |
+| YouTrack | [YouTrack Guide](/guide/youtrack) |
+| Basecamp | [Basecamp Guide](/guide/basecamp) |
+| Bitbucket | [Bitbucket Guide](/guide/bitbucket) |
 

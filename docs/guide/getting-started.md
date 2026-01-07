@@ -1,24 +1,47 @@
 # Getting Started
 
-spectra is a production-grade CLI tool for synchronizing markdown documentation with Jira. Write your epic docs in markdown, sync to Jira automatically.
+spectra is a production-grade CLI tool for synchronizing markdown documentation with issue trackers. Write your epic docs in markdown, sync to your favorite tracker automatically.
+
+## Supported Trackers
+
+spectra supports **14 issue trackers** out of the box:
+
+| Tracker | Type | Best For |
+|---------|------|----------|
+| [**Jira**](/guide/configuration#jira) | Enterprise | Large teams, complex workflows |
+| [**GitHub Issues**](/guide/configuration#github) | Developer | Open source, code-centric teams |
+| [**GitLab Issues**](/guide/gitlab) | DevOps | GitLab-native projects |
+| [**Azure DevOps**](/guide/configuration#azure-devops) | Enterprise | Microsoft ecosystem |
+| [**Linear**](/guide/configuration#linear) | Startup | Fast-paced product teams |
+| [**Asana**](/guide/configuration#asana) | Collaboration | Cross-functional teams |
+| [**Trello**](/guide/trello) | Visual | Kanban workflows |
+| [**ClickUp**](/guide/clickup) | All-in-one | Feature-rich needs |
+| [**Shortcut**](/guide/shortcut) | Agile | Engineering teams |
+| [**Monday.com**](/guide/monday) | Work OS | Marketing & operations |
+| [**Plane**](/guide/plane) | Open source | Self-hosted preference |
+| [**YouTrack**](/guide/youtrack) | JetBrains | IntelliJ users |
+| [**Basecamp**](/guide/basecamp) | Simple | Small teams |
+| [**Bitbucket**](/guide/bitbucket) | Atlassian | Bitbucket repos |
+| **Pivotal Tracker** | Agile | Story-based planning |
 
 ## Why spectra?
 
-Managing Jira issues through the web interface is slow and tedious. Developers prefer working with markdown files that can be:
+Managing issues through web interfaces is slow and tedious. Developers prefer working with markdown files that can be:
 
 - ✅ Version controlled with Git
 - ✅ Reviewed in pull requests
 - ✅ Edited with your favorite editor
 - ✅ Generated with AI assistants
 
-spectra bridges the gap between markdown-first documentation and Jira project management.
+spectra bridges the gap between markdown-first documentation and project management.
 
 ## Key Features
 
 | Feature | Description |
 |---------|-------------|
+| **Multi-Tracker Support** | 14 trackers with unified markdown format |
 | **Full Epic Sync** | Sync stories, subtasks, descriptions, comments |
-| **Smart Matching** | Fuzzy matching between markdown and Jira issues |
+| **Smart Matching** | Fuzzy matching between markdown and tracker issues |
 | **Safe by Default** | Dry-run mode, confirmations, previews |
 | **Backup & Rollback** | Automatic backups before sync, easy rollback |
 | **Plugin System** | Extensible architecture for custom adapters |
@@ -30,14 +53,14 @@ graph LR
     A[📝 Markdown File] --> B[spectra CLI]
     B --> C{Dry Run?}
     C -->|Yes| D[📊 Preview Changes]
-    C -->|No| E[☁️ Jira API]
+    C -->|No| E[☁️ Tracker API]
     E --> F[✅ Issues Updated]
 ```
 
 1. **Write** your epic documentation in markdown following the [schema](/guide/schema)
 2. **Preview** changes with dry-run mode (default)
-3. **Sync** to Jira with `--execute` flag
-4. **Verify** results in Jira or with audit trail
+3. **Sync** to your tracker with `--execute` flag
+4. **Verify** results in your tracker or with audit trail
 
 ## Quick Example
 
@@ -66,15 +89,31 @@ Create a markdown file with your epic:
 | 2 | Implement JWT auth | Add JWT token handling | 3 | 📋 Planned |
 ```
 
-Sync to Jira:
+Sync to your tracker:
 
-```bash
-# Preview changes (default)
-spectra --markdown EPIC.md --epic PROJ-123
+::: code-group
 
-# Execute sync
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+```bash [Jira]
+spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
 ```
+
+```bash [GitHub]
+spectra sync --tracker github --markdown EPIC.md --repo owner/repo --execute
+```
+
+```bash [GitLab]
+spectra sync --tracker gitlab --markdown EPIC.md --project mygroup/myproject --execute
+```
+
+```bash [Linear]
+spectra sync --tracker linear --markdown EPIC.md --team TEAM --execute
+```
+
+```bash [Azure DevOps]
+spectra sync --tracker azure --markdown EPIC.md --project MyProject --execute
+```
+
+:::
 
 ## Next Steps
 
