@@ -534,8 +534,6 @@ class TestSQLiteStateStore:
         sqlite_store: SQLiteStateStore,
     ) -> None:
         """Test finding latest resumable session."""
-        import time
-
         state1 = SyncState(
             session_id="session-old",
             markdown_path="/path/file.md",
@@ -549,9 +547,11 @@ class TestSQLiteStateStore:
             phase=SyncPhase.ANALYZING.value,
         )
 
+        # Explicitly set different timestamps to avoid timing issues on Windows
+        state1.updated_at = "2024-01-01T10:00:00"
+        state2.updated_at = "2024-01-01T11:00:00"
+
         sqlite_store.save(state1)
-        # Add delay for Windows timestamp resolution
-        time.sleep(0.02)
         sqlite_store.save(state2)
 
         latest = sqlite_store.find_latest_resumable("/path/file.md", "PROJ-100")
