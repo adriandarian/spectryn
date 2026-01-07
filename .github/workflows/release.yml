@@ -502,7 +502,7 @@ jobs:
           Section: utils
           Priority: optional
           Architecture: all
-          Depends: python3 (>= 3.10), python3-pip
+          Depends: python3 (>= 3.11), python3-pip
           Maintainer: Adrian Darian <adrian.the.hactus@gmail.com>
           Description: Sync markdown specifications with issue trackers
            Spectra is a production-grade CLI tool for synchronizing

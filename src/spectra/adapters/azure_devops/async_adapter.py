@@ -13,15 +13,20 @@ Example:
     ...     results = await adapter.update_descriptions_async(updates)
 """
 
+from __future__ import annotations
+
 import base64
 import logging
 from collections.abc import Sequence
 from types import TracebackType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from spectra.core.ports.async_tracker import AsyncIssueTrackerPort
 from spectra.core.ports.issue_tracker import IssueData
 
+
+if TYPE_CHECKING:
+    import aiohttp
 
 try:
     import aiohttp
@@ -29,7 +34,7 @@ try:
     ASYNC_AVAILABLE = True
 except ImportError:
     ASYNC_AVAILABLE = False
-    aiohttp = None  # type: ignore
+    aiohttp = None  # type: ignore[assignment]
 
 
 DEFAULT_BASE_URL = "https://dev.azure.com"
@@ -110,7 +115,7 @@ class AsyncAzureDevOpsAdapter(AsyncIssueTrackerPort):
             self._session = None
             self.logger.debug("Async Azure DevOps connection closed")
 
-    async def __aenter__(self) -> "AsyncAzureDevOpsAdapter":
+    async def __aenter__(self) -> AsyncAzureDevOpsAdapter:
         await self.connect()
         return self
 

@@ -13,16 +13,21 @@ Example:
     ...     results = await adapter.update_descriptions_async(updates)
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from spectra.core.ports.async_tracker import AsyncIssueTrackerPort
 from spectra.core.ports.config_provider import TrackerConfig
 from spectra.core.ports.issue_tracker import IssueData
 
+
+if TYPE_CHECKING:
+    import aiohttp
 
 try:
     import aiohttp
@@ -30,7 +35,7 @@ try:
     ASYNC_AVAILABLE = True
 except ImportError:
     ASYNC_AVAILABLE = False
-    aiohttp = None  # type: ignore
+    aiohttp = None  # type: ignore[assignment]
 
 
 DEFAULT_BASE_URL = "https://app.asana.com/api/1.0"
@@ -107,7 +112,7 @@ class AsyncAsanaAdapter(AsyncIssueTrackerPort):
             self._session = None
             self.logger.debug("Async Asana connection closed")
 
-    async def __aenter__(self) -> "AsyncAsanaAdapter":
+    async def __aenter__(self) -> AsyncAsanaAdapter:
         await self.connect()
         return self
 
