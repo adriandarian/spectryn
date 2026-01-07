@@ -35,18 +35,18 @@ Create `.spectra.yaml`:
 linear:
   api_key: lin_api_xxxxxxxxxxxxxxxxxxxx
   team_id: TEAM  # Team key or UUID
-  
+
   # Optional settings
   project_id: project-uuid  # Link issues to a project
   cycle_id: cycle-uuid  # Assign to a cycle (sprint)
-  
+
   # Label configuration (optional)
   labels:
     epic: "Epic"
     story: "Story"
     bug: "Bug"
     subtask: "Sub-issue"
-  
+
   # State mapping (optional)
   state_mapping:
     planned: "Backlog"
@@ -54,7 +54,7 @@ linear:
     in_review: "In Review"
     done: "Done"
     cancelled: "Canceled"
-  
+
   # Priority mapping (optional)
   priority_mapping:
     critical: 1  # Urgent
@@ -206,7 +206,7 @@ Linear uses estimates for planning:
 ```yaml
 linear:
   estimate_scale: linear  # or "exponential", "t-shirt"
-  
+
   # Custom estimate mapping
   estimate_mapping:
     1: 1
@@ -224,7 +224,7 @@ Link issues to projects:
 ```yaml
 linear:
   project_id: project-uuid
-  
+
   # Or map from markdown
   project_mapping:
     "Q1 Features": "project-uuid-1"
@@ -238,7 +238,7 @@ Assign to cycles:
 ```yaml
 linear:
   auto_assign_cycle: current  # or "next", "none"
-  
+
   # Or specific cycle
   cycle_id: cycle-uuid
 ```
@@ -403,15 +403,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install spectra
         run: pip install spectra
-      
+
       - name: Sync to Linear
         run: |
           spectra sync \

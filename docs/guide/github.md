@@ -35,25 +35,25 @@ github:
   token: ghp_xxxxxxxxxxxxxxxxxxxx
   owner: your-org-or-username
   repo: your-repo
-  
+
   # Optional: GitHub Enterprise
   base_url: https://api.github.com  # or https://github.mycompany.com/api/v3
-  
+
   # Optional: GitHub Projects v2
   project_number: 1  # Project board number
-  
+
   # Label configuration (optional)
   epic_label: "epic"
   story_label: "user-story"
   subtask_label: "subtask"
-  
+
   # Priority labels (optional)
   priority_labels:
     critical: "priority: critical"
     high: "priority: high"
     medium: "priority: medium"
     low: "priority: low"
-  
+
   # Status labels (optional)
   status_labels:
     planned: "status: todo"
@@ -206,7 +206,7 @@ Link issues to GitHub Projects v2:
 ```yaml
 github:
   project_number: 1
-  
+
   # Map status to project columns
   project_status_mapping:
     planned: "Todo"

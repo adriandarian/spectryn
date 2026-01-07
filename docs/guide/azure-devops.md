@@ -35,23 +35,23 @@ azure_devops:
   organization: your-org
   project: your-project
   pat: your-personal-access-token
-  
+
   # Optional: Azure DevOps Server (on-premises)
   base_url: https://dev.azure.com  # or https://tfs.mycompany.com/tfs
-  
+
   # Work item type mapping (optional)
   work_item_types:
     epic: Epic
     story: User Story
     subtask: Task
     bug: Bug
-  
+
   # Area path (optional)
   area_path: MyProject\Team A
-  
-  # Iteration path (optional)  
+
+  # Iteration path (optional)
   iteration_path: MyProject\Sprint 1
-  
+
   # State mapping (optional)
   state_mapping:
     planned: New
@@ -200,7 +200,7 @@ Organize work items by team or sprint:
 azure_devops:
   area_path: MyProject\Backend Team
   iteration_path: MyProject\2024\Sprint 1
-  
+
   # Or map from markdown
   area_mapping:
     backend: MyProject\Backend Team

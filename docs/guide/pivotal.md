@@ -35,13 +35,13 @@ Create `.spectra.yaml`:
 pivotal:
   api_token: your-api-token
   project_id: 1234567
-  
+
   # Story type mapping (optional)
   story_types:
     story: feature
     bug: bug
     task: chore
-  
+
   # State mapping (optional)
   state_mapping:
     planned: unscheduled
@@ -50,7 +50,7 @@ pivotal:
     delivered: delivered
     accepted: accepted
     rejected: rejected
-  
+
   # Label configuration (optional)
   labels:
     epic: "epic"
@@ -248,7 +248,7 @@ Assign to iterations (sprints):
 ```yaml
 pivotal:
   auto_assign_iteration: current  # or "next", "backlog"
-  
+
   # Or specific iteration
   iteration_number: 5
 ```
@@ -272,10 +272,10 @@ pivotal:
   description_template: |
     ## User Story
     {description}
-    
+
     ## Acceptance Criteria
     {acceptance_criteria}
-    
+
     ## Technical Notes
     {notes}
 ```
@@ -402,15 +402,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install spectra
         run: pip install spectra
-      
+
       - name: Sync to Pivotal
         run: |
           spectra sync \

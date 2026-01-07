@@ -36,22 +36,22 @@ asana:
   access_token: your-personal-access-token
   workspace_id: "1234567890"
   project_id: "0987654321"
-  
+
   # Optional settings
   team_id: "team-id"  # For team-specific operations
-  
+
   # Section mapping (optional)
   sections:
     backlog: "Backlog"
     in_progress: "In Progress"
     review: "Review"
     done: "Done"
-  
+
   # Custom field mapping (optional)
   custom_fields:
     story_points: "1234567890123"  # Custom field GID
     priority: "9876543210987"
-  
+
   # Priority enum mapping (optional)
   priority_mapping:
     critical: "P0"
@@ -223,7 +223,7 @@ asana:
 asana:
   custom_fields:
     priority: "9876543210987"
-  
+
   # Map markdown values to enum options
   priority_mapping:
     "🔴 Critical": "P0 - Critical"
@@ -425,15 +425,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install spectra
         run: pip install spectra
-      
+
       - name: Sync to Asana
         run: |
           spectra sync \
