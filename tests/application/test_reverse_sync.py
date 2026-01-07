@@ -242,7 +242,7 @@ class TestReverseSyncOrchestrator:
         """Create a sync config."""
         return SyncConfig(dry_run=True)
 
-    def test_pull_basic(self, mock_tracker, config):
+    def test_pull_basic(self, mock_tracker, config, tmp_path):
         """Test basic pull operation."""
         # Setup mock responses
         mock_tracker.get_issue.return_value = IssueData(
@@ -279,14 +279,14 @@ class TestReverseSyncOrchestrator:
 
         result = orchestrator.pull(
             epic_key="PROJ-100",
-            output_path="/tmp/test.md",
+            output_path=str(tmp_path / "test.md"),
         )
 
         assert result.stories_pulled == 2
         assert result.success
         assert len(result.pulled_stories) == 2
 
-    def test_pull_with_subtasks(self, mock_tracker, config):
+    def test_pull_with_subtasks(self, mock_tracker, config, tmp_path):
         """Test pull operation with subtasks."""
         mock_tracker.get_issue.return_value = IssueData(
             key="PROJ-100",
@@ -323,13 +323,13 @@ class TestReverseSyncOrchestrator:
 
         result = orchestrator.pull(
             epic_key="PROJ-100",
-            output_path="/tmp/test.md",
+            output_path=str(tmp_path / "test.md"),
         )
 
         assert result.stories_pulled == 1
         assert result.subtasks_pulled == 2
 
-    def test_pull_no_stories(self, mock_tracker, config):
+    def test_pull_no_stories(self, mock_tracker, config, tmp_path):
         """Test pull when no stories are found."""
         mock_tracker.get_issue.return_value = IssueData(
             key="PROJ-100",
@@ -345,7 +345,7 @@ class TestReverseSyncOrchestrator:
 
         result = orchestrator.pull(
             epic_key="PROJ-100",
-            output_path="/tmp/test.md",
+            output_path=str(tmp_path / "test.md"),
         )
 
         assert result.stories_pulled == 0
