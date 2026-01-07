@@ -2,6 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vitepress",
   "outputDirectory": ".vitepress/dist",
+  "env": {
+    "VERCEL_TOOLBAR_ENABLED": "0"
+  },
   "headers": [
     {
       "source": "/assets/(.*)",
