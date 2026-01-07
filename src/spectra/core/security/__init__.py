@@ -30,21 +30,21 @@ from .redactor import (
 
 
 __all__ = [
+    # Backup Sanitizer
+    "BACKUP_SENSITIVE_PATTERNS",
     # Redactor
     "SENSITIVE_PATTERNS",
+    "BackupSanitizer",
     "RedactionConfig",
+    "SanitizationResult",
     "SecretRedactor",
     "SecretScope",
     "create_redactor",
+    "create_sanitizer",
     "get_global_redactor",
     "redact_dict",
     "redact_string",
     "register_secret",
     "register_secrets",
-    # Backup Sanitizer
-    "BACKUP_SENSITIVE_PATTERNS",
-    "BackupSanitizer",
-    "SanitizationResult",
-    "create_sanitizer",
     "sanitize_backup_data",
 ]

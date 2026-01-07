@@ -17,9 +17,9 @@ import signal
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..exit_codes import ExitCode
-from ..logging import setup_logging
-from ..output import Console
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.logging import setup_logging
+from spectra.cli.output import Console
 
 
 if TYPE_CHECKING:

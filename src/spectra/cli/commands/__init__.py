@@ -32,39 +32,39 @@ from .watch import run_schedule, run_watch, run_webhook, run_websocket
 
 
 __all__ = [
-    # Validation
-    "validate_markdown",
-    # Backup commands
-    "list_sessions",
     "list_backups",
     "list_rollback_points",
-    "run_restore",
+    # Backup commands
+    "list_sessions",
+    "run_attachment_sync",
+    "run_bidirectional_sync",
+    "run_clear_snapshot",
     "run_diff",
+    "run_generate_field_mapping",
+    # Field commands
+    "run_list_custom_fields",
+    # Snapshot commands
+    "run_list_snapshots",
+    "run_list_sprints",
+    "run_multi_epic",
+    "run_multi_tracker_sync",
+    "run_parallel_files",
+    # Pull commands
+    "run_pull",
+    # API commands
+    "run_rest_api",
+    "run_restore",
     "run_rollback",
     "run_rollback_preview",
     "run_rollback_to_timestamp",
+    "run_schedule",
     # Sync commands
     "run_sync",
     "run_sync_links",
-    "run_multi_epic",
-    "run_parallel_files",
-    "run_multi_tracker_sync",
-    "run_attachment_sync",
+    "run_watch",
     # Watch/Schedule commands
     "run_webhook",
     "run_websocket",
-    "run_schedule",
-    "run_watch",
-    # Pull commands
-    "run_pull",
-    "run_bidirectional_sync",
-    # Snapshot commands
-    "run_list_snapshots",
-    "run_clear_snapshot",
-    # Field commands
-    "run_list_custom_fields",
-    "run_generate_field_mapping",
-    "run_list_sprints",
-    # API commands
-    "run_rest_api",
+    # Validation
+    "validate_markdown",
 ]

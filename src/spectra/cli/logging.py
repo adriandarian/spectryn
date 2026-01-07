@@ -570,7 +570,7 @@ class RedactingFilter(logging.Filter):
             # Create a new exception with redacted message
             exc_type, exc_value, exc_tb = record.exc_info
             if exc_value:
-                redacted_msg = self.redactor.redact_string(str(exc_value))
+                self.redactor.redact_string(str(exc_value))
                 # We can't modify the exception, but we can redact exc_text
                 record.exc_text = self.redactor.redact_string(
                     "".join(traceback.format_exception(exc_type, exc_value, exc_tb))

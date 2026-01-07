@@ -16,8 +16,8 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from ..exit_codes import ExitCode
-from ..output import Console
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.output import Console
 
 
 __all__ = [
@@ -124,8 +124,7 @@ def run_restore(args) -> int:
     """
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.application.sync import BackupManager
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -257,8 +256,7 @@ def run_diff(args) -> int:
     """
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.application.sync import BackupManager, compare_backup_to_current
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -377,8 +375,7 @@ def run_rollback(args) -> int:
     """
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.application.sync import BackupManager, compare_backup_to_current
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -567,8 +564,7 @@ def list_rollback_points(args) -> int:
         Exit code.
     """
     from spectra.adapters.sync_history import SQLiteSyncHistoryStore
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -646,8 +642,7 @@ def run_rollback_preview(args) -> int:
         Exit code.
     """
     from spectra.adapters.sync_history import SQLiteSyncHistoryStore
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -785,9 +780,8 @@ def run_rollback_to_timestamp(args) -> int:
         Exit code.
     """
     from spectra.adapters.sync_history import SQLiteSyncHistoryStore, generate_entry_id
+    from spectra.cli.logging import setup_logging
     from spectra.core.ports.sync_history import SyncHistoryEntry, SyncOutcome
-
-    from ..logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO

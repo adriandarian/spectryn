@@ -17,10 +17,9 @@ from spectra.adapters import (
     JiraAdapter,
     MarkdownParser,
 )
-
-from ..exit_codes import ExitCode
-from ..logging import setup_logging
-from ..output import Console
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.logging import setup_logging
+from spectra.cli.output import Console
 
 
 __all__ = [

@@ -1056,7 +1056,6 @@ class SpectraGraphQLServer(GraphQLServerPort):
 
         # Extract field selections (simple parser)
         # Format: query { field1 field2(arg: value) { subfield } }
-        field_pattern = r"(\w+)(?:\s*\(\s*([^)]*)\s*\))?"
 
         # Find fields in the query
         # This is a simplified parser - production would use graphql-core

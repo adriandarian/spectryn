@@ -10,9 +10,8 @@ This module contains handlers for field-related commands:
 from pathlib import Path
 
 from spectra.adapters import EnvironmentConfigProvider, JiraAdapter
-
-from ..exit_codes import ExitCode
-from ..output import Console, Symbols
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.output import Console, Symbols
 
 
 __all__ = [

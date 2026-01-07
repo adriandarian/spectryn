@@ -327,10 +327,7 @@ class SecretRedactor:
         Returns:
             Dictionary with sensitive values redacted.
         """
-        if copy:
-            result = {}
-        else:
-            result = data
+        result = {} if copy else data
 
         for key, value in data.items():
             if self._is_sensitive_key(key):

@@ -4,7 +4,7 @@ Validation command handler.
 This module contains the markdown validation command handler.
 """
 
-from ..output import Console
+from spectra.cli.output import Console
 
 
 __all__ = ["validate_markdown"]
@@ -39,7 +39,7 @@ def validate_markdown(
     Returns:
         Exit code (0 for success, non-zero for errors).
     """
-    from ..validate import run_validate
+    from spectra.cli.validate import run_validate
 
     return run_validate(
         console,

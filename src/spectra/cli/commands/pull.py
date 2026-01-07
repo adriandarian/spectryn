@@ -11,10 +11,9 @@ from pathlib import Path
 
 from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
 from spectra.adapters.formatters import MarkdownWriter
-
-from ..exit_codes import ExitCode
-from ..logging import setup_logging
-from ..output import Console
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.logging import setup_logging
+from spectra.cli.output import Console
 
 
 __all__ = [

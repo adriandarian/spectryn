@@ -16,8 +16,8 @@ Note: Pull/bidirectional commands are in pull.py
 import logging
 from pathlib import Path
 
-from ..exit_codes import ExitCode
-from ..output import Console, Symbols
+from spectra.cli.exit_codes import ExitCode
+from spectra.cli.output import Console, Symbols
 
 
 __all__ = [
@@ -33,7 +33,7 @@ __all__ = [
 def run_sync(console, args) -> int:
     """Run the main sync operation."""
     # Import here to avoid circular imports
-    from .. import app as _app
+    from spectra.cli import app as _app
 
     return _app.run_sync(console, args)
 
@@ -53,8 +53,7 @@ def run_sync_links(args) -> int:
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.adapters.parsers import MarkdownParser
     from spectra.application.sync import LinkSyncOrchestrator, SyncOrchestrator
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -225,8 +224,7 @@ def run_multi_epic(args) -> int:
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.adapters.parsers import MarkdownParser
     from spectra.application.sync import MultiEpicSyncOrchestrator
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -398,8 +396,7 @@ def run_parallel_files(args) -> int:
         ParallelFileProcessor,
         ParallelFilesConfig,
     )
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -586,8 +583,7 @@ def run_multi_tracker_sync(args) -> int:
         MultiTrackerSyncOrchestrator,
         TrackerTarget,
     )
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO
@@ -795,8 +791,7 @@ def run_attachment_sync(args) -> int:
     from spectra.adapters import ADFFormatter, EnvironmentConfigProvider, JiraAdapter
     from spectra.adapters.parsers import MarkdownParser
     from spectra.application.sync import AttachmentSyncOrchestrator
-
-    from ..logging import setup_logging
+    from spectra.cli.logging import setup_logging
 
     # Setup logging
     log_level = logging.DEBUG if getattr(args, "verbose", False) else logging.INFO

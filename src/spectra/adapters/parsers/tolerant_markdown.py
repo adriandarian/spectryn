@@ -2201,10 +2201,7 @@ def parse_code_blocks(
 
     def is_in_used_range(start: int, end: int) -> bool:
         """Check if a range overlaps with already-used ranges."""
-        for used_start, used_end in used_ranges:
-            if start < used_end and end > used_start:
-                return True
-        return False
+        return any(start < used_end and end > used_start for used_start, used_end in used_ranges)
 
     # Parse fenced code blocks first (highest priority)
     for match in _FENCED_CODE_PATTERN.finditer(content):
@@ -2357,10 +2354,7 @@ def extract_code_blocks_from_content(
         include_indented=False,
     )
 
-    if language_filter:
-        blocks = collection.by_language(language_filter)
-    else:
-        blocks = collection.blocks
+    blocks = collection.by_language(language_filter) if language_filter else collection.blocks
 
     return blocks, warnings
 
@@ -2616,21 +2610,38 @@ class ParseErrorCode:
 # =============================================================================
 
 __all__ = [
-    # Error codes
-    "ParseErrorCode",
+    # Code Block Preservation
+    "CodeBlock",
+    "CodeBlockCollection",
+    "CodeBlockType",
+    # Image Embedding
+    "EmbeddedImage",
     # Core types
     "InlineSubtaskInfo",
+    # Error codes
+    "ParseErrorCode",
     "ParseErrorInfo",
     "ParseIssue",
     "ParseLocation",
     "ParseResult",
     "ParseSeverity",
     "ParseWarning",
+    "ParsedTable",
+    # Table Parsing
+    "TableAlignment",
+    "TableCell",
     # Extractors
     "TolerantFieldExtractor",
     # Patterns
     "TolerantPatterns",
     "TolerantSectionExtractor",
+    "code_block_to_markdown",
+    "extract_code_blocks_from_content",
+    "extract_code_from_section",
+    "extract_images_from_section",
+    "extract_table_from_section",
+    "extract_tables_from_content",
+    "get_code_block_stats",
     # Utilities
     "get_column_number",
     "get_context_lines",
@@ -2638,29 +2649,12 @@ __all__ = [
     "get_line_number",
     "location_from_match",
     "parse_checkboxes_tolerant",
-    "parse_description_tolerant",
-    "parse_inline_subtasks",
-    # Image Embedding
-    "EmbeddedImage",
-    "parse_embedded_images",
-    "extract_images_from_section",
-    # Table Parsing
-    "TableAlignment",
-    "TableCell",
-    "ParsedTable",
-    "parse_markdown_table",
-    "extract_tables_from_content",
-    "extract_table_from_section",
-    "table_to_markdown",
-    # Code Block Preservation
-    "CodeBlock",
-    "CodeBlockCollection",
-    "CodeBlockType",
-    "code_block_to_markdown",
-    "extract_code_blocks_from_content",
-    "extract_code_from_section",
-    "get_code_block_stats",
     "parse_code_blocks",
+    "parse_description_tolerant",
+    "parse_embedded_images",
+    "parse_inline_subtasks",
+    "parse_markdown_table",
     "preserve_code_blocks",
     "restore_code_blocks",
+    "table_to_markdown",
 ]

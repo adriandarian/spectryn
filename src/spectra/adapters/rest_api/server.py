@@ -647,7 +647,7 @@ class SpectraRestServer(RestApiServerPort):
                         flat_params[key] = values[0] if len(values) == 1 else values
 
                     # Parse headers
-                    headers = {key: value for key, value in self.headers.items()}
+                    headers = dict(self.headers.items())
 
                     # Parse body for POST/PUT/PATCH
                     body: dict[str, Any] | list[Any] | None = None

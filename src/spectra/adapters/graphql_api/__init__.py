@@ -53,6 +53,8 @@ from .server import (
 __all__ = [
     # Schema
     "SCHEMA_SDL",
+    # Server
+    "DataStore",
     "GraphQLChangeType",
     "GraphQLEpic",
     "GraphQLPriority",
@@ -63,8 +65,6 @@ __all__ = [
     "GraphQLSyncOperation",
     "GraphQLSyncResult",
     "GraphQLWorkspaceStats",
-    # Server
-    "DataStore",
     "SimpleResolverRegistry",
     "SpectraGraphQLServer",
     "convert_epic",

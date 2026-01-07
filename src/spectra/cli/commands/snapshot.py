@@ -6,7 +6,7 @@ This module contains handlers for snapshot-related commands:
 - run_clear_snapshot: Clear the sync snapshot for an epic
 """
 
-from ..exit_codes import ExitCode
+from spectra.cli.exit_codes import ExitCode
 
 
 __all__ = [

@@ -381,14 +381,23 @@ ignore = [
     "N806",    # variable should be lowercase (test mocks)
     "PLR0915", # too many statements
     "SIM102",  # nested if
+    "SIM117",  # nested with statements (common in test mocking)
     "F401",    # unused import (conditional imports)
     "ERA001",  # commented out code
     "PLW2901", # loop variable overwritten
     "F821",    # undefined name (forward refs in tests)
+    "RUF059",  # unused unpacked variable (common in tests that only check first value)
+    "RET504",  # unnecessary assignment before return (clearer in fixtures)
 ]
 "src/spectra/adapters/*" = [
     "ARG002",  # unused method argument (interface implementations)
     "B023",    # function doesn't bind loop variable
+]
+"src/spectra/adapters/graphql_api/schema.py" = [
+    "E402",    # module import not at top (imports after SDL string is intentional)
+]
+"src/spectra/adapters/graphql_api/server.py" = [
+    "N803",    # camelCase args required for GraphQL resolver compatibility
 ]
 "src/spectra/core/__init__.py" = ["F401", "F403"]  # re-exports
 "src/spectra/adapters/observability/*" = ["F401"]  # optional imports

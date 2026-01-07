@@ -9,6 +9,7 @@ Tests the concrete implementations:
 - ResilienceManager
 """
 
+import contextlib
 import threading
 import time
 from datetime import datetime
@@ -457,10 +458,8 @@ class TestResilienceManager:
 
         # Trip the circuit breaker
         for _ in range(3):
-            try:
+            with contextlib.suppress(Exception, RetryExhaustedError):
                 manager.execute(fail)
-            except (Exception, RetryExhaustedError):
-                pass
 
         # Circuit should be open now
         with pytest.raises(CircuitOpenError):
