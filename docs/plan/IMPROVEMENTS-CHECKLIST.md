@@ -27,7 +27,7 @@
   - [x] `test_azure_devops_integration.py` - added async adapter and batch tests
   - [x] `test_asana_integration.py` - added async adapter tests
   - [x] `test_confluence_integration.py` - comprehensive coverage with batch, storage format, permissions
-- [ ] **Code Coverage 80%+** - Currently 71.11%, target 80%+ (3003 tests passing)
+- [ ] **Code Coverage 80%+** - Currently 65.87%, target 80%+ (7,408 tests passing)
 - [x] **Fix Failing Tests** - All 3003 tests passing
 - [x] **Parameterized Tests for ID Prefixes** - Added `test_flexible_id_prefixes.py` with comprehensive ID format tests
 - [x] **Property-Based Testing** - Added `test_parser_properties.py` with Hypothesis tests for parsers
