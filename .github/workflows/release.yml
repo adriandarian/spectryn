@@ -229,7 +229,7 @@ jobs:
           git push origin "${{ needs.validate.outputs.tag }}"
 
       - name: 🚀 Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ !inputs.dry_run }}
         with:
           tag_name: ${{ needs.validate.outputs.tag }}
