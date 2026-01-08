@@ -316,39 +316,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   # ============================================================================
-  # Publish Documentation
-  # ============================================================================
-  publish-docs:
-    name: 📚 Publish Documentation
-    needs: [validate, github-release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: docs/package-lock.json
-
-      - name: 📦 Install Dependencies
-        working-directory: docs
-        run: npm ci
-
-      - name: 🏗️ Build Documentation
-        working-directory: docs
-        run: npm run build
-
-      - name: 🚀 Deploy to GitHub Pages
-        if: ${{ !inputs.dry_run }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/.vitepress/dist
-          cname: spectryn.dev  # Optional: custom domain
-
-  # ============================================================================
   # Publish VS Code Extension
   # ============================================================================
   publish-vscode:
@@ -581,7 +548,7 @@ jobs:
   # ============================================================================
   release-summary:
     name: 📋 Release Summary
-    needs: [validate, github-release, publish-pypi, publish-docker, publish-docs, publish-vscode, publish-homebrew, publish-chocolatey, build-debian, build-rpm]
+    needs: [validate, github-release, publish-pypi, publish-docker, publish-vscode, publish-homebrew, publish-chocolatey, build-debian, build-rpm]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -594,7 +561,6 @@ jobs:
           echo "| GitHub Release | ${{ needs.github-release.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| PyPI | ${{ needs.publish-pypi.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker Hub | ${{ needs.publish-docker.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Documentation | ${{ needs.publish-docs.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| VS Code Extension | ${{ needs.publish-vscode.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Homebrew | ${{ needs.publish-homebrew.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Chocolatey | ${{ needs.publish-chocolatey.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
