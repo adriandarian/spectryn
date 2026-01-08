@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ class TestAsyncJiraAdapterInit:
 
     def test_init_requires_async_support(self, mock_tracker_config):
         """Test that adapter imports correctly when async is available."""
-        from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+        from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
         adapter = AsyncJiraAdapter(
             config=mock_tracker_config,
@@ -99,7 +99,7 @@ class TestAsyncJiraAdapterInit:
 
     def test_init_creates_default_formatter(self, mock_tracker_config):
         """Test that adapter creates default ADF formatter."""
-        from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+        from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
         adapter = AsyncJiraAdapter(
             config=mock_tracker_config,
@@ -116,9 +116,11 @@ class TestAsyncJiraAdapterConnection:
     async def test_connect_creates_client(self, mock_tracker_config):
         """Test that connect creates and initializes the client."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -138,9 +140,11 @@ class TestAsyncJiraAdapterConnection:
     async def test_disconnect_closes_client(self, mock_tracker_config):
         """Test that disconnect properly closes the client."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -161,7 +165,7 @@ class TestAsyncJiraAdapterConnection:
     async def test_ensure_connected_raises_when_not_connected(self, mock_tracker_config):
         """Test that operations fail when not connected."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
             adapter = AsyncJiraAdapter(
                 config=mock_tracker_config,
@@ -179,9 +183,11 @@ class TestAsyncJiraAdapterReadOperations:
     async def test_get_issue_async(self, mock_tracker_config, mock_jira_issue_response):
         """Test fetching a single issue asynchronously."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -210,9 +216,11 @@ class TestAsyncJiraAdapterWriteOperations:
     async def test_update_descriptions_dry_run(self, mock_tracker_config):
         """Test update descriptions in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -237,9 +245,11 @@ class TestAsyncJiraAdapterWriteOperations:
     async def test_create_subtasks_dry_run(self, mock_tracker_config):
         """Test create subtasks in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -267,9 +277,11 @@ class TestAsyncJiraAdapterWriteOperations:
     async def test_transition_issues_dry_run(self, mock_tracker_config):
         """Test transition issues in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -291,9 +303,11 @@ class TestAsyncJiraAdapterWriteOperations:
     async def test_add_comments_dry_run(self, mock_tracker_config):
         """Test add comments in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
-            with patch("spectra.adapters.jira.async_adapter.AsyncJiraApiClient") as mock_client_cls:
+            with patch(
+                "spectryn.adapters.jira.async_adapter.AsyncJiraApiClient"
+            ) as mock_client_cls:
                 mock_client = MagicMock()
                 mock_client.__aenter__ = AsyncMock(return_value=mock_client)
                 mock_client.__aexit__ = AsyncMock()
@@ -318,7 +332,7 @@ class TestAsyncJiraAdapterParseIssue:
     def test_parse_issue_complete(self, mock_tracker_config, mock_jira_issue_response):
         """Test parsing a complete issue response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
             adapter = AsyncJiraAdapter(
                 config=mock_tracker_config,
@@ -338,7 +352,7 @@ class TestAsyncJiraAdapterParseIssue:
     def test_parse_issue_minimal(self, mock_tracker_config):
         """Test parsing a minimal issue response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_adapter import AsyncJiraAdapter
+            from spectryn.adapters.jira.async_adapter import AsyncJiraAdapter
 
             adapter = AsyncJiraAdapter(
                 config=mock_tracker_config,
@@ -365,7 +379,7 @@ class TestAsyncJiraApiClientInit:
     def test_init_sets_api_url(self):
         """Test that initialization correctly sets the API URL."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -380,7 +394,7 @@ class TestAsyncJiraApiClientInit:
     def test_init_custom_settings(self):
         """Test initialization with custom settings."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -403,7 +417,7 @@ class TestAsyncJiraApiClientDryRun:
     async def test_post_dry_run_skips_write(self):
         """Test that POST requests are skipped in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -419,7 +433,7 @@ class TestAsyncJiraApiClientDryRun:
     async def test_put_dry_run_skips(self):
         """Test that PUT requests are skipped in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -435,7 +449,7 @@ class TestAsyncJiraApiClientDryRun:
     async def test_delete_dry_run_skips(self):
         """Test that DELETE requests are skipped in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -455,7 +469,7 @@ class TestAsyncJiraApiClientUserApi:
     async def test_get_myself_caches_result(self):
         """Test that get_myself caches the result."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -472,7 +486,7 @@ class TestAsyncJiraApiClientUserApi:
     async def test_get_current_user_id(self):
         """Test getting the current user ID."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -493,7 +507,7 @@ class TestAsyncJiraApiClientIssueApi:
     async def test_get_issue_with_fields(self):
         """Test getting an issue with specific fields."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -512,7 +526,7 @@ class TestAsyncJiraApiClientIssueApi:
     async def test_update_issue(self):
         """Test updating an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -534,7 +548,7 @@ class TestAsyncJiraApiClientIssueApi:
     async def test_create_issue(self):
         """Test creating an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -559,7 +573,7 @@ class TestAsyncJiraApiClientCommentsApi:
     async def test_get_comments(self):
         """Test getting comments on an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -584,7 +598,7 @@ class TestAsyncJiraApiClientCommentsApi:
     async def test_add_comment(self):
         """Test adding a comment to an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -608,7 +622,7 @@ class TestAsyncJiraApiClientTransitionsApi:
     async def test_get_transitions(self):
         """Test getting available transitions for an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -633,7 +647,7 @@ class TestAsyncJiraApiClientTransitionsApi:
     async def test_transition_issue(self):
         """Test transitioning an issue."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -657,7 +671,7 @@ class TestAsyncJiraApiClientSearchApi:
     async def test_search_jql(self):
         """Test JQL search."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -681,7 +695,7 @@ class TestAsyncJiraApiClientSearchApi:
     async def test_search_all_jql_single_page(self):
         """Test JQL search with single page of results."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.jira.async_client import AsyncJiraApiClient
+            from spectryn.adapters.jira.async_client import AsyncJiraApiClient
 
             client = AsyncJiraApiClient(
                 base_url="https://test.atlassian.net",
@@ -709,7 +723,7 @@ class TestAsyncAvailability:
 
     def test_is_async_available(self):
         """Test is_async_available function."""
-        from spectra.adapters.jira.async_adapter import is_async_available
+        from spectryn.adapters.jira.async_adapter import is_async_available
 
         result = is_async_available()
         assert isinstance(result, bool)

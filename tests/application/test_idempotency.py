@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.application.sync.idempotency import (
+from spectryn.application.sync.idempotency import (
     ContentHasher,
     IdempotencyCheck,
     IdempotencyGuard,
@@ -14,9 +14,9 @@ from spectra.application.sync.idempotency import (
     check_idempotency,
     is_content_unchanged,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Status
-from spectra.core.domain.value_objects import Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Status
+from spectryn.core.domain.value_objects import Description, StoryId
 
 
 # =============================================================================

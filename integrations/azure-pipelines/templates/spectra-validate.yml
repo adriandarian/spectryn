@@ -19,12 +19,12 @@ steps:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install spectra
+      pip install spectryn
     displayName: 'Install Spectra'
 
   - script: |
       echo "✔️ Spectra Validation"
       echo "===================="
-      spectra validate --markdown ${{ parameters.markdownFile }}
+      spectryn validate --markdown ${{ parameters.markdownFile }}
       echo "✅ Validation passed!"
     displayName: 'Validate Markdown'

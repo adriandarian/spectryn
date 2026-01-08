@@ -1,11 +1,11 @@
-# Makefile for spectra development
+# Makefile for spectryn development
 # Run 'make help' to see available targets
 
 .PHONY: help install test lint format typecheck mutation clean
 
 # Default target
 help:
-	@echo "spectra Development Commands"
+	@echo "spectryn Development Commands"
 	@echo "============================"
 	@echo ""
 	@echo "Setup:"
@@ -44,7 +44,7 @@ test-fast:
 	pytest tests/ -v --ignore=tests/integration --ignore=tests/property -x
 
 test-cov:
-	pytest tests/ --cov=src/spectra --cov-report=html --cov-report=term-missing
+	pytest tests/ --cov=src/spectryn --cov-report=html --cov-report=term-missing
 
 # Benchmarking
 bench:
@@ -97,7 +97,7 @@ format:
 	ruff format src/ tests/
 
 typecheck:
-	mypy src/spectra/
+	mypy src/spectryn/
 
 check: lint typecheck test
 

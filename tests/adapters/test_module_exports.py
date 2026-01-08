@@ -9,7 +9,7 @@ class TestInfrastructureExports:
 
     def test_infrastructure_all_exports(self):
         """Test that infrastructure __all__ exports are defined."""
-        from spectra.adapters import infrastructure
+        from spectryn.adapters import infrastructure
 
         assert hasattr(infrastructure, "__all__")
         assert "async_base" in infrastructure.__all__
@@ -22,7 +22,7 @@ class TestInputExports:
 
     def test_input_parsers_exported(self):
         """Test that input parsers are exported."""
-        from spectra.adapters.input import MarkdownParser, NotionParser, YamlParser
+        from spectryn.adapters.input import MarkdownParser, NotionParser, YamlParser
 
         assert MarkdownParser is not None
         assert NotionParser is not None
@@ -30,7 +30,7 @@ class TestInputExports:
 
     def test_input_all_exports(self):
         """Test that input __all__ is defined."""
-        from spectra.adapters import input
+        from spectryn.adapters import input
 
         assert hasattr(input, "__all__")
         assert "MarkdownParser" in input.__all__
@@ -43,14 +43,14 @@ class TestOutputExports:
 
     def test_output_formatters_exported(self):
         """Test that output formatters are exported."""
-        from spectra.adapters.output import ADFFormatter, MarkdownWriter
+        from spectryn.adapters.output import ADFFormatter, MarkdownWriter
 
         assert ADFFormatter is not None
         assert MarkdownWriter is not None
 
     def test_output_all_exports(self):
         """Test that output __all__ is defined."""
-        from spectra.adapters import output
+        from spectryn.adapters import output
 
         assert hasattr(output, "__all__")
         assert "ADFFormatter" in output.__all__
@@ -62,7 +62,7 @@ class TestTrackersExports:
 
     def test_trackers_adapters_exported(self):
         """Test that tracker adapters are exported."""
-        from spectra.adapters.trackers import (
+        from spectryn.adapters.trackers import (
             AsanaAdapter,
             AzureDevOpsAdapter,
             ConfluenceAdapter,
@@ -80,7 +80,7 @@ class TestTrackersExports:
 
     def test_trackers_all_exports(self):
         """Test that trackers __all__ is defined."""
-        from spectra.adapters import trackers
+        from spectryn.adapters import trackers
 
         assert hasattr(trackers, "__all__")
         assert "AsanaAdapter" in trackers.__all__

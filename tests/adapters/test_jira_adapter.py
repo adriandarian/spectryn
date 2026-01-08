@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.jira.adapter import JiraAdapter
-from spectra.core.ports.config_provider import TrackerConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.adapters.jira.adapter import JiraAdapter
+from spectryn.core.ports.config_provider import TrackerConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 @pytest.fixture
@@ -28,8 +28,8 @@ def mock_config():
 def adapter(mock_config):
     """Create a JiraAdapter with mocked client."""
     with (
-        patch("spectra.adapters.jira.adapter.JiraApiClient") as MockClient,
-        patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+        patch("spectryn.adapters.jira.adapter.JiraApiClient") as MockClient,
+        patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
     ):
         mock_client = MagicMock()
         MockClient.return_value = mock_client
@@ -63,8 +63,8 @@ class TestJiraAdapterInit:
     def test_init_with_config(self, mock_config):
         """Test initialization with config."""
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient"),
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient"),
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             adapter = JiraAdapter(config=mock_config, dry_run=True)
 
@@ -76,8 +76,8 @@ class TestJiraAdapterInit:
         mock_config.story_points_field = "customfield_99999"
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient"),
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient"),
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             adapter = JiraAdapter(config=mock_config, dry_run=True)
 
@@ -337,7 +337,7 @@ class TestJiraAdapterLinks:
 
     def test_create_link_dry_run(self, adapter):
         """Test creating link in dry-run mode."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         result = adapter.create_link("TEST-123", "TEST-456", LinkType.BLOCKS)
 
@@ -585,7 +585,7 @@ class TestJiraAdapterTransitionWorkflow:
 
     def test_do_transition_failure(self, adapter):
         """Test transition failure handling."""
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         adapter._dry_run = False
         adapter._client.post.side_effect = IssueTrackerError("Transition not allowed")
@@ -625,7 +625,7 @@ class TestJiraAdapterLinkOperations:
 
     def test_create_link_live(self, adapter):
         """Test creating link live."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter._dry_run = False
 
@@ -636,7 +636,7 @@ class TestJiraAdapterLinkOperations:
 
     def test_delete_link_live(self, adapter):
         """Test deleting link live."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter._dry_run = False
         adapter._client.get.return_value = {

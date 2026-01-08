@@ -4,12 +4,12 @@ Tests for audit trail functionality.
 
 import json
 
-from spectra.application.sync.audit import (
+from spectryn.application.sync.audit import (
     AuditEntry,
     AuditTrailRecorder,
     create_audit_trail,
 )
-from spectra.core.domain.events import (
+from spectryn.core.domain.events import (
     CommentAdded,
     EventBus,
     StoryMatched,
@@ -462,7 +462,7 @@ class TestCLIArgumentParsing:
 
     def test_audit_trail_argument(self):
         """Test --audit-trail argument parsing."""
-        from spectra.cli.app import create_parser
+        from spectryn.cli.app import create_parser
 
         parser = create_parser()
 

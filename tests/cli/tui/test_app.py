@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from spectra.cli.tui.data import TUIState, create_demo_state
+from spectryn.cli.tui.data import TUIState, create_demo_state
 
 
 class TestTUIStateInitialization:
@@ -44,8 +44,8 @@ class TestRunTUIFunction:
 
     def test_run_tui_without_textual(self) -> None:
         """Test run_tui returns error when Textual not available."""
-        with patch("spectra.cli.tui.app.TEXTUAL_AVAILABLE", False):
-            from spectra.cli.tui.app import run_tui
+        with patch("spectryn.cli.tui.app.TEXTUAL_AVAILABLE", False):
+            from spectryn.cli.tui.app import run_tui
 
             # Re-import to get patched version
             result = run_tui(demo=True)
@@ -55,14 +55,14 @@ class TestRunTUIFunction:
 
     def test_run_tui_demo_mode_available(self) -> None:
         """Test that demo mode is supported."""
-        from spectra.cli.tui.app import check_textual_available
+        from spectryn.cli.tui.app import check_textual_available
 
         if not check_textual_available():
             pytest.skip("Textual not available")
 
         # Just verify the function can be called with demo=True
         # Actual running would require Textual's test harness
-        from spectra.cli.tui.app import SpectraTUI
+        from spectryn.cli.tui.app import SpectraTUI
 
         app = SpectraTUI(demo=True)
         assert app.state is not None
@@ -148,12 +148,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_vim_navigation(self) -> None:
         """Test DashboardScreen has vim-style navigation keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -167,12 +167,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_tab_navigation(self) -> None:
         """Test DashboardScreen has tab navigation keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -183,12 +183,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_quick_filters(self) -> None:
         """Test DashboardScreen has quick filter keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -200,12 +200,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_story_operations(self) -> None:
         """Test DashboardScreen has story operation keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -216,12 +216,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_bulk_operations(self) -> None:
         """Test DashboardScreen has bulk operation keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -231,12 +231,12 @@ class TestKeyboardShortcutBindings:
 
     def test_dashboard_screen_has_view_controls(self) -> None:
         """Test DashboardScreen has view control keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         binding_keys = [b.key for b in DashboardScreen.BINDINGS]
 
@@ -247,12 +247,12 @@ class TestKeyboardShortcutBindings:
 
     def test_help_screen_has_scroll_keys(self) -> None:
         """Test HelpScreen has scroll navigation keys."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import HelpScreen
+        from spectryn.cli.tui.app import HelpScreen
 
         binding_keys = [b.key for b in HelpScreen.BINDINGS]
 
@@ -262,12 +262,12 @@ class TestKeyboardShortcutBindings:
 
     def test_main_app_has_global_shortcuts(self) -> None:
         """Test SpectraTUI has global keyboard shortcuts."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import SpectraTUI
+        from spectryn.cli.tui.app import SpectraTUI
 
         binding_keys = [b.key for b in SpectraTUI.BINDINGS]
 
@@ -285,12 +285,12 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_navigation_action_methods(self) -> None:
         """Test DashboardScreen has navigation action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         # Check action methods exist
         assert hasattr(DashboardScreen, "action_move_down")
@@ -302,12 +302,12 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_tab_action_methods(self) -> None:
         """Test DashboardScreen has tab navigation action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         assert hasattr(DashboardScreen, "action_tab_details")
         assert hasattr(DashboardScreen, "action_tab_conflicts")
@@ -315,12 +315,12 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_filter_action_methods(self) -> None:
         """Test DashboardScreen has filter action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         assert hasattr(DashboardScreen, "action_filter_in_progress")
         assert hasattr(DashboardScreen, "action_filter_planned")
@@ -329,12 +329,12 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_story_operation_methods(self) -> None:
         """Test DashboardScreen has story operation action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         assert hasattr(DashboardScreen, "action_open_in_tracker")
         assert hasattr(DashboardScreen, "action_copy_story_id")
@@ -344,12 +344,12 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_view_control_methods(self) -> None:
         """Test DashboardScreen has view control action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         assert hasattr(DashboardScreen, "action_focus_log")
         assert hasattr(DashboardScreen, "action_toggle_zoom")
@@ -357,24 +357,24 @@ class TestKeyboardShortcutActions:
 
     def test_dashboard_has_bulk_operation_methods(self) -> None:
         """Test DashboardScreen has bulk operation action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import DashboardScreen
+        from spectryn.cli.tui.app import DashboardScreen
 
         assert hasattr(DashboardScreen, "action_select_all")
         assert hasattr(DashboardScreen, "action_toggle_selection")
 
     def test_help_screen_has_scroll_methods(self) -> None:
         """Test HelpScreen has scroll action methods."""
-        from spectra.cli.tui.app import TEXTUAL_AVAILABLE
+        from spectryn.cli.tui.app import TEXTUAL_AVAILABLE
 
         if not TEXTUAL_AVAILABLE:
             pytest.skip("Textual not available")
 
-        from spectra.cli.tui.app import HelpScreen
+        from spectryn.cli.tui.app import HelpScreen
 
         assert hasattr(HelpScreen, "action_scroll_down")
         assert hasattr(HelpScreen, "action_scroll_up")

@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from spectra.plugins.base import (
+from spectryn.plugins.base import (
     FormatterPlugin,
     ParserPlugin,
     Plugin,

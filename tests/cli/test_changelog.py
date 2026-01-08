@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.cli.changelog import (
+from spectryn.cli.changelog import (
     ChangeEntry,
     ChangelogFormat,
     ChangelogGenerator,
@@ -14,7 +14,7 @@ from spectra.cli.changelog import (
     ChangeType,
     generate_changelog,
 )
-from spectra.core.ports.sync_history import SyncHistoryEntry, SyncOutcome
+from spectryn.core.ports.sync_history import SyncHistoryEntry, SyncOutcome
 
 
 class MockSyncHistoryStore:

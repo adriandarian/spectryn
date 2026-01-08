@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.cache.file_cache import FileCache
+from spectryn.adapters.cache.file_cache import FileCache
 
 
 class TestFileCacheBasics:

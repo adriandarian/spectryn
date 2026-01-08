@@ -22,9 +22,9 @@ from typing import Any
 
 import pytest
 
-from spectra.adapters.basecamp.adapter import BasecampAdapter
-from spectra.adapters.basecamp.client import BasecampApiClient
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.basecamp.adapter import BasecampAdapter
+from spectryn.adapters.basecamp.client import BasecampApiClient
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,

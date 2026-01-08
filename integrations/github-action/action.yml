@@ -1,6 +1,6 @@
-name: 'spectra Sync'
+name: 'spectryn Sync'
 description: 'Sync markdown specifications to issue trackers (Jira, GitHub, Azure DevOps, Linear)'
-author: 'spectra'
+author: 'spectryn'
 branding:
   icon: 'upload-cloud'
   color: 'blue'

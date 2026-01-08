@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ class TestAsyncLinearAdapterInit:
     def test_init_with_required_params(self):
         """Test initialization with required parameters."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -58,7 +58,7 @@ class TestAsyncLinearAdapterInit:
     def test_init_with_custom_settings(self):
         """Test initialization with custom settings."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -80,7 +80,7 @@ class TestAsyncLinearAdapterConnection:
     async def test_connect_creates_session(self):
         """Test that connect creates an aiohttp session."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -100,7 +100,7 @@ class TestAsyncLinearAdapterConnection:
     async def test_disconnect_closes_session(self):
         """Test that disconnect closes the session."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -125,7 +125,7 @@ class TestAsyncLinearAdapterWriteOperations:
     async def test_update_descriptions_dry_run(self):
         """Test update descriptions in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -150,7 +150,7 @@ class TestAsyncLinearAdapterWriteOperations:
     async def test_create_subtasks_dry_run(self):
         """Test create subtasks in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -174,7 +174,7 @@ class TestAsyncLinearAdapterWriteOperations:
     async def test_transition_issues_dry_run(self):
         """Test transition issues in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -195,7 +195,7 @@ class TestAsyncLinearAdapterWriteOperations:
     async def test_add_comments_dry_run(self):
         """Test add comments in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -219,7 +219,7 @@ class TestAsyncLinearAdapterParseIssue:
     def test_parse_issue_complete(self, mock_linear_issue_response):
         """Test parsing a complete issue response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -237,7 +237,7 @@ class TestAsyncLinearAdapterParseIssue:
     def test_parse_issue_minimal(self):
         """Test parsing a minimal issue response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.linear.async_adapter import AsyncLinearAdapter
+            from spectryn.adapters.linear.async_adapter import AsyncLinearAdapter
 
             adapter = AsyncLinearAdapter(
                 api_key="test-api-key",
@@ -261,7 +261,7 @@ class TestAsyncLinearAvailability:
 
     def test_is_async_available(self):
         """Test is_async_available function."""
-        from spectra.adapters.linear.async_adapter import is_async_available
+        from spectryn.adapters.linear.async_adapter import is_async_available
 
         result = is_async_available()
         assert isinstance(result, bool)

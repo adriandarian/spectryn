@@ -8,14 +8,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.archive import (
+from spectryn.cli.archive import (
     ArchiveCandidate,
     ArchiveResult,
     find_archive_candidates,
     format_archive_result,
     run_archive,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 # =============================================================================
@@ -332,7 +332,7 @@ class TestRunArchive:
         mock_parser = MagicMock()
         mock_parser.parse_stories.side_effect = Exception("Parse error")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(console=mock_console, action="list", input_path=md_file)
 
         assert result == ExitCode.ERROR
@@ -345,7 +345,7 @@ class TestRunArchive:
         mock_parser = MagicMock()
         mock_parser.parse_stories.return_value = []
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(console=mock_console, action="list", input_path=md_file)
 
         assert result == ExitCode.SUCCESS
@@ -360,7 +360,7 @@ class TestRunArchive:
             {"key": "US-1", "title": "Done Story", "status": "done"}
         ]
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(
                 console=mock_console, action="list", input_path=md_file, days_threshold=0
             )
@@ -411,7 +411,7 @@ class TestRunArchive:
         mock_parser = MagicMock()
         mock_parser.parse_stories.return_value = []
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(
                 console=mock_console, action="archive", input_path=md_file, days_threshold=0
             )
@@ -428,7 +428,7 @@ class TestRunArchive:
             {"key": "US-1", "title": "Done Story", "status": "done"}
         ]
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(
                 console=mock_console,
                 action="archive",
@@ -449,7 +449,7 @@ class TestRunArchive:
             {"key": "US-1", "title": "Done Story", "status": "done"}
         ]
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(
                 console=mock_console,
                 action="archive",
@@ -507,7 +507,7 @@ class TestRunArchive:
         mock_parser = MagicMock()
         mock_parser.parse_stories.side_effect = Exception("Parse error")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser", return_value=mock_parser):
             result = run_archive(console=mock_console, action="archive", input_path=md_file)
 
         assert result == ExitCode.ERROR

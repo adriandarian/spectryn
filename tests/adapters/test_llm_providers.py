@@ -6,30 +6,30 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.llm.base import (
+from spectryn.adapters.llm.base import (
     LLMConfig,
     LLMMessage,
     LLMResponse,
     LLMRole,
 )
-from spectra.adapters.llm.manager import (
+from spectryn.adapters.llm.manager import (
     LLMManager,
     LLMManagerConfig,
     ProviderName,
     create_llm_manager,
 )
-from spectra.adapters.llm.ollama import (
+from spectryn.adapters.llm.ollama import (
     OllamaProvider,
     create_ollama_provider,
 )
-from spectra.adapters.llm.openai_compatible import (
+from spectryn.adapters.llm.openai_compatible import (
     OpenAICompatibleProvider,
     create_lm_studio_provider,
     create_local_ai_provider,
     create_openai_compatible_provider,
     create_vllm_provider,
 )
-from spectra.adapters.llm.registry import (
+from spectryn.adapters.llm.registry import (
     LLMRegistry,
     ProviderInfo,
     ProviderType,
@@ -469,9 +469,9 @@ class TestModuleExports:
     """Test that all expected exports are available."""
 
     def test_imports_from_llm_package(self):
-        """Test importing from spectra.adapters.llm."""
+        """Test importing from spectryn.adapters.llm."""
         # Import all expected exports to verify they're available
-        from spectra.adapters import llm
+        from spectryn.adapters import llm
 
         # Verify key types exist
         assert hasattr(llm, "LLMConfig")

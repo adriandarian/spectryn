@@ -1,6 +1,6 @@
 # Environment Variables
 
-spectra uses environment variables for sensitive configuration like API credentials. This page covers all supported variables and best practices.
+spectryn uses environment variables for sensitive configuration like API credentials. This page covers all supported variables and best practices.
 
 ## Tracker Credentials
 
@@ -136,7 +136,7 @@ spectra uses environment variables for sensitive configuration like API credenti
 | `SPECTRA_VERBOSE` | Enable verbose output | `false` |
 | `SPECTRA_LOG_LEVEL` | Logging level | `INFO` |
 | `SPECTRA_NO_COLOR` | Disable colored output | `false` |
-| `SPECTRA_CONFIG` | Config file path | `.spectra.yaml` |
+| `SPECTRA_CONFIG` | Config file path | `.spectryn.yaml` |
 
 ## Setting Environment Variables
 
@@ -189,7 +189,7 @@ GITHUB_REPO=your-repo
 SPECTRA_VERBOSE=true
 ```
 
-spectra automatically loads `.env` files from:
+spectryn automatically loads `.env` files from:
 1. Current working directory
 2. Home directory (`~/.env`)
 
@@ -210,7 +210,7 @@ Add to your `.gitignore`:
 
 1. Go to [Atlassian Account Settings](https://id.atlassian.com/manage-profile/security/api-tokens)
 2. Click **Create API token**
-3. Give it a descriptive name (e.g., "spectra CLI")
+3. Give it a descriptive name (e.g., "spectryn CLI")
 4. Copy the token immediately
 
 ### GitHub
@@ -246,7 +246,7 @@ Add to your `.gitignore`:
 3. Copy the token
 
 ::: tip Token Best Practices
-- Create a dedicated token for spectra
+- Create a dedicated token for spectryn
 - Use a descriptive name for auditing
 - Rotate tokens periodically (every 90 days)
 - Revoke tokens when no longer needed
@@ -269,8 +269,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install spectra
-        run: pip install spectra
+      - name: Install spectryn
+        run: pip install spectryn
 
       - name: Sync to Jira
         env:
@@ -278,7 +278,7 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
         run: |
-          spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
+          spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
 ```
 
 ### GitLab CI
@@ -292,8 +292,8 @@ sync-jira:
     JIRA_EMAIL: $JIRA_EMAIL
     JIRA_API_TOKEN: $JIRA_API_TOKEN
   script:
-    - pip install spectra
-    - spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
+    - pip install spectryn
+    - spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
 ```
 
 ### Docker
@@ -304,7 +304,7 @@ docker run --rm \
   -e JIRA_EMAIL=$JIRA_EMAIL \
   -e JIRA_API_TOKEN=$JIRA_API_TOKEN \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
@@ -333,6 +333,6 @@ If `.env` isn't being loaded:
 3. Try explicit loading:
 
 ```bash
-source .env && spectra --markdown EPIC.md --epic PROJ-123
+source .env && spectryn --markdown EPIC.md --epic PROJ-123
 ```
 

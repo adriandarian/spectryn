@@ -6,15 +6,15 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
-from spectra.application.sync.links import (
+from spectryn.adapters.parsers.markdown import MarkdownParser
+from spectryn.application.sync.links import (
     LinkChange,
     LinkSyncOrchestrator,
     LinkSyncResult,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.value_objects import IssueKey, StoryId
-from spectra.core.ports.issue_tracker import IssueLink, LinkType
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.ports.issue_tracker import IssueLink, LinkType
 
 
 class TestLinkType:

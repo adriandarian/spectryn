@@ -6,15 +6,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.config_cmd import (
+from spectryn.cli.config_cmd import (
     ConfigValidationResult,
     find_config_files,
     format_validation_result,
     run_config_validate,
     validate_config_file,
 )
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.output import Console
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.output import Console
 
 
 class TestConfigValidationResult:
@@ -177,7 +177,7 @@ JIRA_API_TOKEN=secret
 
     def test_validate_json_config(self, tmp_path: Path):
         """Test validating JSON config."""
-        config_file = tmp_path / "spectra.config.json"
+        config_file = tmp_path / "spectryn.config.json"
         config_file.write_text(
             """
 {
@@ -406,8 +406,8 @@ jira:
         console = MagicMock(spec=Console)
         console.color = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_adapter:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_adapter:
                 mock_instance = MagicMock()
                 mock_instance.test_connection.return_value = True
                 mock_instance.get_current_user.return_value = {"displayName": "Test User"}
@@ -439,8 +439,8 @@ jira:
         console = MagicMock(spec=Console)
         console.color = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_adapter:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_adapter:
                 mock_adapter.side_effect = Exception("Connection failed")
                 mock_provider.return_value.load.return_value = MagicMock()
 

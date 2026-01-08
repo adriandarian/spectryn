@@ -1,10 +1,10 @@
 # Contributing
 
-Thank you for your interest in contributing to spectra! This guide will help you get started.
+Thank you for your interest in contributing to spectryn! This guide will help you get started.
 
 ## Code of Conduct
 
-Please read and follow our [Code of Conduct](https://github.com/adriandarian/spectra/blob/main/CODE_OF_CONDUCT.md).
+Please read and follow our [Code of Conduct](https://github.com/adriandarian/spectryn/blob/main/CODE_OF_CONDUCT.md).
 
 ## Getting Started
 
@@ -17,8 +17,8 @@ Please read and follow our [Code of Conduct](https://github.com/adriandarian/spe
 
 ```bash
 # Clone the repository
-git clone https://github.com/adriandarian/spectra.git
-cd spectra
+git clone https://github.com/adriandarian/spectryn.git
+cd spectryn
 
 # Create virtual environment
 python -m venv venv
@@ -38,7 +38,7 @@ pre-commit install
 pytest
 
 # Run with coverage
-pytest --cov=src/spectra
+pytest --cov=src/spectryn
 
 # Run specific test file
 pytest tests/cli/test_cli.py
@@ -101,8 +101,8 @@ chore: update dependencies
 ## Project Structure
 
 ```
-spectra/
-├── src/spectra/        # Source code
+spectryn/
+├── src/spectryn/        # Source code
 │   ├── core/           # Domain logic and ports
 │   ├── adapters/       # Infrastructure implementations
 │   ├── application/    # Use cases and orchestration
@@ -118,11 +118,11 @@ spectra/
 
 ### Good First Issues
 
-Look for issues labeled [`good first issue`](https://github.com/adriandarian/spectra/labels/good%20first%20issue).
+Look for issues labeled [`good first issue`](https://github.com/adriandarian/spectryn/labels/good%20first%20issue).
 
 ### Feature Requests
 
-Check the [Issues](https://github.com/adriandarian/spectra/issues) page for planned features and open discussions.
+Check the [Issues](https://github.com/adriandarian/spectryn/issues) page for planned features and open discussions.
 
 ### Documentation
 
@@ -145,21 +145,21 @@ Want to add support for a new issue tracker? See the [Plugin Guide](/guide/plugi
 ### Running Locally
 
 ```bash
-# Run spectra from source
-python -m spectra --help
+# Run spectryn from source
+python -m spectryn --help
 
 # Or use the installed command
-spectra --help
+spectryn --help
 ```
 
 ### Debugging
 
 ```bash
 # Enable debug logging
-spectra --markdown EPIC.md --epic TEST-1 -v
+spectryn --markdown EPIC.md --epic TEST-1 -v
 
 # Use Python debugger
-python -m pdb -m spectra --markdown EPIC.md --epic TEST-1
+python -m pdb -m spectryn --markdown EPIC.md --epic TEST-1
 ```
 
 ### Testing Against Jira
@@ -182,9 +182,9 @@ Releases are handled by maintainers:
 
 ## Questions?
 
-- **Bug reports**: [GitHub Issues](https://github.com/adriandarian/spectra/issues)
-- **Feature requests**: [GitHub Discussions](https://github.com/adriandarian/spectra/discussions)
-- **Security issues**: See [SECURITY.md](https://github.com/adriandarian/spectra/blob/main/SECURITY.md)
+- **Bug reports**: [GitHub Issues](https://github.com/adriandarian/spectryn/issues)
+- **Feature requests**: [GitHub Discussions](https://github.com/adriandarian/spectryn/discussions)
+- **Security issues**: See [SECURITY.md](https://github.com/adriandarian/spectryn/blob/main/SECURITY.md)
 
 ## License
 

@@ -6,7 +6,7 @@ Provides common fixtures for performance testing.
 
 import pytest
 
-from spectra.core.domain import (
+from spectryn.core.domain import (
     AcceptanceCriteria,
     Epic,
     Priority,
@@ -15,7 +15,7 @@ from spectra.core.domain import (
     Subtask,
     UserStory,
 )
-from spectra.core.result import Err, Ok, Result
+from spectryn.core.result import Err, Ok, Result
 
 
 # =============================================================================

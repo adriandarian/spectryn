@@ -40,15 +40,15 @@ steps:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install spectra
-      spectra --version
+      pip install spectryn
+      spectryn --version
     displayName: 'Install Spectra'
 
   - script: |
       echo "🔄 Spectra Pull (Reverse Sync)"
       echo "=============================="
 
-      CMD="spectra pull --epic ${{ parameters.epicKey }} --output ${{ parameters.outputFile }} --tracker ${{ parameters.tracker }}"
+      CMD="spectryn pull --epic ${{ parameters.epicKey }} --output ${{ parameters.outputFile }} --tracker ${{ parameters.tracker }}"
 
       if [ "${{ parameters.verbose }}" = "True" ]; then
         CMD="$CMD --verbose"

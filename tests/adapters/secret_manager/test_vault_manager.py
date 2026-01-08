@@ -13,11 +13,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from spectra.adapters.secret_manager.vault_manager import (
+from spectryn.adapters.secret_manager.vault_manager import (
     VaultConfig,
     VaultSecretManager,
 )
-from spectra.core.ports.secret_manager import (
+from spectryn.core.ports.secret_manager import (
     AccessDeniedError,
     AuthenticationError,
     ConnectionError,

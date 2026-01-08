@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.monday.adapter import MondayAdapter
-from spectra.adapters.monday.client import MondayApiClient, MondayRateLimiter
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.monday.adapter import MondayAdapter
+from spectryn.adapters.monday.client import MondayApiClient, MondayRateLimiter
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -46,7 +46,7 @@ class TestMondayApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.monday.client.requests.Session") as mock:
+        with patch("spectryn.adapters.monday.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -210,7 +210,7 @@ class TestMondayAdapter:
     @pytest.fixture
     def adapter(self):
         """Create a test adapter."""
-        with patch("spectra.adapters.monday.adapter.MondayApiClient"):
+        with patch("spectryn.adapters.monday.adapter.MondayApiClient"):
             return MondayAdapter(
                 api_token="test_token",
                 board_id="board-123",
@@ -378,7 +378,7 @@ class TestMondayAdapterFileAttachments:
     @pytest.fixture
     def adapter(self):
         """Create a test adapter."""
-        with patch("spectra.adapters.monday.adapter.MondayApiClient"):
+        with patch("spectryn.adapters.monday.adapter.MondayApiClient"):
             return MondayAdapter(
                 api_token="test_token",
                 board_id="board-123",
@@ -435,7 +435,7 @@ class TestMondayAdapterTimeline:
     @pytest.fixture
     def adapter(self):
         """Create a test adapter."""
-        with patch("spectra.adapters.monday.adapter.MondayApiClient"):
+        with patch("spectryn.adapters.monday.adapter.MondayApiClient"):
             return MondayAdapter(
                 api_token="test_token",
                 board_id="board-123",
@@ -511,7 +511,7 @@ class TestMondayAdapterWebhooks:
     @pytest.fixture
     def adapter(self):
         """Create a test adapter."""
-        with patch("spectra.adapters.monday.adapter.MondayApiClient"):
+        with patch("spectryn.adapters.monday.adapter.MondayApiClient"):
             return MondayAdapter(
                 api_token="test_token",
                 board_id="board-123",
@@ -591,7 +591,7 @@ class TestMondayWebhookParser:
     @pytest.fixture
     def parser(self):
         """Create a webhook parser."""
-        from spectra.adapters.monday.webhook_parser import MondayWebhookParser
+        from spectryn.adapters.monday.webhook_parser import MondayWebhookParser
 
         return MondayWebhookParser()
 

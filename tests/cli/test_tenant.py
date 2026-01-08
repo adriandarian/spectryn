@@ -93,11 +93,11 @@ class TestHandleTenantCommand:
 
     def test_dispatches_list_command(self, mock_console):
         """Test dispatching list command."""
-        from spectra.cli.tenant import handle_tenant_command
+        from spectryn.cli.tenant import handle_tenant_command
 
         args = argparse.Namespace(tenant_command="list", all=False, json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_manager = MagicMock()
             mock_manager.list_tenants.return_value = []
             mock_get.return_value = mock_manager
@@ -108,7 +108,7 @@ class TestHandleTenantCommand:
 
     def test_dispatches_create_command(self, mock_console, mock_tenant_manager):
         """Test dispatching create command."""
-        from spectra.cli.tenant import handle_tenant_command
+        from spectryn.cli.tenant import handle_tenant_command
 
         args = argparse.Namespace(
             tenant_command="create",
@@ -119,7 +119,7 @@ class TestHandleTenantCommand:
             activate=False,
         )
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = handle_tenant_command(args, mock_console)
@@ -128,7 +128,7 @@ class TestHandleTenantCommand:
 
     def test_unknown_command(self, mock_console):
         """Test handling unknown command."""
-        from spectra.cli.tenant import handle_tenant_command
+        from spectryn.cli.tenant import handle_tenant_command
 
         args = argparse.Namespace(tenant_command="unknown")
 
@@ -148,11 +148,11 @@ class TestCmdTenantList:
 
     def test_list_empty(self, mock_console):
         """Test listing when no tenants exist."""
-        from spectra.cli.tenant import _cmd_tenant_list
+        from spectryn.cli.tenant import _cmd_tenant_list
 
         args = argparse.Namespace(all=False, json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_manager = MagicMock()
             mock_manager.list_tenants.return_value = []
             mock_get.return_value = mock_manager
@@ -164,11 +164,11 @@ class TestCmdTenantList:
 
     def test_list_with_tenants(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test listing existing tenants."""
-        from spectra.cli.tenant import _cmd_tenant_list
+        from spectryn.cli.tenant import _cmd_tenant_list
 
         args = argparse.Namespace(all=False, json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_list(args, mock_console)
@@ -178,11 +178,11 @@ class TestCmdTenantList:
 
     def test_list_json_output(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test listing with JSON output."""
-        from spectra.cli.tenant import _cmd_tenant_list
+        from spectryn.cli.tenant import _cmd_tenant_list
 
         args = argparse.Namespace(all=False, json=True)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_list(args, mock_console)
@@ -192,11 +192,11 @@ class TestCmdTenantList:
 
     def test_list_includes_inactive(self, mock_console, mock_tenant_manager):
         """Test listing includes inactive when requested."""
-        from spectra.cli.tenant import _cmd_tenant_list
+        from spectryn.cli.tenant import _cmd_tenant_list
 
         args = argparse.Namespace(all=True, json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             _cmd_tenant_list(args, mock_console)
@@ -214,7 +214,7 @@ class TestCmdTenantCreate:
 
     def test_create_basic(self, mock_console, mock_tenant_manager):
         """Test creating a basic tenant."""
-        from spectra.cli.tenant import _cmd_tenant_create
+        from spectryn.cli.tenant import _cmd_tenant_create
 
         args = argparse.Namespace(
             id="new-tenant",
@@ -224,7 +224,7 @@ class TestCmdTenantCreate:
             activate=False,
         )
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_create(args, mock_console)
@@ -234,7 +234,7 @@ class TestCmdTenantCreate:
 
     def test_create_with_activation(self, mock_console, mock_tenant_manager):
         """Test creating and activating a tenant."""
-        from spectra.cli.tenant import _cmd_tenant_create
+        from spectryn.cli.tenant import _cmd_tenant_create
 
         args = argparse.Namespace(
             id="new-tenant",
@@ -244,7 +244,7 @@ class TestCmdTenantCreate:
             activate=True,
         )
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_create(args, mock_console)
@@ -254,7 +254,7 @@ class TestCmdTenantCreate:
 
     def test_create_error(self, mock_console, mock_tenant_manager):
         """Test create with error."""
-        from spectra.cli.tenant import _cmd_tenant_create
+        from spectryn.cli.tenant import _cmd_tenant_create
 
         args = argparse.Namespace(
             id="new-tenant",
@@ -266,7 +266,7 @@ class TestCmdTenantCreate:
 
         mock_tenant_manager.create.side_effect = ValueError("Already exists")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_create(args, mock_console)
@@ -276,7 +276,7 @@ class TestCmdTenantCreate:
 
     def test_create_with_hyphenated_isolation(self, mock_console, mock_tenant_manager):
         """Test creating with hyphenated isolation level."""
-        from spectra.cli.tenant import _cmd_tenant_create
+        from spectryn.cli.tenant import _cmd_tenant_create
 
         args = argparse.Namespace(
             id="new-tenant",
@@ -286,7 +286,7 @@ class TestCmdTenantCreate:
             activate=False,
         )
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_create(args, mock_console)
@@ -304,11 +304,11 @@ class TestCmdTenantUse:
 
     def test_use_success(self, mock_console, mock_tenant_manager):
         """Test successful tenant switch."""
-        from spectra.cli.tenant import _cmd_tenant_use
+        from spectryn.cli.tenant import _cmd_tenant_use
 
         args = argparse.Namespace(id="other-tenant")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_use(args, mock_console)
@@ -318,12 +318,12 @@ class TestCmdTenantUse:
 
     def test_use_not_found(self, mock_console, mock_tenant_manager):
         """Test switching to non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_use
+        from spectryn.cli.tenant import _cmd_tenant_use
 
         args = argparse.Namespace(id="missing-tenant")
         mock_tenant_manager.use.side_effect = KeyError("Not found")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_use(args, mock_console)
@@ -333,12 +333,12 @@ class TestCmdTenantUse:
 
     def test_use_runtime_error(self, mock_console, mock_tenant_manager):
         """Test switch with runtime error."""
-        from spectra.cli.tenant import _cmd_tenant_use
+        from spectryn.cli.tenant import _cmd_tenant_use
 
         args = argparse.Namespace(id="bad-tenant")
         mock_tenant_manager.use.side_effect = RuntimeError("Tenant is archived")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_use(args, mock_console)
@@ -356,11 +356,11 @@ class TestCmdTenantShow:
 
     def test_show_current_tenant(self, mock_console, mock_tenant_manager):
         """Test showing current tenant."""
-        from spectra.cli.tenant import _cmd_tenant_show
+        from spectryn.cli.tenant import _cmd_tenant_show
 
         args = argparse.Namespace(id=None, json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_show(args, mock_console)
@@ -370,11 +370,11 @@ class TestCmdTenantShow:
 
     def test_show_specific_tenant(self, mock_console, mock_tenant_manager):
         """Test showing specific tenant."""
-        from spectra.cli.tenant import _cmd_tenant_show
+        from spectryn.cli.tenant import _cmd_tenant_show
 
         args = argparse.Namespace(id="other-tenant", json=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_show(args, mock_console)
@@ -383,12 +383,12 @@ class TestCmdTenantShow:
 
     def test_show_not_found(self, mock_console, mock_tenant_manager):
         """Test showing non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_show
+        from spectryn.cli.tenant import _cmd_tenant_show
 
         args = argparse.Namespace(id="missing", json=False)
         mock_tenant_manager.get_tenant.return_value = None
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_show(args, mock_console)
@@ -398,11 +398,11 @@ class TestCmdTenantShow:
 
     def test_show_json_output(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test showing tenant with JSON output."""
-        from spectra.cli.tenant import _cmd_tenant_show
+        from spectryn.cli.tenant import _cmd_tenant_show
 
         args = argparse.Namespace(id=None, json=True)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_show(args, mock_console)
@@ -412,12 +412,12 @@ class TestCmdTenantShow:
 
     def test_show_without_metadata(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test showing tenant without metadata."""
-        from spectra.cli.tenant import _cmd_tenant_show
+        from spectryn.cli.tenant import _cmd_tenant_show
 
         args = argparse.Namespace(id=None, json=False)
         mock_tenant.metadata = {}
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_show(args, mock_console)
@@ -435,11 +435,11 @@ class TestCmdTenantDelete:
 
     def test_delete_with_force(self, mock_console, mock_tenant_manager):
         """Test force deleting a tenant."""
-        from spectra.cli.tenant import _cmd_tenant_delete
+        from spectryn.cli.tenant import _cmd_tenant_delete
 
         args = argparse.Namespace(id="test-tenant", force=True, delete_data=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_delete(args, mock_console)
@@ -449,11 +449,11 @@ class TestCmdTenantDelete:
 
     def test_delete_cancelled(self, mock_console, mock_tenant_manager):
         """Test cancelling tenant deletion."""
-        from spectra.cli.tenant import _cmd_tenant_delete
+        from spectryn.cli.tenant import _cmd_tenant_delete
 
         args = argparse.Namespace(id="test-tenant", force=False, delete_data=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
             with patch("builtins.input", return_value="no"):
                 result = _cmd_tenant_delete(args, mock_console)
@@ -463,11 +463,11 @@ class TestCmdTenantDelete:
 
     def test_delete_confirmed(self, mock_console, mock_tenant_manager):
         """Test confirming tenant deletion."""
-        from spectra.cli.tenant import _cmd_tenant_delete
+        from spectryn.cli.tenant import _cmd_tenant_delete
 
         args = argparse.Namespace(id="test-tenant", force=False, delete_data=False)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
             with patch("builtins.input", return_value="yes"):
                 result = _cmd_tenant_delete(args, mock_console)
@@ -477,11 +477,11 @@ class TestCmdTenantDelete:
 
     def test_delete_with_data(self, mock_console, mock_tenant_manager):
         """Test deleting tenant with data."""
-        from spectra.cli.tenant import _cmd_tenant_delete
+        from spectryn.cli.tenant import _cmd_tenant_delete
 
         args = argparse.Namespace(id="test-tenant", force=True, delete_data=True)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_delete(args, mock_console)
@@ -493,12 +493,12 @@ class TestCmdTenantDelete:
 
     def test_delete_error(self, mock_console, mock_tenant_manager):
         """Test delete with error."""
-        from spectra.cli.tenant import _cmd_tenant_delete
+        from spectryn.cli.tenant import _cmd_tenant_delete
 
         args = argparse.Namespace(id="test-tenant", force=True, delete_data=False)
         mock_tenant_manager.delete_tenant.side_effect = ValueError("Cannot delete")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_delete(args, mock_console)
@@ -517,11 +517,11 @@ class TestCmdTenantArchive:
 
     def test_archive_success(self, mock_console, mock_tenant_manager):
         """Test archiving a tenant."""
-        from spectra.cli.tenant import _cmd_tenant_archive
+        from spectryn.cli.tenant import _cmd_tenant_archive
 
         args = argparse.Namespace(id="test-tenant")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_archive(args, mock_console)
@@ -531,12 +531,12 @@ class TestCmdTenantArchive:
 
     def test_archive_not_found(self, mock_console, mock_tenant_manager):
         """Test archiving non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_archive
+        from spectryn.cli.tenant import _cmd_tenant_archive
 
         args = argparse.Namespace(id="missing")
         mock_tenant_manager.registry.archive.side_effect = KeyError("Not found")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_archive(args, mock_console)
@@ -555,11 +555,11 @@ class TestCmdTenantActivate:
 
     def test_activate_success(self, mock_console, mock_tenant_manager):
         """Test activating a tenant."""
-        from spectra.cli.tenant import _cmd_tenant_activate
+        from spectryn.cli.tenant import _cmd_tenant_activate
 
         args = argparse.Namespace(id="test-tenant")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_activate(args, mock_console)
@@ -569,12 +569,12 @@ class TestCmdTenantActivate:
 
     def test_activate_not_found(self, mock_console, mock_tenant_manager):
         """Test activating non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_activate
+        from spectryn.cli.tenant import _cmd_tenant_activate
 
         args = argparse.Namespace(id="missing")
         mock_tenant_manager.registry.activate.side_effect = KeyError("Not found")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
 
             result = _cmd_tenant_activate(args, mock_console)
@@ -593,7 +593,7 @@ class TestCmdTenantMigrate:
 
     def test_migrate_success(self, mock_console, mock_tenant_manager):
         """Test successful migration."""
-        from spectra.cli.tenant import _cmd_tenant_migrate
+        from spectryn.cli.tenant import _cmd_tenant_migrate
 
         args = argparse.Namespace(
             source="default",
@@ -612,9 +612,9 @@ class TestCmdTenantMigrate:
             "backup_files": 2,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantMigrator") as MockMigrator:
+            with patch("spectryn.cli.tenant.TenantMigrator") as MockMigrator:
                 MockMigrator.return_value = mock_migrator
 
                 result = _cmd_tenant_migrate(args, mock_console)
@@ -624,7 +624,7 @@ class TestCmdTenantMigrate:
 
     def test_migrate_with_move(self, mock_console, mock_tenant_manager):
         """Test migration with move mode."""
-        from spectra.cli.tenant import _cmd_tenant_migrate
+        from spectryn.cli.tenant import _cmd_tenant_migrate
 
         args = argparse.Namespace(
             source="default",
@@ -643,9 +643,9 @@ class TestCmdTenantMigrate:
             "backup_files": 0,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantMigrator") as MockMigrator:
+            with patch("spectryn.cli.tenant.TenantMigrator") as MockMigrator:
                 MockMigrator.return_value = mock_migrator
 
                 result = _cmd_tenant_migrate(args, mock_console)
@@ -661,7 +661,7 @@ class TestCmdTenantMigrate:
 
     def test_migrate_error(self, mock_console, mock_tenant_manager):
         """Test migration with error."""
-        from spectra.cli.tenant import _cmd_tenant_migrate
+        from spectryn.cli.tenant import _cmd_tenant_migrate
 
         args = argparse.Namespace(
             source="default",
@@ -675,9 +675,9 @@ class TestCmdTenantMigrate:
         mock_migrator = MagicMock()
         mock_migrator.migrate_from_default.side_effect = Exception("Migration failed")
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantMigrator") as MockMigrator:
+            with patch("spectryn.cli.tenant.TenantMigrator") as MockMigrator:
                 MockMigrator.return_value = mock_migrator
 
                 result = _cmd_tenant_migrate(args, mock_console)
@@ -696,7 +696,7 @@ class TestCmdTenantStatus:
 
     def test_status_specific_tenant(self, mock_console, mock_tenant_manager):
         """Test showing status for specific tenant."""
-        from spectra.cli.tenant import _cmd_tenant_status
+        from spectryn.cli.tenant import _cmd_tenant_status
 
         args = argparse.Namespace(id="test-tenant", json=False)
 
@@ -711,9 +711,9 @@ class TestCmdTenantStatus:
             "unique_files": 20,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.CrossTenantStateQuery") as MockQuery:
+            with patch("spectryn.cli.tenant.CrossTenantStateQuery") as MockQuery:
                 MockQuery.return_value = mock_state_query
 
                 result = _cmd_tenant_status(args, mock_console)
@@ -723,16 +723,16 @@ class TestCmdTenantStatus:
 
     def test_status_not_found(self, mock_console, mock_tenant_manager):
         """Test status for non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_status
+        from spectryn.cli.tenant import _cmd_tenant_status
 
         args = argparse.Namespace(id="missing", json=False)
 
         mock_state_query = MagicMock()
         mock_state_query.get_tenant_stats.return_value = None
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.CrossTenantStateQuery") as MockQuery:
+            with patch("spectryn.cli.tenant.CrossTenantStateQuery") as MockQuery:
                 MockQuery.return_value = mock_state_query
 
                 result = _cmd_tenant_status(args, mock_console)
@@ -742,7 +742,7 @@ class TestCmdTenantStatus:
 
     def test_status_json_output(self, mock_console, mock_tenant_manager):
         """Test status with JSON output."""
-        from spectra.cli.tenant import _cmd_tenant_status
+        from spectryn.cli.tenant import _cmd_tenant_status
 
         args = argparse.Namespace(id="test-tenant", json=True)
 
@@ -752,9 +752,9 @@ class TestCmdTenantStatus:
             "total_sessions": 10,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.CrossTenantStateQuery") as MockQuery:
+            with patch("spectryn.cli.tenant.CrossTenantStateQuery") as MockQuery:
                 MockQuery.return_value = mock_state_query
 
                 result = _cmd_tenant_status(args, mock_console)
@@ -764,7 +764,7 @@ class TestCmdTenantStatus:
 
     def test_status_all_tenants(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test showing status for all tenants."""
-        from spectra.cli.tenant import _cmd_tenant_status
+        from spectryn.cli.tenant import _cmd_tenant_status
 
         args = argparse.Namespace(id=None, json=False)
 
@@ -777,9 +777,9 @@ class TestCmdTenantStatus:
             "unique_epics": 5,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.CrossTenantStateQuery") as MockQuery:
+            with patch("spectryn.cli.tenant.CrossTenantStateQuery") as MockQuery:
                 MockQuery.return_value = mock_state_query
 
                 result = _cmd_tenant_status(args, mock_console)
@@ -789,7 +789,7 @@ class TestCmdTenantStatus:
 
     def test_status_all_tenants_json(self, mock_console, mock_tenant_manager, mock_tenant):
         """Test showing status for all tenants with JSON output."""
-        from spectra.cli.tenant import _cmd_tenant_status
+        from spectryn.cli.tenant import _cmd_tenant_status
 
         args = argparse.Namespace(id=None, json=True)
 
@@ -799,9 +799,9 @@ class TestCmdTenantStatus:
             "total_sessions": 10,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.CrossTenantStateQuery") as MockQuery:
+            with patch("spectryn.cli.tenant.CrossTenantStateQuery") as MockQuery:
                 MockQuery.return_value = mock_state_query
 
                 result = _cmd_tenant_status(args, mock_console)
@@ -819,13 +819,13 @@ class TestCmdTenantConfig:
 
     def test_config_show_path(self, mock_console, mock_tenant_manager, mock_paths):
         """Test showing config paths."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id=None, validate=False, show_path=True)
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager"):
+            with patch("spectryn.cli.tenant.TenantConfigManager"):
                 result = _cmd_tenant_config(args, mock_console)
 
                 assert result == 0
@@ -833,17 +833,17 @@ class TestCmdTenantConfig:
 
     def test_config_validate_success(self, mock_console, mock_tenant_manager):
         """Test validating config successfully."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id="test-tenant", validate=True, show_path=False)
 
         mock_provider = MagicMock()
         mock_provider.validate.return_value = []
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager"):
-                with patch("spectra.core.tenant_config.TenantConfigProvider") as MockProvider:
+            with patch("spectryn.cli.tenant.TenantConfigManager"):
+                with patch("spectryn.core.tenant_config.TenantConfigProvider") as MockProvider:
                     MockProvider.return_value = mock_provider
 
                     result = _cmd_tenant_config(args, mock_console)
@@ -853,17 +853,17 @@ class TestCmdTenantConfig:
 
     def test_config_validate_errors(self, mock_console, mock_tenant_manager):
         """Test validating config with errors."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id="test-tenant", validate=True, show_path=False)
 
         mock_provider = MagicMock()
         mock_provider.validate.return_value = ["Missing API key", "Invalid URL"]
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager"):
-                with patch("spectra.core.tenant_config.TenantConfigProvider") as MockProvider:
+            with patch("spectryn.cli.tenant.TenantConfigManager"):
+                with patch("spectryn.core.tenant_config.TenantConfigProvider") as MockProvider:
                     MockProvider.return_value = mock_provider
 
                     result = _cmd_tenant_config(args, mock_console)
@@ -873,7 +873,7 @@ class TestCmdTenantConfig:
 
     def test_config_show_status(self, mock_console, mock_tenant_manager):
         """Test showing config status."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id=None, validate=False, show_path=False)
 
@@ -890,9 +890,9 @@ class TestCmdTenantConfig:
             }
         ]
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager") as MockConfig:
+            with patch("spectryn.cli.tenant.TenantConfigManager") as MockConfig:
                 MockConfig.return_value = mock_config_manager
 
                 result = _cmd_tenant_config(args, mock_console)
@@ -902,16 +902,16 @@ class TestCmdTenantConfig:
 
     def test_config_status_not_found(self, mock_console, mock_tenant_manager):
         """Test config status for non-existent tenant."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id="missing", validate=False, show_path=False)
 
         mock_config_manager = MagicMock()
         mock_config_manager.list_tenant_configs.return_value = []
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager") as MockConfig:
+            with patch("spectryn.cli.tenant.TenantConfigManager") as MockConfig:
                 MockConfig.return_value = mock_config_manager
 
                 result = _cmd_tenant_config(args, mock_console)
@@ -921,7 +921,7 @@ class TestCmdTenantConfig:
 
     def test_config_with_validation_errors(self, mock_console, mock_tenant_manager):
         """Test config status showing validation errors."""
-        from spectra.cli.tenant import _cmd_tenant_config
+        from spectryn.cli.tenant import _cmd_tenant_config
 
         args = argparse.Namespace(id=None, validate=False, show_path=False)
 
@@ -938,9 +938,9 @@ class TestCmdTenantConfig:
             }
         ]
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantConfigManager") as MockConfig:
+            with patch("spectryn.cli.tenant.TenantConfigManager") as MockConfig:
                 MockConfig.return_value = mock_config_manager
 
                 result = _cmd_tenant_config(args, mock_console)
@@ -959,16 +959,16 @@ class TestCmdTenantCache:
 
     def test_cache_clear(self, mock_console, mock_tenant_manager):
         """Test clearing cache."""
-        from spectra.cli.tenant import _cmd_tenant_cache
+        from spectryn.cli.tenant import _cmd_tenant_cache
 
         args = argparse.Namespace(id=None, clear=True, stats=False)
 
         mock_cache_store = MagicMock()
         mock_cache_store.clear.return_value = 15
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantCacheStore") as MockCache:
+            with patch("spectryn.cli.tenant.TenantCacheStore") as MockCache:
                 MockCache.return_value = mock_cache_store
 
                 result = _cmd_tenant_cache(args, mock_console)
@@ -978,7 +978,7 @@ class TestCmdTenantCache:
 
     def test_cache_stats(self, mock_console, mock_tenant_manager):
         """Test showing cache statistics."""
-        from spectra.cli.tenant import _cmd_tenant_cache
+        from spectryn.cli.tenant import _cmd_tenant_cache
 
         args = argparse.Namespace(id=None, clear=False, stats=True)
 
@@ -992,9 +992,9 @@ class TestCmdTenantCache:
             "default_ttl": 3600,
         }
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantCacheStore") as MockCache:
+            with patch("spectryn.cli.tenant.TenantCacheStore") as MockCache:
                 MockCache.return_value = mock_cache_store
 
                 result = _cmd_tenant_cache(args, mock_console)
@@ -1004,7 +1004,7 @@ class TestCmdTenantCache:
 
     def test_cache_basic_info(self, mock_console, mock_tenant_manager):
         """Test showing basic cache info."""
-        from spectra.cli.tenant import _cmd_tenant_cache
+        from spectryn.cli.tenant import _cmd_tenant_cache
 
         args = argparse.Namespace(id="test-tenant", clear=False, stats=False)
 
@@ -1012,9 +1012,9 @@ class TestCmdTenantCache:
         mock_cache_store.get_stats.return_value = {"disk_entries": 50}
         mock_cache_store.cache_dir = "/path/to/cache"
 
-        with patch("spectra.cli.tenant.get_tenant_manager") as mock_get:
+        with patch("spectryn.cli.tenant.get_tenant_manager") as mock_get:
             mock_get.return_value = mock_tenant_manager
-            with patch("spectra.cli.tenant.TenantCacheStore") as MockCache:
+            with patch("spectryn.cli.tenant.TenantCacheStore") as MockCache:
                 MockCache.return_value = mock_cache_store
 
                 result = _cmd_tenant_cache(args, mock_console)

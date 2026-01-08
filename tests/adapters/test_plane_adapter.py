@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.plane.adapter import PlaneAdapter
-from spectra.adapters.plane.client import PlaneApiClient, PlaneRateLimiter
-from spectra.core.ports.config_provider import PlaneConfig
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.plane.adapter import PlaneAdapter
+from spectryn.adapters.plane.client import PlaneApiClient, PlaneRateLimiter
+from spectryn.core.ports.config_provider import PlaneConfig
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -56,7 +56,7 @@ class TestPlaneApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.plane.client.requests.Session") as mock:
+        with patch("spectryn.adapters.plane.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session

@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.github.adapter import GitHubAdapter
-from spectra.adapters.github.client import GitHubApiClient, GitHubRateLimiter
-from spectra.adapters.github.plugin import GitHubTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.github.adapter import GitHubAdapter
+from spectryn.adapters.github.client import GitHubApiClient, GitHubRateLimiter
+from spectryn.adapters.github.plugin import GitHubTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
 )
@@ -86,7 +86,7 @@ class TestGitHubApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.github.client.requests.Session") as mock:
+        with patch("spectryn.adapters.github.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -220,7 +220,7 @@ class TestGitHubAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as mock:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as mock:
             client = MagicMock()
             client.list_labels.return_value = []
             mock.return_value = client
@@ -456,7 +456,7 @@ class TestGitHubTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.github.plugin.GitHubAdapter") as MockAdapter:
+        with patch("spectryn.adapters.github.plugin.GitHubAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -482,7 +482,7 @@ class TestGitHubTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.github.plugin.GitHubAdapter") as MockAdapter:
+        with patch("spectryn.adapters.github.plugin.GitHubAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -517,7 +517,7 @@ class TestGitHubAdapterIntegration:
     @pytest.fixture
     def live_adapter(self):
         """Create adapter with mocked client for workflow tests."""
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             client = MagicMock()
             client.list_labels.return_value = []
             client.is_connected = True
@@ -626,7 +626,7 @@ class TestGitHubAdapterLinks:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as mock:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as mock:
             client = MagicMock()
             client.list_labels.return_value = []
             mock.return_value = client
@@ -697,7 +697,7 @@ class TestGitHubAdapterLinks:
 
     def test_create_link_adds_to_body(self, adapter, mock_client):
         """Should add link reference to issue body."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.get_issue.return_value = {
             "number": 123,
@@ -714,7 +714,7 @@ class TestGitHubAdapterLinks:
 
     def test_create_link_appends_to_existing(self, adapter, mock_client):
         """Should append to existing link section."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.get_issue.return_value = {
             "number": 123,
@@ -730,7 +730,7 @@ class TestGitHubAdapterLinks:
 
     def test_create_link_no_duplicate(self, adapter, mock_client):
         """Should not duplicate existing link."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.get_issue.return_value = {
             "number": 123,
@@ -745,7 +745,7 @@ class TestGitHubAdapterLinks:
 
     def test_create_link_dry_run(self, mock_client):
         """Should not modify issue in dry run mode."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter = GitHubAdapter(
             token="test-token",
@@ -761,7 +761,7 @@ class TestGitHubAdapterLinks:
 
     def test_delete_link_removes_from_body(self, adapter, mock_client):
         """Should remove link reference from body."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.get_issue.return_value = {
             "number": 123,

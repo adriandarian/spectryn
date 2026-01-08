@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.doctor import (
+from spectryn.cli.doctor import (
     CheckResult,
     CheckStatus,
     Doctor,
@@ -17,7 +17,7 @@ from spectra.cli.doctor import (
     format_doctor_report,
     run_doctor,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 # =============================================================================
@@ -258,9 +258,9 @@ class TestDoctor:
         mock_adapter.get_current_user.return_value = {"displayName": "Test User"}
 
         with patch.dict(os.environ, env):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.core.ports.config_provider.TrackerConfig"):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.core.ports.config_provider.TrackerConfig"):
                         doctor._check_tracker_connection()
 
         check = next(c for c in doctor.report.checks if c.name == "Tracker Connection")
@@ -280,9 +280,9 @@ class TestDoctor:
         mock_adapter.test_connection.return_value = False
 
         with patch.dict(os.environ, env):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.core.ports.config_provider.TrackerConfig"):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.core.ports.config_provider.TrackerConfig"):
                         doctor._check_tracker_connection()
 
         check = next(c for c in doctor.report.checks if c.name == "Tracker Connection")
@@ -459,9 +459,9 @@ class TestRunDoctor:
 
         with patch.dict(os.environ, env):
             with patch("builtins.__import__", side_effect=mock_import):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.core.ports.config_provider.TrackerConfig"):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.core.ports.config_provider.TrackerConfig"):
                             with patch("shutil.which", return_value="/usr/bin/git"):
                                 result = run_doctor(mock_console, verbose=False)
 

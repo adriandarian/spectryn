@@ -9,7 +9,7 @@ Tests cover:
 
 import pytest
 
-from spectra.core.ports.secret_manager import (
+from spectryn.core.ports.secret_manager import (
     CompositeSecretManager,
     Secret,
     SecretBackend,

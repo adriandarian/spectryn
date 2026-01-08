@@ -1,18 +1,18 @@
 # Working with AI Agents
 
-This guide helps AI coding assistants (Claude, Cursor, GitHub Copilot, Codeium, etc.) effectively work with the spectra codebase and markdown format.
+This guide helps AI coding assistants (Claude, Cursor, GitHub Copilot, Codeium, etc.) effectively work with the spectryn codebase and markdown format.
 
 ::: tip Quick Reference
-See [`AGENTS.md`](https://github.com/adriandarian/spectra/blob/main/AGENTS.md) in the project root for the essential commands AI agents should run before completing any task.
+See [`AGENTS.md`](https://github.com/adriandarian/spectryn/blob/main/AGENTS.md) in the project root for the essential commands AI agents should run before completing any task.
 :::
 
 ::: tip For Humans
-If you're looking to use AI tools to **fix** your markdown files, see the [AI Fix Guide](/guide/ai-fix). If you want to **generate** new epic documents, see [AI Prompts](/guide/ai-prompts). This page is context for AI agents working on the spectra codebase itself.
+If you're looking to use AI tools to **fix** your markdown files, see the [AI Fix Guide](/guide/ai-fix). If you want to **generate** new epic documents, see [AI Prompts](/guide/ai-prompts). This page is context for AI agents working on the spectryn codebase itself.
 :::
 
 ## Project Overview
 
-**spectra** is a CLI tool that synchronizes markdown/YAML user story specifications to issue trackers (Jira, GitHub Issues, Linear, Azure DevOps). It follows Clean Architecture with a Hexagonal/Ports-and-Adapters pattern.
+**spectryn** is a CLI tool that synchronizes markdown/YAML user story specifications to issue trackers (Jira, GitHub Issues, Linear, Azure DevOps). It follows Clean Architecture with a Hexagonal/Ports-and-Adapters pattern.
 
 ### Key Concepts
 
@@ -27,8 +27,8 @@ If you're looking to use AI tools to **fix** your markdown files, see the [AI Fi
 ## Codebase Structure
 
 ```
-spectra/
-├── src/spectra/
+spectryn/
+├── src/spectryn/
 │   ├── core/              # Domain layer (entities, enums, ports)
 │   │   ├── domain/        # Entity definitions (Epic, UserStory, etc.)
 │   │   ├── ports/         # Abstract interfaces (DocumentParser, IssueTracker)
@@ -50,17 +50,17 @@ spectra/
 
 | File | Purpose |
 |------|---------|
-| `src/spectra/core/domain/entities.py` | Core domain entities (Epic, UserStory, Subtask, Comment) |
-| `src/spectra/core/domain/enums.py` | Status, Priority enums with parsing logic |
-| `src/spectra/core/ports/document_parser.py` | Parser interface |
-| `src/spectra/adapters/parsers/markdown.py` | Main markdown parser |
-| `src/spectra/cli/app.py` | CLI entry point and command definitions |
-| `src/spectra/cli/validate.py` | Validation logic |
-| `src/spectra/cli/ai_fix.py` | AI-assisted fixing features |
+| `src/spectryn/core/domain/entities.py` | Core domain entities (Epic, UserStory, Subtask, Comment) |
+| `src/spectryn/core/domain/enums.py` | Status, Priority enums with parsing logic |
+| `src/spectryn/core/ports/document_parser.py` | Parser interface |
+| `src/spectryn/adapters/parsers/markdown.py` | Main markdown parser |
+| `src/spectryn/cli/app.py` | CLI entry point and command definitions |
+| `src/spectryn/cli/validate.py` | Validation logic |
+| `src/spectryn/cli/ai_fix.py` | AI-assisted fixing features |
 
 ## Markdown Format Reference
 
-When working with spectra's markdown parsing, understand these exact patterns:
+When working with spectryn's markdown parsing, understand these exact patterns:
 
 ### Story Header Pattern
 ```python
@@ -97,7 +97,7 @@ Or inline format:
 ### Status Enum Values
 
 ```python
-# From src/spectra/core/domain/enums.py
+# From src/spectryn/core/domain/enums.py
 class Status(Enum):
     DONE = "done"          # ✅ Done, Complete, Closed, Resolved
     IN_PROGRESS = "in_progress"  # 🔄 In Progress, In Development
@@ -136,8 +136,8 @@ class Priority(Enum):
 ### Example: Adding a New Parser
 
 ```python
-# 1. Create parser in src/spectra/adapters/parsers/
-from spectra.core.ports.document_parser import DocumentParser
+# 1. Create parser in src/spectryn/adapters/parsers/
+from spectryn.core.ports.document_parser import DocumentParser
 
 class MyFormatParser(DocumentParser):
     @property
@@ -156,8 +156,8 @@ class MyFormatParser(DocumentParser):
         # Parsing logic
         ...
 
-# 2. Register in src/spectra/adapters/parsers/__init__.py
-# 3. Add to factory in src/spectra/core/services.py
+# 2. Register in src/spectryn/adapters/parsers/__init__.py
+# 3. Add to factory in src/spectryn/core/services.py
 # 4. Write tests in tests/adapters/test_myformat_parser.py
 ```
 
@@ -204,7 +204,7 @@ class TestMyParser:
 
 1. **Don't Invent Content**: Preserve user's story IDs, titles, descriptions
 2. **Fix Format Only**: Adjust structure to match schema, keep meaning
-3. **Validate Output**: Ensure the result passes `spectra --validate`
+3. **Validate Output**: Ensure the result passes `spectryn --validate`
 
 ### When Adding Features
 
@@ -218,14 +218,14 @@ class TestMyParser:
 
 ### Task: Fix Validation Error
 
-1. Read the error message from `spectra --validate`
+1. Read the error message from `spectryn --validate`
 2. Locate the regex/parsing logic in `adapters/parsers/markdown.py`
 3. Check enum parsing in `core/domain/enums.py`
 4. Adjust format to match expected patterns
 
 ### Task: Add New Issue Tracker
 
-1. Create adapter directory: `src/spectra/adapters/newtracker/`
+1. Create adapter directory: `src/spectryn/adapters/newtracker/`
 2. Implement `IssueTrackerPort` interface
 3. Add configuration in CLI
 4. Write integration tests
@@ -245,7 +245,7 @@ class TestMyParser:
 
 ```bash
 # All-in-one validation
-ruff format src tests && ruff check src tests --fix && mypy src/spectra && pytest
+ruff format src tests && ruff check src tests --fix && mypy src/spectryn && pytest
 ```
 
 Or individually:
@@ -254,9 +254,9 @@ Or individually:
 |------|---------|
 | Format | `ruff format src tests` |
 | Lint + Fix | `ruff check src tests --fix` |
-| Type Check | `mypy src/spectra` |
+| Type Check | `mypy src/spectryn` |
 | Test | `pytest` |
-| Test + Coverage | `pytest --cov=spectra` |
+| Test + Coverage | `pytest --cov=spectryn` |
 
 ## Environment Setup
 
@@ -265,8 +265,8 @@ Or individually:
 pip install -e ".[dev]"
 
 # Run CLI
-spectra --help
-spectra --validate --markdown EPIC.md
+spectryn --help
+spectryn --validate --markdown EPIC.md
 ```
 
 ## Useful Commands for Agents
@@ -281,7 +281,7 @@ grep -r "class.*Parser" src/
 pytest tests/adapters/test_markdown_parser.py -v
 
 # Validate changes
-spectra --validate --markdown tests/samples/spacemouse-user-stories.md
+spectryn --validate --markdown tests/samples/spacemouse-user-stories.md
 ```
 
 ## Related Documentation

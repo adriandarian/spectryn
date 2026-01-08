@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.bulk import (
+from spectryn.cli.bulk import (
     BulkResult,
     StoryFilter,
     format_bulk_result,
@@ -17,7 +17,7 @@ from spectra.cli.bulk import (
     run_bulk_assign,
     run_bulk_update,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 # =============================================================================
@@ -393,7 +393,7 @@ class TestRunBulkUpdate:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.side_effect = Exception("Parse error")
             MockParser.return_value = mock_parser
@@ -411,7 +411,7 @@ class TestRunBulkUpdate:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser
@@ -432,7 +432,7 @@ class TestRunBulkUpdate:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser
@@ -451,7 +451,7 @@ class TestRunBulkUpdate:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser
@@ -527,7 +527,7 @@ class TestRunBulkAssign:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.side_effect = Exception("Parse error")
             MockParser.return_value = mock_parser
@@ -545,7 +545,7 @@ class TestRunBulkAssign:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser
@@ -566,7 +566,7 @@ class TestRunBulkAssign:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser
@@ -585,7 +585,7 @@ class TestRunBulkAssign:
         test_file = tmp_path / "test.md"
         test_file.write_text("# Test")
 
-        with patch("spectra.adapters.parsers.markdown.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.markdown.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             mock_parser.parse_stories.return_value = [mock_story]
             MockParser.return_value = mock_parser

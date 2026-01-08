@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from spectra.core.ports.websocket import (
+from spectryn.core.ports.websocket import (
     BroadcastError,
     ConnectionInfo,
     MessageType,
@@ -23,7 +23,7 @@ from spectra.core.ports.websocket import (
     WebSocketMessage,
     WebSocketServerPort,
 )
-from spectra.core.ports.websocket import (
+from spectryn.core.ports.websocket import (
     ConnectionError as WsConnectionError,
 )
 

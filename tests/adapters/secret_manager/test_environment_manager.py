@@ -12,11 +12,11 @@ import os
 
 import pytest
 
-from spectra.adapters.secret_manager.environment_manager import (
+from spectryn.adapters.secret_manager.environment_manager import (
     EnvironmentConfig,
     EnvironmentSecretManager,
 )
-from spectra.core.ports.secret_manager import (
+from spectryn.core.ports.secret_manager import (
     SecretBackend,
     SecretNotFoundError,
     SecretReference,

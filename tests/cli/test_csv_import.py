@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.cli.csv_import import (
+from spectryn.cli.csv_import import (
     GITHUB_COLUMNS,
     JIRA_COLUMNS,
     CsvImporter,
@@ -16,7 +16,7 @@ from spectra.cli.csv_import import (
     CsvImportResult,
     import_csv,
 )
-from spectra.core.domain.enums import Priority, Status
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestCsvImporter:

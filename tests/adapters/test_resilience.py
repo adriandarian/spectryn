@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.resilience import (
+from spectryn.adapters.resilience import (
     CircuitBreaker,
     ResilienceManager,
     RetryPolicy,
@@ -25,7 +25,7 @@ from spectra.adapters.resilience import (
     TokenBucketRateLimiter,
     create_resilience_manager,
 )
-from spectra.core.ports.rate_limiting import (
+from spectryn.core.ports.rate_limiting import (
     CircuitBreakerConfig,
     CircuitOpenError,
     CircuitState,

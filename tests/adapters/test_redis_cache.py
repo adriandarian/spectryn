@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.cache import has_redis_support
+from spectryn.adapters.cache import has_redis_support
 
 
 # Skip all tests if redis is not installed
@@ -52,7 +52,7 @@ class TestRedisCacheBasics:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -62,7 +62,7 @@ class TestRedisCacheBasics:
 
     def test_init(self, mock_redis):
         """Test initialization with custom settings."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         cache = RedisCache(
             redis_client=mock_redis,
@@ -156,7 +156,7 @@ class TestRedisCacheTTL:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -182,7 +182,7 @@ class TestRedisCacheTTL:
 
     def test_set_without_ttl(self, mock_redis):
         """Test setting value with no TTL (persistent)."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         cache = RedisCache(
             redis_client=mock_redis,
@@ -218,7 +218,7 @@ class TestRedisCacheTags:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -258,7 +258,7 @@ class TestRedisCacheStats:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -318,7 +318,7 @@ class TestRedisCacheSize:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -362,7 +362,7 @@ class TestRedisCacheHealthCheck:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -400,7 +400,7 @@ class TestRedisCacheErrorHandling:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -450,7 +450,7 @@ class TestCreateRedisCache:
 
     def test_create_redis_cache(self):
         """Test factory function creates cache correctly."""
-        from spectra.adapters.cache.redis_cache import create_redis_cache
+        from spectryn.adapters.cache.redis_cache import create_redis_cache
 
         with (
             patch("redis.Redis") as mock_redis_class,
@@ -483,7 +483,7 @@ class TestCreateRedisCache:
 
     def test_create_redis_cache_with_ssl(self):
         """Test factory function creates cache with SSL correctly."""
-        from spectra.adapters.cache.redis_cache import create_redis_cache
+        from spectryn.adapters.cache.redis_cache import create_redis_cache
 
         with (
             patch("redis.Redis") as mock_redis_class,
@@ -512,7 +512,7 @@ class TestCreateRedisClusterCache:
 
     def test_create_redis_cluster_cache(self):
         """Test factory function creates cluster cache correctly."""
-        from spectra.adapters.cache.redis_cache import create_redis_cluster_cache
+        from spectryn.adapters.cache.redis_cache import create_redis_cluster_cache
 
         with (
             patch("redis.cluster.RedisCluster") as mock_cluster_class,
@@ -646,7 +646,7 @@ class TestRedisCacheIntegration:
     @pytest.fixture
     def cache(self, redis_like_mock):
         """Create a RedisCache with redis-like mock."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=redis_like_mock,
@@ -725,7 +725,7 @@ class TestRedisCacheBackendInterface:
     @pytest.fixture
     def cache(self, mock_redis):
         """Create a RedisCache with mocked client."""
-        from spectra.adapters.cache.redis_cache import RedisCache
+        from spectryn.adapters.cache.redis_cache import RedisCache
 
         return RedisCache(
             redis_client=mock_redis,
@@ -735,7 +735,7 @@ class TestRedisCacheBackendInterface:
 
     def test_is_cache_backend(self, cache):
         """Test that RedisCache is a CacheBackend."""
-        from spectra.adapters.cache import CacheBackend
+        from spectryn.adapters.cache import CacheBackend
 
         assert isinstance(cache, CacheBackend)
 
@@ -783,7 +783,7 @@ class TestHasRedisSupport:
 
     def test_has_redis_support_returns_bool(self):
         """Test that has_redis_support returns a boolean."""
-        from spectra.adapters.cache import has_redis_support
+        from spectryn.adapters.cache import has_redis_support
 
         result = has_redis_support()
         assert isinstance(result, bool)

@@ -13,7 +13,7 @@ Tests cover:
 
 import pytest
 
-from spectra.core.security.redactor import (
+from spectryn.core.security.redactor import (
     DEFAULT_REDACTED,
     SENSITIVE_KEY_PATTERNS,
     SENSITIVE_PATTERNS,

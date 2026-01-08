@@ -86,7 +86,7 @@ jobs:
       - name: 📦 Install and Validate Package
         run: |
           pip install -e ".[dev]"
-          python -c "import spectra; print(f'Package version: {spectra.__version__}')"
+          python -c "import spectryn; print(f'Package version: {spectryn.__version__}')"
 
       - name: 🧪 Run Tests
         run: pytest tests/ -v --tb=short
@@ -174,27 +174,34 @@ jobs:
 
           ### pip (recommended)
           ```bash
-          pip install spectra==${{ needs.validate.outputs.version }}
+          pip install spectryn==${{ needs.validate.outputs.version }}
           ```
 
           ### pipx
           ```bash
-          pipx install spectra==${{ needs.validate.outputs.version }}
+          pipx install spectryn==${{ needs.validate.outputs.version }}
           ```
 
           ### Homebrew (macOS/Linux)
           ```bash
-          brew install adriandarian/spectra/spectra
+          brew install adriandarian/spectryn/spectryn
           ```
 
           ### Docker
           ```bash
-          docker pull adriandarian/spectra:${{ needs.validate.outputs.version }}
+          docker pull adriandarian/spectryn:${{ needs.validate.outputs.version }}
+          ```
+
+          ### VS Code Extension
+          
+          Download the `.vsix` file from the assets below and install manually:
+          ```bash
+          code --install-extension spectryn-${{ needs.validate.outputs.version }}.vsix
           ```
 
           ### From Source
           ```bash
-          pip install git+https://github.com/adriandarian/spectra.git@v${{ needs.validate.outputs.version }}
+          pip install git+https://github.com/adriandarian/spectryn.git@v${{ needs.validate.outputs.version }}
           ```
 
           ---
@@ -208,7 +215,7 @@ jobs:
 
           ---
 
-          **Full Changelog**: https://github.com/adriandarian/spectra/compare/v$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "1.0.0")...v${{ needs.validate.outputs.version }}
+          **Full Changelog**: https://github.com/adriandarian/spectryn/compare/v$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "1.0.0")...v${{ needs.validate.outputs.version }}
           EOF
 
           echo "Generated release notes"
@@ -233,6 +240,7 @@ jobs:
           files: |
             artifacts/python-dist/*
             artifacts/completions/*
+            artifacts/vscode-extension/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -245,7 +253,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/spectra/
+      url: https://pypi.org/project/spectryn/
     steps:
       - name: 📥 Download Python Dist
         uses: actions/download-artifact@v4
@@ -289,7 +297,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            adriandarian/spectra
+            adriandarian/spectryn
             ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}},value=${{ needs.validate.outputs.version }}
@@ -338,7 +346,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/.vitepress/dist
-          cname: spectra.dev  # Optional: custom domain
+          cname: spectryn.dev  # Optional: custom domain
 
   # ============================================================================
   # Publish VS Code Extension
@@ -371,14 +379,14 @@ jobs:
         run: npx vsce package
 
       - name: 🚀 Publish to VS Code Marketplace
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && secrets.VSCE_PAT != '' }}
         run: npx vsce publish -p ${{ secrets.VSCE_PAT }}
-        continue-on-error: true  # Don't fail release if this fails
+        continue-on-error: true  # Optional: publish if token exists
 
       - name: 🚀 Publish to Open VSX
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && secrets.OVSX_PAT != '' }}
         run: npx ovsx publish -p ${{ secrets.OVSX_PAT }}
-        continue-on-error: true
+        continue-on-error: true  # Optional: publish if token exists
 
       - name: 📤 Upload Extension
         uses: actions/upload-artifact@v4
@@ -401,29 +409,24 @@ jobs:
           VERSION="${{ needs.validate.outputs.version }}"
 
           # Download the release tarball to get SHA256
-          curl -sL "https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz" -o spectra.tar.gz
-          SHA256=$(sha256sum spectra.tar.gz | cut -d' ' -f1)
+          curl -sL "https://github.com/adriandarian/spectryn/archive/refs/tags/v${VERSION}.tar.gz" -o spectryn.tar.gz
+          SHA256=$(sha256sum spectryn.tar.gz | cut -d' ' -f1)
 
           # Update formula
-          sed -i "s|url \".*\"|url \"https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz\"|" packaging/packages/homebrew/spectra.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" packaging/packages/homebrew/spectra.rb
-          sed -i "s|version \".*\"|version \"${VERSION}\"|" packaging/packages/homebrew/spectra.rb
+          sed -i "s|url \".*\"|url \"https://github.com/adriandarian/spectryn/archive/refs/tags/v${VERSION}.tar.gz\"|" packaging/packages/homebrew/spectryn.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" packaging/packages/homebrew/spectryn.rb
+          sed -i "s|version \".*\"|version \"${VERSION}\"|" packaging/packages/homebrew/spectryn.rb
 
           echo "Updated formula with version $VERSION and SHA256 $SHA256"
 
-      - name: 🚀 Push to Homebrew Tap
+      - name: 🚀 Commit Updated Formula
         if: ${{ !inputs.dry_run }}
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
-        with:
-          source-directory: 'packaging/packages/homebrew'
-          destination-github-username: 'adriandarian'
-          destination-repository-name: 'homebrew-spectra'
-          user-email: 'github-actions[bot]@users.noreply.github.com'
-          user-name: 'github-actions[bot]'
-          target-branch: main
-          commit-message: 'Update spectra to ${{ needs.validate.outputs.version }}'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packaging/packages/homebrew/spectryn.rb
+          git commit -m "chore: update Homebrew formula to ${{ needs.validate.outputs.version }}" || echo "No changes to commit"
+          git push origin main
 
   # ============================================================================
   # Chocolatey Package (Windows)
@@ -439,13 +442,13 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ needs.validate.outputs.version }}"
-          $nuspec = "packaging/packages/chocolatey/spectra.nuspec"
+          $nuspec = "packaging/packages/chocolatey/spectryn.nuspec"
 
           # Update version in nuspec
           (Get-Content $nuspec) -replace '<version>.*</version>', "<version>$version</version>" | Set-Content $nuspec
 
           # Update download URL
-          $url = "https://github.com/adriandarian/spectra/releases/download/v$version/spectra-$version.tar.gz"
+          $url = "https://github.com/adriandarian/spectryn/releases/download/v$version/spectryn-$version.tar.gz"
           (Get-Content "packaging/packages/chocolatey/tools/chocolateyinstall.ps1") -replace '\$url = .*', "`$url = '$url'" | Set-Content "packaging/packages/chocolatey/tools/chocolateyinstall.ps1"
 
       - name: 📦 Pack Chocolatey Package
@@ -459,7 +462,7 @@ jobs:
         shell: pwsh
         run: |
           cd packaging/packages/chocolatey
-          choco push spectra.${{ needs.validate.outputs.version }}.nupkg --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+          choco push spectryn.${{ needs.validate.outputs.version }}.nupkg --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
         continue-on-error: true
 
   # ============================================================================
@@ -489,7 +492,7 @@ jobs:
       - name: 📦 Create Debian Package Structure
         run: |
           VERSION="${{ needs.validate.outputs.version }}"
-          PKG_DIR="spectra_${VERSION}_all"
+          PKG_DIR="spectryn_${VERSION}_all"
 
           mkdir -p $PKG_DIR/DEBIAN
           mkdir -p $PKG_DIR/usr/local/bin
@@ -497,7 +500,7 @@ jobs:
 
           # Control file
           cat > $PKG_DIR/DEBIAN/control << EOF
-          Package: spectra
+          Package: spectryn
           Version: $VERSION
           Section: utils
           Priority: optional
@@ -508,13 +511,13 @@ jobs:
            Spectra is a production-grade CLI tool for synchronizing
            markdown specifications with issue trackers like Jira,
            GitHub Issues, Azure DevOps, and Linear.
-          Homepage: https://github.com/adriandarian/spectra
+          Homepage: https://github.com/adriandarian/spectryn
           EOF
 
           # Post-install script
           cat > $PKG_DIR/DEBIAN/postinst << 'POSTINST'
           #!/bin/bash
-          pip3 install spectra==$VERSION || true
+          pip3 install spectryn==$VERSION || true
           POSTINST
           chmod 755 $PKG_DIR/DEBIAN/postinst
 
@@ -550,17 +553,17 @@ jobs:
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
           # Copy spec file
-          cp packaging/packages/linux/spectra.spec ~/rpmbuild/SPECS/
+          cp packaging/packages/linux/spectryn.spec ~/rpmbuild/SPECS/
 
           # Update version in spec
-          sed -i "s/^Version:.*/Version: $VERSION/" ~/rpmbuild/SPECS/spectra.spec
+          sed -i "s/^Version:.*/Version: $VERSION/" ~/rpmbuild/SPECS/spectryn.spec
 
           # Download source
-          curl -sL "https://github.com/adriandarian/spectra/archive/refs/tags/v${VERSION}.tar.gz" -o ~/rpmbuild/SOURCES/spectra-${VERSION}.tar.gz || \
-            tar czf ~/rpmbuild/SOURCES/spectra-${VERSION}.tar.gz .
+          curl -sL "https://github.com/adriandarian/spectryn/archive/refs/tags/v${VERSION}.tar.gz" -o ~/rpmbuild/SOURCES/spectryn-${VERSION}.tar.gz || \
+            tar czf ~/rpmbuild/SOURCES/spectryn-${VERSION}.tar.gz .
 
           # Build RPM
-          rpmbuild -ba ~/rpmbuild/SPECS/spectra.spec || echo "RPM build skipped - source not available yet"
+          rpmbuild -ba ~/rpmbuild/SPECS/spectryn.spec || echo "RPM build skipped - source not available yet"
 
       - name: 📤 Upload RPM Package
         uses: actions/upload-artifact@v4
@@ -595,8 +598,8 @@ jobs:
           echo "| RPM Package | ${{ needs.build-rpm.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Links" >> $GITHUB_STEP_SUMMARY
-          echo "- [GitHub Release](https://github.com/adriandarian/spectra/releases/tag/v${{ needs.validate.outputs.version }})" >> $GITHUB_STEP_SUMMARY
-          echo "- [PyPI Package](https://pypi.org/project/spectra/${{ needs.validate.outputs.version }}/)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Docker Hub](https://hub.docker.com/r/adriandarian/spectra)" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/adriandarian/spectryn/releases/tag/v${{ needs.validate.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [PyPI Package](https://pypi.org/project/spectryn/${{ needs.validate.outputs.version }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker Hub](https://hub.docker.com/r/adriandarian/spectryn)" >> $GITHUB_STEP_SUMMARY
 
 

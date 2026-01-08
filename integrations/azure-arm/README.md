@@ -25,11 +25,11 @@ Azure Resource Manager (ARM) and Bicep templates for deploying Spectra to Azure.
 az login
 
 # Create resource group
-az group create --name spectra-rg --location eastus
+az group create --name spectryn-rg --location eastus
 
 # Deploy Spectra
 az deployment group create \
-  --resource-group spectra-rg \
+  --resource-group spectryn-rg \
   --template-file main.bicep \
   --parameters \
     jiraUrl='https://company.atlassian.net' \
@@ -42,7 +42,7 @@ az deployment group create \
 
 ```bash
 az deployment group create \
-  --resource-group spectra-rg \
+  --resource-group spectryn-rg \
   --template-file azuredeploy.json \
   --parameters @azuredeploy.parameters.json
 ```
@@ -72,7 +72,7 @@ az deployment group create \
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `location` | Resource group location | Azure region |
-| `spectraImage` | `spectra/spectra:latest` | Container image |
+| `spectrynImage` | `spectryn/spectryn:latest` | Container image |
 | `schedule` | `0 */6 * * *` | Cron schedule |
 | `dryRun` | `false` | Enable dry-run mode |
 
@@ -82,10 +82,10 @@ az deployment group create \
 
 ```bash
 az deployment group create \
-  --resource-group spectra-rg \
+  --resource-group spectryn-rg \
   --template-file examples/aci-keyvault.bicep \
   --parameters \
-    keyVaultName='spectra-kv' \
+    keyVaultName='spectryn-kv' \
     jiraUrl='https://company.atlassian.net'
 ```
 
@@ -93,10 +93,10 @@ az deployment group create \
 
 ```bash
 az deployment group create \
-  --resource-group spectra-rg \
+  --resource-group spectryn-rg \
   --template-file examples/container-apps.bicep \
   --parameters \
-    environmentName='spectra-env'
+    environmentName='spectryn-env'
 ```
 
 ## License

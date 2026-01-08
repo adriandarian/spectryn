@@ -1,6 +1,6 @@
 # Recipes Guide
 
-Common setups and field mapping examples for spectra.
+Common setups and field mapping examples for spectryn.
 
 ## Quick Recipes
 
@@ -23,7 +23,7 @@ The simplest configuration to get started:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 version: 1
 
@@ -81,7 +81,7 @@ JIRA_API_TOKEN=your-api-token
 ### Sync Command
 
 ```bash
-spectra sync --execute --markdown epic.md --epic PROJ-123
+spectryn sync --execute --markdown epic.md --epic PROJ-123
 ```
 
 ---
@@ -93,7 +93,7 @@ Sync to GitHub Issues and GitHub Projects:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: github
 version: 1
 
@@ -148,7 +148,7 @@ Map custom fields between markdown and your tracker:
 ### Jira Custom Fields
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 
 jira:
@@ -202,7 +202,7 @@ Feature description here...
 ### Linear Custom Fields
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: linear
 
 linear:
@@ -226,7 +226,7 @@ For organizations with multiple teams/projects:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 version: 1
 
 # Default tracker
@@ -289,13 +289,13 @@ epics/
 
 ```bash
 # Sync specific team
-spectra sync --team backend --markdown epics/backend/
+spectryn sync --team backend --markdown epics/backend/
 
 # Sync all teams
-spectra sync --all-teams --markdown epics/
+spectryn sync --all-teams --markdown epics/
 
 # Sync shared epics to multiple trackers
-spectra sync --teams backend,frontend --markdown epics/shared/
+spectryn sync --teams backend,frontend --markdown epics/shared/
 ```
 
 ---
@@ -307,7 +307,7 @@ Configuration for sprint-based workflows:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 version: 1
 
@@ -402,13 +402,13 @@ Implement Google and GitHub OAuth login.
 
 ```bash
 # Validate sprint capacity
-spectra validate --sprint "Sprint 23" --markdown sprint-23.md
+spectryn validate --sprint "Sprint 23" --markdown sprint-23.md
 
 # Show sprint summary
-spectra stats --sprint "Sprint 23"
+spectryn stats --sprint "Sprint 23"
 
 # Sync sprint stories only
-spectra sync --sprint "Sprint 23" --execute --markdown sprint-23.md
+spectryn sync --sprint "Sprint 23" --execute --markdown sprint-23.md
 ```
 
 ---
@@ -420,7 +420,7 @@ Standardized bug report format:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 
 jira:
@@ -506,7 +506,7 @@ Track and prioritize technical debt:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 
 defaults:
@@ -607,7 +607,7 @@ Plan and track releases:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 
 jira:
@@ -688,13 +688,13 @@ releases:
 
 ```bash
 # Show release status
-spectra stats --release v2.1.0
+spectryn stats --release v2.1.0
 
 # Validate release readiness
-spectra validate --release v2.1.0 --check-blockers
+spectryn validate --release v2.1.0 --check-blockers
 
 # Generate release notes
-spectra release-notes --release v2.1.0 --output RELEASE.md
+spectryn release-notes --release v2.1.0 --output RELEASE.md
 ```
 
 ---

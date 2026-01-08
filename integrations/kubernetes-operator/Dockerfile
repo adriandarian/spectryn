@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 # Build the operator binary

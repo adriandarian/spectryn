@@ -7,9 +7,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.adapters.asana import AsanaAdapter
-from spectra.core.exceptions import ResourceNotFoundError
-from spectra.core.ports.config_provider import TrackerConfig
+from spectryn.adapters.asana import AsanaAdapter
+from spectryn.core.exceptions import ResourceNotFoundError
+from spectryn.core.ports.config_provider import TrackerConfig
 
 
 class FakeResponse:

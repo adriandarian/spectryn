@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.azure_devops.client import AzureDevOpsRateLimiter
+from spectryn.adapters.azure_devops.client import AzureDevOpsRateLimiter
 
 
 class TestAzureDevOpsRateLimiter:
@@ -98,8 +98,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_init_sets_attributes(self):
         """Test initialization sets basic attributes."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="org",
@@ -113,8 +113,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_init_without_rate_limiter(self):
         """Test initialization without rate limiting."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="org",
@@ -127,8 +127,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_init_with_rate_limiter(self):
         """Test initialization with rate limiting."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="org",
@@ -141,8 +141,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_build_url_wit(self):
         """Test building Work Item Tracking URL."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="test-org",
@@ -157,8 +157,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_build_url_core(self):
         """Test building Core API URL."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="test-org",
@@ -171,8 +171,8 @@ class TestAzureDevOpsApiClientInit:
 
     def test_build_url_absolute(self):
         """Test absolute URL pass-through."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session"):
-            from spectra.adapters.azure_devops.client import AzureDevOpsApiClient
+        with patch("spectryn.adapters.azure_devops.client.requests.Session"):
+            from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient
 
             client = AzureDevOpsApiClient(
                 organization="test-org",

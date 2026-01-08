@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from spectra.cli.formats import (
+from spectryn.cli.formats import (
     OutputData,
     OutputFormat,
     OutputFormatter,

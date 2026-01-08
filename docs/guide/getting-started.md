@@ -1,10 +1,10 @@
 # Getting Started
 
-spectra is a production-grade CLI tool for synchronizing markdown documentation with issue trackers. Write your epic docs in markdown, sync to your favorite tracker automatically.
+spectryn is a production-grade CLI tool for synchronizing markdown documentation with issue trackers. Write your epic docs in markdown, sync to your favorite tracker automatically.
 
 ## Supported Trackers
 
-spectra supports **14 issue trackers** out of the box:
+spectryn supports **14 issue trackers** out of the box:
 
 | Tracker | Type | Best For |
 |---------|------|----------|
@@ -24,7 +24,7 @@ spectra supports **14 issue trackers** out of the box:
 | [**Bitbucket**](/guide/bitbucket) | Atlassian | Bitbucket repos |
 | **Pivotal Tracker** | Agile | Story-based planning |
 
-## Why spectra?
+## Why spectryn?
 
 Managing issues through web interfaces is slow and tedious. Developers prefer working with markdown files that can be:
 
@@ -33,7 +33,7 @@ Managing issues through web interfaces is slow and tedious. Developers prefer wo
 - ✅ Edited with your favorite editor
 - ✅ Generated with AI assistants
 
-spectra bridges the gap between markdown-first documentation and project management.
+spectryn bridges the gap between markdown-first documentation and project management.
 
 ## Key Features
 
@@ -50,7 +50,7 @@ spectra bridges the gap between markdown-first documentation and project managem
 
 ```mermaid
 graph LR
-    A[📝 Markdown File] --> B[spectra CLI]
+    A[📝 Markdown File] --> B[spectryn CLI]
     B --> C{Dry Run?}
     C -->|Yes| D[📊 Preview Changes]
     C -->|No| E[☁️ Tracker API]
@@ -94,23 +94,23 @@ Sync to your tracker:
 ::: code-group
 
 ```bash [Jira]
-spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
+spectryn sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
 ```bash [GitHub]
-spectra sync --tracker github --markdown EPIC.md --repo owner/repo --execute
+spectryn sync --tracker github --markdown EPIC.md --repo owner/repo --execute
 ```
 
 ```bash [GitLab]
-spectra sync --tracker gitlab --markdown EPIC.md --project mygroup/myproject --execute
+spectryn sync --tracker gitlab --markdown EPIC.md --project mygroup/myproject --execute
 ```
 
 ```bash [Linear]
-spectra sync --tracker linear --markdown EPIC.md --team TEAM --execute
+spectryn sync --tracker linear --markdown EPIC.md --team TEAM --execute
 ```
 
 ```bash [Azure DevOps]
-spectra sync --tracker azure --markdown EPIC.md --project MyProject --execute
+spectryn sync --tracker azure --markdown EPIC.md --project MyProject --execute
 ```
 
 :::

@@ -1,6 +1,6 @@
 # GitHub Integration Guide
 
-spectra supports GitHub Issues and Projects for syncing markdown specifications. This guide covers configuration, authentication, and advanced features.
+spectryn supports GitHub Issues and Projects for syncing markdown specifications. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -16,18 +16,18 @@ The GitHub adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to GitHub
-spectra sync --markdown EPIC.md --tracker github --repo owner/repo --execute
+spectryn sync --markdown EPIC.md --tracker github --repo owner/repo --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # GitHub connection settings
@@ -68,7 +68,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [github]
@@ -110,7 +110,7 @@ export GITHUB_PROJECT_NUMBER=1
 ### CLI Arguments
 
 ```bash
-spectra sync \
+spectryn sync \
   --tracker github \
   --markdown EPIC.md \
   --repo owner/repo \
@@ -329,13 +329,13 @@ github:
 ### 2. Preview Sync
 
 ```bash
-spectra sync --tracker github --markdown epic.md --repo owner/repo
+spectryn sync --tracker github --markdown epic.md --repo owner/repo
 ```
 
 ### 3. Execute Sync
 
 ```bash
-spectra sync --tracker github --markdown epic.md --repo owner/repo --execute
+spectryn sync --tracker github --markdown epic.md --repo owner/repo --execute
 ```
 
 ### 4. View Results
@@ -361,8 +361,8 @@ Error: API rate limit exceeded
 ```
 
 - Use authenticated requests (increases limit from 60 to 5000/hour)
-- Enable caching: `spectra sync --cache`
-- Use `--delay` flag: `spectra sync --delay 1000`
+- Enable caching: `spectryn sync --cache`
+- Use `--delay` flag: `spectryn sync --delay 1000`
 
 ### Project Access
 

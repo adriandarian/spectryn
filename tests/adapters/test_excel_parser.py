@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.parsers import ExcelParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import ExcelParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestExcelParser:

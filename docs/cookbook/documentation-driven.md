@@ -16,7 +16,7 @@ Use markdown documentation as your single source of truth, with Jira as the exec
 │                                                                 │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
-                           ▼  spectra sync
+                           ▼  spectryn sync
 ┌─────────────────────────────────────────────────────────────────┐
 │                    JIRA (Execution Layer)                       │
 │                                                                 │
@@ -274,13 +274,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install spectra
+      - run: pip install spectryn
       - name: Sync all epics
         run: |
           for file in docs/epics/*.md; do
             epic=$(head -1 "$file" | grep -oP '→ \K\w+-\d+' || echo "")
             if [ -n "$epic" ]; then
-              spectra -m "$file" -e "$epic" -x --no-confirm
+              spectryn -m "$file" -e "$epic" -x --no-confirm
             fi
           done
 ```

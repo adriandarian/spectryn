@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.linear.batch import (
+from spectryn.adapters.linear.batch import (
     BatchOperation,
     BatchResult,
     LinearBatchClient,
@@ -217,7 +217,7 @@ class TestLinearBatchClientOperations:
 
     def test_bulk_operation_with_error(self, batch_client, mock_client):
         """Test handling errors in bulk operations."""
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         mock_client.create_issue.side_effect = IssueTrackerError("API Error")
 

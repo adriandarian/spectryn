@@ -8,10 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.asana.cached_adapter import CachedAsanaAdapter
-from spectra.adapters.cache import MemoryCache
-from spectra.core.ports.config_provider import TrackerConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.adapters.asana.cached_adapter import CachedAsanaAdapter
+from spectryn.adapters.cache import MemoryCache
+from spectryn.core.ports.config_provider import TrackerConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 @pytest.fixture

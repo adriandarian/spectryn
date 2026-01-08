@@ -56,14 +56,14 @@ YouTrack uses Permanent Tokens for authentication. To create a token:
 ### Basic Sync
 
 ```bash
-spectra sync --tracker youtrack --markdown EPIC.md
+spectryn sync --tracker youtrack --markdown EPIC.md
 ```
 
 ### With Custom Configuration
 
 ```python
-from spectra.core.ports.config_provider import YouTrackConfig
-from spectra.adapters.youtrack import YouTrackAdapter
+from spectryn.core.ports.config_provider import YouTrackConfig
+from spectryn.adapters.youtrack import YouTrackAdapter
 
 config = YouTrackConfig(
     url="https://youtrack.example.com",
@@ -191,14 +191,14 @@ export YOUTRACK_TOKEN="your-token"
 export YOUTRACK_PROJECT_ID="PROJ"
 
 # Sync epic
-spectra sync --tracker youtrack --markdown EPIC.md
+spectryn sync --tracker youtrack --markdown EPIC.md
 ```
 
 ### Create Subtask
 
 ```python
-from spectra.core.ports.config_provider import YouTrackConfig
-from spectra.adapters.youtrack import YouTrackAdapter
+from spectryn.core.ports.config_provider import YouTrackConfig
+from spectryn.adapters.youtrack import YouTrackAdapter
 
 config = YouTrackConfig(
     url="https://youtrack.example.com",

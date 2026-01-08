@@ -1,12 +1,12 @@
 # Frequently Asked Questions
 
-Common questions about spectra answered.
+Common questions about spectryn answered.
 
 ## General
 
-### What is spectra?
+### What is spectryn?
 
-spectra is a CLI tool that synchronizes markdown documentation with issue trackers like Jira, GitHub Issues, GitLab, Linear, and more. Write your epics and stories in markdown, and spectra keeps them in sync with your tracker.
+spectryn is a CLI tool that synchronizes markdown documentation with issue trackers like Jira, GitHub Issues, GitLab, Linear, and more. Write your epics and stories in markdown, and spectryn keeps them in sync with your tracker.
 
 ### Why use markdown instead of the tracker directly?
 
@@ -37,28 +37,29 @@ spectra is a CLI tool that synchronizes markdown documentation with issue tracke
 
 See [Tracker Guides](/guide/configuration) for setup instructions.
 
-### Is spectra free?
+### Is spectryn free?
 
-Yes! spectra is open source under the MIT license. Use it for personal and commercial projects freely.
+Yes! spectryn is open source under the MIT license. Use it for personal and commercial projects freely.
 
 ---
 
 ## Installation
 
-### How do I install spectra?
+### How do I install spectryn?
 
 ```bash
 # Using pip (recommended)
-pip install spectra
+pip install spectryn
 
 # Using pipx (isolated environment)
-pipx install spectra
+pipx install spectryn
 
 # Using Homebrew (macOS)
-brew install adriandarian/tap/spectra
+brew tap adriandarian/spectra https://github.com/adriandarian/spectra
+brew install spectra
 
 # Using Docker
-docker pull ghcr.io/adriandarian/spectra
+docker pull ghcr.io/adriandarian/spectryn
 ```
 
 See [Installation Guide](/guide/installation) for all options.
@@ -73,7 +74,7 @@ python --version  # Should be 3.11+
 
 ### Does it work on Windows?
 
-Yes! spectra works on Windows, macOS, and Linux. For Windows, we recommend using:
+Yes! spectryn works on Windows, macOS, and Linux. For Windows, we recommend using:
 - Windows Terminal
 - PowerShell 7+
 - Or WSL2
@@ -84,13 +85,13 @@ Yes! spectra works on Windows, macOS, and Linux. For Windows, we recommend using
 
 ### Where should I put my config file?
 
-spectra searches for configuration in this order:
+spectryn searches for configuration in this order:
 1. `--config` flag path
-2. `./spectra.yaml` (current directory)
-3. `./.spectra/config.yaml`
-4. `~/.config/spectra/config.yaml`
+2. `./spectryn.yaml` (current directory)
+3. `./.spectryn/config.yaml`
+4. `~/.config/spectryn/config.yaml`
 
-Recommendation: Put `spectra.yaml` in your project root.
+Recommendation: Put `spectryn.yaml` in your project root.
 
 ### How do I store API tokens securely?
 
@@ -102,7 +103,7 @@ JIRA_API_TOKEN=your-token-here
 ```
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 jira:
   api_token: ${JIRA_API_TOKEN}
 ```
@@ -118,7 +119,7 @@ See [Secret Management](/guide/environment#secret-management).
 ### How do I connect to Jira Server (on-premise)?
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 
 jira:
@@ -166,7 +167,7 @@ See [Schema Reference](/guide/schema) for all options.
 
 ### Can I use my own story ID format?
 
-Yes! Configure the pattern in `spectra.yaml`:
+Yes! Configure the pattern in `spectryn.yaml`:
 
 ```yaml
 story_id_pattern: "STORY-\\d+"    # STORY-001
@@ -222,27 +223,27 @@ Or in description:
 
 ### Will sync overwrite my tracker changes?
 
-By default, spectra shows what would change (dry run). Changes only apply with `--execute`:
+By default, spectryn shows what would change (dry run). Changes only apply with `--execute`:
 
 ```bash
 # Safe - just shows diff
-spectra --markdown EPIC.md
+spectryn --markdown EPIC.md
 
 # Actually makes changes
-spectra --execute --markdown EPIC.md
+spectryn --execute --markdown EPIC.md
 ```
 
 ### How do I sync only specific stories?
 
 ```bash
 # Single story
-spectra sync --story US-001 --markdown EPIC.md
+spectryn sync --story US-001 --markdown EPIC.md
 
 # Multiple stories
-spectra sync --stories US-001,US-002,US-003 --markdown EPIC.md
+spectryn sync --stories US-001,US-002,US-003 --markdown EPIC.md
 
 # By status
-spectra sync --filter "status=To Do" --markdown EPIC.md
+spectryn sync --filter "status=To Do" --markdown EPIC.md
 ```
 
 ### Can I sync bidirectionally?
@@ -251,28 +252,28 @@ Yes! Import tracker changes back to markdown:
 
 ```bash
 # One-way: Markdown → Tracker
-spectra sync --execute --markdown EPIC.md
+spectryn sync --execute --markdown EPIC.md
 
 # Import: Tracker → Markdown
-spectra import --epic PROJ-123 --output EPIC.md
+spectryn import --epic PROJ-123 --output EPIC.md
 
 # Bidirectional with conflict resolution
-spectra sync --bidirectional --interactive --markdown EPIC.md
+spectryn sync --bidirectional --interactive --markdown EPIC.md
 ```
 
 ### What if there's a conflict?
 
-spectra detects conflicts and offers resolution:
+spectryn detects conflicts and offers resolution:
 
 ```bash
 # Interactive resolution
-spectra sync --interactive --markdown EPIC.md
+spectryn sync --interactive --markdown EPIC.md
 
 # Force markdown to win
-spectra sync --force-local --markdown EPIC.md
+spectryn sync --force-local --markdown EPIC.md
 
 # Force tracker to win
-spectra sync --force-remote --markdown EPIC.md
+spectryn sync --force-remote --markdown EPIC.md
 ```
 
 ---
@@ -285,7 +286,7 @@ Your API token is invalid or expired:
 
 1. Generate a new token from your tracker
 2. Update environment variable
-3. Run `spectra doctor` to verify
+3. Run `spectryn doctor` to verify
 
 See [Troubleshooting Guide](/guide/troubleshooting#authentication-issues).
 
@@ -294,7 +295,7 @@ See [Troubleshooting Guide](/guide/troubleshooting#authentication-issues).
 Check your markdown format:
 
 ```bash
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 ```
 
 Common issues:
@@ -306,37 +307,37 @@ Common issues:
 
 ```bash
 # Verbose output
-spectra --verbose --markdown EPIC.md
+spectryn --verbose --markdown EPIC.md
 
 # Debug mode with full logs
-spectra --debug --markdown EPIC.md
+spectryn --debug --markdown EPIC.md
 
 # Check diagnostics
-spectra doctor
+spectryn doctor
 ```
 
 ### Where are the log files?
 
 ```bash
 # Default location
-~/.spectra/logs/spectra.log
+~/.spectryn/logs/spectryn.log
 
 # Or set custom location
-export SPECTRA_LOG_FILE=/path/to/spectra.log
+export SPECTRA_LOG_FILE=/path/to/spectryn.log
 ```
 
 ---
 
 ## Advanced Usage
 
-### Can I use spectra in CI/CD?
+### Can I use spectryn in CI/CD?
 
-Absolutely! spectra is designed for CI/CD:
+Absolutely! spectryn is designed for CI/CD:
 
 ```yaml
 # GitHub Actions
 - name: Sync Stories
-  run: spectra sync --execute --markdown docs/epics/
+  run: spectryn sync --execute --markdown docs/epics/
   env:
     JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 ```
@@ -346,7 +347,7 @@ See [CI/CD Setup Tutorial](/tutorials/cicd-setup).
 ### How do I sync to multiple trackers?
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 trackers:
   jira:
     url: https://company.atlassian.net
@@ -358,33 +359,33 @@ trackers:
 
 ```bash
 # Sync to both
-spectra sync --trackers jira,github --markdown EPIC.md
+spectryn sync --trackers jira,github --markdown EPIC.md
 ```
 
-### Can I extend spectra with plugins?
+### Can I extend spectryn with plugins?
 
-Yes! spectra has a plugin system:
+Yes! spectryn has a plugin system:
 
 ```bash
 # Install a plugin
-spectra plugin install spectra-custom-fields
+spectryn plugin install spectryn-custom-fields
 
 # List plugins
-spectra plugin list
+spectryn plugin list
 
 # Create your own
-spectra plugin scaffold --name my-plugin
+spectryn plugin scaffold --name my-plugin
 ```
 
 See [Plugins Guide](/guide/plugins).
 
-### Does spectra support webhooks?
+### Does spectryn support webhooks?
 
 Yes, for real-time sync:
 
 ```bash
 # Start webhook listener
-spectra webhook listen --port 8080
+spectryn webhook listen --port 8080
 
 # Configure in your tracker to send webhooks to:
 # https://your-server.com:8080/webhook
@@ -394,7 +395,7 @@ spectra webhook listen --port 8080
 
 ## Performance
 
-### How fast is spectra?
+### How fast is spectryn?
 
 Typical performance:
 - Parse 100 stories: ~50ms
@@ -404,7 +405,7 @@ Typical performance:
 ### How do I speed up large syncs?
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 performance:
   parallel_sync: true
   max_workers: 4
@@ -427,12 +428,12 @@ No hard limit. We've tested with:
 
 ### Where is my data stored?
 
-- **Config**: `spectra.yaml` in your project
-- **State**: `.spectra/state.json` (tracks sync state)
+- **Config**: `spectryn.yaml` in your project
+- **State**: `.spectryn/state.json` (tracks sync state)
 - **Cache**: In memory or configured location
-- **Logs**: `~/.spectra/logs/`
+- **Logs**: `~/.spectryn/logs/`
 
-spectra never sends data to external servers (except your configured tracker).
+spectryn never sends data to external servers (except your configured tracker).
 
 ### Is my data encrypted?
 
@@ -440,7 +441,7 @@ spectra never sends data to external servers (except your configured tracker).
 - **At rest**: Cache can be encrypted with `cache.encrypt: true`
 - **Tokens**: Use environment variables, never stored in files
 
-### Does spectra collect telemetry?
+### Does spectryn collect telemetry?
 
 By default, no. Optional anonymous usage stats can be enabled:
 
@@ -458,18 +459,18 @@ See [Telemetry Policy](/guide/telemetry).
 ### Where can I get support?
 
 1. **Documentation**: You're here! 📚
-2. **GitHub Issues**: [Report bugs](https://github.com/adriandarian/spectra/issues)
-3. **Discussions**: [Ask questions](https://github.com/adriandarian/spectra/discussions)
+2. **GitHub Issues**: [Report bugs](https://github.com/adriandarian/spectryn/issues)
+3. **Discussions**: [Ask questions](https://github.com/adriandarian/spectryn/discussions)
 
 ### How do I report a bug?
 
 ```bash
 # Generate diagnostic report
-spectra doctor --report > diagnostics.txt
+spectryn doctor --report > diagnostics.txt
 ```
 
 Then open an issue with:
-- spectra version
+- spectryn version
 - Python version
 - OS
 - Steps to reproduce
@@ -481,8 +482,8 @@ We welcome contributions! See [Contributing Guide](/contributing).
 
 ```bash
 # Set up development environment
-git clone https://github.com/adriandarian/spectra
-cd spectra
+git clone https://github.com/adriandarian/spectryn
+cd spectryn
 pip install -e ".[dev]"
 pytest
 ```

@@ -13,7 +13,7 @@ from urllib.request import urlopen
 
 import pytest
 
-from spectra.cli.health import (
+from spectryn.cli.health import (
     HealthConfig,
     HealthServer,
     HealthStatus,

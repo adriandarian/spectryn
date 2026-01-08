@@ -1,17 +1,17 @@
 # ==============================================================================
-# spectra Chocolatey Install Script
+# spectryn Chocolatey Install Script
 # ==============================================================================
 
 $ErrorActionPreference = 'Stop'
 
-$packageName = 'spectra'
+$packageName = 'spectryn'
 $version = '2.0.0'
 
 # Install via pip (Python must be installed via dependency)
 $pipArgs = @(
     'install'
     '--upgrade'
-    "spectra==$version"
+    "spectryn==$version"
 )
 
 # Try pip3 first, fall back to pip
@@ -32,15 +32,15 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Verify installation
-$spectraPath = Get-Command spectra -ErrorAction SilentlyContinue
-if ($spectraPath) {
-    Write-Host "$packageName installed successfully at: $($spectraPath.Source)" -ForegroundColor Green
+$spectrynPath = Get-Command spectryn -ErrorAction SilentlyContinue
+if ($spectrynPath) {
+    Write-Host "$packageName installed successfully at: $($spectrynPath.Source)" -ForegroundColor Green
 } else {
     Write-Warning "$packageName installed but not found in PATH. You may need to restart your terminal."
 }
 
 Write-Host ""
-Write-Host "To use spectra, set these environment variables:" -ForegroundColor Cyan
+Write-Host "To use spectryn, set these environment variables:" -ForegroundColor Cyan
 Write-Host '  $env:JIRA_URL = "https://your-company.atlassian.net"'
 Write-Host '  $env:JIRA_EMAIL = "your.email@company.com"'
 Write-Host '  $env:JIRA_API_TOKEN = "your-api-token"'

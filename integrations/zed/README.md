@@ -4,7 +4,7 @@ Zed editor extension for Spectra markdown-based user story management.
 
 ## Features
 
-- **LSP Integration** - Full language server support via spectra-lsp
+- **LSP Integration** - Full language server support via spectryn-lsp
 - **Syntax Highlighting** - Custom highlighting for Spectra markdown
 - **Tree-sitter Grammar** - Proper parsing of Spectra documents
 - **Completions** - Auto-complete status, priority, and tracker IDs
@@ -22,13 +22,13 @@ Zed editor extension for Spectra markdown-based user story management.
 
 ### Manual Installation
 
-1. Clone this repository to `~/.config/zed/extensions/spectra`
+1. Clone this repository to `~/.config/zed/extensions/spectryn`
 2. Restart Zed
 
 ## Requirements
 
 - Zed 0.130.0 or later
-- Spectra LSP server (`pip install spectra-lsp`)
+- Spectra LSP server (`pip install spectryn-lsp`)
 
 ## Configuration
 
@@ -37,13 +37,13 @@ Add to your Zed settings (`~/.config/zed/settings.json`):
 ```json
 {
   "lsp": {
-    "spectra": {
+    "spectryn": {
       "binary": {
-        "path": "spectra-lsp",
+        "path": "spectryn-lsp",
         "arguments": ["--stdio"]
       },
       "initialization_options": {
-        "spectra": {
+        "spectryn": {
           "tracker": {
             "type": "jira",
             "url": "https://your-org.atlassian.net",
@@ -69,8 +69,8 @@ Add to your keymap (`~/.config/zed/keymap.json`):
   {
     "context": "Editor && extension == md",
     "bindings": {
-      "ctrl-shift-v": "spectra::validate",
-      "ctrl-shift-s": "spectra::sync"
+      "ctrl-shift-v": "spectryn::validate",
+      "ctrl-shift-s": "spectryn::sync"
     }
   }
 ]
@@ -107,7 +107,7 @@ zed-ext publish
 zed/
 ├── extension.toml          # Extension manifest
 ├── languages/
-│   └── spectra/
+│   └── spectryn/
 │       ├── config.toml     # Language configuration
 │       ├── highlights.scm  # Syntax highlighting
 │       └── injections.scm  # Language injections

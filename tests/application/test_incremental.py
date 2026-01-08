@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.application.sync.incremental import (
+from spectryn.application.sync.incremental import (
     ChangeDetectionResult,
     ChangeTracker,
     IncrementalSyncStats,
@@ -17,9 +17,9 @@ from spectra.application.sync.incremental import (
     compute_story_hash,
     stories_differ,
 )
-from spectra.core.domain.entities import Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, StoryId
+from spectryn.core.domain.entities import Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, StoryId
 
 
 # =============================================================================

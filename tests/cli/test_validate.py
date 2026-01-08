@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.output import Console
-from spectra.cli.validate import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.output import Console
+from spectryn.cli.validate import (
     IssueSeverity,
     MarkdownValidator,
     ValidationIssue,

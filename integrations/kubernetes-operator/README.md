@@ -32,8 +32,8 @@ kubectl apply -f config/manager/
 ### Install with Helm
 
 ```bash
-helm install spectra-operator ./chart \
-  --namespace spectra-system \
+helm install spectryn-operator ./chart \
+  --namespace spectryn-system \
   --create-namespace
 ```
 
@@ -42,7 +42,7 @@ helm install spectra-operator ./chart \
 ### Basic Example
 
 ```yaml
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: my-project-sync
@@ -93,7 +93,7 @@ stringData:
 ### Git Source Example
 
 ```yaml
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: git-sync
@@ -148,10 +148,10 @@ spec:
 
 ```bash
 # Build operator image
-make docker-build IMG=spectra/operator:latest
+make docker-build IMG=spectryn/operator:latest
 
 # Push image
-make docker-push IMG=spectra/operator:latest
+make docker-push IMG=spectryn/operator:latest
 ```
 
 ### Running Locally

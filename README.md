@@ -1,8 +1,8 @@
-# spectra
+# spectryn
 
 <div align="center">
 
-[![CI](https://github.com/adriandarian/spectra/actions/workflows/pr.yml/badge.svg)](https://github.com/adriandarian/spectra/actions/workflows/pr.yml)
+[![CI](https://github.com/adriandarian/spectryn/actions/workflows/pr.yml/badge.svg)](https://github.com/adriandarian/spectryn/actions/workflows/pr.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -24,9 +24,9 @@
 
 ## 🚀 Overview
 
-**spectra** is a production-grade CLI tool designed to eliminate the gap between product documentation and issue tracking. It allows teams to maintain their product specifications as "Docs-as-Code" while keeping project management tools perfectly in sync.
+**spectryn** is a production-grade CLI tool designed to eliminate the gap between product documentation and issue tracking. It allows teams to maintain their product specifications as "Docs-as-Code" while keeping project management tools perfectly in sync.
 
-Whether you write stories in Markdown, manage roadmaps in YAML, or organize features in Notion, **spectra** provides a unified command-line interface to synchronize them across multiple enterprise trackers.
+Whether you write stories in Markdown, manage roadmaps in YAML, or organize features in Notion, **spectryn** provides a unified command-line interface to synchronize them across multiple enterprise trackers.
 
 ---
 
@@ -65,19 +65,19 @@ Whether you write stories in Markdown, manage roadmaps in YAML, or organize feat
 
 ### Using pipx (Recommended)
 ```bash
-pipx install spectra
+pipx install spectryn
 ```
 
 ### Using Homebrew (macOS/Linux)
 ```bash
-brew tap adriandarian/spectra
+brew tap adriandarian/spectra https://github.com/adriandarian/spectra
 brew install spectra
 ```
 
 ### From Source
 ```bash
-git clone https://github.com/adriandarian/spectra.git
-cd spectra
+git clone https://github.com/adriandarian/spectryn.git
+cd spectryn
 pip install -e ".[dev]"
 ```
 
@@ -86,7 +86,7 @@ pip install -e ".[dev]"
 ## 🏁 Quick Start
 
 ### 1. Configure your environment
-Create a `.spectra.yaml` file in your project root:
+Create a `.spectryn.yaml` file in your project root:
 
 ```yaml
 # Tracker Configuration
@@ -107,7 +107,7 @@ sync:
 Check your markdown or YAML file for formatting issues:
 
 ```bash
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 ```
 
 ### 3. Synchronize
@@ -115,17 +115,17 @@ Preview the changes (dry-run) and then execute when ready:
 
 ```bash
 # Preview changes
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 
 # Execute sync
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
 ---
 
 ## 🤖 AI-Assisted Sync
 
-**spectra** integrates with modern LLMs to help you maintain high-quality specifications.
+**spectryn** integrates with modern LLMs to help you maintain high-quality specifications.
 
 - **Auto-Fix**: Automatically correct formatting errors in your markdown.
 - **Guided Generation**: Generate new epic templates from existing tracker data.
@@ -133,20 +133,20 @@ spectra --markdown EPIC.md --epic PROJ-123 --execute
 
 ```bash
 # Detect available AI tools
-spectra --list-ai-tools
+spectryn --list-ai-tools
 
 # Auto-fix markdown formatting
-spectra --validate --markdown EPIC.md --auto-fix --ai-tool claude
+spectryn --validate --markdown EPIC.md --auto-fix --ai-tool claude
 ```
 
 ---
 
 ## 🏗 Architecture
 
-Built on **Clean Architecture** principles, spectra ensures maximum extensibility through its Ports-and-Adapters (Hexagonal) design.
+Built on **Clean Architecture** principles, spectryn ensures maximum extensibility through its Ports-and-Adapters (Hexagonal) design.
 
 ```text
-src/spectra/
+src/spectryn/
 ├── core/           # Domain Layer (Entities, Enums, Ports)
 ├── adapters/       # Infrastructure (Parsers, API Clients, Trackers)
 ├── application/    # Use Cases (Sync Orchestration, Command Handlers)
@@ -165,7 +165,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Run quality checks before submitting
-ruff format src tests && ruff check src tests --fix && mypy src/spectra && pytest
+ruff format src tests && ruff check src tests --fix && mypy src/spectryn && pytest
 ```
 
 ---

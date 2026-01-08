@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.bitbucket.server_client import (
+from spectryn.adapters.bitbucket.server_client import (
     ATLASSIAN_API_AVAILABLE,
     BitbucketServerClient,
     is_server_url,
@@ -50,7 +50,7 @@ class TestBitbucketServerClient:
     @pytest.fixture
     def mock_atlassian_bitbucket(self):
         """Mock the atlassian Bitbucket class."""
-        with patch("spectra.adapters.bitbucket.server_client.Bitbucket") as mock:
+        with patch("spectryn.adapters.bitbucket.server_client.Bitbucket") as mock:
             instance = MagicMock()
             mock.return_value = instance
             yield instance
@@ -130,7 +130,7 @@ class TestBitbucketServerClient:
     @pytest.mark.skipif(not ATLASSIAN_API_AVAILABLE, reason="atlassian-python-api not installed")
     def test_get_issue_not_found(self, mock_atlassian_bitbucket):
         """Should raise NotFoundError when issue doesn't exist."""
-        from spectra.core.ports.issue_tracker import NotFoundError
+        from spectryn.core.ports.issue_tracker import NotFoundError
 
         mock_atlassian_bitbucket.get_issue.return_value = None
 
@@ -226,7 +226,7 @@ class TestBitbucketClientIntegration:
 
     def test_client_falls_back_when_library_unavailable(self):
         """Should fall back to REST API when library not available."""
-        from spectra.adapters.bitbucket.client import BitbucketApiClient
+        from spectryn.adapters.bitbucket.client import BitbucketApiClient
 
         # Use Cloud URL (shouldn't try to use Server client)
         client = BitbucketApiClient(
@@ -245,10 +245,10 @@ class TestBitbucketClientIntegration:
     @pytest.mark.skipif(not ATLASSIAN_API_AVAILABLE, reason="atlassian-python-api not installed")
     def test_client_uses_library_for_server(self):
         """Should use atlassian-python-api for Server URLs when available."""
-        from spectra.adapters.bitbucket.client import BitbucketApiClient
+        from spectryn.adapters.bitbucket.client import BitbucketApiClient
 
         with patch(
-            "spectra.adapters.bitbucket.client.BitbucketServerClient"
+            "spectryn.adapters.bitbucket.client.BitbucketServerClient"
         ) as mock_server_client_class:
             mock_server_client = MagicMock()
             mock_server_client.get_current_user.return_value = {"username": "testuser"}

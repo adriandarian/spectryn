@@ -8,12 +8,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.asana.batch import (
+from spectryn.adapters.asana.batch import (
     AsanaBatchClient,
     BatchOperation,
     BatchResult,
 )
-from spectra.core.exceptions import TrackerError
+from spectryn.core.exceptions import TrackerError
 
 
 @pytest.fixture

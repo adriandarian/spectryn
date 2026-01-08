@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.diff_cmd import (
+from spectryn.cli.diff_cmd import (
     DiffResult,
     FieldDiff,
     StoryDiff,
@@ -16,7 +16,7 @@ from spectra.cli.diff_cmd import (
     format_diff,
     run_diff,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 class TestFieldDiff:
@@ -532,8 +532,8 @@ class TestRunDiff:
         assert result == ExitCode.FILE_NOT_FOUND
         mock_console.error.assert_called()
 
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_config_error(
         self, mock_logging, mock_config_provider, mock_console, tmp_path
     ):
@@ -553,10 +553,10 @@ class TestRunDiff:
         )
         assert result == ExitCode.CONFIG_ERROR
 
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_connection_error(
         self, mock_logging, mock_config_provider, mock_formatter, mock_jira, mock_console, tmp_path
     ):
@@ -579,11 +579,11 @@ class TestRunDiff:
         )
         assert result == ExitCode.CONNECTION_ERROR
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_success(
         self,
         mock_logging,
@@ -621,11 +621,11 @@ class TestRunDiff:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_json_output(
         self,
         mock_logging,
@@ -670,11 +670,11 @@ class TestRunDiff:
         assert "local_path" in data
         assert "has_changes" in data
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_fetch_error(
         self,
         mock_logging,
@@ -712,11 +712,11 @@ class TestRunDiff:
         )
         assert result == ExitCode.CONNECTION_ERROR
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_with_changes(
         self,
         mock_logging,
@@ -774,11 +774,11 @@ class TestRunDiff:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_match_by_title(
         self,
         mock_logging,
@@ -836,11 +836,11 @@ class TestRunDiff:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_diff_skips_subtasks(
         self,
         mock_logging,

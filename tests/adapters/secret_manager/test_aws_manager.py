@@ -13,8 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.secret_manager.aws_manager import AwsSecretsConfig
-from spectra.core.ports.secret_manager import (
+from spectryn.adapters.secret_manager.aws_manager import AwsSecretsConfig
+from spectryn.core.ports.secret_manager import (
     SecretBackend,
     SecretReference,
 )
@@ -84,7 +84,7 @@ class TestAwsSecretManagerMocked:
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
             # Import inside the patch to get the mocked version
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             # Setup mock responses
             client = mock_boto3.Session.return_value.client.return_value
@@ -104,7 +104,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -130,7 +130,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -156,7 +156,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -181,7 +181,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -210,7 +210,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -230,7 +230,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -266,7 +266,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -300,7 +300,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -326,7 +326,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}
@@ -345,7 +345,7 @@ class TestAwsSecretManagerMocked:
             sys.modules,
             {"boto3": mock_boto3, "botocore.exceptions": mock_botocore_exceptions},
         ):
-            from spectra.adapters.secret_manager.aws_manager import AwsSecretManager
+            from spectryn.adapters.secret_manager.aws_manager import AwsSecretManager
 
             client = mock_boto3.Session.return_value.client.return_value
             client.list_secrets.return_value = {"SecretList": []}

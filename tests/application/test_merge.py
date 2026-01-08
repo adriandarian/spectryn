@@ -2,8 +2,8 @@
 
 import pytest
 
-from spectra.application.sync.conflict import Conflict, ConflictType
-from spectra.application.sync.merge import (
+from spectryn.application.sync.conflict import Conflict, ConflictType
+from spectryn.application.sync.merge import (
     MergeAttempt,
     MergeConfig,
     MergeResult,

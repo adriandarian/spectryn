@@ -1,6 +1,6 @@
 # GitLab Integration Guide
 
-spectra supports GitLab Issues for syncing markdown specifications. This guide covers configuration, authentication, and advanced features.
+spectryn supports GitLab Issues for syncing markdown specifications. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -16,21 +16,21 @@ The GitLab adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Optional: Install with GitLab SDK support
-pip install spectra[gitlab]
+pip install spectryn[gitlab]
 
 # Sync markdown to GitLab
-spectra --markdown EPIC.md --tracker gitlab --execute
+spectryn --markdown EPIC.md --tracker gitlab --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # GitLab connection settings
@@ -63,7 +63,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [gitlab]
@@ -99,7 +99,7 @@ export GITLAB_USE_SDK=false
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker gitlab \
   --gitlab-token glpat-xxx \
@@ -117,7 +117,7 @@ spectra \
    - Or: Self-hosted instance → User Settings → Access Tokens
 
 2. **Create Token**
-   - Token name: `spectra-sync`
+   - Token name: `spectryn-sync`
    - Expiration date: Set appropriate expiration
    - Scopes: Select `api` scope (minimum required)
    - Optional scopes:
@@ -129,7 +129,7 @@ spectra \
    - Copy the token immediately (shown only once)
    - Format: `glpat-xxxxxxxxxxxxxxxxxxxx`
 
-4. **Configure spectra**
+4. **Configure spectryn**
    ```bash
    export GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxxxxxx
    ```
@@ -294,7 +294,7 @@ gitlab:
 Link merge requests to issues automatically:
 
 ```python
-from spectra.adapters.gitlab import GitLabAdapter
+from spectryn.adapters.gitlab import GitLabAdapter
 
 adapter = GitLabAdapter(
     token="glpat-xxx",
@@ -357,7 +357,7 @@ Use the official python-gitlab SDK instead of the custom client:
 
 **Installation:**
 ```bash
-pip install spectra[gitlab]
+pip install spectryn[gitlab]
 ```
 
 **Configuration:**
@@ -459,7 +459,7 @@ GitLab has two states: `opened` and `closed`. For workflow states, use labels:
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker gitlab --verbose
+spectryn --markdown EPIC.md --tracker gitlab --verbose
 ```
 
 Or in config:
@@ -475,10 +475,10 @@ sync:
 
 ```bash
 # Dry-run (preview changes)
-spectra --markdown EPIC.md --tracker gitlab
+spectryn --markdown EPIC.md --tracker gitlab
 
 # Execute sync
-spectra --markdown EPIC.md --tracker gitlab --execute
+spectryn --markdown EPIC.md --tracker gitlab --execute
 ```
 
 ### Self-Hosted Instance
@@ -488,7 +488,7 @@ export GITLAB_BASE_URL=https://gitlab.company.com/api/v4
 export GITLAB_TOKEN=glpat-xxx
 export GITLAB_PROJECT_ID=engineering/backend
 
-spectra --markdown EPIC.md --tracker gitlab --execute
+spectryn --markdown EPIC.md --tracker gitlab --execute
 ```
 
 ### With Epics (Premium/Ultimate)

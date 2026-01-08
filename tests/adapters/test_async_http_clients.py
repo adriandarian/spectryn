@@ -22,7 +22,7 @@ class TestAsyncHttpClientWithoutAiohttp:
 
     def test_import_error_when_aiohttp_missing(self) -> None:
         """Test that ImportError is raised when aiohttp is not installed."""
-        from spectra.adapters.async_base import http_client
+        from spectryn.adapters.async_base import http_client
 
         original = http_client.AIOHTTP_AVAILABLE
 
@@ -45,7 +45,7 @@ class TestAsyncHttpClient:
     def client(self):
         """Create an async HTTP client."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.async_base.http_client import AsyncHttpClient
+        from spectryn.adapters.async_base.http_client import AsyncHttpClient
 
         return AsyncHttpClient(
             base_url="https://api.example.com",
@@ -58,7 +58,7 @@ class TestAsyncHttpClient:
     def test_init_defaults(self) -> None:
         """Test initialization with defaults."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.async_base.http_client import AsyncHttpClient
+        from spectryn.adapters.async_base.http_client import AsyncHttpClient
 
         client = AsyncHttpClient(base_url="https://api.example.com")
 
@@ -71,7 +71,7 @@ class TestAsyncHttpClient:
     def test_init_with_custom_config(self) -> None:
         """Test initialization with custom config."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.async_base.http_client import AsyncHttpClient
+        from spectryn.adapters.async_base.http_client import AsyncHttpClient
 
         client = AsyncHttpClient(
             base_url="https://api.example.com/",  # Trailing slash stripped
@@ -96,7 +96,7 @@ class TestAsyncHttpClient:
     def test_init_no_rate_limiting(self) -> None:
         """Test initialization without rate limiting."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.async_base.http_client import AsyncHttpClient
+        from spectryn.adapters.async_base.http_client import AsyncHttpClient
 
         client = AsyncHttpClient(
             base_url="https://api.example.com",
@@ -176,13 +176,13 @@ class TestBaseHttpClientSync:
     @pytest.fixture
     def client_class(self):
         """Get a concrete implementation for testing."""
-        from spectra.adapters.async_base.http_client_sync import BaseHttpClient
+        from spectryn.adapters.async_base.http_client_sync import BaseHttpClient
 
         class ConcreteHttpClient(BaseHttpClient):
             """Concrete implementation for testing."""
 
             def _create_rate_limiter(self, rps: float, burst: int):
-                from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+                from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
                 return TokenBucketRateLimiter(requests_per_second=rps, burst_size=burst)
 
@@ -329,7 +329,7 @@ class TestRetryUtils:
 
     def test_calculate_delay(self) -> None:
         """Test calculate_delay function."""
-        from spectra.adapters.async_base.retry_utils import calculate_delay
+        from spectryn.adapters.async_base.retry_utils import calculate_delay
 
         # Basic calculation
         delay = calculate_delay(0, initial_delay=1.0, max_delay=60.0)
@@ -350,7 +350,7 @@ class TestRetryUtils:
 
     def test_get_retry_after(self) -> None:
         """Test get_retry_after function."""
-        from spectra.adapters.async_base.retry_utils import get_retry_after
+        from spectryn.adapters.async_base.retry_utils import get_retry_after
 
         mock_response = Mock()
 
@@ -377,7 +377,7 @@ class TestTokenBucketRateLimiter:
 
     def test_initial_burst_capacity(self) -> None:
         """Test initial burst capacity."""
-        from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+        from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
         limiter = TokenBucketRateLimiter(requests_per_second=10.0, burst_size=5)
 
@@ -390,7 +390,7 @@ class TestTokenBucketRateLimiter:
 
     def test_token_refill(self) -> None:
         """Test tokens refill over time."""
-        from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+        from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
         limiter = TokenBucketRateLimiter(requests_per_second=100.0, burst_size=1)
 
@@ -406,7 +406,7 @@ class TestTokenBucketRateLimiter:
 
     def test_stats(self) -> None:
         """Test stats tracking."""
-        from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+        from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
         limiter = TokenBucketRateLimiter(requests_per_second=10.0, burst_size=5)
 
@@ -420,7 +420,7 @@ class TestTokenBucketRateLimiter:
 
     def test_reset(self) -> None:
         """Test reset restores initial state."""
-        from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+        from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
         limiter = TokenBucketRateLimiter(requests_per_second=10.0, burst_size=5)
 
@@ -438,7 +438,7 @@ class TestTokenBucketRateLimiter:
 
     def test_available_tokens(self) -> None:
         """Test available_tokens property."""
-        from spectra.adapters.async_base.token_bucket import TokenBucketRateLimiter
+        from spectryn.adapters.async_base.token_bucket import TokenBucketRateLimiter
 
         limiter = TokenBucketRateLimiter(requests_per_second=10.0, burst_size=5)
 
@@ -459,7 +459,7 @@ class TestAsyncRateLimiter:
 
     async def test_acquire(self) -> None:
         """Test acquire method."""
-        from spectra.adapters.async_base.rate_limiter import AsyncRateLimiter
+        from spectryn.adapters.async_base.rate_limiter import AsyncRateLimiter
 
         limiter = AsyncRateLimiter(requests_per_second=100.0, burst_size=5)
 
@@ -469,7 +469,7 @@ class TestAsyncRateLimiter:
 
     async def test_update_from_response_success(self) -> None:
         """Test update from successful response."""
-        from spectra.adapters.async_base.rate_limiter import AsyncRateLimiter
+        from spectryn.adapters.async_base.rate_limiter import AsyncRateLimiter
 
         limiter = AsyncRateLimiter(requests_per_second=10.0, burst_size=5)
         original_rate = limiter.requests_per_second
@@ -481,7 +481,7 @@ class TestAsyncRateLimiter:
 
     async def test_update_from_response_rate_limit(self) -> None:
         """Test update from 429 response."""
-        from spectra.adapters.async_base.rate_limiter import AsyncRateLimiter
+        from spectryn.adapters.async_base.rate_limiter import AsyncRateLimiter
 
         limiter = AsyncRateLimiter(requests_per_second=10.0, burst_size=5)
         original_rate = limiter.requests_per_second
@@ -493,7 +493,7 @@ class TestAsyncRateLimiter:
 
     def test_stats(self) -> None:
         """Test stats property."""
-        from spectra.adapters.async_base.rate_limiter import AsyncRateLimiter
+        from spectryn.adapters.async_base.rate_limiter import AsyncRateLimiter
 
         limiter = AsyncRateLimiter(requests_per_second=10.0, burst_size=5)
 

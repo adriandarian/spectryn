@@ -1,5 +1,5 @@
 #!/bin/bash
-# spectra - Quick runner script
+# spectryn - Quick runner script
 # 
 # Usage:
 #   ./run.sh EPIC.md PROJ-123           # Dry-run
@@ -16,10 +16,10 @@ if [ -d ".venv" ]; then
 fi
 
 # Check if installed
-if ! python -c "import spectra" 2>/dev/null; then
-    echo "Installing spectra..."
+if ! python -c "import spectryn" 2>/dev/null; then
+    echo "Installing spectryn..."
     pip install -e . -q
 fi
 
 # Run with arguments
-python -m spectra.cli.app "$@"
+python -m spectryn.cli.app "$@"

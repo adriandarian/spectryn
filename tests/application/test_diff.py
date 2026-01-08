@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.application.sync.backup import Backup, IssueSnapshot
-from spectra.application.sync.diff import (
+from spectryn.application.sync.backup import Backup, IssueSnapshot
+from spectryn.application.sync.diff import (
     DiffCalculator,
     DiffFormatter,
     DiffResult,
@@ -13,7 +13,7 @@ from spectra.application.sync.diff import (
     IssueDiff,
     compare_backup_to_current,
 )
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 class TestFieldDiff:

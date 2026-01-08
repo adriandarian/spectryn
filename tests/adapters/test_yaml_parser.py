@@ -6,9 +6,9 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.parsers.yaml_parser import YamlParser
-from spectra.adapters.parsers.yaml_plugin import YamlParserPlugin, create_plugin
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.yaml_parser import YamlParser
+from spectryn.adapters.parsers.yaml_plugin import YamlParserPlugin, create_plugin
+from spectryn.core.domain.enums import Priority, Status
 
 
 # =============================================================================

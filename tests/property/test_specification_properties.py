@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from hypothesis import assume, given
 from hypothesis import strategies as st
 
-from spectra.core.specification import (
+from spectryn.core.specification import (
     AlwaysFalse,
     AlwaysTrue,
     PredicateSpec,

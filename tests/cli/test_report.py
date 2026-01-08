@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.report import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.report import (
     ReportData,
     _progress_bar,
     collect_report_data,
@@ -18,7 +18,7 @@ from spectra.cli.report import (
     format_text_report,
     run_report,
 )
-from spectra.core.domain.enums import Priority, Status
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestReportData:
@@ -133,7 +133,7 @@ class TestProgressBar:
 class TestCollectReportData:
     """Tests for collect_report_data function."""
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_weekly_report(self, mock_parser_class):
         """Test collecting weekly report data."""
         mock_parser = MagicMock()
@@ -157,7 +157,7 @@ class TestCollectReportData:
         assert report.points_completed == 5
         assert len(report.completed_stories) == 1
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_monthly_report(self, mock_parser_class):
         """Test collecting monthly report data."""
         mock_parser = MagicMock()
@@ -177,7 +177,7 @@ class TestCollectReportData:
         assert report.period == "monthly"
         assert report.velocity == 8 / 4  # Weekly average
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_sprint_report(self, mock_parser_class):
         """Test collecting sprint report data."""
         mock_parser = MagicMock()
@@ -188,7 +188,7 @@ class TestCollectReportData:
 
         assert report.period == "sprint"
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_in_progress_stories(self, mock_parser_class):
         """Test collecting in-progress stories."""
         mock_parser = MagicMock()
@@ -208,7 +208,7 @@ class TestCollectReportData:
         assert report.stories_in_progress == 1
         assert len(report.in_progress_stories) == 1
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_blocked_stories(self, mock_parser_class):
         """Test collecting blocked stories."""
         mock_parser = MagicMock()
@@ -229,7 +229,7 @@ class TestCollectReportData:
         assert report.stories_blocked == 1
         assert len(report.blocked_stories) == 1
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_no_status(self, mock_parser_class):
         """Test collecting story with no status."""
         mock_parser = MagicMock()
@@ -248,7 +248,7 @@ class TestCollectReportData:
         # No status means planned, not counted as completed
         assert report.stories_completed == 0
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_closed_status(self, mock_parser_class):
         """Test collecting story with closed status."""
         mock_parser = MagicMock()
@@ -267,7 +267,7 @@ class TestCollectReportData:
 
         assert report.stories_completed == 1
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_resolved_status(self, mock_parser_class):
         """Test collecting story with resolved status."""
         mock_parser = MagicMock()
@@ -286,7 +286,7 @@ class TestCollectReportData:
 
         assert report.stories_completed == 1
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_collect_active_status(self, mock_parser_class):
         """Test collecting story with active status."""
         mock_parser = MagicMock()
@@ -624,7 +624,7 @@ class TestRunReport:
         )
         assert result == ExitCode.FILE_NOT_FOUND
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_text_output(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_report with text output."""
         test_file = tmp_path / "test.md"
@@ -642,7 +642,7 @@ class TestRunReport:
 
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_html_output(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_report with HTML output."""
         test_file = tmp_path / "test.md"
@@ -662,7 +662,7 @@ class TestRunReport:
         captured = capsys.readouterr()
         assert "<!DOCTYPE html>" in captured.out
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_json_output(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_report with JSON output."""
         test_file = tmp_path / "test.md"
@@ -684,7 +684,7 @@ class TestRunReport:
         assert "period" in data
         assert "summary" in data
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_save_to_file(self, mock_parser_class, mock_console, tmp_path):
         """Test run_report saving to file."""
         test_file = tmp_path / "test.md"
@@ -707,7 +707,7 @@ class TestRunReport:
         content = output_file.read_text(encoding="utf-8")
         assert "Progress Report" in content
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_save_html(self, mock_parser_class, mock_console, tmp_path):
         """Test run_report saving HTML to file."""
         test_file = tmp_path / "test.md"
@@ -730,7 +730,7 @@ class TestRunReport:
         content = output_file.read_text()
         assert "<!DOCTYPE html>" in content
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_save_json(self, mock_parser_class, mock_console, tmp_path):
         """Test run_report saving JSON to file."""
         test_file = tmp_path / "test.md"
@@ -753,7 +753,7 @@ class TestRunReport:
         data = json.loads(output_file.read_text())
         assert "period" in data
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_monthly(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_report with monthly period."""
         test_file = tmp_path / "test.md"
@@ -773,7 +773,7 @@ class TestRunReport:
         captured = capsys.readouterr()
         assert "Monthly" in captured.out
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_sprint(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_report with sprint period."""
         test_file = tmp_path / "test.md"
@@ -791,7 +791,7 @@ class TestRunReport:
 
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_report_strips_ansi_from_file(self, mock_parser_class, mock_console, tmp_path):
         """Test that ANSI codes are stripped when saving text to file."""
         test_file = tmp_path / "test.md"

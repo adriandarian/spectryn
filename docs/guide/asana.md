@@ -1,6 +1,6 @@
 # Asana Integration Guide
 
-spectra supports Asana for syncing markdown specifications to tasks. This guide covers configuration, authentication, and advanced features.
+spectryn supports Asana for syncing markdown specifications to tasks. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -17,18 +17,18 @@ The Asana adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Asana
-spectra sync --markdown EPIC.md --tracker asana --project 1234567890 --execute
+spectryn sync --markdown EPIC.md --tracker asana --project 1234567890 --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Asana connection settings
@@ -67,7 +67,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [asana]
@@ -104,7 +104,7 @@ export ASANA_TEAM_ID=team-id
 ### CLI Arguments
 
 ```bash
-spectra sync \
+spectryn sync \
   --tracker asana \
   --markdown EPIC.md \
   --project 0987654321 \
@@ -117,7 +117,7 @@ spectra sync \
 
 1. Go to **My Settings** → **Apps** → **Developer Console**
 2. Click **Create new token**
-3. Name your token (e.g., "spectra-sync")
+3. Name your token (e.g., "spectryn-sync")
 4. Copy the token immediately
 
 ::: warning
@@ -394,13 +394,13 @@ asana:
 ### 2. Preview Sync
 
 ```bash
-spectra sync --tracker asana --markdown epic.md --project 1234567890
+spectryn sync --tracker asana --markdown epic.md --project 1234567890
 ```
 
 ### 3. Execute Sync
 
 ```bash
-spectra sync --tracker asana --markdown epic.md --project 1234567890 --execute
+spectryn sync --tracker asana --markdown epic.md --project 1234567890 --execute
 ```
 
 ### 4. View Results
@@ -431,12 +431,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install spectra
-        run: pip install spectra
+      - name: Install spectryn
+        run: pip install spectryn
 
       - name: Sync to Asana
         run: |
-          spectra sync \
+          spectryn sync \
             --tracker asana \
             --markdown docs/EPIC.md \
             --project ${{ vars.ASANA_PROJECT_ID }} \
@@ -505,12 +505,12 @@ To find GIDs (Global IDs) for Asana resources:
 2. **Custom Field GID**: Project Settings → Custom Fields → Click field → GID in URL
 3. **Section GID**: API Explorer or browser dev tools
 
-Or use the spectra helper:
+Or use the spectryn helper:
 
 ```bash
-spectra asana list-projects --workspace 1234567890
-spectra asana list-custom-fields --project 0987654321
-spectra asana list-sections --project 0987654321
+spectryn asana list-projects --workspace 1234567890
+spectryn asana list-custom-fields --project 0987654321
+spectryn asana list-sections --project 0987654321
 ```
 
 ## See Also

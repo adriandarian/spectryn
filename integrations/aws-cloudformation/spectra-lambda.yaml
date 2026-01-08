@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 AWSTemplateFormatVersion: '2010-09-09'
@@ -41,7 +41,7 @@ Parameters:
 
   SpectraImage:
     Type: String
-    Default: spectra/spectra:latest
+    Default: spectryn/spectryn:latest
     Description: Spectra Docker image for Lambda container
 
   Schedule:
@@ -126,7 +126,7 @@ Resources:
       ImageUri: !Ref SpectraImage
       ImageConfig:
         Command:
-          - spectra
+          - spectryn
           - sync
           - --tracker
           - jira
@@ -163,7 +163,7 @@ Resources:
             Enabled: true
       Tags:
         Environment: !Ref Environment
-        Application: spectra
+        Application: spectryn
 
   # Lambda Log Group
   SpectraLogGroup:

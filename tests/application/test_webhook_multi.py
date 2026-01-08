@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from spectra.application.webhook_multi import (
+from spectryn.application.webhook_multi import (
     AzureDevOpsWebhookParser,
     GitHubWebhookParser,
     GitLabWebhookParser,

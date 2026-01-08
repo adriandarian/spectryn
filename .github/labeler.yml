@@ -5,28 +5,28 @@
 # Core domain logic
 core:
   - changed-files:
-      - any-glob-to-any-file: "src/spectra/core/**/*"
+      - any-glob-to-any-file: "src/spectryn/core/**/*"
 
 # Adapters layer
 adapters:
   - changed-files:
-      - any-glob-to-any-file: "src/spectra/adapters/**/*"
+      - any-glob-to-any-file: "src/spectryn/adapters/**/*"
 
 # CLI changes
 cli:
   - changed-files:
-      - any-glob-to-any-file: "src/spectra/cli/**/*"
+      - any-glob-to-any-file: "src/spectryn/cli/**/*"
 
 # Application layer
 application:
   - changed-files:
-      - any-glob-to-any-file: "src/spectra/application/**/*"
+      - any-glob-to-any-file: "src/spectryn/application/**/*"
 
 # Plugin system
 plugins:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/spectra/plugins/**/*"
+          - "src/spectryn/plugins/**/*"
           - "tests/plugins/**/*"
 
 # Documentation changes

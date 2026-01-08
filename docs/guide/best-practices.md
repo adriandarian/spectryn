@@ -1,6 +1,6 @@
 # Best Practices Guide
 
-Recommended workflows and patterns for using spectra effectively.
+Recommended workflows and patterns for using spectryn effectively.
 
 ## Core Principles
 
@@ -9,7 +9,7 @@ Recommended workflows and patterns for using spectra effectively.
 Your markdown file should be the **authoritative source** for story definitions:
 
 ```
-┌─────────────────┐      spectra       ┌─────────────────┐
+┌─────────────────┐      spectryn       ┌─────────────────┐
 │    EPIC.md      │  ──────────────▶   │  Issue Tracker  │
 │ (Source of Truth)│                    │   (Execution)   │
 └─────────────────┘                    └─────────────────┘
@@ -30,7 +30,7 @@ Always commit your markdown changes before syncing:
 ```bash
 git add EPIC.md
 git commit -m "feat: Add user authentication stories"
-spectra sync --markdown EPIC.md
+spectryn sync --markdown EPIC.md
 ```
 
 This ensures you can:
@@ -44,10 +44,10 @@ Always preview changes before executing:
 
 ```bash
 # See what would change
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 
 # Then execute
-spectra --execute --markdown EPIC.md --epic PROJ-123
+spectryn --execute --markdown EPIC.md --epic PROJ-123
 ```
 
 ---
@@ -65,17 +65,17 @@ project/
 │   │   └── notifications.md
 │   └── templates/
 │       └── epic-template.md
-├── spectra.yaml
-└── .spectra/
+├── spectryn.yaml
+└── .spectryn/
     └── state.json
 ```
 
 ### Configuration File
 
-Create a `spectra.yaml` at your project root:
+Create a `spectryn.yaml` at your project root:
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 version: 1
 
@@ -188,9 +188,9 @@ Additional context: Support SSO for enterprise customers.
 | 13 | Epic-sized | **Split this story!** |
 
 ::: warning
-If a story is 13+ points, use `spectra split` to break it down:
+If a story is 13+ points, use `spectryn split` to break it down:
 ```bash
-spectra split --story US-001 --markdown EPIC.md
+spectryn split --story US-001 --markdown EPIC.md
 ```
 :::
 
@@ -205,17 +205,17 @@ spectra split --story US-001 --markdown EPIC.md
 vim docs/epics/sprint-23.md
 
 # 2. Validate structure
-spectra --validate --markdown docs/epics/sprint-23.md
+spectryn --validate --markdown docs/epics/sprint-23.md
 
 # 3. Preview sync
-spectra diff --markdown docs/epics/sprint-23.md
+spectryn diff --markdown docs/epics/sprint-23.md
 
 # 4. Commit to git
 git add docs/epics/sprint-23.md
 git commit -m "plan: Sprint 23 stories"
 
 # 5. Sync to tracker
-spectra sync --execute --markdown docs/epics/sprint-23.md
+spectryn sync --execute --markdown docs/epics/sprint-23.md
 
 # 6. Push changes
 git push
@@ -225,7 +225,7 @@ git push
 
 ```bash
 # 1. Import current state from tracker
-spectra import --epic PROJ-123 --output docs/epics/current.md
+spectryn import --epic PROJ-123 --output docs/epics/current.md
 
 # 2. Review and refine in markdown
 # - Add acceptance criteria
@@ -233,17 +233,17 @@ spectra import --epic PROJ-123 --output docs/epics/current.md
 # - Update estimates
 
 # 3. Diff changes
-spectra diff --markdown docs/epics/current.md --epic PROJ-123
+spectryn diff --markdown docs/epics/current.md --epic PROJ-123
 
 # 4. Sync refinements back
-spectra sync --execute --markdown docs/epics/current.md
+spectryn sync --execute --markdown docs/epics/current.md
 ```
 
 ### 3. AI-Assisted Planning
 
 ```bash
 # 1. Generate stories from high-level description
-spectra ai generate \
+spectryn ai generate \
   --prompt "User authentication with OAuth support" \
   --output docs/epics/auth.md
 
@@ -251,10 +251,10 @@ spectra ai generate \
 vim docs/epics/auth.md
 
 # 3. Validate and improve
-spectra ai refine --markdown docs/epics/auth.md
+spectryn ai refine --markdown docs/epics/auth.md
 
 # 4. Sync when ready
-spectra sync --execute --markdown docs/epics/auth.md
+spectryn sync --execute --markdown docs/epics/auth.md
 ```
 
 ### 4. CI/CD Integration
@@ -276,18 +276,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup spectra
-        uses: adriandarian/spectra-action@v1
+      - name: Setup spectryn
+        uses: adriandarian/spectryn-action@v1
 
       - name: Validate stories
-        run: spectra --validate --markdown docs/epics/
+        run: spectryn --validate --markdown docs/epics/
 
       - name: Sync to Jira
         env:
           JIRA_URL: ${{ secrets.JIRA_URL }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-        run: spectra sync --execute --markdown docs/epics/
+        run: spectryn sync --execute --markdown docs/epics/
 ```
 
 ---
@@ -306,8 +306,8 @@ Include story changes in PRs:
 - US-002: Password Reset (Updated AC)
 
 ### Sync Preview
-```spectra
-spectra diff --markdown docs/epics/auth.md
+```spectryn
+spectryn diff --markdown docs/epics/auth.md
 ```
 
 ### Checklist
@@ -335,7 +335,7 @@ When syncing significant changes, notify the team:
 
 ```bash
 # Generate summary for Slack/Teams
-spectra sync --execute --markdown EPIC.md --notify slack
+spectryn sync --execute --markdown EPIC.md --notify slack
 ```
 
 ---
@@ -347,7 +347,7 @@ spectra sync --execute --markdown EPIC.md --notify slack
 Enable strict validation:
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 validation:
   require_acceptance_criteria: true
   require_story_points: true
@@ -367,15 +367,15 @@ Prevent invalid stories from being committed:
 
 ```bash
 # Install hook
-spectra hook install
+spectryn hook install
 
 # Or manually in .pre-commit-config.yaml
 repos:
   - repo: local
     hooks:
-      - id: spectra-validate
-        name: Validate spectra stories
-        entry: spectra --validate --markdown
+      - id: spectryn-validate
+        name: Validate spectryn stories
+        entry: spectryn --validate --markdown
         language: system
         files: '\.md$'
 ```
@@ -386,16 +386,16 @@ Always have a backup:
 
 ```bash
 # Automatic backup
-spectra sync --backup --execute --markdown EPIC.md
+spectryn sync --backup --execute --markdown EPIC.md
 
 # Manual backup
-spectra backup create --epic PROJ-123
+spectryn backup create --epic PROJ-123
 
 # List backups
-spectra backup list
+spectryn backup list
 
 # Restore if needed
-spectra backup restore --timestamp 2025-01-06T10:30:00
+spectryn backup restore --timestamp 2025-01-06T10:30:00
 ```
 
 ---
@@ -405,7 +405,7 @@ spectra backup restore --timestamp 2025-01-06T10:30:00
 ### For Large Projects
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 performance:
   parallel_sync: true
   max_workers: 4
@@ -419,7 +419,7 @@ performance:
 After initial sync, use incremental mode:
 
 ```bash
-spectra sync --incremental --markdown EPIC.md
+spectryn sync --incremental --markdown EPIC.md
 ```
 
 ### Split Large Files
@@ -464,15 +464,15 @@ RIGHT:
 
 ```bash
 # WRONG - No preview!
-spectra sync --execute --markdown EPIC.md
+spectryn sync --execute --markdown EPIC.md
 ```
 
 ### ✅ Do: Always Preview
 
 ```bash
 # RIGHT - Preview first
-spectra diff --markdown EPIC.md
-spectra sync --execute --markdown EPIC.md
+spectryn diff --markdown EPIC.md
+spectryn sync --execute --markdown EPIC.md
 ```
 
 ### ❌ Don't: Store Secrets in Config

@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.youtrack.adapter import YouTrackAdapter
-from spectra.adapters.youtrack.client import YouTrackApiClient
-from spectra.core.ports.config_provider import YouTrackConfig
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.youtrack.adapter import YouTrackAdapter
+from spectryn.adapters.youtrack.client import YouTrackApiClient
+from spectryn.core.ports.config_provider import YouTrackConfig
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -27,7 +27,7 @@ class TestYouTrackApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -132,7 +132,7 @@ class TestYouTrackAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -275,7 +275,7 @@ class TestYouTrackAdapter:
 
     def test_create_link(self, adapter, mock_client):
         """Should create a link."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.create_link.return_value = {}
         result = adapter.create_link("PROJ-123", "PROJ-124", LinkType.DEPENDS_ON)
@@ -386,7 +386,7 @@ class TestYouTrackCustomFields:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -494,7 +494,7 @@ class TestYouTrackCustomFields:
 
     def test_update_issue_custom_field_dry_run(self, config):
         """Should not update in dry run mode."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = YouTrackAdapter(config=config, dry_run=True)
@@ -541,7 +541,7 @@ class TestYouTrackApiClientCustomFields:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -549,7 +549,7 @@ class TestYouTrackApiClientCustomFields:
     @pytest.fixture
     def client(self, mock_session):
         """Create test client."""
-        from spectra.adapters.youtrack.client import YouTrackApiClient
+        from spectryn.adapters.youtrack.client import YouTrackApiClient
 
         return YouTrackApiClient(
             url="https://test.youtrack.com",
@@ -662,7 +662,7 @@ class TestYouTrackBulkOperations:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -691,7 +691,7 @@ class TestYouTrackBulkOperations:
 
     def test_bulk_create_issues_dry_run(self, config):
         """Should not create in dry run mode."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = YouTrackAdapter(config=config, dry_run=True)
@@ -767,7 +767,7 @@ class TestYouTrackAttachments:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -812,7 +812,7 @@ class TestYouTrackAttachments:
 
     def test_upload_attachment_dry_run(self, config):
         """Should not upload in dry run mode."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = YouTrackAdapter(config=config, dry_run=True)
@@ -848,7 +848,7 @@ class TestYouTrackApiClientBulkOperations:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -856,7 +856,7 @@ class TestYouTrackApiClientBulkOperations:
     @pytest.fixture
     def client(self, mock_session):
         """Create test client."""
-        from spectra.adapters.youtrack.client import YouTrackApiClient
+        from spectryn.adapters.youtrack.client import YouTrackApiClient
 
         return YouTrackApiClient(
             url="https://test.youtrack.com",
@@ -909,7 +909,7 @@ class TestYouTrackApiClientAttachments:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -917,7 +917,7 @@ class TestYouTrackApiClientAttachments:
     @pytest.fixture
     def client(self, mock_session):
         """Create test client."""
-        from spectra.adapters.youtrack.client import YouTrackApiClient
+        from spectryn.adapters.youtrack.client import YouTrackApiClient
 
         return YouTrackApiClient(
             url="https://test.youtrack.com",
@@ -1009,7 +1009,7 @@ class TestYouTrackWorkflow:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1030,7 +1030,7 @@ class TestYouTrackWorkflow:
 
     def test_execute_command_dry_run(self, config):
         """Should not execute in dry run mode."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = YouTrackAdapter(config=config, dry_run=True)
@@ -1072,7 +1072,7 @@ class TestYouTrackDueDates:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1119,7 +1119,7 @@ class TestYouTrackDueDates:
 
     def test_update_issue_due_date_dry_run(self, config):
         """Should not update in dry run mode."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = YouTrackAdapter(config=config, dry_run=True)
@@ -1150,7 +1150,7 @@ class TestYouTrackTags:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1224,7 +1224,7 @@ class TestYouTrackWatchers:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1292,7 +1292,7 @@ class TestYouTrackAgileBoards:
 
     @pytest.fixture
     def mock_client(self):
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1352,7 +1352,7 @@ class TestYouTrackSprints:
 
     @pytest.fixture
     def mock_client(self):
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1429,7 +1429,7 @@ class TestYouTrackTimeTracking:
 
     @pytest.fixture
     def mock_client(self):
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1513,7 +1513,7 @@ class TestYouTrackHistory:
 
     @pytest.fixture
     def mock_client(self):
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -1562,7 +1562,7 @@ class TestYouTrackMentions:
 
     @pytest.fixture
     def mock_client(self):
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as mock:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client

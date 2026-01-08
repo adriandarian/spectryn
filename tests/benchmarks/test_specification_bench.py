@@ -12,7 +12,7 @@ Run with:
 
 import pytest
 
-from spectra.core.specification import (
+from spectryn.core.specification import (
     HasSubtasksSpec,
     PredicateSpec,
     StatusSpec,

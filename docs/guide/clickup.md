@@ -1,6 +1,6 @@
 # ClickUp Integration Guide
 
-spectra supports ClickUp for syncing markdown specifications. This guide covers configuration, authentication, space/folder/list hierarchy, and advanced features.
+spectryn supports ClickUp for syncing markdown specifications. This guide covers configuration, authentication, space/folder/list hierarchy, and advanced features.
 
 ## Overview
 
@@ -21,18 +21,18 @@ The ClickUp adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to ClickUp
-spectra --markdown EPIC.md --tracker clickup --execute
+spectryn --markdown EPIC.md --tracker clickup --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # ClickUp connection settings
@@ -51,7 +51,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [clickup]
@@ -84,7 +84,7 @@ export CLICKUP_API_URL=https://api.clickup.com/api/v2
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker clickup \
   --clickup-api-token your-token \
@@ -104,7 +104,7 @@ spectra \
    - Click on your profile icon (bottom left)
    - Go to **Settings** → **Apps** → **API**
    - Click **Generate** to create a new API token
-   - Give it a name (e.g., "spectra-sync")
+   - Give it a name (e.g., "spectryn-sync")
    - Copy the token immediately (you won't be able to see it again)
    - **Important**: Store the token securely - it provides full access to your ClickUp workspace
 
@@ -215,7 +215,7 @@ ClickUp doesn't have a built-in "story points" field. You need to:
    - Create a "Number" type field named "Story Points" or "Points"
    - Note the field ID
 
-2. **Configure in spectra**:
+2. **Configure in spectryn**:
    - The adapter automatically detects custom fields with "story point" or "point" in the name
    - No manual configuration needed if you use standard naming
 
@@ -289,7 +289,7 @@ ClickUp uses **custom statuses** per list. Each list can have different statuses
 
 ClickUp priorities map as follows:
 
-| spectra Priority | ClickUp Priority | Value |
+| spectryn Priority | ClickUp Priority | Value |
 |------------------|------------------|-------|
 | Critical | Urgent | 1 |
 | High | High | 2 |
@@ -472,7 +472,7 @@ IssueTrackerError: team_id is required
 # Create a goal (epic) first
 # Then sync stories as tasks linked to the goal
 
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker clickup \
   --clickup-api-token $CLICKUP_API_TOKEN \
@@ -483,7 +483,7 @@ spectra \
 ### Sync to Specific List
 
 ```bash
-spectra \
+spectryn \
   --markdown STORIES.md \
   --tracker clickup \
   --clickup-api-token $CLICKUP_API_TOKEN \
@@ -494,7 +494,7 @@ spectra \
 ### Dry Run (Preview Changes)
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker clickup \
   --clickup-api-token $CLICKUP_API_TOKEN \
@@ -537,7 +537,7 @@ For detailed API documentation, see:
 ## Support
 
 For issues or questions:
-- Check the [spectra documentation](/guide/getting-started)
+- Check the [spectryn documentation](/guide/getting-started)
 - Review [ClickUp API docs](https://clickup.com/api)
 - Open an issue on GitHub
 

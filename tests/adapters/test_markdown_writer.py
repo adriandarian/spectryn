@@ -2,10 +2,10 @@
 
 import pytest
 
-from spectra.adapters.formatters.markdown_writer import MarkdownUpdater, MarkdownWriter
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, CommitRef, Description, StoryId
+from spectryn.adapters.formatters.markdown_writer import MarkdownUpdater, MarkdownWriter
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, CommitRef, Description, StoryId
 
 
 class TestMarkdownWriter:

@@ -13,11 +13,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.adapters.rest_api import SpectraRestServer, create_rest_server
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import IssueKey, StoryId
-from spectra.core.ports.rest_api import (
+from spectryn.adapters.rest_api import SpectraRestServer, create_rest_server
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.ports.rest_api import (
     HttpMethod,
     HttpStatus,
     RestError,

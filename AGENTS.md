@@ -1,6 +1,6 @@
 # AI Agent Instructions
 
-This file provides instructions for AI coding assistants (Claude, Cursor, Copilot, etc.) working on the spectra codebase.
+This file provides instructions for AI coding assistants (Claude, Cursor, Copilot, etc.) working on the spectryn codebase.
 
 ## Before Submitting Changes
 
@@ -8,14 +8,14 @@ This file provides instructions for AI coding assistants (Claude, Cursor, Copilo
 
 ```bash
 # Fast validation (~5 seconds): Format, lint, type check
-ruff format src tests && ruff check src tests --fix && mypy src/spectra
+ruff format src tests && ruff check src tests --fix && mypy src/spectryn
 ```
 
 **For full validation with tests (~40 seconds):**
 
 ```bash
 # Full checks with parallel tests
-ruff format src tests && ruff check src tests --fix && mypy src/spectra && pytest
+ruff format src tests && ruff check src tests --fix && mypy src/spectryn && pytest
 ```
 
 ## ⚡ Performance Notes
@@ -30,13 +30,13 @@ ruff format src tests && ruff check src tests --fix && mypy src/spectra && pytes
 
 | Task | Command |
 |------|---------|
-| **Quick Check** | `ruff format src tests && ruff check src tests --fix && mypy src/spectra` |
+| **Quick Check** | `ruff format src tests && ruff check src tests --fix && mypy src/spectryn` |
 | Format | `ruff format src tests` |
 | Lint | `ruff check src tests` |
 | Lint + Fix | `ruff check src tests --fix` |
-| Type Check | `mypy src/spectra` |
+| Type Check | `mypy src/spectryn` |
 | Test | `pytest` |
-| Test + Coverage | `pytest --cov=spectra` |
+| Test + Coverage | `pytest --cov=spectryn` |
 | Test Specific | `pytest tests/adapters/test_markdown_parser.py -v` |
 | Test Slow | `pytest -m slow` |
 | Test Chaos | `pytest -m chaos` |
@@ -58,7 +58,7 @@ take significant time and resources.
 - Python 3.11+ with full type hints on all functions
 - Use `dataclass` for entities, `Enum` for constrained values
 - Use `Protocol` for interfaces (structural subtyping)
-- Absolute imports only: `from spectra.core.domain.entities import UserStory`
+- Absolute imports only: `from spectryn.core.domain.entities import UserStory`
 
 ### Architecture
 - Core depends on abstractions, adapters implement them
@@ -84,10 +84,10 @@ ruff check src tests --fix
 ### Mypy Errors
 ```bash
 # Check specific file
-mypy src/spectra/path/to/file.py
+mypy src/spectryn/path/to/file.py
 
 # Ignore missing imports (if needed)
-mypy src/spectra --ignore-missing-imports
+mypy src/spectryn --ignore-missing-imports
 ```
 
 ### Test Failures
@@ -102,7 +102,7 @@ pytest -k "test_parse" -v
 ## File Structure
 
 ```
-src/spectra/
+src/spectryn/
 ├── core/           # Domain (entities, enums, ports)
 ├── adapters/       # Infrastructure (parsers, API clients)
 ├── application/    # Use cases
@@ -113,8 +113,8 @@ tests/              # Mirrors src structure
 
 ## Key Files
 
-- `src/spectra/core/domain/entities.py` - Epic, UserStory, Subtask
-- `src/spectra/core/domain/enums.py` - Status, Priority parsing
-- `src/spectra/adapters/parsers/markdown.py` - Main parser
-- `src/spectra/cli/app.py` - CLI entry point
+- `src/spectryn/core/domain/entities.py` - Epic, UserStory, Subtask
+- `src/spectryn/core/domain/enums.py` - Status, Priority parsing
+- `src/spectryn/adapters/parsers/markdown.py` - Main parser
+- `src/spectryn/cli/app.py` - CLI entry point
 

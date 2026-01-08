@@ -2,8 +2,8 @@
 
 import pytest
 
-from spectra.adapters.parsers.google_sheets_parser import GoogleSheetsParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.google_sheets_parser import GoogleSheetsParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestGoogleSheetsParser:

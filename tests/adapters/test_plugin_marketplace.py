@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.plugin_marketplace import (
+from spectryn.core.ports.plugin_marketplace import (
     InstallResult,
     MarketplaceInfo,
     MarketplacePlugin,
@@ -302,7 +302,7 @@ class TestGitHubPluginRegistry:
     @pytest.fixture
     def registry(self, tmp_path, mock_session):
         """Create a registry instance with mocked session."""
-        from spectra.adapters.plugin_marketplace.github_registry import (
+        from spectryn.adapters.plugin_marketplace.github_registry import (
             GitHubPluginRegistry,
             GitHubRegistryConfig,
         )
@@ -428,7 +428,7 @@ class TestGitHubRegistryInstallation:
     @pytest.fixture
     def registry(self, tmp_path, mock_session):
         """Create a registry instance."""
-        from spectra.adapters.plugin_marketplace.github_registry import (
+        from spectryn.adapters.plugin_marketplace.github_registry import (
             GitHubPluginRegistry,
             GitHubRegistryConfig,
         )

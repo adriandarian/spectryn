@@ -10,7 +10,7 @@ Tests algebraic laws that Result should satisfy:
 from hypothesis import assume, given
 from hypothesis import strategies as st
 
-from spectra.core.result import Err, Ok, Result
+from spectryn.core.result import Err, Ok, Result
 
 
 # =============================================================================

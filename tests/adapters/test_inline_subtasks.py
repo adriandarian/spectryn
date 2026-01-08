@@ -16,12 +16,12 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.parsers import MarkdownParser
-from spectra.adapters.parsers.tolerant_markdown import (
+from spectryn.adapters.parsers import MarkdownParser
+from spectryn.adapters.parsers.tolerant_markdown import (
     InlineSubtaskInfo,
     parse_inline_subtasks,
 )
-from spectra.core.domain import Status
+from spectryn.core.domain import Status
 
 
 # =============================================================================

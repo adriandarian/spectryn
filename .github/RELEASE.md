@@ -12,19 +12,20 @@ Configure these secrets in GitHub repository settings (Settings → Secrets and 
 |--------|--------------|------------|
 | `DOCKERHUB_USERNAME` | Docker Hub | Your Docker Hub username |
 | `DOCKERHUB_TOKEN` | Docker Hub | [Create access token](https://hub.docker.com/settings/security) |
-| `VSCE_PAT` | VS Code Marketplace | [Create PAT](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) |
-| `OVSX_PAT` | Open VSX | [Create token](https://open-vsx.org/user-settings/tokens) |
+| `VSCE_PAT` | VS Code Marketplace (optional) | [Create PAT](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) |
+| `OVSX_PAT` | Open VSX (optional) | [Create token](https://open-vsx.org/user-settings/tokens) |
 | `CHOCOLATEY_API_KEY` | Chocolatey | [Get API key](https://community.chocolatey.org/account) |
-| `HOMEBREW_TAP_DEPLOY_KEY` | Homebrew Tap | SSH deploy key for tap repo |
+
+**Note:** `VSCE_PAT` and `OVSX_PAT` are optional. If not provided, the VS Code extension will be packaged and available as a `.vsix` download from GitHub releases for manual installation.
 
 ### PyPI Trusted Publishing (No Secret Needed!)
 
 PyPI uses OIDC trusted publishing. Configure it in PyPI:
 
-1. Go to https://pypi.org/manage/project/spectra/settings/publishing/
+1. Go to https://pypi.org/manage/project/spectryn/settings/publishing/
 2. Add a new trusted publisher:
    - Owner: `adriandarian`
-   - Repository: `spectra`
+   - Repository: `spectryn`
    - Workflow: `release.yml`
    - Environment: `pypi`
 
@@ -91,24 +92,24 @@ If a release has issues:
 1. **PyPI**: You cannot delete releases, but you can yank them:
    ```bash
    pip install twine
-   twine yank spectra==1.0.0
+   twine yank spectryn==1.0.0
    ```
 
 2. **Docker**: Delete the tag from Docker Hub/GHCR
 
 3. **GitHub**: Mark release as pre-release or delete it
 
-4. **Homebrew**: Push a fix to the tap repository
+4. **Homebrew**: Commit a fix to the formula in the main repository
 
 ## Artifacts Published
 
 | Artifact | Location |
 |----------|----------|
-| Python package | https://pypi.org/project/spectra/ |
-| Docker image | https://hub.docker.com/r/adriandarian/spectra |
-| Docker image | ghcr.io/adriandarian/spectra |
+| Python package | https://pypi.org/project/spectryn/ |
+| Docker image | https://hub.docker.com/r/adriandarian/spectryn |
+| Docker image | ghcr.io/adriandarian/spectryn |
 | VS Code extension | VS Code Marketplace |
-| Documentation | https://adriandarian.github.io/spectra |
-| Homebrew | `brew install adriandarian/spectra/spectra` |
+| Documentation | https://adriandarian.github.io/spectryn |
+| Homebrew | `brew tap adriandarian/spectra https://github.com/adriandarian/spectra && brew install spectra` |
 | Shell completions | GitHub Release assets |
 

@@ -4,12 +4,12 @@ Tests for the testing utilities module.
 
 import pytest
 
-from spectra.core.container import Container
-from spectra.core.ports.config_provider import SyncConfig, TrackerConfig
-from spectra.core.ports.document_formatter import DocumentFormatterPort
-from spectra.core.ports.document_parser import DocumentParserPort
-from spectra.core.ports.issue_tracker import IssueData, IssueTrackerPort
-from spectra.testing import (
+from spectryn.core.container import Container
+from spectryn.core.ports.config_provider import SyncConfig, TrackerConfig
+from spectryn.core.ports.document_formatter import DocumentFormatterPort
+from spectryn.core.ports.document_parser import DocumentParserPort
+from spectryn.core.ports.issue_tracker import IssueData, IssueTrackerPort
+from spectryn.testing import (
     create_mock_formatter,
     create_mock_parser,
     create_mock_tracker,
@@ -73,7 +73,7 @@ class TestCreateMockTracker:
 
     def test_mock_issue_not_found(self):
         """Test mock raises NotFoundError for missing issues."""
-        from spectra.core.ports.issue_tracker import NotFoundError
+        from spectryn.core.ports.issue_tracker import NotFoundError
 
         mock = create_mock_tracker()
 

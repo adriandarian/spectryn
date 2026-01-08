@@ -1,6 +1,6 @@
 # Installation
 
-spectra can be installed using several methods. Choose the one that best fits your workflow.
+spectryn can be installed using several methods. Choose the one that best fits your workflow.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ spectra can be installed using several methods. Choose the one that best fits yo
 ### pip (Recommended)
 
 ```bash
-pip install spectra
+pip install spectryn
 ```
 
 ### pipx (Isolated Environment)
@@ -20,25 +20,26 @@ pip install spectra
 [pipx](https://pipx.pypa.io/) installs Python CLI tools in isolated environments:
 
 ```bash
-pipx install spectra
+pipx install spectryn
 ```
 
 ### Homebrew (macOS/Linux)
 
 ```bash
-brew install adriandarian/spectra/spectra
+brew tap adriandarian/spectra https://github.com/adriandarian/spectra
+brew install spectra
 ```
 
 ### Chocolatey (Windows)
 
 ```bash
-choco install spectra
+choco install spectryn
 ```
 
 ### Universal Linux Installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adriandarian/spectra/main/packaging/packages/linux/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/adriandarian/spectryn/main/packaging/packages/linux/install.sh | bash
 ```
 
 ## Docker
@@ -46,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/adriandarian/spectra/main/packaging
 ### Pull from Docker Hub
 
 ```bash
-docker pull adriandarian/spectra:latest
+docker pull adriandarian/spectryn:latest
 ```
 
 ### Run with Docker
@@ -57,7 +58,7 @@ docker run --rm \
   -e JIRA_EMAIL=your.email@company.com \
   -e JIRA_API_TOKEN=your-api-token \
   -v $(pwd):/workspace \
-  spectra:latest \
+  spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -68,8 +69,8 @@ For easier usage with persistent configuration:
 ```yaml
 # docker-compose.yml
 services:
-  spectra:
-    image: adriandarian/spectra:latest
+  spectryn:
+    image: adriandarian/spectryn:latest
     env_file:
       - .env
     volumes:
@@ -79,7 +80,7 @@ services:
 
 ```bash
 # Run with Docker Compose
-docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123
+docker compose run --rm spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ## From Source
@@ -87,24 +88,24 @@ docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123
 Clone the repository and install in development mode:
 
 ```bash
-git clone https://github.com/adriandarian/spectra.git
-cd spectra
+git clone https://github.com/adriandarian/spectryn.git
+cd spectryn
 pip install -e ".[dev]"
 ```
 
-This installs spectra in editable mode with development dependencies (pytest, mypy, ruff, etc.).
+This installs spectryn in editable mode with development dependencies (pytest, mypy, ruff, etc.).
 
 ## Verify Installation
 
-Check that spectra is installed correctly:
+Check that spectryn is installed correctly:
 
 ```bash
-spectra --version
+spectryn --version
 ```
 
 Expected output:
 ```
-spectra version 1.0.0
+spectryn version 1.0.0
 ```
 
 ## Shell Completions
@@ -114,15 +115,15 @@ Enable tab completion for your shell:
 ::: code-group
 
 ```bash [Bash]
-eval "$(spectra --completions bash)"
+eval "$(spectryn --completions bash)"
 ```
 
 ```bash [Zsh]
-eval "$(spectra --completions zsh)"
+eval "$(spectryn --completions zsh)"
 ```
 
 ```fish [Fish]
-spectra --completions fish | source
+spectryn --completions fish | source
 ```
 
 :::

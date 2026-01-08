@@ -9,13 +9,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.generate import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.generate import (
     GenerateResult,
     TemplateGenerator,
     run_generate,
 )
-from spectra.cli.output import Console
+from spectryn.cli.output import Console
 
 
 # =============================================================================
@@ -542,7 +542,7 @@ class TestCLIIntegration:
 class TestRunGenerate:
     """Tests for run_generate function."""
 
-    @patch("spectra.adapters.config.environment.EnvironmentConfigProvider.validate")
+    @patch("spectryn.adapters.config.environment.EnvironmentConfigProvider.validate")
     def test_run_generate_config_error(self, mock_validate):
         """Test run_generate with config error."""
         mock_validate.return_value = ["Missing JIRA_URL"]

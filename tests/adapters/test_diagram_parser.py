@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.diagram_parser import DiagramParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.diagram_parser import DiagramParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestDiagramParser:

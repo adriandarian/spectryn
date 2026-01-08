@@ -4,7 +4,7 @@ Tests for domain enums.
 
 import pytest
 
-from spectra.core.domain.enums import IssueType, Priority, Status
+from spectryn.core.domain.enums import IssueType, Priority, Status
 
 
 class TestStatus:

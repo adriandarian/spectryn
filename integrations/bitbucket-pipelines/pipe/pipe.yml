@@ -1,11 +1,11 @@
 # Spectra Bitbucket Pipe Definition
-# This defines the spectra-sync pipe for Bitbucket Pipelines
+# This defines the spectryn-sync pipe for Bitbucket Pipelines
 
 name: Spectra Sync
 image: python:3.11-slim
 description: Sync markdown specifications to issue trackers (Jira, GitHub, Azure DevOps, Linear)
 
-repository: spectra/spectra-sync
+repository: spectryn/spectryn-sync
 
 variables:
   - name: MARKDOWN_FILE

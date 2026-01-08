@@ -30,8 +30,8 @@ steps:
       versionSpec: '3.11'
 
   - script: |
-      pip install spectra
-      spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --execute --no-confirm
+      pip install spectryn
+      spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --execute --no-confirm
     displayName: 'Sync to Jira'
     env:
       JIRA_URL: $(JIRA_URL)
@@ -46,13 +46,13 @@ Reference the template from your pipeline:
 ```yaml
 resources:
   repositories:
-    - repository: spectra
+    - repository: spectryn
       type: github
-      name: spectra/spectra
+      name: spectryn/spectryn
       ref: main
 
 extends:
-  template: integrations/azure-pipelines/spectra-pipeline.yml@spectra
+  template: integrations/azure-pipelines/spectryn-pipeline.yml@spectryn
   parameters:
     markdownFile: 'docs/user-stories.md'
     epicKey: 'PROJ-123'
@@ -77,10 +77,10 @@ extends:
 
 ### Variable Groups
 
-Create a variable group `spectra-credentials`:
+Create a variable group `spectryn-credentials`:
 
 1. Go to **Pipelines > Library > Variable groups**
-2. Create group `spectra-credentials`
+2. Create group `spectryn-credentials`
 3. Add variables:
    - `JIRA_URL`
    - `JIRA_EMAIL`
@@ -90,7 +90,7 @@ Reference in pipeline:
 
 ```yaml
 variables:
-  - group: spectra-credentials
+  - group: spectryn-credentials
 ```
 
 ## Examples
@@ -106,7 +106,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: spectra-credentials
+  - group: spectryn-credentials
 
 stages:
   - stage: Validate
@@ -117,8 +117,8 @@ stages:
             inputs:
               versionSpec: '3.11'
           - script: |
-              pip install spectra
-              spectra validate --markdown docs/user-stories.md
+              pip install spectryn
+              spectryn validate --markdown docs/user-stories.md
             displayName: 'Validate Specs'
 
   - stage: Preview
@@ -131,8 +131,8 @@ stages:
             inputs:
               versionSpec: '3.11'
           - script: |
-              pip install spectra
-              spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY)
+              pip install spectryn
+              spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY)
             displayName: 'Preview Sync'
             env:
               JIRA_URL: $(JIRA_URL)
@@ -153,8 +153,8 @@ stages:
                   inputs:
                     versionSpec: '3.11'
                 - script: |
-                    pip install spectra
-                    spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --execute --no-confirm
+                    pip install spectryn
+                    spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --execute --no-confirm
                   displayName: 'Sync to Jira'
                   env:
                     JIRA_URL: $(JIRA_URL)
@@ -179,15 +179,15 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: spectra-credentials
+  - group: spectryn-credentials
 
 steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.11'
   - script: |
-      pip install spectra
-      spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --incremental --execute --no-confirm
+      pip install spectryn
+      spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --incremental --execute --no-confirm
     displayName: 'Incremental Sync'
     env:
       JIRA_URL: $(JIRA_URL)
@@ -199,12 +199,12 @@ steps:
 
 ```yaml
 variables:
-  - group: spectra-azure-devops
+  - group: spectryn-azure-devops
 
 steps:
   - script: |
-      pip install spectra
-      spectra sync --markdown docs/user-stories.md --tracker azure-devops --execute --no-confirm
+      pip install spectryn
+      spectryn sync --markdown docs/user-stories.md --tracker azure-devops --execute --no-confirm
     displayName: 'Sync to Azure DevOps'
     env:
       AZURE_PAT: $(AZURE_PAT)
@@ -233,13 +233,13 @@ steps:
     inputs:
       versionSpec: '3.11'
 
-  - script: pip install spectra
+  - script: pip install spectryn
     displayName: 'Install Spectra'
 
-  - script: spectra validate --markdown docs/user-stories.md
+  - script: spectryn validate --markdown docs/user-stories.md
     displayName: 'Validate Markdown'
 
-  - script: spectra diff --markdown docs/user-stories.md --epic $(EPIC_KEY)
+  - script: spectryn diff --markdown docs/user-stories.md --epic $(EPIC_KEY)
     displayName: 'Show Changes'
     env:
       JIRA_URL: $(JIRA_URL)
@@ -252,8 +252,8 @@ steps:
 ```yaml
 steps:
   - script: |
-      pip install spectra
-      spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --export sync-results.json --execute --no-confirm
+      pip install spectryn
+      spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --export sync-results.json --execute --no-confirm
     displayName: 'Sync with Export'
     env:
       JIRA_URL: $(JIRA_URL)
@@ -267,7 +267,7 @@ steps:
 
 ## Template Reference
 
-### spectra-sync.yml
+### spectryn-sync.yml
 
 ```yaml
 parameters:
@@ -287,7 +287,7 @@ parameters:
     default: false
 
 steps:
-  - template: templates/spectra-sync.yml
+  - template: templates/spectryn-sync.yml
     parameters:
       markdownFile: ${{ parameters.markdownFile }}
       epicKey: ${{ parameters.epicKey }}
@@ -312,8 +312,8 @@ variables:
 
 steps:
   - script: |
-      pip install spectra
-      spectra sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --verbose
+      pip install spectryn
+      spectryn sync --markdown docs/user-stories.md --epic $(EPIC_KEY) --verbose
 ```
 
 ## License

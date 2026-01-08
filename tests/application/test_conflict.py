@@ -5,7 +5,7 @@ Tests for conflict detection and resolution.
 import tempfile
 from pathlib import Path
 
-from spectra.application.sync.conflict import (
+from spectryn.application.sync.conflict import (
     Conflict,
     ConflictDetector,
     ConflictReport,
@@ -19,10 +19,10 @@ from spectra.application.sync.conflict import (
     SyncSnapshot,
     create_snapshot_from_sync,
 )
-from spectra.core.domain.entities import Subtask, UserStory
-from spectra.core.domain.enums import Status
-from spectra.core.domain.value_objects import Description, StoryId
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.domain.entities import Subtask, UserStory
+from spectryn.core.domain.enums import Status
+from spectryn.core.domain.value_objects import Description, StoryId
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 class TestFieldSnapshot:

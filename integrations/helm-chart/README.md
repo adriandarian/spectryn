@@ -22,7 +22,7 @@ A Helm chart for deploying Spectra operator and scheduled syncs to Kubernetes.
 ### Add the Helm repository
 
 ```bash
-helm repo add spectra https://spectra.github.io/helm-charts
+helm repo add spectryn https://spectryn.github.io/helm-charts
 helm repo update
 ```
 
@@ -30,13 +30,13 @@ helm repo update
 
 ```bash
 # Install operator mode (recommended)
-helm install spectra spectra/spectra \
-  --namespace spectra-system \
+helm install spectryn spectryn/spectryn \
+  --namespace spectryn-system \
   --create-namespace
 
 # Install with custom values
-helm install spectra spectra/spectra \
-  --namespace spectra-system \
+helm install spectryn spectryn/spectryn \
+  --namespace spectryn-system \
   --create-namespace \
   -f values.yaml
 ```
@@ -44,8 +44,8 @@ helm install spectra spectra/spectra \
 ### Quick start with Jira
 
 ```bash
-helm install spectra spectra/spectra \
-  --namespace spectra-system \
+helm install spectryn spectryn/spectryn \
+  --namespace spectryn-system \
   --create-namespace \
   --set jira.enabled=true \
   --set jira.url=https://company.atlassian.net \
@@ -62,10 +62,10 @@ See [values.yaml](values.yaml) for all available options.
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `operator.enabled` | Deploy the operator | `true` |
-| `operator.image.repository` | Operator image repository | `spectra/operator` |
+| `operator.image.repository` | Operator image repository | `spectryn/operator` |
 | `operator.image.tag` | Operator image tag | `latest` |
-| `spectra.image.repository` | Spectra image repository | `spectra/spectra` |
-| `spectra.image.tag` | Spectra image tag | `latest` |
+| `spectryn.image.repository` | Spectra image repository | `spectryn/spectryn` |
+| `spectryn.image.tag` | Spectra image tag | `latest` |
 | `jira.enabled` | Enable Jira tracker | `false` |
 | `github.enabled` | Enable GitHub tracker | `false` |
 | `metrics.enabled` | Enable Prometheus metrics | `true` |
@@ -125,16 +125,16 @@ syncs:
 ## Upgrading
 
 ```bash
-helm upgrade spectra spectra/spectra \
-  --namespace spectra-system \
+helm upgrade spectryn spectryn/spectryn \
+  --namespace spectryn-system \
   -f values.yaml
 ```
 
 ## Uninstalling
 
 ```bash
-helm uninstall spectra --namespace spectra-system
-kubectl delete namespace spectra-system
+helm uninstall spectryn --namespace spectryn-system
+kubectl delete namespace spectryn-system
 ```
 
 ## License

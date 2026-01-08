@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers.roundtrip import (
+from spectryn.adapters.parsers.roundtrip import (
     EditOperation,
     EditType,
     FieldSpan,
@@ -16,7 +16,7 @@ from spectra.adapters.parsers.roundtrip import (
     batch_update_stories,
     update_story_in_file,
 )
-from spectra.core.domain.enums import Priority, Status
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestSourceSpan:

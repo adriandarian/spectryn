@@ -1,6 +1,6 @@
 # Configuration
 
-spectra supports multiple configuration sources with clear precedence rules.
+spectryn supports multiple configuration sources with clear precedence rules.
 
 ## Configuration Precedence
 
@@ -9,11 +9,11 @@ Configuration is loaded in this order (highest priority first):
 1. **CLI arguments** - Command line flags override all other sources
 2. **Environment variables** - `JIRA_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`
 3. **`.env` file** - In current directory or package directory
-4. **Config files** - `.spectra.yaml`, `.spectra.toml`, or `pyproject.toml`
+4. **Config files** - `.spectryn.yaml`, `.spectryn.toml`, or `pyproject.toml`
 
 ## Config File Locations
 
-spectra searches for config files in this order:
+spectryn searches for config files in this order:
 
 1. Explicit path via `--config` flag
 2. Current working directory
@@ -23,7 +23,7 @@ spectra searches for config files in this order:
 
 ### YAML (Recommended)
 
-Create `.spectra.yaml` or `.spectra.yml`:
+Create `.spectryn.yaml` or `.spectryn.yml`:
 
 ```yaml
 # Jira connection settings (required)
@@ -51,7 +51,7 @@ epic: PROJ-123
 
 ### TOML
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 # Default paths
@@ -79,19 +79,19 @@ statuses = true
 
 ### pyproject.toml
 
-Add a `[tool.spectra]` section to your project's `pyproject.toml`:
+Add a `[tool.spectryn]` section to your project's `pyproject.toml`:
 
 ```toml
-[tool.spectra]
+[tool.spectryn]
 epic = "PROJ-123"
 
-[tool.spectra.jira]
+[tool.spectryn.jira]
 url = "https://your-company.atlassian.net"
 email = "your-email@company.com"
 api_token = "your-api-token"
 project = "PROJ"
 
-[tool.spectra.sync]
+[tool.spectryn.sync]
 verbose = true
 ```
 
@@ -159,13 +159,13 @@ Add `.env` to your `.gitignore`!
 
 ```bash
 # Override Jira URL
-spectra --markdown epic.md --epic PROJ-123 --jira-url https://other.atlassian.net
+spectryn --markdown epic.md --epic PROJ-123 --jira-url https://other.atlassian.net
 
 # Specify config file
-spectra --markdown epic.md --epic PROJ-123 --config ~/configs/spectra-prod.yaml
+spectryn --markdown epic.md --epic PROJ-123 --config ~/configs/spectryn-prod.yaml
 
 # Override project
-spectra --markdown epic.md --epic PROJ-123 --project OTHER
+spectryn --markdown epic.md --epic PROJ-123 --project OTHER
 ```
 
 ## Security Best Practices
@@ -182,11 +182,11 @@ spectra --markdown epic.md --epic PROJ-123 --project OTHER
 ### Example `.gitignore` entries
 
 ```bash
-# spectra config with secrets
+# spectryn config with secrets
 .env
-.spectra.yaml
-.spectra.yml
-.spectra.toml
+.spectryn.yaml
+.spectryn.yml
+.spectryn.toml
 ```
 
 ## Configuration Reference
@@ -706,7 +706,7 @@ The following sections provide additional constraints for advanced workflows.
 #### Complete Example
 
 ```yaml
-# .spectra.yaml - Complete Validation Configuration Example
+# .spectryn.yaml - Complete Validation Configuration Example
 validation:
   # Issue Types - Guard against "Story" vs "User Story" confusion
   issue_types:

@@ -13,7 +13,7 @@ Run with:
 
 import pytest
 
-from spectra.core.domain import (
+from spectryn.core.domain import (
     AcceptanceCriteria,
     IssueKey,
     Priority,
@@ -233,7 +233,7 @@ class TestContainerOperations:
 
     def test_container_register(self, benchmark):
         """Benchmark container registration."""
-        from spectra.core.container import Container
+        from spectryn.core.container import Container
 
         container = Container()
 
@@ -250,7 +250,7 @@ class TestContainerOperations:
 
     def test_container_get_singleton(self, benchmark):
         """Benchmark container singleton resolution."""
-        from spectra.core.container import Container
+        from spectryn.core.container import Container
 
         container = Container()
 
@@ -268,7 +268,7 @@ class TestContainerOperations:
 
     def test_container_get_transient(self, benchmark):
         """Benchmark container transient resolution."""
-        from spectra.core.container import Container, Lifecycle
+        from spectryn.core.container import Container, Lifecycle
 
         container = Container()
 

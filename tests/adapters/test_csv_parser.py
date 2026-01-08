@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers import CsvParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import CsvParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestCsvParser:

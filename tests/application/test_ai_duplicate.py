@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_duplicate import (
+from spectryn.application.ai_duplicate import (
     AIDuplicateDetector,
     DuplicateOptions,
     DuplicateResult,
@@ -19,9 +19,9 @@ from spectra.application.ai_duplicate import (
     find_duplicates_text_based,
     parse_duplicate_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -434,7 +434,7 @@ class TestAIDuplicateDetector:
         """Test detection using text-based similarity only."""
         options = DuplicateOptions(use_llm=False)
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             detector = AIDuplicateDetector(options)
@@ -465,7 +465,7 @@ class TestAIDuplicateDetector:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 

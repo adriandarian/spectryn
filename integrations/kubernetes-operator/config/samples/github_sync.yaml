@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 # Example: Sync from Git repository to GitHub Issues
@@ -21,7 +21,7 @@ stringData:
   username: git
   password: ghp_your_github_token_here
 ---
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: github-sync

@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from spectra.adapters.async_base.rate_limiter import AsyncRateLimiter
+from spectryn.adapters.async_base.rate_limiter import AsyncRateLimiter
 
 
 class TestAsyncRateLimiterBasics:

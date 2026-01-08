@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.cache import MemoryCache
-from spectra.adapters.jira.cached_client import CachedJiraApiClient
+from spectryn.adapters.cache import MemoryCache
+from spectryn.adapters.jira.cached_client import CachedJiraApiClient
 
 
 @pytest.fixture

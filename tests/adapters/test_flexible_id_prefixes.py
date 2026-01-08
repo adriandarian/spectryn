@@ -16,10 +16,10 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.parsers import MarkdownParser
-from spectra.adapters.parsers.asciidoc_parser import AsciiDocParser
-from spectra.adapters.parsers.json_parser import JsonParser
-from spectra.adapters.parsers.yaml_parser import YamlParser
+from spectryn.adapters.parsers import MarkdownParser
+from spectryn.adapters.parsers.asciidoc_parser import AsciiDocParser
+from spectryn.adapters.parsers.json_parser import JsonParser
+from spectryn.adapters.parsers.yaml_parser import YamlParser
 
 
 # =============================================================================

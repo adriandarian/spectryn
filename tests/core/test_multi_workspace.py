@@ -21,14 +21,14 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from spectra.core.tenant import (
+from spectryn.core.tenant import (
     DEFAULT_TENANT_ID,
     Tenant,
     TenantManager,
     TenantPaths,
     TenantRegistry,
 )
-from spectra.core.workspace import (
+from spectryn.core.workspace import (
     DEFAULT_WORKSPACE_ID,
     CrossTenantWorkspaceQuery,
     Workspace,
@@ -345,7 +345,7 @@ class TestWorkspaceContext:
         assert get_current_workspace() == workspace
 
         # Reset
-        from spectra.core.workspace import reset_current_workspace
+        from spectryn.core.workspace import reset_current_workspace
 
         reset_current_workspace(token)
 

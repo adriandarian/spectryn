@@ -1,6 +1,6 @@
 # Telemetry & Observability
 
-spectra includes optional OpenTelemetry and Prometheus support for monitoring sync operations, API calls, and errors in production environments.
+spectryn includes optional OpenTelemetry and Prometheus support for monitoring sync operations, API calls, and errors in production environments.
 
 ## Overview
 
@@ -14,7 +14,7 @@ The telemetry system provides:
 Telemetry requires additional packages. Install with:
 
 ```bash
-pip install spectra[telemetry]
+pip install spectryn[telemetry]
 ```
 
 Or install packages individually:
@@ -32,12 +32,12 @@ Enable tracing and metrics export to an OTLP collector (Jaeger, Zipkin, etc.):
 
 ```bash
 # Via CLI flags
-spectra --otel-enable --otel-endpoint http://localhost:4317 --markdown EPIC.md --epic PROJ-123
+spectryn --otel-enable --otel-endpoint http://localhost:4317 --markdown EPIC.md --epic PROJ-123
 
 # Via environment variables
 export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ### Prometheus
@@ -46,12 +46,12 @@ Start a Prometheus metrics server:
 
 ```bash
 # Via CLI flags
-spectra --prometheus-enable --prometheus-port 9090 --markdown EPIC.md --epic PROJ-123
+spectryn --prometheus-enable --prometheus-port 9090 --markdown EPIC.md --epic PROJ-123
 
 # Via environment variables
 export PROMETHEUS_ENABLED=true
 export PROMETHEUS_PORT=9090
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 Then scrape metrics at `http://localhost:9090/metrics`.
@@ -63,7 +63,7 @@ Then scrape metrics at `http://localhost:9090/metrics`.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `OTEL_ENABLED` | Enable OpenTelemetry | `false` |
-| `OTEL_SERVICE_NAME` | Service name for traces/metrics | `spectra` |
+| `OTEL_SERVICE_NAME` | Service name for traces/metrics | `spectryn` |
 | `OTEL_SERVICE_VERSION` | Service version for traces/metrics | `2.0.0` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint | None |
 | `OTEL_EXPORTER_OTLP_INSECURE` | Use insecure connection | `true` |
@@ -84,7 +84,7 @@ The OTLP exporter sends traces and metrics to an OpenTelemetry Collector or comp
 ```bash
 export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 **With Authentication Headers:**
@@ -93,14 +93,14 @@ export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=https://api.datadoghq.com
 export OTEL_EXPORTER_OTLP_HEADERS="DD-API-KEY=your-key,DD-SITE=datadoghq.com"
 export OTEL_EXPORTER_OTLP_INSECURE=false
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 **Via CLI Flags:**
 ```bash
-spectra --otel-enable \
+spectryn --otel-enable \
   --otel-endpoint http://localhost:4317 \
-  --otel-service-name my-spectra-instance \
+  --otel-service-name my-spectryn-instance \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -112,12 +112,12 @@ Prometheus metrics are exposed via HTTP on the configured port. The metrics endp
 ```bash
 export PROMETHEUS_ENABLED=true
 export PROMETHEUS_PORT=9090
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 **Via CLI Flags:**
 ```bash
-spectra --prometheus \
+spectryn --prometheus \
   --prometheus-port 9090 \
   --prometheus-host 0.0.0.0 \
   --markdown EPIC.md --epic PROJ-123
@@ -135,18 +135,18 @@ For local development and debugging, you can export traces and metrics to the co
 ```bash
 export OTEL_ENABLED=true
 export OTEL_CONSOLE_EXPORT=true
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 Or via CLI:
 ```bash
-spectra --otel-enable --otel-console --markdown EPIC.md --epic PROJ-123
+spectryn --otel-enable --otel-console --markdown EPIC.md --epic PROJ-123
 ```
 
 ### Programmatic Configuration
 
 ```python
-from spectra.cli.telemetry import (
+from spectryn.cli.telemetry import (
     TelemetryConfig,
     TelemetryProvider,
     configure_telemetry,
@@ -156,7 +156,7 @@ from spectra.cli.telemetry import (
 # Configure OpenTelemetry
 config = TelemetryConfig(
     enabled=True,
-    service_name="spectra",
+    service_name="spectryn",
     service_version="2.0.0",
     otlp_endpoint="http://localhost:4317",
     otlp_insecure=True,
@@ -169,7 +169,7 @@ provider.initialize()
 configure_telemetry(
     enabled=True,
     endpoint="http://localhost:4317",
-    service_name="spectra",
+    service_name="spectryn",
 )
 
 # Configure Prometheus
@@ -177,7 +177,7 @@ configure_prometheus(
     enabled=True,
     port=9090,
     host="0.0.0.0",
-    service_name="spectra",
+    service_name="spectryn",
 )
 ```
 
@@ -187,25 +187,25 @@ configure_prometheus(
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `spectra.sync.total` | Counter | Total sync operations |
-| `spectra.sync.duration` | Histogram | Sync duration in seconds |
-| `spectra.stories.processed` | Counter | Stories processed |
-| `spectra.api.calls` | Counter | API calls made |
-| `spectra.api.duration` | Histogram | API call duration in ms |
-| `spectra.errors.total` | Counter | Total errors |
+| `spectryn.sync.total` | Counter | Total sync operations |
+| `spectryn.sync.duration` | Histogram | Sync duration in seconds |
+| `spectryn.stories.processed` | Counter | Stories processed |
+| `spectryn.api.calls` | Counter | API calls made |
+| `spectryn.api.duration` | Histogram | API call duration in ms |
+| `spectryn.errors.total` | Counter | Total errors |
 
 ### Prometheus Metrics
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `spectra_sync_total` | Counter | `epic_key`, `success` | Total sync operations |
-| `spectra_sync_duration_seconds` | Histogram | `epic_key` | Sync duration |
-| `spectra_stories_processed_total` | Counter | `epic_key`, `operation` | Stories processed |
-| `spectra_api_calls_total` | Counter | `operation`, `success` | API calls |
-| `spectra_api_duration_milliseconds` | Histogram | `operation` | API duration |
-| `spectra_errors_total` | Counter | `error_type`, `operation` | Errors |
-| `spectra_active_syncs` | Gauge | - | Currently active syncs |
-| `spectra_info` | Gauge | `version`, `service_name` | Service info |
+| `spectryn_sync_total` | Counter | `epic_key`, `success` | Total sync operations |
+| `spectryn_sync_duration_seconds` | Histogram | `epic_key` | Sync duration |
+| `spectryn_stories_processed_total` | Counter | `epic_key`, `operation` | Stories processed |
+| `spectryn_api_calls_total` | Counter | `operation`, `success` | API calls |
+| `spectryn_api_duration_milliseconds` | Histogram | `operation` | API duration |
+| `spectryn_errors_total` | Counter | `error_type`, `operation` | Errors |
+| `spectryn_active_syncs` | Gauge | - | Currently active syncs |
+| `spectryn_info` | Gauge | `version`, `service_name` | Service info |
 
 ## Tracing
 
@@ -214,7 +214,7 @@ configure_prometheus(
 Add tracing to your custom functions:
 
 ```python
-from spectra.cli.telemetry import traced
+from spectryn.cli.telemetry import traced
 
 @traced("custom.operation")
 def my_custom_function():
@@ -232,7 +232,7 @@ def process_story(story_id: str):
 For more control over spans:
 
 ```python
-from spectra.cli.telemetry import get_telemetry
+from spectryn.cli.telemetry import get_telemetry
 
 telemetry = get_telemetry()
 
@@ -247,7 +247,7 @@ with telemetry.span("my.operation", attributes={"story_id": "STORY-001"}) as spa
 Automatically time and record API call metrics:
 
 ```python
-from spectra.cli.telemetry import timed_api_call
+from spectryn.cli.telemetry import timed_api_call
 
 @timed_api_call("get_issue")
 def get_issue(key: str):
@@ -258,7 +258,7 @@ def get_issue(key: str):
 ## Recording Custom Metrics
 
 ```python
-from spectra.cli.telemetry import get_telemetry
+from spectryn.cli.telemetry import get_telemetry
 
 telemetry = get_telemetry()
 
@@ -293,8 +293,8 @@ telemetry.record_error(
 version: '3.8'
 
 services:
-  spectra:
-    image: adriandarian/spectra:latest
+  spectryn:
+    image: adriandarian/spectryn:latest
     environment:
       OTEL_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
@@ -317,8 +317,8 @@ services:
 version: '3.8'
 
 services:
-  spectra:
-    image: adriandarian/spectra:latest
+  spectryn:
+    image: adriandarian/spectryn:latest
     environment:
       PROMETHEUS_ENABLED: "true"
       PROMETHEUS_PORT: "9090"
@@ -350,9 +350,9 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'spectra'
+  - job_name: 'spectryn'
     static_configs:
-      - targets: ['spectra:9090']
+      - targets: ['spectryn:9090']
 ```
 
 ### Kubernetes Deployment
@@ -361,13 +361,13 @@ scrape_configs:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spectra
+  name: spectryn
 spec:
   template:
     spec:
       containers:
-        - name: spectra
-          image: adriandarian/spectra:latest
+        - name: spectryn
+          image: adriandarian/spectryn:latest
           env:
             - name: OTEL_ENABLED
               value: "true"
@@ -384,9 +384,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spectra
+  name: spectryn
   labels:
-    app: spectra
+    app: spectryn
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9090"
@@ -395,23 +395,23 @@ spec:
     - port: 9090
       name: metrics
   selector:
-    app: spectra
+    app: spectryn
 ```
 
 ## Grafana Dashboard
 
-Here's a sample Grafana dashboard configuration for monitoring spectra:
+Here's a sample Grafana dashboard configuration for monitoring spectryn:
 
 ```json
 {
-  "title": "spectra Sync Metrics",
+  "title": "spectryn Sync Metrics",
   "panels": [
     {
       "title": "Sync Operations",
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(spectra_sync_total)",
+          "expr": "sum(spectryn_sync_total)",
           "legendFormat": "Total Syncs"
         }
       ]
@@ -421,7 +421,7 @@ Here's a sample Grafana dashboard configuration for monitoring spectra:
       "type": "gauge",
       "targets": [
         {
-          "expr": "sum(spectra_sync_total{success=\"true\"}) / sum(spectra_sync_total) * 100"
+          "expr": "sum(spectryn_sync_total{success=\"true\"}) / sum(spectryn_sync_total) * 100"
         }
       ]
     },
@@ -430,7 +430,7 @@ Here's a sample Grafana dashboard configuration for monitoring spectra:
       "type": "timeseries",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(spectra_sync_duration_seconds_bucket[5m]))"
+          "expr": "histogram_quantile(0.95, rate(spectryn_sync_duration_seconds_bucket[5m]))"
         }
       ]
     },
@@ -439,7 +439,7 @@ Here's a sample Grafana dashboard configuration for monitoring spectra:
       "type": "piechart",
       "targets": [
         {
-          "expr": "sum by (operation) (spectra_api_calls_total)"
+          "expr": "sum by (operation) (spectryn_api_calls_total)"
         }
       ]
     },
@@ -448,7 +448,7 @@ Here's a sample Grafana dashboard configuration for monitoring spectra:
       "type": "table",
       "targets": [
         {
-          "expr": "sum by (error_type, operation) (spectra_errors_total)"
+          "expr": "sum by (error_type, operation) (spectryn_errors_total)"
         }
       ]
     }
@@ -462,12 +462,12 @@ Example Prometheus alerting rules:
 
 ```yaml
 groups:
-  - name: spectra
+  - name: spectryn
     rules:
       - alert: SpectraSyncFailureRate
         expr: |
-          sum(rate(spectra_sync_total{success="false"}[5m]))
-          / sum(rate(spectra_sync_total[5m])) > 0.1
+          sum(rate(spectryn_sync_total{success="false"}[5m]))
+          / sum(rate(spectryn_sync_total[5m])) > 0.1
         for: 5m
         labels:
           severity: warning
@@ -477,7 +477,7 @@ groups:
 
       - alert: SpectraHighApiLatency
         expr: |
-          histogram_quantile(0.95, rate(spectra_api_duration_milliseconds_bucket[5m])) > 5000
+          histogram_quantile(0.95, rate(spectryn_api_duration_milliseconds_bucket[5m])) > 5000
         for: 5m
         labels:
           severity: warning
@@ -486,11 +486,11 @@ groups:
           description: "95th percentile API latency is above 5 seconds"
 
       - alert: SpectraErrors
-        expr: increase(spectra_errors_total[1h]) > 10
+        expr: increase(spectryn_errors_total[1h]) > 10
         labels:
           severity: critical
         annotations:
-          summary: "spectra error spike"
+          summary: "spectryn error spike"
           description: "More than 10 errors in the last hour"
 ```
 
@@ -500,12 +500,12 @@ groups:
 
 1. **Check dependencies are installed:**
    ```bash
-   pip install spectra[telemetry]
+   pip install spectryn[telemetry]
    ```
 
 2. **Verify configuration:**
    ```bash
-   OTEL_ENABLED=true OTEL_CONSOLE_EXPORT=true spectra --validate --markdown EPIC.md
+   OTEL_ENABLED=true OTEL_CONSOLE_EXPORT=true spectryn --validate --markdown EPIC.md
    ```
 
 3. **Check collector connectivity:**
@@ -543,8 +543,8 @@ export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=https://api.datadoghq.com
 export OTEL_EXPORTER_OTLP_HEADERS="DD-API-KEY=your-key,DD-SITE=datadoghq.com"
 export OTEL_EXPORTER_OTLP_INSECURE=false
-export OTEL_SERVICE_NAME=spectra-sync
-spectra --markdown EPIC.md --epic PROJ-123
+export OTEL_SERVICE_NAME=spectryn-sync
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ### New Relic
@@ -556,8 +556,8 @@ export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net
 export OTEL_EXPORTER_OTLP_HEADERS="api-key=your-new-relic-license-key"
 export OTEL_EXPORTER_OTLP_INSECURE=false
-export OTEL_SERVICE_NAME=spectra
-spectra --markdown EPIC.md --epic PROJ-123
+export OTEL_SERVICE_NAME=spectryn
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ### Honeycomb
@@ -569,8 +569,8 @@ export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io
 export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=your-api-key"
 export OTEL_EXPORTER_OTLP_INSECURE=false
-export OTEL_SERVICE_NAME=spectra
-spectra --markdown EPIC.md --epic PROJ-123
+export OTEL_SERVICE_NAME=spectryn
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ### OpenTelemetry Collector
@@ -605,17 +605,17 @@ service:
       exporters: [logging, prometheus]
 ```
 
-Run spectra with collector:
+Run spectryn with collector:
 ```bash
 export OTEL_ENABLED=true
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ## See Also
 
 - [Configuration](/guide/configuration) – General configuration options
-- [Docker](/guide/docker) – Running spectra in containers
+- [Docker](/guide/docker) – Running spectryn in containers
 - [Architecture](/guide/architecture) – System design overview
 
 

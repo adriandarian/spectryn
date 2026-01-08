@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.application.sync.progress import (
+from spectryn.application.sync.progress import (
     ProgressReporter,
     ProgressState,
     SyncPhase,

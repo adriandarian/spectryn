@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.cache import (
+from spectryn.adapters.cache import (
     DEFAULT_METADATA_TTLS,
     MemoryCache,
     MetadataCache,

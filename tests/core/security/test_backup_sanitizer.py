@@ -10,14 +10,14 @@ Tests cover:
 
 import pytest
 
-from spectra.core.security.backup_sanitizer import (
+from spectryn.core.security.backup_sanitizer import (
     BACKUP_SENSITIVE_PATTERNS,
     BackupSanitizer,
     SanitizationResult,
     create_sanitizer,
     sanitize_backup_data,
 )
-from spectra.core.security.redactor import SecretRedactor
+from spectryn.core.security.redactor import SecretRedactor
 
 
 class TestSanitizationResult:

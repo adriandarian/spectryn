@@ -10,7 +10,7 @@ Tests invariants and edge cases for:
 from hypothesis import assume, given
 from hypothesis import strategies as st
 
-from spectra.core.domain import (
+from spectryn.core.domain import (
     AcceptanceCriteria,
     IssueKey,
     Priority,

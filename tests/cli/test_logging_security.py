@@ -12,8 +12,8 @@ import logging
 
 import pytest
 
-from spectra.cli.logging import RedactingFilter, setup_secure_logging
-from spectra.core.security.redactor import SecretRedactor
+from spectryn.cli.logging import RedactingFilter, setup_secure_logging
+from spectryn.core.security.redactor import SecretRedactor
 
 
 class TestRedactingFilter:

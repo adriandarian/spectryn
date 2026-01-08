@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from spectra.cli.workspace import (
+from spectryn.cli.workspace import (
     _print_workspace_detail,
     _print_workspace_table,
     _truncate_path,
@@ -66,7 +66,7 @@ class TestPrintWorkspaceTable:
 
     def test_single_workspace(self, capsys):
         """Test output with single workspace."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="test-ws",
@@ -82,7 +82,7 @@ class TestPrintWorkspaceTable:
 
     def test_multiple_workspaces_with_tenant(self, capsys):
         """Test output with multiple workspaces showing tenant."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         workspaces = [
             Workspace(
@@ -111,7 +111,7 @@ class TestPrintWorkspaceDetail:
 
     def test_minimal_workspace(self, capsys):
         """Test output with minimal workspace info."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="test-ws",
@@ -128,7 +128,7 @@ class TestPrintWorkspaceDetail:
 
     def test_workspace_with_paths(self, capsys):
         """Test output with paths information."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="test-ws",
@@ -164,7 +164,7 @@ class TestCmdWorkspaceList:
 
     def test_list_workspaces_success(self, capsys):
         """Test successful workspace listing."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         mock_manager = Mock()
         mock_manager.list_workspaces.return_value = [
@@ -177,7 +177,7 @@ class TestCmdWorkspaceList:
             ),
         ]
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_list()
 
         assert result == 0
@@ -186,7 +186,7 @@ class TestCmdWorkspaceList:
 
     def test_list_workspaces_json_format(self, capsys):
         """Test workspace listing in JSON format."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         mock_manager = Mock()
         ws = Workspace(
@@ -198,7 +198,7 @@ class TestCmdWorkspaceList:
         )
         mock_manager.list_workspaces.return_value = [ws]
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_list(output_format="json")
 
         assert result == 0
@@ -210,7 +210,7 @@ class TestCmdWorkspaceList:
         mock_manager = Mock()
         mock_manager.list_workspaces.return_value = []
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_list(workspace_type="project", tag="important")
 
         assert result == 0
@@ -218,7 +218,7 @@ class TestCmdWorkspaceList:
 
     def test_list_workspaces_all_tenants(self, capsys):
         """Test listing workspaces across all tenants."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-1",
@@ -228,7 +228,7 @@ class TestCmdWorkspaceList:
             status=WorkspaceStatus.ACTIVE,
         )
 
-        with patch("spectra.cli.workspace.CrossTenantWorkspaceQuery") as mock_query_cls:
+        with patch("spectryn.cli.workspace.CrossTenantWorkspaceQuery") as mock_query_cls:
             mock_query = Mock()
             mock_query.list_all_workspaces.return_value = [("tenant-1", ws)]
             mock_query_cls.return_value = mock_query
@@ -242,7 +242,7 @@ class TestCmdWorkspaceList:
     def test_list_workspaces_error(self, capsys):
         """Test handling of listing errors."""
         with patch(
-            "spectra.cli.workspace.get_workspace_manager",
+            "spectryn.cli.workspace.get_workspace_manager",
             side_effect=Exception("Database error"),
         ):
             result = cmd_workspace_list()
@@ -262,7 +262,7 @@ class TestCmdWorkspaceCreate:
 
     def test_create_workspace_success(self, capsys):
         """Test successful workspace creation."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         mock_manager = Mock()
         mock_manager.create.return_value = Workspace(
@@ -273,7 +273,7 @@ class TestCmdWorkspaceCreate:
             status=WorkspaceStatus.ACTIVE,
         )
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_create(
                 workspace_id="new-ws",
                 name="New Workspace",
@@ -286,7 +286,7 @@ class TestCmdWorkspaceCreate:
 
     def test_create_workspace_with_options(self, capsys):
         """Test workspace creation with all options."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         mock_manager = Mock()
         mock_manager.create.return_value = Workspace(
@@ -299,7 +299,7 @@ class TestCmdWorkspaceCreate:
             tracker_project="PROJ-123",
         )
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_create(
                 workspace_id="new-ws",
                 name="New Workspace",
@@ -319,7 +319,7 @@ class TestCmdWorkspaceCreate:
         mock_manager = Mock()
         mock_manager.create.side_effect = ValueError("Invalid workspace ID")
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_create(
                 workspace_id="invalid!ws",
                 name="Bad Workspace",
@@ -332,7 +332,7 @@ class TestCmdWorkspaceCreate:
     def test_create_workspace_generic_error(self, capsys):
         """Test handling of generic errors."""
         with patch(
-            "spectra.cli.workspace.get_workspace_manager",
+            "spectryn.cli.workspace.get_workspace_manager",
             side_effect=Exception("Database error"),
         ):
             result = cmd_workspace_create(
@@ -353,7 +353,7 @@ class TestCmdWorkspaceUse:
 
     def test_use_workspace_success(self, capsys):
         """Test successful workspace switch."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         mock_manager = Mock()
         mock_manager.use.return_value = Workspace(
@@ -366,7 +366,7 @@ class TestCmdWorkspaceUse:
             tracker_project="PROJ-123",
         )
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_use("ws-1")
 
         assert result == 0
@@ -380,7 +380,7 @@ class TestCmdWorkspaceUse:
         mock_manager = Mock()
         mock_manager.use.side_effect = KeyError("ws-not-found")
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_use("ws-not-found")
 
         assert result == 1
@@ -392,7 +392,7 @@ class TestCmdWorkspaceUse:
         mock_manager = Mock()
         mock_manager.use.side_effect = RuntimeError("Workspace is archived")
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_use("ws-archived")
 
         assert result == 1
@@ -410,7 +410,7 @@ class TestCmdWorkspaceShow:
 
     def test_show_workspace_by_id(self, capsys):
         """Test showing workspace by ID."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-1",
@@ -424,7 +424,7 @@ class TestCmdWorkspaceShow:
         mock_manager.get_workspace.return_value = ws
         mock_manager.registry.get_paths.return_value = None
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_show("ws-1")
 
         assert result == 0
@@ -433,7 +433,7 @@ class TestCmdWorkspaceShow:
 
     def test_show_current_workspace(self, capsys):
         """Test showing current workspace."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="current-ws",
@@ -447,7 +447,7 @@ class TestCmdWorkspaceShow:
         mock_manager.current_workspace = ws
         mock_manager.registry.get_paths.return_value = None
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_show()
 
         assert result == 0
@@ -459,7 +459,7 @@ class TestCmdWorkspaceShow:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = None
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_show("ws-not-found")
 
         assert result == 1
@@ -477,7 +477,7 @@ class TestCmdWorkspaceDelete:
 
     def test_delete_workspace_forced(self, capsys):
         """Test forced workspace deletion."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-to-delete",
@@ -490,7 +490,7 @@ class TestCmdWorkspaceDelete:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = ws
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_delete("ws-to-delete", force=True)
 
         assert result == 0
@@ -500,7 +500,7 @@ class TestCmdWorkspaceDelete:
 
     def test_delete_workspace_hard(self, capsys):
         """Test hard workspace deletion."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-to-delete",
@@ -513,7 +513,7 @@ class TestCmdWorkspaceDelete:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = ws
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_delete("ws-to-delete", hard=True, force=True)
 
         assert result == 0
@@ -526,7 +526,7 @@ class TestCmdWorkspaceDelete:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = None
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_delete("ws-not-found", force=True)
 
         assert result == 1
@@ -535,7 +535,7 @@ class TestCmdWorkspaceDelete:
 
     def test_delete_default_workspace(self, capsys):
         """Test that default workspace cannot be deleted."""
-        from spectra.core.workspace import (
+        from spectryn.core.workspace import (
             DEFAULT_WORKSPACE_ID,
             Workspace,
             WorkspaceStatus,
@@ -553,7 +553,7 @@ class TestCmdWorkspaceDelete:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = ws
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_delete(DEFAULT_WORKSPACE_ID, force=True)
 
         assert result == 1
@@ -562,7 +562,7 @@ class TestCmdWorkspaceDelete:
 
     def test_delete_workspace_cancelled(self, capsys):
         """Test workspace deletion cancelled by user."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-to-delete",
@@ -575,7 +575,7 @@ class TestCmdWorkspaceDelete:
         mock_manager = Mock()
         mock_manager.get_workspace.return_value = ws
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             with patch("builtins.input", return_value="n"):
                 result = cmd_workspace_delete("ws-to-delete")
 
@@ -595,7 +595,7 @@ class TestCmdWorkspaceArchive:
 
     def test_archive_workspace_success(self, capsys):
         """Test successful workspace archiving."""
-        from spectra.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
+        from spectryn.core.workspace import Workspace, WorkspaceStatus, WorkspaceType
 
         ws = Workspace(
             id="ws-to-archive",
@@ -608,7 +608,7 @@ class TestCmdWorkspaceArchive:
         mock_manager = Mock()
         mock_manager.registry.archive.return_value = ws
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_archive("ws-to-archive")
 
         assert result == 0
@@ -620,7 +620,7 @@ class TestCmdWorkspaceArchive:
         mock_manager = Mock()
         mock_manager.registry.archive.side_effect = KeyError("ws-not-found")
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_archive("ws-not-found")
 
         assert result == 1
@@ -630,7 +630,7 @@ class TestCmdWorkspaceArchive:
         mock_manager = Mock()
         mock_manager.registry.archive.side_effect = ValueError("Already archived")
 
-        with patch("spectra.cli.workspace.get_workspace_manager", return_value=mock_manager):
+        with patch("spectryn.cli.workspace.get_workspace_manager", return_value=mock_manager):
             result = cmd_workspace_archive("ws-archived")
 
         assert result == 1

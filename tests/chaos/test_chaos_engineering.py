@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.issue_tracker import (
+from spectryn.core.ports.issue_tracker import (
     IssueData,
     IssueTrackerError,
 )
@@ -57,8 +57,8 @@ class TestNetworkFailureResilience:
 
     def test_adapter_handles_connection_error(self):
         """Test adapter handles connection errors gracefully."""
-        from spectra.adapters.jira.adapter import JiraAdapter
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.adapters.jira.adapter import JiraAdapter
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         config = TrackerConfig(
             url="https://test.atlassian.net",
@@ -67,8 +67,8 @@ class TestNetworkFailureResilience:
         )
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient") as MockClient,
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient") as MockClient,
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             mock_client = MagicMock()
             mock_client.get.side_effect = ConnectionError("Network unreachable")
@@ -82,9 +82,9 @@ class TestNetworkFailureResilience:
 
     def test_adapter_handles_timeout(self):
         """Test adapter handles timeouts gracefully."""
-        from spectra.adapters.github.adapter import GitHubAdapter
+        from spectryn.adapters.github.adapter import GitHubAdapter
 
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.list_labels.return_value = []
             mock_client.get_issue.side_effect = TimeoutError("Request timed out")
@@ -127,10 +127,10 @@ class TestRateLimitingResilience:
 
     def test_github_rate_limit_handling(self):
         """Test GitHub adapter handles rate limits."""
-        from spectra.adapters.github.adapter import GitHubAdapter
-        from spectra.core.ports.issue_tracker import RateLimitError
+        from spectryn.adapters.github.adapter import GitHubAdapter
+        from spectryn.core.ports.issue_tracker import RateLimitError
 
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.list_labels.return_value = []
             mock_client.get_issue.side_effect = RateLimitError(
@@ -148,7 +148,7 @@ class TestRateLimitingResilience:
 
     def test_rate_limiter_token_bucket(self):
         """Test token bucket rate limiter behavior."""
-        from spectra.adapters.github.client import GitHubRateLimiter
+        from spectryn.adapters.github.client import GitHubRateLimiter
 
         limiter = GitHubRateLimiter(requests_per_second=10.0, burst_size=5)
 
@@ -166,7 +166,7 @@ class TestPartialFailureResilience:
 
     def test_batch_operation_partial_failure(self):
         """Test batch operations handle partial failures."""
-        from spectra.adapters.linear.batch import BatchResult, LinearBatchClient
+        from spectryn.adapters.linear.batch import BatchResult, LinearBatchClient
 
         mock_client = MagicMock()
         mock_client.dry_run = False
@@ -219,8 +219,8 @@ class TestConnectionDropResilience:
 
     def test_connection_drop_during_write(self):
         """Test handling connection drop during write operation."""
-        from spectra.adapters.jira.adapter import JiraAdapter
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.adapters.jira.adapter import JiraAdapter
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         config = TrackerConfig(
             url="https://test.atlassian.net",
@@ -229,8 +229,8 @@ class TestConnectionDropResilience:
         )
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient") as MockClient,
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient") as MockClient,
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             mock_client = MagicMock()
             mock_client.put.side_effect = ConnectionResetError("Connection reset")

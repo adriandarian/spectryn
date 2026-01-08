@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.graphql.batching import (
+from spectryn.adapters.graphql.batching import (
     BatchedQuery,
     BatchedQueryResult,
     BatchExecutionMode,

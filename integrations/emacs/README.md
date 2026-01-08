@@ -4,7 +4,7 @@ Emacs configuration for Spectra markdown files with LSP support via lsp-mode or 
 
 ## Features
 
-- **LSP Integration** - Full language server support via spectra-lsp
+- **LSP Integration** - Full language server support via spectryn-lsp
 - **Syntax Highlighting** - Enhanced markdown highlighting for Spectra
 - **Completions** - Auto-complete via company-mode
 - **Diagnostics** - Real-time validation via flycheck/flymake
@@ -18,7 +18,7 @@ Emacs configuration for Spectra markdown files with LSP support via lsp-mode or 
 ### 1. Install Spectra LSP
 
 ```bash
-pip install spectra-lsp
+pip install spectryn-lsp
 ```
 
 ### 2. Choose Your LSP Client
@@ -39,7 +39,7 @@ Add to your Emacs config (`~/.emacs.d/init.el` or `~/.emacs`):
   :commands lsp-ui-mode)
 
 ;; Load Spectra configuration
-(load "~/.emacs.d/spectra/spectra-lsp.el")
+(load "~/.emacs.d/spectryn/spectryn-lsp.el")
 ```
 
 #### Option B: eglot (Built-in from Emacs 29)
@@ -49,34 +49,34 @@ Add to your Emacs config (`~/.emacs.d/init.el` or `~/.emacs`):
   :hook ((markdown-mode . eglot-ensure)))
 
 ;; Load Spectra configuration
-(load "~/.emacs.d/spectra/spectra-eglot.el")
+(load "~/.emacs.d/spectryn/spectryn-eglot.el")
 ```
 
 ### 3. Copy Configuration Files
 
 ```bash
-mkdir -p ~/.emacs.d/spectra
-cp integrations/emacs/*.el ~/.emacs.d/spectra/
+mkdir -p ~/.emacs.d/spectryn
+cp integrations/emacs/*.el ~/.emacs.d/spectryn/
 ```
 
 ## Configuration
 
 ### lsp-mode Settings
 
-The `spectra-lsp.el` file provides full configuration. Key settings:
+The `spectryn-lsp.el` file provides full configuration. Key settings:
 
 ```elisp
 ;; Customize these in your init.el
-(setq spectra-tracker-type "jira")
-(setq spectra-tracker-url "https://your-org.atlassian.net")
-(setq spectra-project-key "PROJ")
+(setq spectryn-tracker-type "jira")
+(setq spectryn-tracker-url "https://your-org.atlassian.net")
+(setq spectryn-project-key "PROJ")
 ```
 
 ### eglot Settings
 
 ```elisp
 ;; Customize in your init.el
-(setq spectra-eglot-server-args '("--stdio"))
+(setq spectryn-eglot-server-args '("--stdio"))
 ```
 
 ## Key Bindings
@@ -116,18 +116,18 @@ _e_: Export      _r_: Report     _q_: Quit
 
 ## Major Mode
 
-The package provides `spectra-mode`, a derived mode from `markdown-mode`:
+The package provides `spectryn-mode`, a derived mode from `markdown-mode`:
 
 ```elisp
 ;; Enable for specific files
-(add-to-list 'auto-mode-alist '("\\.spectra\\.md\\'" . spectra-mode))
-(add-to-list 'auto-mode-alist '("user-stories\\.md\\'" . spectra-mode))
-(add-to-list 'auto-mode-alist '("backlog\\.md\\'" . spectra-mode))
+(add-to-list 'auto-mode-alist '("\\.spectryn\\.md\\'" . spectryn-mode))
+(add-to-list 'auto-mode-alist '("user-stories\\.md\\'" . spectryn-mode))
+(add-to-list 'auto-mode-alist '("backlog\\.md\\'" . spectryn-mode))
 ```
 
 ## Org-mode Integration
 
-For org-mode users, see `spectra-org.el` for integration that allows:
+For org-mode users, see `spectryn-org.el` for integration that allows:
 
 - Export org files to Spectra markdown format
 - Import Spectra markdown to org files
@@ -137,10 +137,10 @@ For org-mode users, see `spectra-org.el` for integration that allows:
 
 ### LSP Not Starting
 
-1. Check spectra-lsp is installed:
+1. Check spectryn-lsp is installed:
    ```bash
-   which spectra-lsp
-   spectra-lsp --version
+   which spectryn-lsp
+   spectryn-lsp --version
    ```
 
 2. Check lsp-mode logs:
@@ -150,7 +150,7 @@ For org-mode users, see `spectra-org.el` for integration that allows:
 
 3. Verify executable path:
    ```elisp
-   (executable-find "spectra-lsp")
+   (executable-find "spectryn-lsp")
    ```
 
 ### No Completions
@@ -172,11 +172,11 @@ M-x flycheck-verify-setup
 ```
 emacs/
 ├── README.md
-├── spectra-lsp.el      # lsp-mode configuration
-├── spectra-eglot.el    # eglot configuration
-├── spectra-mode.el     # Major mode definition
-├── spectra-commands.el # Interactive commands
-└── spectra-org.el      # Org-mode integration
+├── spectryn-lsp.el      # lsp-mode configuration
+├── spectryn-eglot.el    # eglot configuration
+├── spectryn-mode.el     # Major mode definition
+├── spectryn-commands.el # Interactive commands
+└── spectryn-org.el      # Org-mode integration
 ```
 
 ## License

@@ -8,14 +8,14 @@ from unittest.mock import patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.init import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.init import (
     ConfigFormat,
     InitConfig,
     InitWizard,
     run_init,
 )
-from spectra.cli.output import Console
+from spectryn.cli.output import Console
 
 
 # =============================================================================
@@ -82,6 +82,10 @@ class TestInitWizard:
 
     def test_check_existing_config_env_file(self, wizard, tmp_path, monkeypatch):
         """Test detection of existing .env file."""
+        # Clear any pre-existing environment variables that might interfere
+        monkeypatch.delenv("JIRA_URL", raising=False)
+        monkeypatch.delenv("JIRA_EMAIL", raising=False)
+        monkeypatch.delenv("JIRA_API_TOKEN", raising=False)
         monkeypatch.chdir(tmp_path)
 
         # No config file
@@ -315,6 +319,10 @@ class TestWizardFlow:
         monkeypatch,
     ):
         """Test complete wizard flow."""
+        # Clear any pre-existing environment variables that might interfere
+        monkeypatch.delenv("JIRA_URL", raising=False)
+        monkeypatch.delenv("JIRA_EMAIL", raising=False)
+        monkeypatch.delenv("JIRA_API_TOKEN", raising=False)
         monkeypatch.chdir(tmp_path)
 
         # Mock connection test to succeed

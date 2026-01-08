@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers.frontmatter import (
+from spectryn.adapters.parsers.frontmatter import (
     DEFAULT_EPIC_MAPPINGS,
     DEFAULT_STORY_MAPPINGS,
     FieldMapping,
@@ -35,7 +35,7 @@ from spectra.adapters.parsers.frontmatter import (
     parse_subtasks_from_frontmatter,
     strip_frontmatter,
 )
-from spectra.core.domain.enums import Priority, Status
+from spectryn.core.domain.enums import Priority, Status
 
 
 # =============================================================================

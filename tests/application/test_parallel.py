@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.application.sync.parallel import (
+from spectryn.application.sync.parallel import (
     EpicProgress,
     ParallelSyncConfig,
     ParallelSyncResult,

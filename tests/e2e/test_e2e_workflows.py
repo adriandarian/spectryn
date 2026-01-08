@@ -15,10 +15,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
-from spectra.core.domain.entities import Epic, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, IssueKey, StoryId
+from spectryn.adapters.parsers.markdown import MarkdownParser
+from spectryn.core.domain.entities import Epic, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, IssueKey, StoryId
 
 
 # Mark all tests in this module as e2e tests (skipped by default)
@@ -282,7 +282,7 @@ class TestExportWorkflow:
 
     def test_export_sync_results_to_json(self, tmp_path):
         """Test exporting sync results to JSON."""
-        from spectra.application.sync import SyncResult
+        from spectryn.application.sync import SyncResult
 
         result = SyncResult(
             success=True,
@@ -442,7 +442,7 @@ class TestConfigurationWorkflow:
 
     def test_load_config_and_connect(self):
         """Test loading configuration and connecting to tracker."""
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         config = TrackerConfig(
             url="https://test.atlassian.net",

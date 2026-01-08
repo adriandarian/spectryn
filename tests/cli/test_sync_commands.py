@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from spectra.cli.commands.sync import (
+from spectryn.cli.commands.sync import (
     _create_tracker_for_multi_sync,
     run_multi_epic,
     run_multi_tracker_sync,
@@ -22,7 +22,7 @@ from spectra.cli.commands.sync import (
     run_sync,
     run_sync_links,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 # =============================================================================
@@ -160,7 +160,7 @@ class TestRunSync:
 
     def test_run_sync_delegates_to_app(self, console, mock_args):
         """Test that run_sync delegates to app.run_sync."""
-        with patch("spectra.cli.app.run_sync") as mock_run_sync:
+        with patch("spectryn.cli.app.run_sync") as mock_run_sync:
             mock_run_sync.return_value = ExitCode.SUCCESS
 
             result = run_sync(console, mock_args)
@@ -189,7 +189,7 @@ class TestRunSyncLinks:
         """Test handling of configuration validation errors."""
         mock_args.input = str(sample_markdown_file)
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
             mock_provider_instance = Mock()
             mock_provider_instance.validate.return_value = ["Missing JIRA_URL"]
             mock_config_provider.return_value = mock_provider_instance
@@ -202,8 +202,8 @@ class TestRunSyncLinks:
         """Test handling of connection failures."""
         mock_args.input = str(sample_markdown_file)
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_jira_adapter:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_jira_adapter:
                 # Config is valid
                 mock_provider_instance = Mock()
                 mock_provider_instance.validate.return_value = []
@@ -226,9 +226,9 @@ class TestRunSyncLinks:
         """Test handling when no links are found in markdown."""
         mock_args.input = str(sample_markdown_file)
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_jira_adapter:
-                with patch("spectra.adapters.parsers.MarkdownParser") as mock_parser:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_jira_adapter:
+                with patch("spectryn.adapters.parsers.MarkdownParser") as mock_parser:
                     # Setup valid config
                     mock_provider_instance = Mock()
                     mock_provider_instance.validate.return_value = []
@@ -277,7 +277,7 @@ class TestRunMultiEpic:
         mock_args.input = str(multi_epic_markdown_file)
         mock_args.list_epics = True
 
-        with patch("spectra.adapters.parsers.MarkdownParser") as mock_parser:
+        with patch("spectryn.adapters.parsers.MarkdownParser") as mock_parser:
             # Setup parser
             mock_parser_instance = Mock()
             mock_epic1 = Mock(key="PROJ-100", title="First Epic", stories=[Mock()])
@@ -295,7 +295,7 @@ class TestRunMultiEpic:
         mock_args.input = str(multi_epic_markdown_file)
         mock_args.list_epics = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
             mock_provider_instance = Mock()
             mock_provider_instance.validate.return_value = ["Missing JIRA_URL"]
             mock_config_provider.return_value = mock_provider_instance
@@ -309,9 +309,9 @@ class TestRunMultiEpic:
         mock_args.input = str(sample_markdown_file)
         mock_args.list_epics = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_jira_adapter:
-                with patch("spectra.adapters.parsers.MarkdownParser") as mock_parser:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_jira_adapter:
+                with patch("spectryn.adapters.parsers.MarkdownParser") as mock_parser:
                     # Setup valid config
                     mock_provider_instance = Mock()
                     mock_provider_instance.validate.return_value = []
@@ -341,8 +341,8 @@ class TestRunMultiEpic:
         mock_args.input = str(multi_epic_markdown_file)
         mock_args.list_epics = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
-            with patch("spectra.adapters.JiraAdapter") as mock_jira_adapter:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
+            with patch("spectryn.adapters.JiraAdapter") as mock_jira_adapter:
                 # Setup valid config
                 mock_provider_instance = Mock()
                 mock_provider_instance.validate.return_value = []
@@ -386,7 +386,7 @@ class TestRunParallelFiles:
         mock_args.input_files = None
         mock_args.input_dir = None
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
             mock_provider_instance = Mock()
             mock_provider_instance.validate.return_value = ["Missing JIRA_URL"]
             mock_config_provider.return_value = mock_provider_instance
@@ -402,8 +402,8 @@ class TestRunParallelFiles:
         mock_args.input_dir = None
         mock_args.epic = "TEST-123"
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
-            with patch("spectra.adapters.trackers.JiraAdapter") as mock_jira_adapter:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
+            with patch("spectryn.adapters.trackers.JiraAdapter") as mock_jira_adapter:
                 # Config is valid
                 mock_provider_instance = Mock()
                 mock_provider_instance.validate.return_value = []
@@ -456,9 +456,9 @@ class TestRunMultiTrackerSync:
         mock_args.trackers = ["invalid-no-colon"]  # Missing colon separator
         mock_args.primary_tracker = None
 
-        with patch("spectra.adapters.EnvironmentConfigProvider") as mock_config_provider:
+        with patch("spectryn.adapters.EnvironmentConfigProvider") as mock_config_provider:
             with patch(
-                "spectra.application.sync.multi_tracker.MultiTrackerSyncOrchestrator"
+                "spectryn.application.sync.multi_tracker.MultiTrackerSyncOrchestrator"
             ) as mock_orchestrator:
                 # Config loads
                 mock_provider_instance = Mock()
@@ -491,8 +491,8 @@ class TestCreateTrackerForMultiSync:
         mock_config.tracker = Mock()
         mock_config_provider = Mock()
 
-        with patch("spectra.adapters.ADFFormatter"):
-            with patch("spectra.adapters.JiraAdapter") as mock_jira_adapter:
+        with patch("spectryn.adapters.ADFFormatter"):
+            with patch("spectryn.adapters.JiraAdapter") as mock_jira_adapter:
                 mock_tracker = Mock()
                 mock_jira_adapter.return_value = mock_tracker
 
@@ -512,7 +512,7 @@ class TestCreateTrackerForMultiSync:
         mock_config = Mock()
         mock_config_provider = Mock()
 
-        with patch("spectra.adapters.github.GitHubAdapter") as mock_github_adapter:
+        with patch("spectryn.adapters.github.GitHubAdapter") as mock_github_adapter:
             mock_tracker = Mock()
             mock_github_adapter.return_value = mock_tracker
 
@@ -531,7 +531,7 @@ class TestCreateTrackerForMultiSync:
         mock_config = Mock()
         mock_config_provider = Mock()
 
-        with patch("spectra.adapters.gitlab.GitLabAdapter") as mock_gitlab_adapter:
+        with patch("spectryn.adapters.gitlab.GitLabAdapter") as mock_gitlab_adapter:
             mock_tracker = Mock()
             mock_gitlab_adapter.return_value = mock_tracker
 
@@ -550,7 +550,7 @@ class TestCreateTrackerForMultiSync:
         mock_config = Mock()
         mock_config_provider = Mock()
 
-        with patch("spectra.adapters.linear.LinearAdapter") as mock_linear_adapter:
+        with patch("spectryn.adapters.linear.LinearAdapter") as mock_linear_adapter:
             mock_tracker = Mock()
             mock_linear_adapter.return_value = mock_tracker
 

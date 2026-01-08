@@ -1,6 +1,6 @@
 # Exit Codes
 
-spectra uses standard Unix exit codes to indicate how the program terminated. These codes can be used in shell scripts for automation and CI/CD pipelines.
+spectryn uses standard Unix exit codes to indicate how the program terminated. These codes can be used in shell scripts for automation and CI/CD pipelines.
 
 ## Quick Reference
 
@@ -27,7 +27,7 @@ spectra uses standard Unix exit codes to indicate how the program terminated. Th
 The operation completed without any errors.
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 echo $?  # Returns 0
 ```
 
@@ -36,7 +36,7 @@ echo $?  # Returns 0
 A general, unspecified error occurred. Check the error message for details.
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 if [ $? -eq 1 ]; then
     echo "Something went wrong"
 fi
@@ -53,7 +53,7 @@ Configuration is missing or invalid. Common causes:
 ```bash
 # Missing JIRA_URL
 unset JIRA_URL
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 echo $?  # Returns 2
 ```
 
@@ -64,7 +64,7 @@ echo $?  # Returns 2
 The specified input file does not exist.
 
 ```bash
-spectra --markdown nonexistent.md --epic PROJ-123
+spectryn --markdown nonexistent.md --epic PROJ-123
 echo $?  # Returns 3
 ```
 
@@ -81,7 +81,7 @@ Failed to establish a connection to the Jira API. Common causes:
 
 ```bash
 export JIRA_URL="https://invalid.atlassian.net"
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 echo $?  # Returns 4
 ```
 
@@ -98,7 +98,7 @@ Authentication with Jira failed. Common causes:
 
 ```bash
 export JIRA_API_TOKEN="invalid_token"
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 echo $?  # Returns 5
 ```
 
@@ -113,7 +113,7 @@ The input file failed validation. Common causes:
 - Malformed story/subtask definitions
 
 ```bash
-spectra --validate --markdown invalid.md --epic PROJ-123
+spectryn --validate --markdown invalid.md --epic PROJ-123
 echo $?  # Returns 6
 ```
 
@@ -128,7 +128,7 @@ Insufficient permissions to perform the requested operation. Common causes:
 - User cannot transition issues
 
 ```bash
-spectra --markdown EPIC.md --epic RESTRICTED-123 --execute
+spectryn --markdown EPIC.md --epic RESTRICTED-123 --execute
 echo $?  # Returns 7
 ```
 
@@ -144,7 +144,7 @@ Jira API returned an error. This can occur due to:
 - Server-side errors
 
 ```bash
-spectra --markdown EPIC.md --epic INVALID-999 --execute
+spectryn --markdown EPIC.md --epic INVALID-999 --execute
 echo $?  # Returns 8
 ```
 
@@ -152,10 +152,10 @@ echo $?  # Returns 8
 
 ### Partial Success (64)
 
-The operation completed, but some individual operations failed. With graceful degradation enabled, spectra continues processing even when some issues fail.
+The operation completed, but some individual operations failed. With graceful degradation enabled, spectryn continues processing even when some issues fail.
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 if [ $? -eq 64 ]; then
     echo "Sync completed with some failures - check the report"
 fi
@@ -168,7 +168,7 @@ fi
 The operation was cancelled by the user via a confirmation prompt.
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 # User types 'n' at confirmation prompt
 echo $?  # Returns 80
 ```
@@ -188,7 +188,7 @@ The process was terminated by a SIGTERM signal (e.g., from `kill` command).
 ```bash
 #!/bin/bash
 
-spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
+spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
 EXIT_CODE=$?
 
 case $EXIT_CODE in
@@ -225,7 +225,7 @@ esac
 - name: Sync to Jira
   id: sync
   run: |
-    spectra --markdown EPIC.md --epic ${{ env.EPIC_KEY }} --execute --no-confirm
+    spectryn --markdown EPIC.md --epic ${{ env.EPIC_KEY }} --execute --no-confirm
   continue-on-error: true
   
 - name: Check sync result
@@ -244,7 +244,7 @@ MAX_RETRIES=3
 RETRY_DELAY=5
 
 for i in $(seq 1 $MAX_RETRIES); do
-    spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
+    spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
     EXIT_CODE=$?
     
     case $EXIT_CODE in
@@ -276,7 +276,7 @@ done
 Exit codes are also available programmatically:
 
 ```python
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 # Check exit code meaning
 print(ExitCode.CONFIG_ERROR.description)
@@ -292,7 +292,7 @@ except Exception as e:
 
 ## Exit Code Conventions
 
-spectra follows standard Unix conventions:
+spectryn follows standard Unix conventions:
 
 - **0**: Success
 - **1-63**: Standard errors

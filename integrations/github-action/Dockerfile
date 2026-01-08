@@ -1,8 +1,8 @@
-# GitHub Action for spectra
+# GitHub Action for spectryn
 FROM python:3.12-slim
 
-LABEL maintainer="spectra"
-LABEL org.opencontainers.image.source="https://github.com/spectra/spectra"
+LABEL maintainer="spectryn"
+LABEL org.opencontainers.image.source="https://github.com/spectryn/spectryn"
 LABEL org.opencontainers.image.description="Sync markdown documentation to Jira"
 
 # Install system dependencies
@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install spectra
+# Install spectryn
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Install spectra from the parent directory (when building from repo)
+# Install spectryn from the parent directory (when building from repo)
 # For published action, this would install from PyPI
 COPY setup.py pyproject.toml README.md /app/
 COPY src/ /app/src/

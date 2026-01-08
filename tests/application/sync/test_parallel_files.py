@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.sync.parallel_files import (
+from spectryn.application.sync.parallel_files import (
     FileProgress,
     FileSyncResult,
     ParallelFileProcessor,
@@ -418,7 +418,7 @@ class TestFactoryFunctions:
         config = MagicMock(dry_run=True)
 
         with patch(
-            "spectra.application.sync.parallel_files.ParallelFileProcessor.process"
+            "spectryn.application.sync.parallel_files.ParallelFileProcessor.process"
         ) as mock_process:
             mock_process.return_value = ParallelFilesResult(
                 files_total=1,

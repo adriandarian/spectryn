@@ -1,7 +1,7 @@
 """
 Mutmut configuration for mutation testing.
 
-This file configures mutmut for the spectra project.
+This file configures mutmut for the spectryn project.
 Run mutation tests with: mutmut run
 
 See: https://mutmut.readthedocs.io/

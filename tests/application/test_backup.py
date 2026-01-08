@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.application.sync.backup import (
+from spectryn.application.sync.backup import (
     Backup,
     BackupManager,
     IssueSnapshot,
@@ -13,7 +13,7 @@ from spectra.application.sync.backup import (
     create_pre_sync_backup,
     restore_from_backup,
 )
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 class TestIssueSnapshot:

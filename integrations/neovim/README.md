@@ -1,6 +1,6 @@
-# spectra.nvim
+# spectryn.nvim
 
-Neovim plugin for [spectra](https://github.com/your-org/spectra) - sync markdown documentation with Jira.
+Neovim plugin for [spectryn](https://github.com/your-org/spectryn) - sync markdown documentation with Jira.
 
 ## ✨ Features
 
@@ -17,13 +17,13 @@ Neovim plugin for [spectra](https://github.com/your-org/spectra) - sync markdown
 
 ```lua
 {
-  "spectra/nvim-plugin",
+  "spectryn/nvim-plugin",
   dependencies = {
     "nvim-telescope/telescope.nvim",  -- optional, for fuzzy finding
   },
   ft = "markdown",
   config = function()
-    require("spectra").setup({})
+    require("spectryn").setup({})
   end,
 }
 ```
@@ -32,10 +32,10 @@ Neovim plugin for [spectra](https://github.com/your-org/spectra) - sync markdown
 
 ```lua
 use {
-  "spectra/nvim-plugin",
+  "spectryn/nvim-plugin",
   requires = { "nvim-telescope/telescope.nvim" },
   config = function()
-    require("spectra").setup({})
+    require("spectryn").setup({})
   end,
 }
 ```
@@ -43,8 +43,8 @@ use {
 ## ⚙️ Configuration
 
 ```lua
-require("spectra").setup({
-  -- Path to spectra executable (nil = use PATH)
+require("spectryn").setup({
+  -- Path to spectryn executable (nil = use PATH)
   executable = nil,
 
   -- Default arguments passed to all commands
@@ -103,9 +103,9 @@ require("spectra").setup({
 Browse content with fuzzy finding:
 
 ```vim
-:Telescope spectra stories    " Find stories
-:Telescope spectra epics      " Find epics
-:Telescope spectra commands   " All commands
+:Telescope spectryn stories    " Find stories
+:Telescope spectryn epics      " Find epics
+:Telescope spectryn commands   " All commands
 ```
 
 ### Telescope Keymaps
@@ -119,26 +119,26 @@ Browse content with fuzzy finding:
 ## 🔌 Lua API
 
 ```lua
-local spectra = require("spectra")
+local spectryn = require("spectryn")
 
 -- Parse stories from current buffer
-local stories = spectra.parse_stories()
+local stories = spectryn.parse_stories()
 -- Returns: { { id = "US-001", title = "...", line = 10 }, ... }
 
 -- Jump to a story
-spectra.goto_story("US-001")
+spectryn.goto_story("US-001")
 
 -- Detect epic key from buffer
-local epic = spectra.detect_epic()
+local epic = spectryn.detect_epic()
 
 -- Run commands
-spectra.validate()
-spectra.sync()
-spectra.sync_execute()
-spectra.dashboard()
+spectryn.validate()
+spectryn.sync()
+spectryn.sync_execute()
+spectryn.dashboard()
 
 -- Run async with callback
-spectra.run_async({ "--validate", "--markdown", "epic.md" }, {
+spectryn.run_async({ "--validate", "--markdown", "epic.md" }, {
   on_complete = function(result)
     print("Exit code:", result.code)
     print("Output:", result.stdout)

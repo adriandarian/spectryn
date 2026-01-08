@@ -1,6 +1,6 @@
 """Tests for plugin hook system."""
 
-from spectra.plugins import (
+from spectryn.plugins import (
     Hook,
     HookContext,
     HookPoint,

@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.export_cmd import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.export_cmd import (
     ExportOptions,
     ExportResult,
     export_to_csv,
@@ -493,7 +493,7 @@ So that it works
         )
         assert result == ExitCode.FILE_NOT_FOUND
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_html_success(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export HTML success."""
         # Create test file
@@ -530,7 +530,7 @@ So that it works
         # Check output file was created
         assert output_path.exists()
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_csv_success(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export CSV success."""
         test_file = tmp_path / "test.md"
@@ -564,7 +564,7 @@ So that it works
         assert result == ExitCode.SUCCESS
         assert output_path.exists()
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_json_success(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export JSON success."""
         test_file = tmp_path / "test.md"
@@ -602,7 +602,7 @@ So that it works
         content = json.loads(output_path.read_text())
         assert "stories" in content
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_custom_output_path(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export with custom output path."""
         test_file = tmp_path / "test.md"
@@ -625,7 +625,7 @@ So that it works
         assert result == ExitCode.SUCCESS
         assert output_path.exists()
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_unknown_format(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export with unknown format."""
         test_file = tmp_path / "test.md"
@@ -645,7 +645,7 @@ So that it works
         assert result == ExitCode.CONFIG_ERROR
         mock_console.error.assert_called()
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_pdf_missing_weasyprint(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export PDF fails without weasyprint."""
         test_file = tmp_path / "test.md"
@@ -677,7 +677,7 @@ So that it works
 
         assert result == ExitCode.CONFIG_ERROR
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_docx_missing_python_docx(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export DOCX fails without python-docx."""
         test_file = tmp_path / "test.md"
@@ -708,7 +708,7 @@ So that it works
 
         assert result == ExitCode.CONFIG_ERROR
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_with_epic(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export when file has epic structure."""
         test_file = tmp_path / "test.md"
@@ -731,7 +731,7 @@ So that it works
 
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_include_options(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export respects include options."""
         test_file = tmp_path / "test.md"
@@ -752,7 +752,7 @@ So that it works
 
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
     def test_run_export_error_handling(self, mock_parser_class, mock_console, tmp_path):
         """Test run_export handles export errors."""
         test_file = tmp_path / "test.md"

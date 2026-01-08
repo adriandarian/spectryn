@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from spectra.cli.manpage import (
+from spectryn.cli.manpage import (
     generate_man_page,
     get_installation_instructions,
     get_man_path,
@@ -184,12 +184,12 @@ class TestCLIManFlag:
 
     def test_man_flag_shows_content(self, capsys):
         """Test --man flag displays man page content."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         # Mock subprocess to avoid actually calling man
         with (
             patch("sys.argv", ["spectra", "--man"]),
-            patch("spectra.cli.manpage.subprocess.run") as mock_run,
+            patch("spectryn.cli.manpage.subprocess.run") as mock_run,
         ):
             # Simulate man not being available
             mock_run.side_effect = FileNotFoundError
@@ -202,12 +202,12 @@ class TestCLIManFlag:
 
     def test_install_man_flag(self, tmp_path, capsys):
         """Test --install-man flag attempts installation."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         # Mock get_man_path to use temp directory
         with (
             patch("sys.argv", ["spectra", "--install-man"]),
-            patch("spectra.cli.manpage.get_man_path", return_value=tmp_path),
+            patch("spectryn.cli.manpage.get_man_path", return_value=tmp_path),
         ):
             result = main()
 
@@ -215,7 +215,7 @@ class TestCLIManFlag:
         # Should either succeed or give informative message
         assert result == 0 or "Permission" in captured.out or "Error" in captured.out
 
-        # If successful, man page should exist
+        # If successful, man page should exist (named spectra.1 for command name)
         man_file = tmp_path / "spectra.1"
         if result == 0:
             assert man_file.exists()

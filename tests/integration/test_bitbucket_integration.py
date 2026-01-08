@@ -18,9 +18,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.adapters.bitbucket.adapter import BitbucketAdapter
-from spectra.adapters.bitbucket.client import BitbucketApiClient
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.bitbucket.adapter import BitbucketAdapter
+from spectryn.adapters.bitbucket.client import BitbucketApiClient
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,

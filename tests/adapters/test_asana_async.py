@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.config_provider import TrackerConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.config_provider import TrackerConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ class TestAsyncAsanaAdapterInit:
     def test_init_with_required_params(self, mock_asana_config):
         """Test initialization with required parameters."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -63,7 +63,7 @@ class TestAsyncAsanaAdapterInit:
     def test_init_with_custom_settings(self, mock_asana_config):
         """Test initialization with custom settings."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -82,7 +82,7 @@ class TestAsyncAsanaAdapterConnection:
     async def test_connect_creates_session(self, mock_asana_config):
         """Test that connect creates an aiohttp session."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -97,7 +97,7 @@ class TestAsyncAsanaAdapterConnection:
     async def test_disconnect_closes_session(self, mock_asana_config):
         """Test that disconnect closes the session."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -121,7 +121,7 @@ class TestAsyncAsanaAdapterWriteOperations:
     async def test_update_descriptions_dry_run(self, mock_asana_config):
         """Test update descriptions in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -145,7 +145,7 @@ class TestAsyncAsanaAdapterWriteOperations:
     async def test_create_subtasks_dry_run(self, mock_asana_config):
         """Test create subtasks in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -167,7 +167,7 @@ class TestAsyncAsanaAdapterWriteOperations:
     async def test_transition_issues_dry_run(self, mock_asana_config):
         """Test transition issues in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -187,7 +187,7 @@ class TestAsyncAsanaAdapterWriteOperations:
     async def test_add_comments_dry_run(self, mock_asana_config):
         """Test add comments in dry-run mode."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -210,7 +210,7 @@ class TestAsyncAsanaAdapterParseTask:
     def test_parse_task_complete(self, mock_asana_config, mock_asana_task_response):
         """Test parsing a complete task response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -226,7 +226,7 @@ class TestAsyncAsanaAdapterParseTask:
     def test_parse_task_minimal(self, mock_asana_config):
         """Test parsing a minimal task response."""
         with patch.dict("sys.modules", {"aiohttp": MagicMock()}):
-            from spectra.adapters.asana.async_adapter import AsyncAsanaAdapter
+            from spectryn.adapters.asana.async_adapter import AsyncAsanaAdapter
 
             adapter = AsyncAsanaAdapter(
                 config=mock_asana_config,
@@ -248,7 +248,7 @@ class TestAsyncAsanaAvailability:
 
     def test_is_async_available(self):
         """Test is_async_available function."""
-        from spectra.adapters.asana.async_adapter import is_async_available
+        from spectryn.adapters.asana.async_adapter import is_async_available
 
         result = is_async_available()
         assert isinstance(result, bool)

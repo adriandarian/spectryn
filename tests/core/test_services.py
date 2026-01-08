@@ -8,12 +8,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.core.container import Container
-from spectra.core.ports.config_provider import SyncConfig, TrackerConfig
-from spectra.core.ports.document_formatter import DocumentFormatterPort
-from spectra.core.ports.document_parser import DocumentParserPort
-from spectra.core.ports.issue_tracker import IssueTrackerPort
-from spectra.core.services import (
+from spectryn.core.container import Container
+from spectryn.core.ports.config_provider import SyncConfig, TrackerConfig
+from spectryn.core.ports.document_formatter import DocumentFormatterPort
+from spectryn.core.ports.document_parser import DocumentParserPort
+from spectryn.core.ports.issue_tracker import IssueTrackerPort
+from spectryn.core.services import (
     AppConfig,
     DryRunMode,
     create_formatter_factory,
@@ -72,7 +72,7 @@ class TestCreateTrackerFactory:
         factory = create_tracker_factory("jira")
         container.register_instance(TrackerConfig, mock_tracker_config)
 
-        with patch("spectra.adapters.jira.JiraAdapter") as MockJira:
+        with patch("spectryn.adapters.jira.JiraAdapter") as MockJira:
             mock_adapter = MagicMock()
             MockJira.return_value = mock_adapter
 
@@ -86,7 +86,7 @@ class TestCreateTrackerFactory:
         factory = create_tracker_factory("github")
         container.register_instance(TrackerConfig, mock_tracker_config)
 
-        with patch("spectra.adapters.github.GitHubAdapter") as MockGitHub:
+        with patch("spectryn.adapters.github.GitHubAdapter") as MockGitHub:
             mock_adapter = MagicMock()
             MockGitHub.return_value = mock_adapter
 
@@ -99,7 +99,7 @@ class TestCreateTrackerFactory:
         factory = create_tracker_factory("azure")
         container.register_instance(TrackerConfig, mock_tracker_config)
 
-        with patch("spectra.adapters.azure_devops.AzureDevOpsAdapter") as MockAzure:
+        with patch("spectryn.adapters.azure_devops.AzureDevOpsAdapter") as MockAzure:
             mock_adapter = MagicMock()
             MockAzure.return_value = mock_adapter
 
@@ -112,7 +112,7 @@ class TestCreateTrackerFactory:
         factory = create_tracker_factory("linear")
         container.register_instance(TrackerConfig, mock_tracker_config)
 
-        with patch("spectra.adapters.linear.LinearAdapter") as MockLinear:
+        with patch("spectryn.adapters.linear.LinearAdapter") as MockLinear:
             mock_adapter = MagicMock()
             MockLinear.return_value = mock_adapter
 
@@ -125,7 +125,7 @@ class TestCreateTrackerFactory:
         factory = create_tracker_factory("asana")
         container.register_instance(TrackerConfig, mock_tracker_config)
 
-        with patch("spectra.adapters.asana.AsanaAdapter") as MockAsana:
+        with patch("spectryn.adapters.asana.AsanaAdapter") as MockAsana:
             mock_adapter = MagicMock()
             MockAsana.return_value = mock_adapter
 
@@ -147,7 +147,7 @@ class TestCreateTrackerFactory:
         container.register_instance(TrackerConfig, mock_tracker_config)
         container.register_instance(DryRunMode, DryRunMode())
 
-        with patch("spectra.adapters.jira.JiraAdapter") as MockJira:
+        with patch("spectryn.adapters.jira.JiraAdapter") as MockJira:
             mock_adapter = MagicMock()
             MockJira.return_value = mock_adapter
 
@@ -165,7 +165,7 @@ class TestCreateParserFactory:
         """Test creating markdown parser."""
         factory = create_parser_factory("markdown")
 
-        with patch("spectra.adapters.parsers.MarkdownParser") as MockParser:
+        with patch("spectryn.adapters.parsers.MarkdownParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -177,7 +177,7 @@ class TestCreateParserFactory:
         """Test creating YAML parser."""
         factory = create_parser_factory("yaml")
 
-        with patch("spectra.adapters.parsers.YamlParser") as MockParser:
+        with patch("spectryn.adapters.parsers.YamlParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -189,7 +189,7 @@ class TestCreateParserFactory:
         """Test creating JSON parser."""
         factory = create_parser_factory("json")
 
-        with patch("spectra.adapters.parsers.JsonParser") as MockParser:
+        with patch("spectryn.adapters.parsers.JsonParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -201,7 +201,7 @@ class TestCreateParserFactory:
         """Test creating TOML parser."""
         factory = create_parser_factory("toml")
 
-        with patch("spectra.adapters.parsers.TomlParser") as MockParser:
+        with patch("spectryn.adapters.parsers.TomlParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -213,7 +213,7 @@ class TestCreateParserFactory:
         """Test creating CSV parser."""
         factory = create_parser_factory("csv")
 
-        with patch("spectra.adapters.parsers.CsvParser") as MockParser:
+        with patch("spectryn.adapters.parsers.CsvParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -225,7 +225,7 @@ class TestCreateParserFactory:
         """Test creating AsciiDoc parser."""
         factory = create_parser_factory("asciidoc")
 
-        with patch("spectra.adapters.parsers.AsciiDocParser") as MockParser:
+        with patch("spectryn.adapters.parsers.AsciiDocParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -237,7 +237,7 @@ class TestCreateParserFactory:
         """Test creating Excel parser."""
         factory = create_parser_factory("excel")
 
-        with patch("spectra.adapters.parsers.ExcelParser") as MockParser:
+        with patch("spectryn.adapters.parsers.ExcelParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -249,7 +249,7 @@ class TestCreateParserFactory:
         """Test creating TOON parser."""
         factory = create_parser_factory("toon")
 
-        with patch("spectra.adapters.parsers.ToonParser") as MockParser:
+        with patch("spectryn.adapters.parsers.ToonParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -261,7 +261,7 @@ class TestCreateParserFactory:
         """Test creating Notion parser."""
         factory = create_parser_factory("notion")
 
-        with patch("spectra.adapters.parsers.NotionParser") as MockParser:
+        with patch("spectryn.adapters.parsers.NotionParser") as MockParser:
             mock_parser = MagicMock()
             MockParser.return_value = mock_parser
 
@@ -284,7 +284,7 @@ class TestCreateFormatterFactory:
         """Test creating ADF formatter."""
         factory = create_formatter_factory()
 
-        with patch("spectra.adapters.formatters.adf.ADFFormatter") as MockFormatter:
+        with patch("spectryn.adapters.formatters.adf.ADFFormatter") as MockFormatter:
             mock_formatter = MagicMock()
             MockFormatter.return_value = mock_formatter
 
@@ -300,7 +300,7 @@ class TestCreateOutputFactory:
         """Test creating Confluence output."""
         factory = create_output_factory("confluence")
 
-        with patch("spectra.adapters.confluence.ConfluenceAdapter") as MockAdapter:
+        with patch("spectryn.adapters.confluence.ConfluenceAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -414,7 +414,7 @@ class TestCreateSyncOrchestrator:
             }
         )
 
-        with patch("spectra.application.sync.SyncOrchestrator") as MockOrchestrator:
+        with patch("spectryn.application.sync.SyncOrchestrator") as MockOrchestrator:
             mock_orchestrator = MagicMock()
             MockOrchestrator.return_value = mock_orchestrator
 
@@ -437,7 +437,7 @@ class TestCreateSyncOrchestrator:
             }
         )
 
-        with patch("spectra.application.sync.SyncOrchestrator") as MockOrchestrator:
+        with patch("spectryn.application.sync.SyncOrchestrator") as MockOrchestrator:
             mock_orchestrator = MagicMock()
             MockOrchestrator.return_value = mock_orchestrator
 

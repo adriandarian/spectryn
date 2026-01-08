@@ -6,14 +6,14 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.cli.interactive import (
+from spectryn.cli.interactive import (
     Action,
     InteractiveSession,
     PendingOperation,
     PhasePreview,
     run_interactive,
 )
-from spectra.cli.output import Console
+from spectryn.cli.output import Console
 
 
 class TestPendingOperation:

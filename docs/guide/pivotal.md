@@ -1,6 +1,6 @@
 # Pivotal Tracker Integration Guide
 
-spectra supports Pivotal Tracker for syncing markdown specifications to stories. This guide covers configuration, authentication, and advanced features.
+spectryn supports Pivotal Tracker for syncing markdown specifications to stories. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -17,18 +17,18 @@ The Pivotal Tracker adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Pivotal Tracker
-spectra sync --markdown EPIC.md --tracker pivotal --project 1234567 --execute
+spectryn sync --markdown EPIC.md --tracker pivotal --project 1234567 --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Pivotal Tracker connection settings
@@ -64,7 +64,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [pivotal]
@@ -97,7 +97,7 @@ export PIVOTAL_PROJECT_ID=1234567
 ### CLI Arguments
 
 ```bash
-spectra sync \
+spectryn sync \
   --tracker pivotal \
   --markdown EPIC.md \
   --project 1234567 \
@@ -371,13 +371,13 @@ Currency is displaying without proper formatting in some locales.
 ### 2. Preview Sync
 
 ```bash
-spectra sync --tracker pivotal --markdown epic.md --project 1234567
+spectryn sync --tracker pivotal --markdown epic.md --project 1234567
 ```
 
 ### 3. Execute Sync
 
 ```bash
-spectra sync --tracker pivotal --markdown epic.md --project 1234567 --execute
+spectryn sync --tracker pivotal --markdown epic.md --project 1234567 --execute
 ```
 
 ### 4. View Results
@@ -408,12 +408,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install spectra
-        run: pip install spectra
+      - name: Install spectryn
+        run: pip install spectryn
 
       - name: Sync to Pivotal
         run: |
-          spectra sync \
+          spectryn sync \
             --tracker pivotal \
             --markdown docs/EPIC.md \
             --project ${{ vars.PIVOTAL_PROJECT_ID }} \

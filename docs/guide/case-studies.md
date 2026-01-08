@@ -1,10 +1,10 @@
 # Case Studies
 
-Real-world examples of teams using spectra successfully.
+Real-world examples of teams using spectryn successfully.
 
 ## Overview
 
-These case studies showcase how different organizations use spectra to improve their development workflows.
+These case studies showcase how different organizations use spectryn to improve their development workflows.
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
 
@@ -22,7 +22,7 @@ These case studies showcase how different organizations use spectra to improve t
 
 <div style="border: 1px solid var(--vp-c-divider); border-radius: 12px; padding: 1.5rem;">
 <h3 style="margin-top: 0;">🏥 Healthcare SaaS</h3>
-<p style="opacity: 0.8;">Compliance-focused team uses spectra for audit trails and traceability</p>
+<p style="opacity: 0.8;">Compliance-focused team uses spectryn for audit trails and traceability</p>
 <strong>Results:</strong> Audit-ready documentation
 </div>
 
@@ -43,7 +43,7 @@ These case studies showcase how different organizations use spectra to improve t
 
 ### The Challenge
 
-Before spectra, the team faced:
+Before spectryn, the team faced:
 - Product specs in Notion, Confluence, and Google Docs
 - Stories manually copied to Jira (error-prone)
 - Sprint planning took 2+ hours
@@ -52,7 +52,7 @@ Before spectra, the team faced:
 
 ### The Solution
 
-The team adopted spectra with this workflow:
+The team adopted spectryn with this workflow:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -72,7 +72,7 @@ The team adopted spectra with this workflow:
 ### Configuration
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 version: 1
 
@@ -156,7 +156,7 @@ product-specs/
 │   │   └── unified-cart.md      # Cross-team epic
 │   └── templates/
 │       └── cross-team-epic.md
-├── spectra.yaml
+├── spectryn.yaml
 └── .github/
     └── workflows/
         └── sync-stories.yml
@@ -207,7 +207,7 @@ graph LR
 ### Multi-Tracker Sync
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 version: 1
 
 trackers:
@@ -286,7 +286,7 @@ As a healthcare company, they needed:
 **Compliance configuration:**
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 tracker: jira
 version: 1
 
@@ -351,13 +351,13 @@ hooks:
 
 ```bash
 # Generate compliance report
-spectra report --format compliance --output audit-report.pdf
+spectryn report --format compliance --output audit-report.pdf
 
 # Show change history for specific story
-spectra history --story US-001 --format detailed
+spectryn history --story US-001 --format detailed
 
 # Export for auditors
-spectra export --format csv --include-history --output audit-export.csv
+spectryn export --format csv --include-history --output audit-export.csv
 ```
 
 ### Results
@@ -388,7 +388,7 @@ Based on these case studies, here are universal recommendations:
 
 ```bash
 # Begin with one team/epic
-spectra sync --markdown epics/pilot-project.md
+spectryn sync --markdown epics/pilot-project.md
 
 # Expand after proving value
 ```
@@ -406,12 +406,12 @@ Create templates that match your workflow:
 ```yaml
 # Validate on every PR
 - name: Validate Stories
-  run: spectra --validate --markdown epics/
+  run: spectryn --validate --markdown epics/
 
 # Sync on merge to main
 - name: Sync Stories
   if: github.ref == 'refs/heads/main'
-  run: spectra sync --execute
+  run: spectryn sync --execute
 ```
 
 ### 4. Train Your Team
@@ -432,8 +432,8 @@ Track metrics before and after:
 
 ## Share Your Story
 
-Using spectra successfully? We'd love to feature your case study!
+Using spectryn successfully? We'd love to feature your case study!
 
-- Open a [discussion](https://github.com/adriandarian/spectra/discussions)
-- Tweet us [@spectra_cli](https://twitter.com/spectra_cli)
-- Email: case-studies@spectra.dev
+- Open a [discussion](https://github.com/adriandarian/spectryn/discussions)
+- Tweet us [@spectryn_cli](https://twitter.com/spectryn_cli)
+- Email: case-studies@spectryn.dev

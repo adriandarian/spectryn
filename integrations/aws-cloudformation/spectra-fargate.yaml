@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 AWSTemplateFormatVersion: '2010-09-09'
@@ -44,7 +44,7 @@ Parameters:
 
   SpectraImage:
     Type: String
-    Default: spectra/spectra:latest
+    Default: spectryn/spectryn:latest
     Description: Spectra Docker image
 
   Schedule:
@@ -307,11 +307,11 @@ Resources:
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       ContainerDefinitions:
-        - Name: spectra
+        - Name: spectryn
           Image: !Ref SpectraImage
           Essential: true
           Command:
-            - spectra
+            - spectryn
             - sync
             - --tracker
             - jira
@@ -335,7 +335,7 @@ Resources:
             Options:
               awslogs-group: !Ref LogGroup
               awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: spectra
+              awslogs-stream-prefix: spectryn
       Tags:
         - Key: Environment
           Value: !Ref Environment

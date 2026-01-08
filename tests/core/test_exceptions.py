@@ -10,7 +10,7 @@ It verifies that:
 
 import pytest
 
-from spectra.core.exceptions import (
+from spectryn.core.exceptions import (
     AccessDeniedError,
     AuthenticationError,
     # Config errors

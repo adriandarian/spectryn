@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from spectra.cli.telemetry import (
+from spectryn.cli.telemetry import (
     OTEL_AVAILABLE,
     PROMETHEUS_AVAILABLE,
     TelemetryConfig,

@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.openapi_parser import OpenAPIParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.openapi_parser import OpenAPIParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestOpenAPIParser:

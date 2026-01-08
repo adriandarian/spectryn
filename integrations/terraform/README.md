@@ -29,10 +29,10 @@ go build -o terraform-provider-jira
 
 ```bash
 # Create plugin directory
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/spectra/jira/1.0.0/$(go env GOOS)_$(go env GOARCH)
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/spectryn/jira/1.0.0/$(go env GOOS)_$(go env GOARCH)
 
 # Copy the binary
-cp terraform-provider-jira ~/.terraform.d/plugins/registry.terraform.io/spectra/jira/1.0.0/$(go env GOOS)_$(go env GOARCH)/
+cp terraform-provider-jira ~/.terraform.d/plugins/registry.terraform.io/spectryn/jira/1.0.0/$(go env GOOS)_$(go env GOARCH)/
 ```
 
 ## Authentication
@@ -70,7 +70,7 @@ provider "jira" {
 terraform {
   required_providers {
     jira = {
-      source  = "spectra/jira"
+      source  = "spectryn/jira"
       version = "~> 1.0"
     }
   }
@@ -219,13 +219,13 @@ export TF_ACC=1
 go test ./... -v
 ```
 
-## Integration with spectra
+## Integration with spectryn
 
-This provider is part of the [spectra](https://github.com/spectra/spectra) project, which provides tools for managing Jira from markdown documentation.
+This provider is part of the [spectryn](https://github.com/spectryn/spectryn) project, which provides tools for managing Jira from markdown documentation.
 
-You can use this Terraform provider alongside spectra for different use cases:
+You can use this Terraform provider alongside spectryn for different use cases:
 
-- **spectra**: Sync existing markdown documentation to Jira
+- **spectryn**: Sync existing markdown documentation to Jira
 - **Terraform provider**: Manage Jira as infrastructure-as-code
 
 ## License

@@ -7,13 +7,13 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
-from spectra.application.sync.multi_epic import (
+from spectryn.adapters.parsers.markdown import MarkdownParser
+from spectryn.application.sync.multi_epic import (
     EpicSyncResult,
     MultiEpicSyncOrchestrator,
     MultiEpicSyncResult,
 )
-from spectra.core.ports.config_provider import SyncConfig
+from spectryn.core.ports.config_provider import SyncConfig
 
 
 # Sample multi-epic markdown content

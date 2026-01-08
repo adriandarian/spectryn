@@ -15,8 +15,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from spectra.adapters.youtrack.client import YouTrackApiClient
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.youtrack.client import YouTrackApiClient
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -36,7 +36,7 @@ class TestYouTrackClientInit:
 
     def test_client_initialization(self):
         """Should initialize with correct settings."""
-        with patch("spectra.adapters.youtrack.client.requests.Session"):
+        with patch("spectryn.adapters.youtrack.client.requests.Session"):
             client = YouTrackApiClient(
                 url="https://test.youtrack.com",
                 token="test-token",
@@ -49,7 +49,7 @@ class TestYouTrackClientInit:
 
     def test_client_initialization_with_trailing_slash(self):
         """Should handle trailing slash in URL."""
-        with patch("spectra.adapters.youtrack.client.requests.Session"):
+        with patch("spectryn.adapters.youtrack.client.requests.Session"):
             client = YouTrackApiClient(
                 url="https://test.youtrack.com/",
                 token="test-token",
@@ -59,7 +59,7 @@ class TestYouTrackClientInit:
 
     def test_client_custom_retry_settings(self):
         """Should accept custom retry settings."""
-        with patch("spectra.adapters.youtrack.client.requests.Session"):
+        with patch("spectryn.adapters.youtrack.client.requests.Session"):
             client = YouTrackApiClient(
                 url="https://test.youtrack.com",
                 token="test-token",
@@ -84,7 +84,7 @@ class TestYouTrackRateLimiting:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -160,7 +160,7 @@ class TestYouTrackErrorHandling:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -249,7 +249,7 @@ class TestYouTrackEdgeCases:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -350,7 +350,7 @@ class TestYouTrackSessionManagement:
 
     def test_session_headers(self):
         """Should set correct session headers."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
 
@@ -369,7 +369,7 @@ class TestYouTrackSessionManagement:
 
     def test_session_mount_http_adapter(self):
         """Should mount HTTP adapter for connection pooling."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
 
@@ -383,7 +383,7 @@ class TestYouTrackSessionManagement:
 
     def test_context_manager(self):
         """Should work as context manager."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
 
@@ -397,7 +397,7 @@ class TestYouTrackSessionManagement:
 
     def test_close_session(self):
         """Should close session on close()."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
 
@@ -421,7 +421,7 @@ class TestYouTrackDryRunMode:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -592,7 +592,7 @@ class TestYouTrackApiMethods:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session."""
-        with patch("spectra.adapters.youtrack.client.requests.Session") as mock:
+        with patch("spectryn.adapters.youtrack.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session

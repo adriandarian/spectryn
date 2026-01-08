@@ -4,7 +4,7 @@ Tests for CLI error formatting.
 Tests the rich error messages, suggestions, and formatting.
 """
 
-from spectra.cli.errors import (
+from spectryn.cli.errors import (
     ErrorCode,
     ErrorFormatter,
     FormattedError,
@@ -12,8 +12,8 @@ from spectra.cli.errors import (
     format_connection_error,
     format_error,
 )
-from spectra.cli.output import Console
-from spectra.core.exceptions import (
+from spectryn.cli.output import Console
+from spectryn.core.exceptions import (
     AccessDeniedError,
     AuthenticationError,
     ConfigError,

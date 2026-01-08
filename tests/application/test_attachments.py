@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.application.sync.attachments import (
+from spectryn.application.sync.attachments import (
     Attachment,
     AttachmentExtractor,
     AttachmentStatus,

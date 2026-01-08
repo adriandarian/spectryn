@@ -1,5 +1,5 @@
 {
-  "name": "@spectra/pulumi",
+  "name": "@spectryn/pulumi",
   "version": "0.1.0",
   "description": "Pulumi provider for Spectra - Markdown to Issue Tracker sync",
   "main": "lib/index.js",
@@ -13,19 +13,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/spectra/spectra.git",
+    "url": "https://github.com/spectryn/spectryn.git",
     "directory": "integrations/pulumi"
   },
   "keywords": [
     "pulumi",
-    "spectra",
+    "spectryn",
     "jira",
     "github",
     "issue-tracker",
     "devops",
     "infrastructure"
   ],
-  "author": "spectra",
+  "author": "spectryn",
   "license": "MIT",
   "peerDependencies": {
     "@pulumi/pulumi": "^3.0.0"

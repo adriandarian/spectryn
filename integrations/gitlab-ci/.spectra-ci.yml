@@ -2,28 +2,28 @@
 # Include this template in your .gitlab-ci.yml to sync markdown to issue trackers
 
 # Base image with Python
-.spectra-base:
+.spectryn-base:
   image: python:3.11-slim
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     SPECTRA_VERSION: "latest"
   cache:
-    key: spectra-${CI_COMMIT_REF_SLUG}
+    key: spectryn-${CI_COMMIT_REF_SLUG}
     paths:
       - .cache/pip
   before_script:
     - pip install --upgrade pip
     - |
       if [ "$SPECTRA_VERSION" = "latest" ]; then
-        pip install spectra
+        pip install spectryn
       else
-        pip install spectra==$SPECTRA_VERSION
+        pip install spectryn==$SPECTRA_VERSION
       fi
-    - spectra --version
+    - spectryn --version
 
 # Main sync job template
-.spectra-sync:
-  extends: .spectra-base
+.spectryn-sync:
+  extends: .spectryn-base
   stage: deploy
   variables:
     # Required
@@ -66,7 +66,7 @@
       fi
 
       # Build command
-      CMD="spectra sync"
+      CMD="spectryn sync"
       CMD="$CMD --markdown $MARKDOWN_FILE"
       CMD="$CMD --tracker $TRACKER"
 
@@ -157,8 +157,8 @@
       echo "✅ Spectra sync complete!"
 
 # Pull (reverse sync) job template
-.spectra-pull:
-  extends: .spectra-base
+.spectryn-pull:
+  extends: .spectryn-base
   stage: deploy
   variables:
     EPIC_KEY: ""
@@ -180,7 +180,7 @@
         exit 1
       fi
 
-      CMD="spectra pull"
+      CMD="spectryn pull"
       CMD="$CMD --epic $EPIC_KEY"
       CMD="$CMD --output $OUTPUT_FILE"
       CMD="$CMD --tracker $TRACKER"
@@ -213,8 +213,8 @@
       echo "✅ Pull complete! Output: $OUTPUT_FILE"
 
 # Validation job template
-.spectra-validate:
-  extends: .spectra-base
+.spectryn-validate:
+  extends: .spectryn-base
   stage: test
   variables:
     MARKDOWN_FILE: ""
@@ -228,13 +228,13 @@
         exit 1
       fi
 
-      spectra validate --markdown "$MARKDOWN_FILE"
+      spectryn validate --markdown "$MARKDOWN_FILE"
 
       echo "✅ Validation passed!"
 
 # Diff job template (compare local vs tracker)
-.spectra-diff:
-  extends: .spectra-base
+.spectryn-diff:
+  extends: .spectryn-base
   stage: test
   variables:
     MARKDOWN_FILE: ""
@@ -245,4 +245,4 @@
       echo "📊 Spectra Diff"
       echo "==============="
 
-      spectra diff --markdown "$MARKDOWN_FILE" --epic "$EPIC_KEY" --tracker "$TRACKER"
+      spectryn diff --markdown "$MARKDOWN_FILE" --epic "$EPIC_KEY" --tracker "$TRACKER"

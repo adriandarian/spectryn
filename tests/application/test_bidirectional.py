@@ -6,11 +6,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.sync.bidirectional import (
+from spectryn.application.sync.bidirectional import (
     BidirectionalSyncOrchestrator,
     BidirectionalSyncResult,
 )
-from spectra.application.sync.conflict import (
+from spectryn.application.sync.conflict import (
     Conflict,
     ConflictReport,
     ConflictType,
@@ -20,11 +20,11 @@ from spectra.application.sync.conflict import (
     StorySnapshot,
     SyncSnapshot,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import IssueKey, StoryId
-from spectra.core.ports.config_provider import SyncConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.ports.config_provider import SyncConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 # =============================================================================

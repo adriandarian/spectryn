@@ -33,17 +33,17 @@ Spectra uses a **Hexagonal Architecture** (Ports & Adapters pattern) which makes
 ### 1. Create the Directory Structure
 
 ```bash
-mkdir -p src/spectra/adapters/mytracker
-touch src/spectra/adapters/mytracker/__init__.py
-touch src/spectra/adapters/mytracker/client.py
-touch src/spectra/adapters/mytracker/adapter.py
-touch src/spectra/adapters/mytracker/plugin.py
+mkdir -p src/spectryn/adapters/mytracker
+touch src/spectryn/adapters/mytracker/__init__.py
+touch src/spectryn/adapters/mytracker/client.py
+touch src/spectryn/adapters/mytracker/adapter.py
+touch src/spectryn/adapters/mytracker/plugin.py
 touch tests/adapters/test_mytracker_adapter.py
 ```
 
 ### 2. Add TrackerType Enum
 
-Edit `src/spectra/core/ports/config_provider.py`:
+Edit `src/spectryn/core/ports/config_provider.py`:
 
 ```python
 class TrackerType(Enum):
@@ -81,12 +81,12 @@ from typing import Any
 import requests
 from requests.adapters import HTTPAdapter
 
-from spectra.adapters.async_base import (
+from spectryn.adapters.async_base import (
     RETRYABLE_STATUS_CODES,
     calculate_delay,
     get_retry_after,
 )
-from spectra.core.ports.issue_tracker import (
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -394,7 +394,7 @@ Key mappings:
 import logging
 from typing import Any
 
-from spectra.core.ports.issue_tracker import (
+from spectryn.core.ports.issue_tracker import (
     IssueData,
     IssueLink,
     IssueTrackerError,
@@ -459,9 +459,9 @@ class MyTrackerAdapter(IssueTrackerPort):
         }
         return mapping.get(tracker_status.lower(), tracker_status.capitalize())
 
-    def _map_status_to_tracker(self, spectra_status: str) -> str:
+    def _map_status_to_tracker(self, spectryn_status: str) -> str:
         """Map Spectra status to tracker status."""
-        status_lower = spectra_status.lower()
+        status_lower = spectryn_status.lower()
         if any(x in status_lower for x in ["done", "closed", "complete"]):
             return "done"
         if any(x in status_lower for x in ["review"]):
@@ -694,8 +694,8 @@ MyTracker Plugin - Plugin wrapper for MyTracker adapter.
 import os
 from typing import Any
 
-from spectra.core.ports.issue_tracker import IssueTrackerPort
-from spectra.plugins.base import PluginMetadata, PluginType, TrackerPlugin
+from spectryn.core.ports.issue_tracker import IssueTrackerPort
+from spectryn.plugins.base import PluginMetadata, PluginType, TrackerPlugin
 
 from .adapter import MyTrackerAdapter
 
@@ -730,7 +730,7 @@ class MyTrackerPlugin(TrackerPlugin):
         return PluginMetadata(
             name="mytracker",
             version="1.0.0",
-            description="MyTracker integration for spectra",
+            description="MyTracker integration for spectryn",
             author="Your Name/Company",
             plugin_type=PluginType.TRACKER,
             requires=[],
@@ -824,10 +824,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.mytracker.adapter import MyTrackerAdapter
-from spectra.adapters.mytracker.client import MyTrackerApiClient
-from spectra.adapters.mytracker.plugin import MyTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.mytracker.adapter import MyTrackerAdapter
+from spectryn.adapters.mytracker.client import MyTrackerApiClient
+from spectryn.adapters.mytracker.plugin import MyTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
 )
@@ -838,7 +838,7 @@ class TestMyTrackerApiClient:
 
     @pytest.fixture
     def mock_session(self):
-        with patch("spectra.adapters.mytracker.client.requests.Session") as mock:
+        with patch("spectryn.adapters.mytracker.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -941,7 +941,7 @@ class TestMyTrackerPlugin:
     """Tests for MyTrackerPlugin."""
 
     def test_metadata(self):
-        from spectra.plugins.base import PluginType
+        from spectryn.plugins.base import PluginType
 
         plugin = MyTrackerPlugin()
         assert plugin.metadata.name == "mytracker"
@@ -952,7 +952,7 @@ class TestMyTrackerPlugin:
         plugin = MyTrackerPlugin()
         plugin.config = {}
 
-        with patch("spectra.adapters.mytracker.plugin.MyTrackerAdapter") as mock:
+        with patch("spectryn.adapters.mytracker.plugin.MyTrackerAdapter") as mock:
             mock.return_value = MagicMock()
             plugin.initialize()
             mock.assert_called_once()
@@ -980,13 +980,13 @@ Before submitting your adapter, ensure:
 ### Code Quality
 ```bash
 # Format code
-ruff format src/spectra/adapters/mytracker tests/adapters/test_mytracker_adapter.py
+ruff format src/spectryn/adapters/mytracker tests/adapters/test_mytracker_adapter.py
 
 # Lint and fix
-ruff check src/spectra/adapters/mytracker tests/adapters/test_mytracker_adapter.py --fix
+ruff check src/spectryn/adapters/mytracker tests/adapters/test_mytracker_adapter.py --fix
 
 # Type checking
-mypy src/spectra/adapters/mytracker
+mypy src/spectryn/adapters/mytracker
 
 # Run tests
 pytest tests/adapters/test_mytracker_adapter.py -v
@@ -1047,7 +1047,7 @@ def update_issue(self, key: str, **kwargs) -> bool:
 Use Spectra's exception types:
 
 ```python
-from spectra.core.ports.issue_tracker import (
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,    # 401 errors
     PermissionError,        # 403 errors
     NotFoundError,          # 404 errors
@@ -1122,7 +1122,7 @@ class MyTrackerBatchClient:
 For frequently accessed data:
 
 ```python
-from spectra.adapters.cache import CacheManager
+from spectryn.adapters.cache import CacheManager
 
 class CachedMyTrackerAdapter(MyTrackerAdapter):
     def __init__(self, *args, cache_ttl: int = 300, **kwargs):
@@ -1166,7 +1166,7 @@ export MYTRACKER_PROJECT_ID="your-project-id"
 ### Configuration File
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 tracker:
   type: mytracker
   api_token: ${MYTRACKER_API_TOKEN}
@@ -1176,8 +1176,8 @@ tracker:
 ## Usage
 
 ```bash
-spectra --tracker mytracker --markdown EPIC.md --validate
-spectra --tracker mytracker --markdown EPIC.md --execute
+spectryn --tracker mytracker --markdown EPIC.md --validate
+spectryn --tracker mytracker --markdown EPIC.md --execute
 ```
 
 ## Status Mapping
@@ -1226,7 +1226,7 @@ If you see 429 errors, the adapter will automatically back off.
 
 ## Getting Help
 
-- **Examples**: See existing adapters in `src/spectra/adapters/` (Shortcut, Trello, Pivotal are good templates)
+- **Examples**: See existing adapters in `src/spectryn/adapters/` (Shortcut, Trello, Pivotal are good templates)
 - **Questions**: Open a GitHub Discussion
 - **Bugs**: Open a GitHub Issue
 

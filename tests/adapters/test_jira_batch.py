@@ -8,13 +8,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.adapters.jira.batch import (
+from spectryn.adapters.jira.batch import (
     BatchOperation,
     BatchResult,
     JiraBatchClient,
 )
-from spectra.adapters.jira.client import JiraApiClient
-from spectra.core.ports.issue_tracker import IssueTrackerError
+from spectryn.adapters.jira.client import JiraApiClient
+from spectryn.core.ports.issue_tracker import IssueTrackerError
 
 
 # =============================================================================

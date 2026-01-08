@@ -10,8 +10,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.adapters.github.adapter import GitHubAdapter
-from spectra.core.ports.issue_tracker import IssueTrackerError
+from spectryn.adapters.github.adapter import GitHubAdapter
+from spectryn.core.ports.issue_tracker import IssueTrackerError
 
 
 # =============================================================================
@@ -254,7 +254,7 @@ class TestGitHubLinkOperations:
 
     def test_create_link_updates_body(self, github_config, mock_issue_response):
         """Test create_link adds reference to issue body."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter = GitHubAdapter(**github_config, dry_run=False)
 
@@ -296,7 +296,7 @@ class TestGitHubLinkOperations:
 
     def test_delete_link_removes_reference(self, github_config):
         """Test delete_link removes reference from body."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter = GitHubAdapter(**github_config, dry_run=False)
 

@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.plan_cmd import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.plan_cmd import (
     PlannedChange,
     SyncPlan,
     format_plan,
@@ -370,8 +370,8 @@ class TestRunPlan:
         )
         assert result == ExitCode.FILE_NOT_FOUND
 
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_config_error(
         self, mock_logging, mock_config_provider, mock_console, tmp_path
     ):
@@ -390,12 +390,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.CONFIG_ERROR
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_connection_error(
         self,
         mock_logging,
@@ -426,12 +426,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.CONNECTION_ERROR
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_success(
         self,
         mock_logging,
@@ -474,12 +474,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_json_output(
         self,
         mock_logging,
@@ -528,12 +528,12 @@ class TestRunPlan:
         assert "has_changes" in data
         assert "summary" in data
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_with_changes(
         self,
         mock_logging,
@@ -586,12 +586,12 @@ class TestRunPlan:
         # Should show hint about execution
         mock_console.info.assert_called()
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_with_updates(
         self,
         mock_logging,
@@ -646,12 +646,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_with_subtasks(
         self,
         mock_logging,
@@ -709,12 +709,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_with_status_change(
         self,
         mock_logging,
@@ -768,12 +768,12 @@ class TestRunPlan:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.application.SyncOrchestrator")
-    @patch("spectra.adapters.parsers.MarkdownParser")
-    @patch("spectra.adapters.JiraAdapter")
-    @patch("spectra.adapters.ADFFormatter")
-    @patch("spectra.adapters.EnvironmentConfigProvider")
-    @patch("spectra.cli.logging.setup_logging")
+    @patch("spectryn.application.SyncOrchestrator")
+    @patch("spectryn.adapters.parsers.MarkdownParser")
+    @patch("spectryn.adapters.JiraAdapter")
+    @patch("spectryn.adapters.ADFFormatter")
+    @patch("spectryn.adapters.EnvironmentConfigProvider")
+    @patch("spectryn.cli.logging.setup_logging")
     def test_run_plan_verbose(
         self,
         mock_logging,

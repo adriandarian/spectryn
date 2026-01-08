@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.obsidian_parser import ObsidianParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.obsidian_parser import ObsidianParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestObsidianParser:

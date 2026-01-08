@@ -1,5 +1,5 @@
 {{/*
-Copyright (c) spectra
+Copyright (c) spectryn
 SPDX-License-Identifier: MIT
 */}}
 
@@ -7,20 +7,20 @@ SPDX-License-Identifier: MIT
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: spectrasyncs.spectra.io
+  name: spectrynsyncs.spectryn.io
   labels:
-    {{- include "spectra.labels" . | nindent 4 }}
+    {{- include "spectryn.labels" . | nindent 4 }}
   annotations:
     {{- if .Values.crds.keep }}
     "helm.sh/resource-policy": keep
     {{- end }}
 spec:
-  group: spectra.io
+  group: spectryn.io
   names:
     kind: SpectraSync
     listKind: SpectraSyncList
-    plural: spectrasyncs
-    singular: spectrasync
+    plural: spectrynsyncs
+    singular: spectrynsync
     shortNames:
       - ss
       - sync

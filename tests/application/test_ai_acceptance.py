@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_acceptance import (
+from spectryn.application.ai_acceptance import (
     ACCategory,
     ACGenerationOptions,
     ACGenerationResult,
@@ -16,9 +16,9 @@ from spectra.application.ai_acceptance import (
     build_ac_generation_prompt,
     parse_ac_generation_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -396,7 +396,7 @@ class TestAIAcceptanceCriteriaGenerator:
 
     def test_generate_with_fallback(self, story_without_ac: UserStory) -> None:
         """Test generating with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             generator = AIAcceptanceCriteriaGenerator()
@@ -433,7 +433,7 @@ class TestAIAcceptanceCriteriaGenerator:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -455,7 +455,7 @@ class TestAIAcceptanceCriteriaGenerator:
 
     def test_generate_with_existing_ac(self, story_with_ac: UserStory) -> None:
         """Test generating for story that already has AC."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             generator = AIAcceptanceCriteriaGenerator()

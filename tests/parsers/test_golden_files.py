@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.markdown import MarkdownParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 # Path to markdown fixtures

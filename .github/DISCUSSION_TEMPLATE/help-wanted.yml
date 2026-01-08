@@ -9,7 +9,7 @@ body:
         
         Stuck on something? The community is here to help!
         
-        For bugs, please use the [bug report template](https://github.com/adriandarian/spectra/issues/new?template=bug_report.yml) instead.
+        For bugs, please use the [bug report template](https://github.com/adriandarian/spectryn/issues/new?template=bug_report.yml) instead.
 
   - type: textarea
     id: problem
@@ -53,7 +53,7 @@ body:
       description: Any relevant output (use `--verbose` for more detail)
       render: shell
       placeholder: |
-        $ spectra sync --epic PROJ-123 --verbose
+        $ spectryn sync --epic PROJ-123 --verbose
         ...
 
   - type: textarea
@@ -63,7 +63,7 @@ body:
       description: Share your config (remove sensitive data!)
       render: yaml
       placeholder: |
-        # .spectra.yaml (with secrets redacted)
+        # .spectryn.yaml (with secrets redacted)
         tracker: jira
         jira:
           url: https://company.atlassian.net

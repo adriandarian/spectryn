@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.core.result import (
+from spectryn.core.result import (
     BatchItem,
     BatchResult,
     Err,

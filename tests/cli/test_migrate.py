@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.migrate import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.migrate import (
     DEFAULT_STATUS_MAPS,
     MigrationMapping,
     MigrationResult,
@@ -241,7 +241,7 @@ class TestRunMigrate:
 
     def test_unsupported_source_tracker(self, mock_console):
         """Test with unsupported source tracker."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="unsupported", target_type="github")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -249,7 +249,7 @@ class TestRunMigrate:
 
     def test_unsupported_target_tracker(self, mock_console):
         """Test with unsupported target tracker."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="jira", target_type="unsupported")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -257,7 +257,7 @@ class TestRunMigrate:
 
     def test_same_source_and_target(self, mock_console):
         """Test source and target cannot be the same."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="jira", target_type="jira")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -265,14 +265,14 @@ class TestRunMigrate:
 
     def test_migrate_to_markdown(self, mock_console):
         """Test migration to markdown."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="jira", target_type="markdown")
 
         assert result == ExitCode.SUCCESS
 
     def test_basic_migration_dry_run(self, mock_console):
         """Test basic migration in dry run."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -285,7 +285,7 @@ class TestRunMigrate:
 
     def test_migration_with_project(self, mock_console):
         """Test migration with project specified."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -299,7 +299,7 @@ class TestRunMigrate:
 
     def test_migration_with_epic(self, mock_console):
         """Test migration with epic specified."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -314,7 +314,7 @@ class TestRunMigrate:
         mapping_file = tmp_path / "mapping.yaml"
         mapping_file.write_text("status_map:\n  To Do: open")
 
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -326,7 +326,7 @@ class TestRunMigrate:
 
     def test_migration_nonexistent_mapping_file(self, mock_console, tmp_path):
         """Test migration with nonexistent mapping file uses defaults."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -343,34 +343,34 @@ class TestRunMigrate:
         for source in supported[:2]:  # Just test a couple as source
             for target in supported[2:4]:  # And a couple as target
                 if source != target:
-                    with patch("spectra.cli.logging.setup_logging"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_migrate(mock_console, source_type=source, target_type=target)
                     assert result == ExitCode.SUCCESS
 
     def test_migration_github_to_jira(self, mock_console):
         """Test GitHub to Jira migration."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="github", target_type="jira")
 
         assert result == ExitCode.SUCCESS
 
     def test_migration_linear_to_jira(self, mock_console):
         """Test Linear to Jira migration."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="linear", target_type="jira")
 
         assert result == ExitCode.SUCCESS
 
     def test_migration_jira_to_linear(self, mock_console):
         """Test Jira to Linear migration."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(mock_console, source_type="jira", target_type="linear")
 
         assert result == ExitCode.SUCCESS
 
     def test_migration_with_comments_flag(self, mock_console):
         """Test migration with comments flag."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",
@@ -382,7 +382,7 @@ class TestRunMigrate:
 
     def test_migration_with_attachments_flag(self, mock_console):
         """Test migration with attachments flag."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_migrate(
                 mock_console,
                 source_type="jira",

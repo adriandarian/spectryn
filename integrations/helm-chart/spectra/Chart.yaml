@@ -1,8 +1,8 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 apiVersion: v2
-name: spectra
+name: spectryn
 description: A Helm chart for deploying Spectra - Markdown to Issue Tracker sync tool
 type: application
 version: 0.1.0
@@ -10,7 +10,7 @@ appVersion: "1.0.0"
 kubeVersion: ">=1.19.0-0"
 
 keywords:
-  - spectra
+  - spectryn
   - jira
   - github
   - issue-tracker
@@ -19,25 +19,25 @@ keywords:
   - devops
   - agile
 
-home: https://github.com/spectra/spectra
+home: https://github.com/spectryn/spectryn
 sources:
-  - https://github.com/spectra/spectra
-  - https://github.com/spectra/spectra/tree/main/integrations/helm-chart
+  - https://github.com/spectryn/spectryn
+  - https://github.com/spectryn/spectryn/tree/main/integrations/helm-chart
 
 maintainers:
-  - name: spectra
-    email: maintainers@spectra.dev
-    url: https://github.com/spectra
+  - name: spectryn
+    email: maintainers@spectryn.dev
+    url: https://github.com/spectryn
 
-icon: https://raw.githubusercontent.com/spectra/spectra/main/docs/public/logo.svg
+icon: https://raw.githubusercontent.com/spectryn/spectryn/main/docs/public/logo.svg
 
 annotations:
   artifacthub.io/license: MIT
   artifacthub.io/links: |
     - name: Documentation
-      url: https://spectra.dev/docs
+      url: https://spectryn.dev/docs
     - name: GitHub
-      url: https://github.com/spectra/spectra
+      url: https://github.com/spectryn/spectryn
   artifacthub.io/category: integration-delivery
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |

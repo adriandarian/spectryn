@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_quality import (
+from spectryn.application.ai_quality import (
     AIQualityScorer,
     DimensionScore,
     QualityDimension,
@@ -16,9 +16,9 @@ from spectra.application.ai_quality import (
     build_quality_prompt,
     parse_quality_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -404,7 +404,7 @@ class TestAIQualityScorer:
 
     def test_score_with_fallback(self, well_written_story: UserStory) -> None:
         """Test scoring with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             scorer = AIQualityScorer()
@@ -443,7 +443,7 @@ class TestAIQualityScorer:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -467,7 +467,7 @@ class TestAIQualityScorer:
 
     def test_fallback_poor_story(self, poor_story: UserStory) -> None:
         """Test that poor stories get low fallback scores."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             scorer = AIQualityScorer()
@@ -480,7 +480,7 @@ class TestAIQualityScorer:
 
     def test_fallback_incomplete_story(self, incomplete_story: UserStory) -> None:
         """Test that incomplete stories get medium fallback scores."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             scorer = AIQualityScorer()

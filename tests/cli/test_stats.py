@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.output import Console
-from spectra.cli.stats import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.output import Console
+from spectryn.cli.stats import (
     StoryStats,
     VelocityStats,
     collect_stats_from_directory,
@@ -361,7 +361,7 @@ class TestRunStats:
         console = MagicMock(spec=Console)
 
         # Create empty directory and mock Path.cwd()
-        with patch("spectra.cli.stats.Path") as mock_path:
+        with patch("spectryn.cli.stats.Path") as mock_path:
             mock_cwd = MagicMock()
             mock_cwd.glob.return_value = []
             mock_path.cwd.return_value = mock_cwd
@@ -388,7 +388,7 @@ class TestRunStats:
         console = MagicMock(spec=Console)
         console.color = False
 
-        with patch("spectra.cli.stats.Path") as mock_path:
+        with patch("spectryn.cli.stats.Path") as mock_path:
             mock_cwd = MagicMock()
             mock_cwd.glob.return_value = [tmp_path / "test.md"]
             mock_cwd.__str__ = lambda _: str(tmp_path)
@@ -396,7 +396,7 @@ class TestRunStats:
             mock_path.return_value.is_dir.return_value = False
             mock_path.return_value.exists.return_value = False
 
-            with patch("spectra.cli.stats.collect_stats_from_directory") as mock_collect:
+            with patch("spectryn.cli.stats.collect_stats_from_directory") as mock_collect:
                 mock_collect.return_value = StoryStats(total_stories=1, done=1)
                 result = run_stats(console)
 

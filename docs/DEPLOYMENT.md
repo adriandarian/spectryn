@@ -1,12 +1,12 @@
 # Deployment
 
-Guide for deploying the spectra documentation site.
+Guide for deploying the spectryn documentation site.
 
 ## Vercel Deployment
 
 ### One-Click Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/adriandarian/spectra&root-directory=docs)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/adriandarian/spectryn&root-directory=docs)
 
 ### Manual Setup
 
@@ -26,7 +26,7 @@ For custom domains, no additional environment variables are needed.
 
 For GitHub Pages (subdirectory deployment):
 ```
-VITEPRESS_BASE=/spectra/
+VITEPRESS_BASE=/spectryn/
 ```
 
 ## GitHub Pages Deployment
@@ -35,7 +35,7 @@ To deploy to GitHub Pages instead:
 
 1. Set the environment variable:
    ```bash
-   VITEPRESS_BASE=/spectra/
+   VITEPRESS_BASE=/spectryn/
    ```
 
 2. Build:
@@ -77,7 +77,7 @@ jobs:
       - name: Build
         run: cd docs && npm run build
         env:
-          VITEPRESS_BASE: /spectra/
+          VITEPRESS_BASE: /spectryn/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

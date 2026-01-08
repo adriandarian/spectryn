@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.application.webhook import (
+from spectryn.application.webhook import (
     WebhookDisplay,
     WebhookEvent,
     WebhookEventType,

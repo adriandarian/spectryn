@@ -8,15 +8,15 @@ from datetime import datetime
 
 import pytest
 
-from spectra.cli.dashboard import (
+from spectryn.cli.dashboard import (
     Dashboard,
     DashboardData,
     StoryStatus,
     load_dashboard_data,
     run_dashboard,
 )
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.output import Console
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.output import Console
 
 
 # =============================================================================

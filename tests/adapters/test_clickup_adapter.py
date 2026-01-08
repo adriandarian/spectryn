@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.clickup.adapter import ClickUpAdapter
-from spectra.adapters.clickup.client import ClickUpApiClient, ClickUpRateLimiter
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.clickup.adapter import ClickUpAdapter
+from spectryn.adapters.clickup.client import ClickUpApiClient, ClickUpRateLimiter
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -66,7 +66,7 @@ class TestClickUpApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.clickup.client.requests.Session") as mock:
+        with patch("spectryn.adapters.clickup.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -569,7 +569,7 @@ class TestClickUpApiClientWebhooks:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.clickup.client.requests.Session") as mock:
+        with patch("spectryn.adapters.clickup.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -820,7 +820,7 @@ class TestClickUpAdapterDependencies:
 
     def test_create_link_depends_on(self, adapter, mock_client):
         """Should create a DEPENDS_ON link."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("task123", "task456", LinkType.DEPENDS_ON)
 
@@ -832,7 +832,7 @@ class TestClickUpAdapterDependencies:
 
     def test_create_link_blocked_by(self, adapter, mock_client):
         """Should create a BLOCKS link (maps to blocked_by)."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("task123", "task456", LinkType.BLOCKS)
 
@@ -848,7 +848,7 @@ class TestClickUpAdapterDependencies:
         adapter = ClickUpAdapter(api_token="test_token", dry_run=True)
         adapter._client = mock_client
 
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         result = adapter.create_link("task123", "task456", LinkType.DEPENDS_ON)
 
@@ -993,7 +993,7 @@ class TestClickUpAdapterAttachments:
     @pytest.fixture
     def adapter(self, mock_client):
         """Create adapter with mock client."""
-        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+        with patch("spectryn.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
             adapter = ClickUpAdapter(
                 api_token="test-token",
                 space_id="space123",
@@ -1060,7 +1060,7 @@ class TestClickUpAdapterAttachments:
 
     def test_upload_task_attachment_dry_run(self, mock_client):
         """Should not upload in dry-run mode."""
-        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+        with patch("spectryn.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
             adapter = ClickUpAdapter(
                 api_token="test-token",
                 space_id="space123",
@@ -1085,7 +1085,7 @@ class TestClickUpAdapterAttachments:
 
     def test_delete_task_attachment_dry_run(self, mock_client):
         """Should not delete in dry-run mode."""
-        with patch("spectra.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
+        with patch("spectryn.adapters.clickup.adapter.ClickUpApiClient", return_value=mock_client):
             adapter = ClickUpAdapter(
                 api_token="test-token",
                 space_id="space123",

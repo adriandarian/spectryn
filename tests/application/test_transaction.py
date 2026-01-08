@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.sync.transaction import (
+from spectryn.application.sync.transaction import (
     OperationType,
     RollbackResult,
     TransactionalSync,

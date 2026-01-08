@@ -1,6 +1,6 @@
 # Azure DevOps Integration Guide
 
-spectra supports Azure DevOps for syncing markdown specifications to Work Items. This guide covers configuration, authentication, and advanced features.
+spectryn supports Azure DevOps for syncing markdown specifications to Work Items. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -16,18 +16,18 @@ The Azure DevOps adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Azure DevOps
-spectra sync --markdown EPIC.md --tracker azure --project MyProject --execute
+spectryn sync --markdown EPIC.md --tracker azure --project MyProject --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Azure DevOps connection settings
@@ -66,7 +66,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [azure_devops]
@@ -110,7 +110,7 @@ export AZURE_DEVOPS_ITERATION_PATH="MyProject\Sprint 1"
 ### CLI Arguments
 
 ```bash
-spectra sync \
+spectryn sync \
   --tracker azure \
   --markdown EPIC.md \
   --project MyProject \
@@ -125,7 +125,7 @@ spectra sync \
 1. Go to **User Settings** → **Personal access tokens**
 2. Click **+ New Token**
 3. Configure:
-   - **Name**: spectra-sync
+   - **Name**: spectryn-sync
    - **Organization**: Select your organization
    - **Expiration**: Set appropriate expiration
    - **Scopes**: Select these scopes:
@@ -150,7 +150,7 @@ azure_devops:
 
 ### Work Item Hierarchy
 
-spectra maps to Azure DevOps hierarchy:
+spectryn maps to Azure DevOps hierarchy:
 
 | Markdown | Azure DevOps |
 |----------|--------------|
@@ -359,13 +359,13 @@ azure_devops:
 ### 2. Preview Sync
 
 ```bash
-spectra sync --tracker azure --markdown epic.md --project MyProject
+spectryn sync --tracker azure --markdown epic.md --project MyProject
 ```
 
 ### 3. Execute Sync
 
 ```bash
-spectra sync --tracker azure --markdown epic.md --project MyProject --execute
+spectryn sync --tracker azure --markdown epic.md --project MyProject --execute
 ```
 
 ### 4. View Results
@@ -389,11 +389,11 @@ steps:
     inputs:
       versionSpec: '3.11'
 
-  - script: pip install spectra
-    displayName: 'Install spectra'
+  - script: pip install spectryn
+    displayName: 'Install spectryn'
 
   - script: |
-      spectra sync \
+      spectryn sync \
         --tracker azure \
         --markdown docs/EPIC.md \
         --project $(System.TeamProject) \

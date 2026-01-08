@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.application.watch import (
+from spectryn.application.watch import (
     FileChange,
     FileWatcher,
     WatchDisplay,

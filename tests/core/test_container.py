@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 import pytest
 
-from spectra.core.container import (
+from spectryn.core.container import (
     CircularDependencyError,
     Container,
     Lifecycle,

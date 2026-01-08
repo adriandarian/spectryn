@@ -1,8 +1,8 @@
-# spectra GitHub Action
+# spectryn GitHub Action
 
 Sync markdown documentation to Jira issues, epics, and subtasks directly from your CI/CD pipeline.
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-spectra--sync-blue?logo=github)](https://github.com/marketplace/actions/spectra-sync)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-spectryn--sync-blue?logo=github)](https://github.com/marketplace/actions/spectryn-sync)
 
 ## Features
 
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync to Jira
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Preview Sync
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -145,7 +145,7 @@ jobs:
       
       - name: Sync to Jira
         id: sync
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/epics/Q1-2024.md
           epic-key: PROJ-100
@@ -181,7 +181,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync All Epics
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/ROADMAP.md
           multi-epic: true
@@ -209,7 +209,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Pull from Jira
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -245,7 +245,7 @@ jobs:
       
       - name: Sync to Jira
         id: sync
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -284,7 +284,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync to Jira
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -304,7 +304,7 @@ jobs:
 
 ## Markdown Format
 
-The action expects markdown files in the spectra format:
+The action expects markdown files in the spectryn format:
 
 ```markdown
 # Epic: PROJ-123 - Authentication System
@@ -326,7 +326,7 @@ The action expects markdown files in the spectra format:
 - [ ] Testing: Write integration tests (2 pts)
 ```
 
-See the [spectra documentation](https://github.com/spectra/spectra) for the complete format specification.
+See the [spectryn documentation](https://github.com/spectryn/spectryn) for the complete format specification.
 
 ## Troubleshooting
 

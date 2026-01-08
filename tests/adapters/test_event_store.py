@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.event_store import FileEventStore, MemoryEventStore
-from spectra.core.domain.events import (
+from spectryn.adapters.event_store import FileEventStore, MemoryEventStore
+from spectryn.core.domain.events import (
     DomainEvent,
     StoryMatched,
     StoryUpdated,
     SyncCompleted,
     SyncStarted,
 )
-from spectra.core.ports.event_store import (
+from spectryn.core.ports.event_store import (
     ConcurrencyError,
     EventQuery,
     EventStorePort,

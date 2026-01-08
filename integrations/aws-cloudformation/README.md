@@ -24,8 +24,8 @@ AWS CloudFormation templates for deploying Spectra to AWS.
 ```bash
 # Deploy the main stack
 aws cloudformation create-stack \
-  --stack-name spectra-sync \
-  --template-body file://spectra-fargate.yaml \
+  --stack-name spectryn-sync \
+  --template-body file://spectryn-fargate.yaml \
   --parameters \
     ParameterKey=JiraUrl,ParameterValue=https://company.atlassian.net \
     ParameterKey=JiraEmail,ParameterValue=user@company.com \
@@ -38,8 +38,8 @@ aws cloudformation create-stack \
 
 ```bash
 sam deploy \
-  --template-file spectra-lambda.yaml \
-  --stack-name spectra-lambda \
+  --template-file spectryn-lambda.yaml \
+  --stack-name spectryn-lambda \
   --parameter-overrides \
     JiraUrl=https://company.atlassian.net \
     JiraEmail=user@company.com \
@@ -51,11 +51,11 @@ sam deploy \
 
 | Template | Description |
 |----------|-------------|
-| `spectra-fargate.yaml` | ECS Fargate deployment |
-| `spectra-lambda.yaml` | Lambda-based scheduled sync |
-| `spectra-ecs.yaml` | ECS with EC2 instances |
-| `spectra-vpc.yaml` | VPC infrastructure |
-| `spectra-secrets.yaml` | Secrets Manager setup |
+| `spectryn-fargate.yaml` | ECS Fargate deployment |
+| `spectryn-lambda.yaml` | Lambda-based scheduled sync |
+| `spectryn-ecs.yaml` | ECS with EC2 instances |
+| `spectryn-vpc.yaml` | VPC infrastructure |
+| `spectryn-secrets.yaml` | Secrets Manager setup |
 
 ## Configuration
 
@@ -73,7 +73,7 @@ sam deploy \
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `Environment` | `production` | Environment name |
-| `SpectraImage` | `spectra/spectra:latest` | Container image |
+| `SpectraImage` | `spectryn/spectryn:latest` | Container image |
 | `Schedule` | `rate(6 hours)` | EventBridge schedule |
 | `DryRun` | `false` | Enable dry-run mode |
 | `VpcId` | Create new | Existing VPC ID |
@@ -117,8 +117,8 @@ sam deploy \
 
 ```bash
 aws cloudformation create-stack \
-  --stack-name spectra-sync \
-  --template-body file://spectra-fargate.yaml \
+  --stack-name spectryn-sync \
+  --template-body file://spectryn-fargate.yaml \
   --parameters \
     ParameterKey=VpcId,ParameterValue=vpc-12345678 \
     ParameterKey=SubnetIds,ParameterValue="subnet-111,subnet-222" \
@@ -133,8 +133,8 @@ aws cloudformation create-stack \
 
 ```bash
 aws cloudformation create-stack \
-  --stack-name spectra-lambda \
-  --template-body file://spectra-lambda.yaml \
+  --stack-name spectryn-lambda \
+  --template-body file://spectryn-lambda.yaml \
   --parameters \
     ParameterKey=Schedule,ParameterValue="cron(0 */4 * * ? *)" \
     ParameterKey=JiraUrl,ParameterValue=https://company.atlassian.net \
@@ -147,10 +147,10 @@ aws cloudformation create-stack \
 
 ```bash
 # Delete the stack
-aws cloudformation delete-stack --stack-name spectra-sync
+aws cloudformation delete-stack --stack-name spectryn-sync
 
 # Wait for deletion
-aws cloudformation wait stack-delete-complete --stack-name spectra-sync
+aws cloudformation wait stack-delete-complete --stack-name spectryn-sync
 ```
 
 ## License

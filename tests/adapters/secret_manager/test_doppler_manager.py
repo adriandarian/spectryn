@@ -12,11 +12,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.secret_manager.doppler_manager import (
+from spectryn.adapters.secret_manager.doppler_manager import (
     DopplerConfig,
     DopplerSecretManager,
 )
-from spectra.core.ports.secret_manager import (
+from spectryn.core.ports.secret_manager import (
     AccessDeniedError,
     AuthenticationError,
     SecretBackend,

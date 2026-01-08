@@ -1,6 +1,6 @@
 # Plane.so Integration Guide
 
-spectra supports Plane.so for syncing markdown specifications. This guide covers configuration, authentication, workspace and project setup, self-hosted instances, and advanced features.
+spectryn supports Plane.so for syncing markdown specifications. This guide covers configuration, authentication, workspace and project setup, self-hosted instances, and advanced features.
 
 ## Overview
 
@@ -21,18 +21,18 @@ The Plane.so adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Plane.so
-spectra --markdown EPIC.md --tracker plane --execute
+spectryn --markdown EPIC.md --tracker plane --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Plane.so connection settings
@@ -68,7 +68,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [plane]
@@ -111,7 +111,7 @@ export PLANE_EPIC_AS_CYCLE=true
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker plane \
   --plane-api-token your-token \
@@ -132,11 +132,11 @@ spectra \
    - Click on your profile icon (top right)
    - Go to **Settings** → **API Tokens** (or **Account Settings** → **API**)
    - Click **Generate Token** or **Create Token**
-   - Give it a descriptive name (e.g., "spectra-sync")
+   - Give it a descriptive name (e.g., "spectryn-sync")
    - Select appropriate permissions:
      - **Read**: View issues, cycles, modules
      - **Write**: Create and update issues, cycles, modules
-     - **Full access**: Complete access (recommended for spectra)
+     - **Full access**: Complete access (recommended for spectryn)
    - Copy the token immediately (you won't be able to see it again)
 
 3. **Set Environment Variables**
@@ -218,7 +218,7 @@ Plane.so supports self-hosted instances. To use a self-hosted instance:
 Set the `api_url` to your self-hosted instance URL:
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 plane:
   api_token: your-api-token
   workspace_slug: your-workspace-slug
@@ -259,7 +259,7 @@ Plane.so uses states to track issue status. The adapter maps standard statuses t
 
 ### Default Status Mapping
 
-| spectra Status | Plane.so State |
+| spectryn Status | Plane.so State |
 |---------------|----------------|
 | Backlog       | Backlog        |
 | Todo          | Todo           |
@@ -295,7 +295,7 @@ Plane.so supports issue priorities. The adapter maps standard priorities:
 
 ### Default Priority Mapping
 
-| spectra Priority | Plane.so Priority |
+| spectryn Priority | Plane.so Priority |
 |------------------|-------------------|
 | Critical         | Urgent            |
 | High             | High              |
@@ -329,7 +329,7 @@ Plane.so supports both Cycles (sprints) and Modules (epics) for organizing work:
   - Useful for feature-based organization
   - Modules group related issues
 
-Configure in your `.spectra.yaml`:
+Configure in your `.spectryn.yaml`:
 
 ```yaml
 plane:
@@ -437,16 +437,16 @@ Plane.so supports assigning issues to team members:
 
 ```bash
 # Dry run (preview changes)
-spectra --markdown EPIC.md --tracker plane
+spectryn --markdown EPIC.md --tracker plane
 
 # Execute sync
-spectra --markdown EPIC.md --tracker plane --execute
+spectryn --markdown EPIC.md --tracker plane --execute
 ```
 
 ### With Custom Configuration
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 plane:
   api_token: ${PLANE_API_TOKEN}
   workspace_slug: my-company
@@ -462,7 +462,7 @@ sync:
 ### Self-Hosted Instance
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 plane:
   api_token: ${PLANE_API_TOKEN}
   workspace_slug: my-company
@@ -548,7 +548,7 @@ sync:
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker plane --verbose
+spectryn --markdown EPIC.md --tracker plane --verbose
 ```
 
 Or set in config:

@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.hook import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.hook import (
     PRE_COMMIT_SCRIPT,
     PRE_PUSH_SCRIPT,
     get_git_hooks_dir,
@@ -18,7 +18,7 @@ from spectra.cli.hook import (
     run_hook_uninstall,
     uninstall_hook,
 )
-from spectra.cli.output import Console
+from spectryn.cli.output import Console
 
 
 class TestGetGitHooksDir:
@@ -29,7 +29,7 @@ class TestGetGitHooksDir:
         git_dir = tmp_path / ".git"
         git_dir.mkdir()
 
-        with patch("spectra.cli.hook.Path") as mock_path:
+        with patch("spectryn.cli.hook.Path") as mock_path:
             # Make Path(".git") return our mock
             mock_git = MagicMock()
             mock_git.is_dir.return_value = True
@@ -41,7 +41,7 @@ class TestGetGitHooksDir:
 
     def test_returns_none_when_no_git_dir(self, tmp_path: Path):
         """Test returns None when not in a git repository."""
-        with patch("spectra.cli.hook.Path") as mock_path:
+        with patch("spectryn.cli.hook.Path") as mock_path:
             mock_git = MagicMock()
             mock_git.is_dir.return_value = False
 
@@ -190,7 +190,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="pre-commit")
 
         assert result == ExitCode.SUCCESS
@@ -204,7 +204,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="pre-push")
 
         assert result == ExitCode.SUCCESS
@@ -218,7 +218,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="all")
 
         assert result == ExitCode.SUCCESS
@@ -229,7 +229,7 @@ class TestRunHookInstall:
         """Test error when not in a git repository."""
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=None):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=None):
             result = run_hook_install(console)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -242,7 +242,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="unknown")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -261,7 +261,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="pre-commit")
 
         assert result == ExitCode.SUCCESS
@@ -281,7 +281,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="pre-commit", force=False)
 
         assert result == ExitCode.SUCCESS
@@ -300,7 +300,7 @@ class TestRunHookInstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_install(console, hook_type="pre-commit", force=True)
 
         assert result == ExitCode.SUCCESS
@@ -320,7 +320,7 @@ class TestRunHookUninstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_uninstall(console, hook_type="pre-commit")
 
         assert result == ExitCode.SUCCESS
@@ -336,7 +336,7 @@ class TestRunHookUninstall:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_uninstall(console, hook_type="all")
 
         assert result == ExitCode.SUCCESS
@@ -347,7 +347,7 @@ class TestRunHookUninstall:
         """Test error when not in a git repository."""
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=None):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=None):
             result = run_hook_uninstall(console)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -366,7 +366,7 @@ class TestRunHookStatus:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_status(console)
 
         assert result == ExitCode.SUCCESS
@@ -381,7 +381,7 @@ class TestRunHookStatus:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_status(console)
 
         assert result == ExitCode.SUCCESS
@@ -394,7 +394,7 @@ class TestRunHookStatus:
 
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=hooks_dir):
             result = run_hook_status(console)
 
         assert result == ExitCode.SUCCESS
@@ -404,7 +404,7 @@ class TestRunHookStatus:
         """Test error when not in a git repository."""
         console = MagicMock(spec=Console)
 
-        with patch("spectra.cli.hook.get_git_hooks_dir", return_value=None):
+        with patch("spectryn.cli.hook.get_git_hooks_dir", return_value=None):
             result = run_hook_status(console)
 
         assert result == ExitCode.CONFIG_ERROR

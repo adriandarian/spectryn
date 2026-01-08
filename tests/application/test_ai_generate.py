@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_generate import (
+from spectryn.application.ai_generate import (
     AIStoryGenerator,
     GeneratedStory,
     GenerationOptions,
@@ -16,8 +16,8 @@ from spectra.application.ai_generate import (
     convert_to_user_stories,
     parse_generated_stories,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestGenerationOptions:
@@ -308,7 +308,7 @@ class TestAIStoryGenerator:
 
     def test_generate_without_llm_provider(self) -> None:
         """Test generation fails gracefully without LLM provider."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = False
             mock_manager.return_value = mock_mgr
@@ -340,7 +340,7 @@ class TestAIStoryGenerator:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -365,7 +365,7 @@ class TestAIStoryGenerator:
 
     def test_generate_handles_llm_error(self) -> None:
         """Test handling of LLM errors."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
             mock_mgr.prompt.side_effect = Exception("API rate limit exceeded")

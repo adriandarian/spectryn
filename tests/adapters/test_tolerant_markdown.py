@@ -13,7 +13,7 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.parsers import (
+from spectryn.adapters.parsers import (
     MarkdownParser,
     ParseErrorCode,
     ParseErrorInfo,

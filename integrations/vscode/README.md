@@ -1,4 +1,4 @@
-# spectra for VS Code
+# spectryn for VS Code
 
 Sync markdown documentation with Jira directly from VS Code.
 
@@ -29,18 +29,18 @@ Sync markdown documentation with Jira directly from VS Code.
 
 | Command | Description | Keybinding |
 |---------|-------------|------------|
-| `spectra: Validate` | Validate markdown | `Ctrl+Shift+V` |
-| `spectra: Sync` | Sync (dry-run) | `Ctrl+Shift+S` |
-| `spectra: Sync Execute` | Sync (execute) | - |
-| `spectra: Dashboard` | Show dashboard | - |
-| `spectra: Go to Story` | Jump to story | `Ctrl+Shift+G` |
-| `spectra: Setup Wizard` | Run init | - |
+| `spectryn: Validate` | Validate markdown | `Ctrl+Shift+V` |
+| `spectryn: Sync` | Sync (dry-run) | `Ctrl+Shift+S` |
+| `spectryn: Sync Execute` | Sync (execute) | - |
+| `spectryn: Dashboard` | Show dashboard | - |
+| `spectryn: Go to Story` | Jump to story | `Ctrl+Shift+G` |
+| `spectryn: Setup Wizard` | Run init | - |
 
 ## 📦 Installation
 
 ### From VSIX
 1. Download the `.vsix` file
-2. Run `code --install-extension spectra-1.0.0.vsix`
+2. Run `code --install-extension spectryn-1.0.0.vsix`
 
 ### From Source
 ```bash
@@ -52,16 +52,16 @@ npm run compile
 
 ## ⚙️ Configuration
 
-Open Settings (`Ctrl+,`) and search for "spectra":
+Open Settings (`Ctrl+,`) and search for "spectryn":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `spectra.executable` | `spectra` | Path to spectra CLI |
-| `spectra.jiraUrl` | - | Jira instance URL |
-| `spectra.autoValidate` | `true` | Validate on save |
-| `spectra.showStoryDecorations` | `true` | Highlight story IDs |
-| `spectra.showCodeLens` | `true` | Show action buttons |
-| `spectra.showStatusBar` | `true` | Show status bar item |
+| `spectryn.executable` | `spectryn` | Path to spectryn CLI |
+| `spectryn.jiraUrl` | - | Jira instance URL |
+| `spectryn.autoValidate` | `true` | Validate on save |
+| `spectryn.showStoryDecorations` | `true` | Highlight story IDs |
+| `spectryn.showCodeLens` | `true` | Show action buttons |
+| `spectryn.showStatusBar` | `true` | Show status bar item |
 
 ## 🎯 Usage
 
@@ -103,7 +103,7 @@ The extension recognizes stories in this format:
 ## 🔧 Requirements
 
 - VS Code 1.80.0 or higher
-- spectra CLI installed and in PATH
+- spectryn CLI installed and in PATH
 
 ## 📝 Release Notes
 

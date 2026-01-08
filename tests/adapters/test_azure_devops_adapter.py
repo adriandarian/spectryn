@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.azure_devops.adapter import AzureDevOpsAdapter
-from spectra.adapters.azure_devops.client import AzureDevOpsApiClient, AzureDevOpsRateLimiter
-from spectra.adapters.azure_devops.plugin import AzureDevOpsTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.azure_devops.adapter import AzureDevOpsAdapter
+from spectryn.adapters.azure_devops.client import AzureDevOpsApiClient, AzureDevOpsRateLimiter
+from spectryn.adapters.azure_devops.plugin import AzureDevOpsTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -81,7 +81,7 @@ class TestAzureDevOpsApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.azure_devops.client.requests.Session") as mock:
+        with patch("spectryn.adapters.azure_devops.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -233,7 +233,7 @@ class TestAzureDevOpsAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.azure_devops.adapter.AzureDevOpsApiClient") as mock:
+        with patch("spectryn.adapters.azure_devops.adapter.AzureDevOpsApiClient") as mock:
             client = MagicMock()
             client.get_work_item_states.return_value = [
                 {"name": "New", "category": "Proposed"},
@@ -527,7 +527,7 @@ class TestAzureDevOpsTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.azure_devops.plugin.AzureDevOpsAdapter") as MockAdapter:
+        with patch("spectryn.adapters.azure_devops.plugin.AzureDevOpsAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -553,7 +553,7 @@ class TestAzureDevOpsTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.azure_devops.plugin.AzureDevOpsAdapter") as MockAdapter:
+        with patch("spectryn.adapters.azure_devops.plugin.AzureDevOpsAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -588,7 +588,7 @@ class TestAzureDevOpsAdapterIntegration:
     @pytest.fixture
     def live_adapter(self):
         """Create adapter with mocked client for workflow tests."""
-        with patch("spectra.adapters.azure_devops.adapter.AzureDevOpsApiClient") as MockClient:
+        with patch("spectryn.adapters.azure_devops.adapter.AzureDevOpsApiClient") as MockClient:
             client = MagicMock()
             client.get_work_item_states.return_value = [
                 {"name": "New", "category": "Proposed"},

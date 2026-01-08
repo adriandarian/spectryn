@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.rst_parser import RstParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.rst_parser import RstParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestRstParser:

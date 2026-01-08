@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from spectra.application.sync.time_tracking import (
+from spectryn.application.sync.time_tracking import (
     TimeTrackingExtractor,
     TimeTrackingInfo,
     TimeTrackingSyncConfig,

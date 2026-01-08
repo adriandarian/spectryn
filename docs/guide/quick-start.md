@@ -1,10 +1,10 @@
 # Quick Start
 
-Get up and running with spectra in 5 minutes.
+Get up and running with spectryn in 5 minutes.
 
 ## Step 1: Choose Your Tracker
 
-spectra supports many issue trackers. Set up credentials for your tracker:
+spectryn supports many issue trackers. Set up credentials for your tracker:
 
 ::: code-group
 
@@ -149,20 +149,20 @@ Create `EPIC.md` with your user stories:
 Before syncing, validate your markdown format:
 
 ```bash
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 ```
 
-If there are formatting issues, spectra will suggest fixes:
+If there are formatting issues, spectryn will suggest fixes:
 
 ```bash
 # View the format guide
-spectra --validate --markdown EPIC.md --show-guide
+spectryn --validate --markdown EPIC.md --show-guide
 
 # Get an AI prompt to fix issues (copy-paste to ChatGPT/Claude)
-spectra --validate --markdown EPIC.md --suggest-fix
+spectryn --validate --markdown EPIC.md --suggest-fix
 
 # Auto-fix with AI CLI tools (if installed)
-spectra --validate --markdown EPIC.md --auto-fix
+spectryn --validate --markdown EPIC.md --auto-fix
 ```
 
 ::: tip AI Fix
@@ -171,36 +171,36 @@ See the [AI Fix Guide](/guide/ai-fix) for detailed help with fixing formatting i
 
 ## Step 4: Preview Changes
 
-Run spectra in dry-run mode (default) to see what would change:
+Run spectryn in dry-run mode (default) to see what would change:
 
 ::: code-group
 
 ```bash [Jira]
-spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123
+spectryn sync --tracker jira --markdown EPIC.md --epic PROJ-123
 ```
 
 ```bash [GitHub]
-spectra sync --tracker github --markdown EPIC.md --repo owner/repo
+spectryn sync --tracker github --markdown EPIC.md --repo owner/repo
 ```
 
 ```bash [GitLab]
-spectra sync --tracker gitlab --markdown EPIC.md --project group/project
+spectryn sync --tracker gitlab --markdown EPIC.md --project group/project
 ```
 
 ```bash [Linear]
-spectra sync --tracker linear --markdown EPIC.md --team TEAM
+spectryn sync --tracker linear --markdown EPIC.md --team TEAM
 ```
 
 ```bash [Azure DevOps]
-spectra sync --tracker azure --markdown EPIC.md --project MyProject
+spectryn sync --tracker azure --markdown EPIC.md --project MyProject
 ```
 
 ```bash [Asana]
-spectra sync --tracker asana --markdown EPIC.md --project 1234567890
+spectryn sync --tracker asana --markdown EPIC.md --project 1234567890
 ```
 
 ```bash [Trello]
-spectra sync --tracker trello --markdown EPIC.md --board abc123
+spectryn sync --tracker trello --markdown EPIC.md --board abc123
 ```
 
 :::
@@ -209,7 +209,7 @@ You'll see a detailed preview:
 
 ```
 ╭──────────────────────────────────────────────╮
-│  spectra - Sync Preview                      │
+│  spectryn - Sync Preview                      │
 ╰──────────────────────────────────────────────╯
 
 Tracker: jira
@@ -243,19 +243,19 @@ When you're happy with the preview, add `--execute`:
 ::: code-group
 
 ```bash [Jira]
-spectra sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
+spectryn sync --tracker jira --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
 ```bash [GitHub]
-spectra sync --tracker github --markdown EPIC.md --repo owner/repo --execute
+spectryn sync --tracker github --markdown EPIC.md --repo owner/repo --execute
 ```
 
 ```bash [GitLab]
-spectra sync --tracker gitlab --markdown EPIC.md --project group/project --execute
+spectryn sync --tracker gitlab --markdown EPIC.md --project group/project --execute
 ```
 
 ```bash [Linear]
-spectra sync --tracker linear --markdown EPIC.md --team TEAM --execute
+spectryn sync --tracker linear --markdown EPIC.md --team TEAM --execute
 ```
 
 :::
@@ -280,37 +280,37 @@ Check your tracker to see the synced issues:
 
 ```bash
 # Sync descriptions only
-spectra sync -m EPIC.md --epic PROJ-123 -x --phase descriptions
+spectryn sync -m EPIC.md --epic PROJ-123 -x --phase descriptions
 
 # Sync subtasks only
-spectra sync -m EPIC.md --epic PROJ-123 -x --phase subtasks
+spectryn sync -m EPIC.md --epic PROJ-123 -x --phase subtasks
 
 # Sync specific story
-spectra sync -m EPIC.md --epic PROJ-123 -x --story STORY-001
+spectryn sync -m EPIC.md --epic PROJ-123 -x --story STORY-001
 
 # Skip confirmation prompts (for CI/CD)
-spectra sync -m EPIC.md --epic PROJ-123 -x --no-confirm
+spectryn sync -m EPIC.md --epic PROJ-123 -x --no-confirm
 
 # Verbose output
-spectra sync -m EPIC.md --epic PROJ-123 -v
+spectryn sync -m EPIC.md --epic PROJ-123 -v
 
 # Export results to JSON
-spectra sync -m EPIC.md --epic PROJ-123 -x --export results.json
+spectryn sync -m EPIC.md --epic PROJ-123 -x --export results.json
 ```
 
 ## Backup & Rollback
 
-spectra automatically creates backups before sync:
+spectryn automatically creates backups before sync:
 
 ```bash
 # List backups
-spectra backup list
+spectryn backup list
 
 # View diff from backup
-spectra backup diff --epic PROJ-123
+spectryn backup diff --epic PROJ-123
 
 # Rollback to previous state
-spectra backup rollback --epic PROJ-123 --execute
+spectryn backup rollback --epic PROJ-123 --execute
 ```
 
 ## Next Steps

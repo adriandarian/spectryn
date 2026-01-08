@@ -6,22 +6,22 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from spectra.adapters.confluence.adapter import ConfluenceAdapter
-from spectra.adapters.confluence.client import (
+from spectryn.adapters.confluence.adapter import ConfluenceAdapter
+from spectryn.adapters.confluence.client import (
     ConfluenceAPIError,
     ConfluenceClient,
     ConfluenceConfig,
 )
-from spectra.adapters.confluence.plugin import ConfluencePlugin, create_plugin
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import (
+from spectryn.adapters.confluence.plugin import ConfluencePlugin, create_plugin
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import (
     AcceptanceCriteria,
     Description,
     IssueKey,
     StoryId,
 )
-from spectra.core.ports.document_output import (
+from spectryn.core.ports.document_output import (
     AuthenticationError,
     NotFoundError,
 )

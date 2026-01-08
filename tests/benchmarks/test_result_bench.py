@@ -13,7 +13,7 @@ Run with:
 
 import pytest
 
-from spectra.core.result import Err, Ok, Result
+from spectryn.core.result import Err, Ok, Result
 
 
 # Mark all tests in this module as benchmark tests (skipped by default)

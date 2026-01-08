@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.application.sync.field_mapping import (
+from spectryn.application.sync.field_mapping import (
     FieldDefinition,
     FieldDirection,
     FieldMapper,

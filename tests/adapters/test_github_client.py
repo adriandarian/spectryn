@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.github.client import GitHubApiClient, GitHubRateLimiter
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.github.client import GitHubApiClient, GitHubRateLimiter
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -35,7 +35,7 @@ def mock_issue_response():
 @pytest.fixture
 def mock_session():
     """Create a mock requests session."""
-    with patch("spectra.adapters.github.client.requests.Session") as mock:
+    with patch("spectryn.adapters.github.client.requests.Session") as mock:
         session_instance = MagicMock()
         mock.return_value = session_instance
         yield session_instance
@@ -164,8 +164,8 @@ class TestGitHubApiClientInit:
 
     def test_init_sets_attributes(self):
         """Test initialization sets basic attributes."""
-        with patch("spectra.adapters.github.client.requests.Session"):
-            from spectra.adapters.github.client import GitHubApiClient
+        with patch("spectryn.adapters.github.client.requests.Session"):
+            from spectryn.adapters.github.client import GitHubApiClient
 
             client = GitHubApiClient(
                 token="ghp_test",
@@ -179,8 +179,8 @@ class TestGitHubApiClientInit:
 
     def test_init_with_custom_base_url(self):
         """Test initialization with enterprise URL."""
-        with patch("spectra.adapters.github.client.requests.Session"):
-            from spectra.adapters.github.client import GitHubApiClient
+        with patch("spectryn.adapters.github.client.requests.Session"):
+            from spectryn.adapters.github.client import GitHubApiClient
 
             client = GitHubApiClient(
                 token="ghp_test",
@@ -193,8 +193,8 @@ class TestGitHubApiClientInit:
 
     def test_init_without_rate_limiter(self):
         """Test initialization without rate limiting."""
-        with patch("spectra.adapters.github.client.requests.Session"):
-            from spectra.adapters.github.client import GitHubApiClient
+        with patch("spectryn.adapters.github.client.requests.Session"):
+            from spectryn.adapters.github.client import GitHubApiClient
 
             client = GitHubApiClient(
                 token="ghp_test",
@@ -207,8 +207,8 @@ class TestGitHubApiClientInit:
 
     def test_init_with_rate_limiter(self):
         """Test initialization with rate limiting."""
-        with patch("spectra.adapters.github.client.requests.Session"):
-            from spectra.adapters.github.client import GitHubApiClient
+        with patch("spectryn.adapters.github.client.requests.Session"):
+            from spectryn.adapters.github.client import GitHubApiClient
 
             client = GitHubApiClient(
                 token="ghp_test",
@@ -238,7 +238,7 @@ class TestGitHubApiClientMethods:
 
     def test_post_request_dry_run(self, mock_session):
         """Test POST respects dry_run mode."""
-        with patch("spectra.adapters.github.client.requests.Session") as mock:
+        with patch("spectryn.adapters.github.client.requests.Session") as mock:
             mock.return_value = mock_session
             client = GitHubApiClient(
                 token="ghp_test",
@@ -267,7 +267,7 @@ class TestGitHubApiClientMethods:
 
     def test_patch_request_dry_run(self, mock_session):
         """Test PATCH respects dry_run mode."""
-        with patch("spectra.adapters.github.client.requests.Session") as mock:
+        with patch("spectryn.adapters.github.client.requests.Session") as mock:
             mock.return_value = mock_session
             client = GitHubApiClient(
                 token="ghp_test",
@@ -283,7 +283,7 @@ class TestGitHubApiClientMethods:
 
     def test_delete_request_dry_run(self, mock_session):
         """Test DELETE respects dry_run mode."""
-        with patch("spectra.adapters.github.client.requests.Session") as mock:
+        with patch("spectryn.adapters.github.client.requests.Session") as mock:
             mock.return_value = mock_session
             client = GitHubApiClient(
                 token="ghp_test",

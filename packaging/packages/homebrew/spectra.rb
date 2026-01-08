@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Homebrew formula for spectra
-# To install from local tap:
-#   brew tap adriandarian/spectra https://github.com/adriandarian/homebrew-spectra
+# To install:
+#   brew tap adriandarian/spectra https://github.com/adriandarian/spectra
 #   brew install spectra
 #
 # Or install directly:

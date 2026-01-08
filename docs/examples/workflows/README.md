@@ -4,7 +4,7 @@ This directory contains example GitHub Actions workflows demonstrating how to us
 
 ## Available Examples
 
-### [spectra-sync.yml](spectra-sync.yml)
+### [spectryn-sync.yml](spectryn-sync.yml)
 **Sync Documentation to Jira**
 
 This workflow demonstrates:
@@ -13,7 +13,7 @@ This workflow demonstrates:
 - Manual dry-run trigger via `workflow_dispatch`
 - Incremental sync with result export
 
-### [spectra-pull.yml](spectra-pull.yml)
+### [spectryn-pull.yml](spectryn-pull.yml)
 **Pull from Jira to Markdown**
 
 This workflow demonstrates:

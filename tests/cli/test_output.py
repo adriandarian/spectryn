@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.output import (
+from spectryn.cli.output import (
     Colors,
     ColorTheme,
     Console,

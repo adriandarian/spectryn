@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
+from spectryn.adapters.parsers.markdown import MarkdownParser
 
 
 class TestExtractTrackerInfo:

@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.shortcut.adapter import ShortcutAdapter
-from spectra.adapters.shortcut.client import ShortcutApiClient, ShortcutRateLimiter
-from spectra.adapters.shortcut.plugin import ShortcutTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.shortcut.adapter import ShortcutAdapter
+from spectryn.adapters.shortcut.client import ShortcutApiClient, ShortcutRateLimiter
+from spectryn.adapters.shortcut.plugin import ShortcutTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -69,7 +69,7 @@ class TestShortcutApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -403,7 +403,7 @@ class TestShortcutAdapter:
 
     def test_create_link_depends_on(self, adapter, mock_client):
         """Should create a DEPENDS_ON link."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("123", "456", LinkType.DEPENDS_ON)
 
@@ -411,7 +411,7 @@ class TestShortcutAdapter:
 
     def test_create_link_is_dependency_of(self, adapter, mock_client):
         """Should create an IS_DEPENDENCY_OF link (reverse)."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("123", "456", LinkType.IS_DEPENDENCY_OF)
 
@@ -419,7 +419,7 @@ class TestShortcutAdapter:
 
     def test_create_link_blocks(self, adapter, mock_client):
         """Should create a BLOCKS link (target depends on source)."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("123", "456", LinkType.BLOCKS)
 
@@ -427,7 +427,7 @@ class TestShortcutAdapter:
 
     def test_create_link_is_blocked_by(self, adapter, mock_client):
         """Should create an IS_BLOCKED_BY link (source depends on target)."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.create_link("123", "456", LinkType.IS_BLOCKED_BY)
 
@@ -435,7 +435,7 @@ class TestShortcutAdapter:
 
     def test_delete_link(self, adapter, mock_client):
         """Should delete a dependency link."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         adapter.delete_link("123", "456", LinkType.DEPENDS_ON)
 
@@ -461,7 +461,7 @@ class TestShortcutTrackerPlugin:
 
     def test_metadata(self):
         """Should have correct metadata."""
-        from spectra.plugins.base import PluginType
+        from spectryn.plugins.base import PluginType
 
         plugin = ShortcutTrackerPlugin()
         metadata = plugin.metadata
@@ -477,7 +477,7 @@ class TestShortcutTrackerPlugin:
         plugin = ShortcutTrackerPlugin()
         plugin.config = {}
 
-        with patch("spectra.adapters.shortcut.plugin.ShortcutAdapter") as mock_adapter:
+        with patch("spectryn.adapters.shortcut.plugin.ShortcutAdapter") as mock_adapter:
             mock_adapter.return_value = MagicMock()
             plugin.initialize()
 
@@ -516,7 +516,7 @@ class TestShortcutAdapterWebhooks:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.shortcut.adapter.ShortcutApiClient"):
+        with patch("spectryn.adapters.shortcut.adapter.ShortcutApiClient"):
             adapter = ShortcutAdapter(
                 api_token="test_token",
                 workspace_id="test_workspace",
@@ -629,7 +629,7 @@ class TestShortcutApiClientWebhooks:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -729,7 +729,7 @@ class TestShortcutAdapterIterations:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.shortcut.adapter.ShortcutApiClient"):
+        with patch("spectryn.adapters.shortcut.adapter.ShortcutApiClient"):
             adapter = ShortcutAdapter(
                 api_token="test_token",
                 workspace_id="test_workspace",
@@ -881,7 +881,7 @@ class TestShortcutApiClientIterations:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -1137,7 +1137,7 @@ class TestShortcutApiClientAttachments:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -1192,7 +1192,7 @@ class TestShortcutApiClientAttachments:
 
     def test_upload_file_dry_run(self):
         """Should not upload in dry run mode."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             mock_session = MagicMock()
             mock.return_value = mock_session
             client = ShortcutApiClient(
@@ -1267,7 +1267,7 @@ class TestShortcutApiClientAttachments:
 
     def test_delete_file_dry_run(self):
         """Should not delete in dry run mode."""
-        with patch("spectra.adapters.shortcut.client.requests.Session") as mock:
+        with patch("spectryn.adapters.shortcut.client.requests.Session") as mock:
             mock_session = MagicMock()
             mock.return_value = mock_session
             client = ShortcutApiClient(

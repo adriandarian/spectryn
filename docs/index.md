@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: spectra
+  name: spectryn
   text: Specs to Trackers, Simplified
   tagline: A production-grade CLI tool for syncing markdown specs to issue trackers. Supports Jira, GitHub Issues, Azure DevOps, Linear, Trello, ClickUp, and more.
   image:
     src: /hero-illustration.svg
-    alt: spectra
+    alt: spectryn
   actions:
     - theme: brand
       text: Get Started →
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/adriandarian/spectra
+      link: https://github.com/adriandarian/spectryn
 
 features:
   - icon: 🚀
@@ -59,19 +59,20 @@ features:
 ::: code-group
 
 ```bash [pip]
-pip install spectra
+pip install spectryn
 ```
 
 ```bash [pipx]
-pipx install spectra
+pipx install spectryn
 ```
 
 ```bash [Homebrew]
-brew install adriandarian/spectra/spectra
+brew tap adriandarian/spectra https://github.com/adriandarian/spectra
+brew install spectra
 ```
 
 ```bash [Docker]
-docker pull adriandarian/spectra:latest
+docker pull adriandarian/spectryn:latest
 ```
 
 :::
@@ -80,18 +81,18 @@ docker pull adriandarian/spectra:latest
 
 ```bash
 # Preview changes (dry-run)
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 
 # Execute sync
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 
 # Sync with interactive mode
-spectra --markdown EPIC.md --epic PROJ-123 --execute --interactive
+spectryn --markdown EPIC.md --epic PROJ-123 --execute --interactive
 ```
 
 ## What People Are Saying
 
-> "spectra transformed our sprint planning. We write everything in markdown and sync to Jira in seconds."
+> "spectryn transformed our sprint planning. We write everything in markdown and sync to Jira in seconds."
 
 > "Finally, a tool that understands developers prefer markdown over clicking through Jira forms."
 

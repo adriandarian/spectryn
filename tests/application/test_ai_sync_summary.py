@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_sync_summary import (
+from spectryn.application.ai_sync_summary import (
     AISyncSummaryGenerator,
     SummaryOptions,
     SyncAction,
@@ -314,7 +314,7 @@ class TestAISyncSummaryGenerator:
 
     def test_generate_with_fallback(self, sync_operation: SyncOperation) -> None:
         """Test generation falls back without LLM."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             generator = AISyncSummaryGenerator()
@@ -336,7 +336,7 @@ class TestAISyncSummaryGenerator:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -363,7 +363,7 @@ class TestAISyncSummaryGenerator:
             {"id": "US-003", "title": "Broken", "error": "Missing field"},
         ]
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             generator = AISyncSummaryGenerator()

@@ -19,10 +19,10 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers.markdown import MarkdownParser
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, StoryId
+from spectryn.adapters.parsers.markdown import MarkdownParser
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, StoryId
 
 
 # Mark all tests in this module as slow (skipped by default)

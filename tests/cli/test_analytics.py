@@ -8,7 +8,7 @@ import json
 
 import pytest
 
-from spectra.cli.analytics import (
+from spectryn.cli.analytics import (
     AnalyticsConfig,
     AnalyticsData,
     AnalyticsManager,

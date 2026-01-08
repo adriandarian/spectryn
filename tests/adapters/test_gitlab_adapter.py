@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.gitlab.adapter import GitLabAdapter
-from spectra.adapters.gitlab.client import GitLabApiClient
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.gitlab.adapter import GitLabAdapter
+from spectryn.adapters.gitlab.client import GitLabApiClient
+from spectryn.core.ports.issue_tracker import (
     IssueData,
     IssueTrackerError,
     NotFoundError,
@@ -27,7 +27,7 @@ class TestGitLabAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.gitlab.adapter.GitLabApiClient") as mock:
+        with patch("spectryn.adapters.gitlab.adapter.GitLabApiClient") as mock:
             client = MagicMock()
             client.list_labels.return_value = []
             client.is_connected = True

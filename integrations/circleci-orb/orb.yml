@@ -5,16 +5,16 @@ version: 2.1
 
 description: |
   Sync markdown specifications to issue trackers (Jira, GitHub, Azure DevOps, Linear).
-  Source: https://github.com/spectra/spectra
+  Source: https://github.com/spectryn/spectryn
 
 display:
-  home_url: https://github.com/spectra/spectra
-  source_url: https://github.com/spectra/spectra/tree/main/integrations/circleci-orb
+  home_url: https://github.com/spectryn/spectryn
+  source_url: https://github.com/spectryn/spectryn/tree/main/integrations/circleci-orb
 
 # Executors
 executors:
   python:
-    description: Python executor for running spectra
+    description: Python executor for running spectryn
     parameters:
       python-version:
         type: string
@@ -25,7 +25,7 @@ executors:
 # Commands
 commands:
   install:
-    description: Install spectra CLI
+    description: Install spectryn CLI
     parameters:
       version:
         type: string
@@ -37,11 +37,11 @@ commands:
           command: |
             pip install --upgrade pip
             if [ "<< parameters.version >>" = "latest" ]; then
-              pip install spectra
+              pip install spectryn
             else
-              pip install spectra==<< parameters.version >>
+              pip install spectryn==<< parameters.version >>
             fi
-            spectra --version
+            spectryn --version
 
   sync-command:
     description: Sync markdown to tracker
@@ -114,7 +114,7 @@ commands:
             fi
 
             # Build command
-            CMD="spectra sync --markdown << parameters.markdown-file >> --tracker << parameters.tracker >>"
+            CMD="spectryn sync --markdown << parameters.markdown-file >> --tracker << parameters.tracker >>"
 
             # Add epic key if provided
             if [ -n "<< parameters.epic-key >>" ]; then
@@ -186,7 +186,7 @@ commands:
           command: |
             echo "✔️ Spectra Validation"
             echo "===================="
-            spectra validate --markdown << parameters.markdown-file >>
+            spectryn validate --markdown << parameters.markdown-file >>
             echo "✅ Validation passed!"
 
   pull-command:
@@ -214,7 +214,7 @@ commands:
             echo "🔄 Spectra Pull"
             echo "==============="
 
-            CMD="spectra pull --epic << parameters.epic-key >> --output << parameters.output-file >> --tracker << parameters.tracker >>"
+            CMD="spectryn pull --epic << parameters.epic-key >> --output << parameters.output-file >> --tracker << parameters.tracker >>"
 
             if [ "<< parameters.verbose >>" = "true" ]; then
               CMD="$CMD --verbose"
@@ -243,7 +243,7 @@ commands:
           command: |
             echo "📊 Spectra Diff"
             echo "==============="
-            spectra diff --markdown << parameters.markdown-file >> --epic << parameters.epic-key >> --tracker << parameters.tracker >>
+            spectryn diff --markdown << parameters.markdown-file >> --epic << parameters.epic-key >> --tracker << parameters.tracker >>
 
 # Jobs
 jobs:
@@ -295,17 +295,17 @@ jobs:
       python-version:
         type: string
         default: "3.11"
-      spectra-version:
+      spectryn-version:
         type: string
         default: "latest"
     steps:
       - checkout
       - restore_cache:
           keys:
-            - spectra-pip-{{ checksum "requirements.txt" }}
-            - spectra-pip-
+            - spectryn-pip-{{ checksum "requirements.txt" }}
+            - spectryn-pip-
       - install:
-          version: << parameters.spectra-version >>
+          version: << parameters.spectryn-version >>
       - sync-command:
           markdown-file: << parameters.markdown-file >>
           epic-key: << parameters.epic-key >>
@@ -320,7 +320,7 @@ jobs:
           verbose: << parameters.verbose >>
           export-results: << parameters.export-results >>
       - save_cache:
-          key: spectra-pip-{{ checksum "requirements.txt" }}
+          key: spectryn-pip-{{ checksum "requirements.txt" }}
           paths:
             - ~/.cache/pip
       - when:
@@ -342,13 +342,13 @@ jobs:
       python-version:
         type: string
         default: "3.11"
-      spectra-version:
+      spectryn-version:
         type: string
         default: "latest"
     steps:
       - checkout
       - install:
-          version: << parameters.spectra-version >>
+          version: << parameters.spectryn-version >>
       - validate-command:
           markdown-file: << parameters.markdown-file >>
 
@@ -374,13 +374,13 @@ jobs:
       python-version:
         type: string
         default: "3.11"
-      spectra-version:
+      spectryn-version:
         type: string
         default: "latest"
     steps:
       - checkout
       - install:
-          version: << parameters.spectra-version >>
+          version: << parameters.spectryn-version >>
       - pull-command:
           epic-key: << parameters.epic-key >>
           output-file: << parameters.output-file >>
@@ -409,13 +409,13 @@ jobs:
       python-version:
         type: string
         default: "3.11"
-      spectra-version:
+      spectryn-version:
         type: string
         default: "latest"
     steps:
       - checkout
       - install:
-          version: << parameters.spectra-version >>
+          version: << parameters.spectryn-version >>
       - diff-command:
           markdown-file: << parameters.markdown-file >>
           epic-key: << parameters.epic-key >>
@@ -428,11 +428,11 @@ examples:
     usage:
       version: 2.1
       orbs:
-        spectra: spectra/spectra@1.0.0
+        spectryn: spectryn/spectryn@1.0.0
       workflows:
         sync:
           jobs:
-            - spectra/sync:
+            - spectryn/sync:
                 markdown-file: docs/user-stories.md
                 epic-key: PROJ-123
                 context: jira-credentials
@@ -442,15 +442,15 @@ examples:
     usage:
       version: 2.1
       orbs:
-        spectra: spectra/spectra@1.0.0
+        spectryn: spectryn/spectryn@1.0.0
       workflows:
         main:
           jobs:
-            - spectra/validate:
+            - spectryn/validate:
                 markdown-file: docs/user-stories.md
-            - spectra/sync:
+            - spectryn/sync:
                 requires:
-                  - spectra/validate
+                  - spectryn/validate
                 markdown-file: docs/user-stories.md
                 epic-key: PROJ-123
                 context: jira-credentials
@@ -460,7 +460,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        spectra: spectra/spectra@1.0.0
+        spectryn: spectryn/spectryn@1.0.0
       workflows:
         nightly:
           triggers:
@@ -470,7 +470,7 @@ examples:
                   branches:
                     only: main
           jobs:
-            - spectra/sync:
+            - spectryn/sync:
                 markdown-file: docs/user-stories.md
                 epic-key: PROJ-123
                 incremental: true

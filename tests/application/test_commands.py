@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.application.commands import (
+from spectryn.application.commands import (
     AddCommentCommand,
     CommandBatch,
     CommandResult,
@@ -13,8 +13,8 @@ from spectra.application.commands import (
     UpdateDescriptionCommand,
     UpdateSubtaskCommand,
 )
-from spectra.core.domain.events import EventBus
-from spectra.core.ports.issue_tracker import IssueData, IssueTrackerError
+from spectryn.core.domain.events import EventBus
+from spectryn.core.ports.issue_tracker import IssueData, IssueTrackerError
 
 
 class TestCommandResult:
@@ -148,7 +148,7 @@ class TestUpdateDescriptionCommand:
         assert "Undo failed" in undo_result.error
 
     def test_execute_with_event_bus(self, mock_tracker):
-        from spectra.core.domain.events import DomainEvent, StoryUpdated
+        from spectryn.core.domain.events import DomainEvent, StoryUpdated
 
         event_bus = EventBus()
         events: list[DomainEvent] = []
@@ -297,7 +297,7 @@ class TestCreateSubtaskCommand:
         assert "Failed" in result.error
 
     def test_execute_with_event_bus(self, mock_tracker):
-        from spectra.core.domain.events import DomainEvent, SubtaskCreated
+        from spectryn.core.domain.events import DomainEvent, SubtaskCreated
 
         event_bus = EventBus()
         events: list[DomainEvent] = []
@@ -479,7 +479,7 @@ class TestAddCommentCommand:
         assert "Comment failed" in result.error
 
     def test_execute_with_event_bus(self, mock_tracker):
-        from spectra.core.domain.events import CommentAdded, DomainEvent
+        from spectryn.core.domain.events import CommentAdded, DomainEvent
 
         event_bus = EventBus()
         events: list[DomainEvent] = []
@@ -650,7 +650,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_failed_operation_str_format(self):
         """Test FailedOperation string representation."""
-        from spectra.application.sync.orchestrator import FailedOperation
+        from spectryn.application.sync.orchestrator import FailedOperation
 
         failed = FailedOperation(
             operation="update_description",
@@ -666,7 +666,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_failed_operation_without_story_id(self):
         """Test FailedOperation without story ID."""
-        from spectra.application.sync.orchestrator import FailedOperation
+        from spectryn.application.sync.orchestrator import FailedOperation
 
         failed = FailedOperation(
             operation="transition_status",
@@ -680,7 +680,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_add_failed_operation(self):
         """Test adding failed operations to SyncResult."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult()
         assert result.success is True
@@ -699,7 +699,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_partial_success_detection(self):
         """Test partial success when some ops succeed and some fail."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult()
         result.stories_updated = 5
@@ -722,7 +722,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_success_rate_calculation(self):
         """Test success rate calculation."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult()
         result.stories_updated = 8
@@ -739,14 +739,14 @@ class TestSyncResultGracefulDegradation:
 
     def test_success_rate_with_no_operations(self):
         """Test success rate when no operations performed."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult()
         assert result.success_rate == 1.0
 
     def test_summary_generation(self):
         """Test summary generation."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult()
         result.stories_matched = 10
@@ -768,7 +768,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_summary_dry_run(self):
         """Test summary shows dry run mode."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult(dry_run=True)
         summary = result.summary()
@@ -777,7 +777,7 @@ class TestSyncResultGracefulDegradation:
 
     def test_summary_success(self):
         """Test summary for successful sync."""
-        from spectra.application.sync.orchestrator import SyncResult
+        from spectryn.application.sync.orchestrator import SyncResult
 
         result = SyncResult(dry_run=False)
         result.stories_updated = 5
@@ -793,8 +793,8 @@ class TestSyncOrchestratorGracefulDegradation:
         self, mock_tracker_with_children, mock_parser, mock_formatter, sync_config
     ):
         """Test that sync continues even if one description update fails."""
-        from spectra.application.sync.orchestrator import SyncOrchestrator
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.application.sync.orchestrator import SyncOrchestrator
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         # Make one description update fail
         call_count = [0]
@@ -826,7 +826,7 @@ class TestSyncOrchestratorGracefulDegradation:
         self, mock_tracker_with_children, mock_parser, mock_formatter, sync_config
     ):
         """Test that failed operations are tracked in a list."""
-        from spectra.application.sync.orchestrator import SyncOrchestrator
+        from spectryn.application.sync.orchestrator import SyncOrchestrator
 
         orchestrator = SyncOrchestrator(
             tracker=mock_tracker_with_children,

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from spectra.adapters.confluence.client import (
+from spectryn.adapters.confluence.client import (
     ConfluenceAPIError,
     ConfluenceClient,
     ConfluenceConfig,

@@ -1,22 +1,22 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: spectrasyncs.spectra.io
+  name: spectrynsyncs.spectryn.io
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 spec:
-  group: spectra.io
+  group: spectryn.io
   names:
     kind: SpectraSync
     listKind: SpectraSyncList
-    plural: spectrasyncs
-    singular: spectrasync
+    plural: spectrynsyncs
+    singular: spectrynsync
     shortNames:
       - ss
       - sync

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_split import (
+from spectryn.application.ai_split import (
     AIStorySplitter,
     SplitOptions,
     SplitReason,
@@ -15,9 +15,9 @@ from spectra.application.ai_split import (
     build_splitting_prompt,
     parse_splitting_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -407,7 +407,7 @@ class TestAIStorySplitter:
 
     def test_analyze_with_fallback(self, large_story: UserStory) -> None:
         """Test analyzing with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             splitter = AIStorySplitter()
@@ -450,7 +450,7 @@ class TestAIStorySplitter:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -488,7 +488,7 @@ class TestAIStorySplitter:
 
     def test_small_story_not_split(self, small_story: UserStory) -> None:
         """Test that small stories are not flagged for splitting."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             splitter = AIStorySplitter()

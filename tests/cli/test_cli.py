@@ -6,10 +6,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.application.sync import SyncResult
-from spectra.cli.app import main, run_sync, validate_markdown
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.output import Colors, Console, Symbols
+from spectryn.application.sync import SyncResult
+from spectryn.cli.app import main, run_sync, validate_markdown
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.output import Colors, Console, Symbols
 
 
 # =============================================================================
@@ -559,13 +559,13 @@ class TestMainFunction:
 
     def test_main_validate_mode(self):
         """Test main in validate mode."""
-        from spectra.cli.exit_codes import ExitCode
+        from spectryn.cli.exit_codes import ExitCode
 
         with (
             patch(
                 "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
-            patch("spectra.cli.app.validate_markdown") as mock_validate,
+            patch("spectryn.cli.app.validate_markdown") as mock_validate,
         ):
             mock_validate.return_value = ExitCode.SUCCESS
             result = main()
@@ -578,7 +578,7 @@ class TestMainFunction:
             patch(
                 "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
-            patch("spectra.cli.app.validate_markdown") as mock_validate,
+            patch("spectryn.cli.app.validate_markdown") as mock_validate,
         ):
             mock_validate.side_effect = KeyboardInterrupt()
             result = main()
@@ -590,7 +590,7 @@ class TestMainFunction:
             patch(
                 "sys.argv", ["spectra", "--input", "test.md", "--epic", "PROJ-123", "--validate"]
             ),
-            patch("spectra.cli.app.validate_markdown") as mock_validate,
+            patch("spectryn.cli.app.validate_markdown") as mock_validate,
         ):
             mock_validate.side_effect = RuntimeError("Unexpected")
             result = main()
@@ -654,7 +654,7 @@ This is not a valid story format.
 
     def test_validate_markdown_file_not_found(self, console, capsys):
         """Test validation with non-existent file."""
-        from spectra.cli.exit_codes import ExitCode
+        from spectryn.cli.exit_codes import ExitCode
 
         result = validate_markdown(console, "/nonexistent/file.md")
 
@@ -671,7 +671,7 @@ class TestRunSync:
 
     def test_run_sync_config_errors(self, console, base_cli_args, capsys):
         """Test run_sync returns error on config validation failure."""
-        with patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider:
+        with patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider:
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = ["Missing JIRA_URL"]
 
@@ -685,7 +685,7 @@ class TestRunSync:
         """Test run_sync returns error when markdown file not found."""
         base_cli_args.input = "/nonexistent/path/epic.md"
 
-        with patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider:
+        with patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider:
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = []
             mock_provider.config_file_path = None
@@ -705,8 +705,8 @@ class TestRunSync:
         base_cli_args.input = str(md_file)
 
         with (
-            patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
-            patch("spectra.cli.app.JiraAdapter") as MockAdapter,
+            patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider,
+            patch("spectryn.cli.app.JiraAdapter") as MockAdapter,
         ):
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = []
@@ -731,10 +731,10 @@ class TestRunSync:
         base_cli_args.no_confirm = False
 
         with (
-            patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
-            patch("spectra.cli.app.JiraAdapter") as MockAdapter,
-            patch("spectra.cli.app.SyncOrchestrator") as MockOrchestrator,
-            patch("spectra.application.sync.StateStore") as MockStateStore,
+            patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider,
+            patch("spectryn.cli.app.JiraAdapter") as MockAdapter,
+            patch("spectryn.cli.app.SyncOrchestrator") as MockOrchestrator,
+            patch("spectryn.application.sync.StateStore") as MockStateStore,
         ):
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = []
@@ -765,10 +765,10 @@ class TestRunSync:
         base_cli_args.input = str(md_file)
 
         with (
-            patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
-            patch("spectra.cli.app.JiraAdapter") as MockAdapter,
-            patch("spectra.cli.app.SyncOrchestrator") as MockOrchestrator,
-            patch("spectra.application.sync.StateStore") as MockStateStore,
+            patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider,
+            patch("spectryn.cli.app.JiraAdapter") as MockAdapter,
+            patch("spectryn.cli.app.SyncOrchestrator") as MockOrchestrator,
+            patch("spectryn.application.sync.StateStore") as MockStateStore,
         ):
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = []
@@ -803,10 +803,10 @@ class TestRunSync:
         base_cli_args.export = str(export_file)
 
         with (
-            patch("spectra.cli.app.EnvironmentConfigProvider") as MockProvider,
-            patch("spectra.cli.app.JiraAdapter") as MockAdapter,
-            patch("spectra.cli.app.SyncOrchestrator") as MockOrchestrator,
-            patch("spectra.application.sync.StateStore") as MockStateStore,
+            patch("spectryn.cli.app.EnvironmentConfigProvider") as MockProvider,
+            patch("spectryn.cli.app.JiraAdapter") as MockAdapter,
+            patch("spectryn.cli.app.SyncOrchestrator") as MockOrchestrator,
+            patch("spectryn.application.sync.StateStore") as MockStateStore,
         ):
             mock_provider = MockProvider.return_value
             mock_provider.validate.return_value = []

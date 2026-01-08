@@ -1,37 +1,37 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: spectra-system
+  name: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
     control-plane: controller-manager
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: spectra-controller-manager
-  namespace: spectra-system
+  name: spectryn-controller-manager
+  namespace: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: spectra-manager-role
+  name: spectryn-manager-role
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 rules:
   # SpectraSync resources
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs
+      - spectrynsyncs
     verbs:
       - create
       - delete
@@ -41,17 +41,17 @@ rules:
       - update
       - watch
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs/status
+      - spectrynsyncs/status
     verbs:
       - get
       - patch
       - update
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs/finalizers
+      - spectrynsyncs/finalizers
     verbs:
       - update
   # Jobs for running syncs
@@ -135,27 +135,27 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: spectra-manager-rolebinding
+  name: spectryn-manager-rolebinding
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: spectra-manager-role
+  name: spectryn-manager-role
 subjects:
   - kind: ServiceAccount
-    name: spectra-controller-manager
-    namespace: spectra-system
+    name: spectryn-controller-manager
+    namespace: spectryn-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: spectra-leader-election-role
-  namespace: spectra-system
+  name: spectryn-leader-election-role
+  namespace: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 rules:
   - apiGroups:
       - ""
@@ -192,28 +192,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: spectra-leader-election-rolebinding
-  namespace: spectra-system
+  name: spectryn-leader-election-rolebinding
+  namespace: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: spectra-leader-election-role
+  name: spectryn-leader-election-role
 subjects:
   - kind: ServiceAccount
-    name: spectra-controller-manager
-    namespace: spectra-system
+    name: spectryn-controller-manager
+    namespace: spectryn-system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spectra-controller-manager
-  namespace: spectra-system
+  name: spectryn-controller-manager
+  namespace: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
     control-plane: controller-manager
 spec:
   replicas: 1
@@ -227,14 +227,14 @@ spec:
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:
-      serviceAccountName: spectra-controller-manager
+      serviceAccountName: spectryn-controller-manager
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: manager
-          image: spectra/operator:latest
+          image: spectryn/operator:latest
           imagePullPolicy: IfNotPresent
           command:
             - /manager
@@ -244,7 +244,7 @@ spec:
             - --metrics-bind-address=:8080
           env:
             - name: SPECTRA_IMAGE
-              value: spectra/spectra:latest
+              value: spectryn/spectryn:latest
             - name: SPECTRA_IMAGE_PULL_POLICY
               value: IfNotPresent
             - name: LOG_LEVEL
@@ -290,11 +290,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spectra-controller-manager-metrics
-  namespace: spectra-system
+  name: spectryn-controller-manager-metrics
+  namespace: spectryn-system
   labels:
-    app.kubernetes.io/name: spectra-operator
-    app.kubernetes.io/part-of: spectra
+    app.kubernetes.io/name: spectryn-operator
+    app.kubernetes.io/part-of: spectryn
     control-plane: controller-manager
 spec:
   ports:

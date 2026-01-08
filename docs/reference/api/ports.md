@@ -1,6 +1,6 @@
 # Ports & Adapters
 
-API reference for spectra's port interfaces and adapter implementations.
+API reference for spectryn's port interfaces and adapter implementations.
 
 ## Ports (Interfaces)
 
@@ -12,7 +12,7 @@ Interface for issue tracker integrations.
 
 ```python
 from abc import ABC, abstractmethod
-from spectra.core.domain import IssueData, SubtaskData, Status
+from spectryn.core.domain import IssueData, SubtaskData, Status
 
 class IssueTrackerPort(ABC):
     """Abstract interface for issue trackers."""
@@ -125,7 +125,7 @@ Interface for document parsers.
 
 ```python
 from abc import ABC, abstractmethod
-from spectra.core.domain import Epic
+from spectryn.core.domain import Epic
 
 class DocumentParserPort(ABC):
     """Abstract interface for document parsers."""
@@ -245,7 +245,7 @@ class ConfigProviderPort(ABC):
 Jira implementation of `IssueTrackerPort`.
 
 ```python
-from spectra.adapters.trackers.jira import JiraAdapter
+from spectryn.adapters.trackers.jira import JiraAdapter
 
 # Create adapter with credentials
 adapter = JiraAdapter(
@@ -265,7 +265,7 @@ adapter.transition_issue("PROJ-456", Status.DONE)
 Markdown implementation of `DocumentParserPort`.
 
 ```python
-from spectra.adapters.input.parsers import MarkdownParser
+from spectryn.adapters.input.parsers import MarkdownParser
 
 parser = MarkdownParser()
 
@@ -287,7 +287,7 @@ for error in errors:
 Atlassian Document Format implementation.
 
 ```python
-from spectra.adapters.output.formatters import ADFFormatter
+from spectryn.adapters.output.formatters import ADFFormatter
 
 formatter = ADFFormatter()
 
@@ -301,7 +301,7 @@ adf_content = formatter.format_description(story.description)
 Environment-based configuration.
 
 ```python
-from spectra.adapters.infrastructure.config import EnvironmentConfigProvider
+from spectryn.adapters.infrastructure.config import EnvironmentConfigProvider
 
 config = EnvironmentConfigProvider()
 
@@ -319,11 +319,11 @@ api_token = config.get_required("jira.api_token")
 
 ```python
 from linear_api import LinearClient
-from spectra.core.ports import IssueTrackerPort
-from spectra.core.domain import IssueData, Status
+from spectryn.core.ports import IssueTrackerPort
+from spectryn.core.domain import IssueData, Status
 
 class LinearAdapter(IssueTrackerPort):
-    """Linear.app adapter for spectra."""
+    """Linear.app adapter for spectryn."""
     
     def __init__(self, api_key: str):
         self.client = LinearClient(api_key=api_key)
@@ -386,7 +386,7 @@ class LinearAdapter(IssueTrackerPort):
 ### Register the Adapter
 
 ```python
-from spectra.plugins import get_registry
+from spectryn.plugins import get_registry
 
 registry = get_registry()
 registry.register_adapter("linear", LinearAdapter)
@@ -395,6 +395,6 @@ registry.register_adapter("linear", LinearAdapter)
 ### Use via CLI
 
 ```bash
-spectra --tracker linear --markdown EPIC.md --epic proj_123
+spectryn --tracker linear --markdown EPIC.md --epic proj_123
 ```
 

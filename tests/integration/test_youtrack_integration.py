@@ -10,9 +10,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.adapters.youtrack.adapter import YouTrackAdapter
-from spectra.core.ports.config_provider import YouTrackConfig
-from spectra.core.ports.issue_tracker import IssueTrackerError
+from spectryn.adapters.youtrack.adapter import YouTrackAdapter
+from spectryn.core.ports.config_provider import YouTrackConfig
+from spectryn.core.ports.issue_tracker import IssueTrackerError
 
 
 # =============================================================================
@@ -113,7 +113,7 @@ def mock_priorities_response():
 class TestYouTrackIntegration:
     """Integration tests for YouTrack adapter."""
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_get_current_user(self, mock_session, youtrack_config, mock_user_response):
         """Test getting current authenticated user."""
         mock_response = Mock()
@@ -128,7 +128,7 @@ class TestYouTrackIntegration:
         assert user["login"] == "testuser"
         assert user["email"] == "test@example.com"
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_get_issue(self, mock_session, youtrack_config, mock_issue_response):
         """Test getting a single issue."""
         mock_response = Mock()
@@ -159,7 +159,7 @@ class TestYouTrackIntegration:
         assert issue.status == "Open"
         assert issue.story_points == 5
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_search_issues(self, mock_session, youtrack_config, mock_issues_list_response):
         """Test searching for issues."""
         mock_response = Mock()
@@ -192,7 +192,7 @@ class TestYouTrackIntegration:
         assert issues[0].key == "PROJ-10"
         assert issues[1].key == "PROJ-11"
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_create_subtask(self, mock_session, youtrack_config, mock_issue_response):
         """Test creating a subtask."""
         # Mock issue creation response
@@ -233,7 +233,7 @@ class TestYouTrackIntegration:
 
         assert subtask_id == "PROJ-125"
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_update_issue_description(self, mock_session, youtrack_config, mock_issue_response):
         """Test updating issue description."""
         update_response = Mock()
@@ -248,7 +248,7 @@ class TestYouTrackIntegration:
 
         assert result is True
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_add_comment(self, mock_session, youtrack_config):
         """Test adding a comment."""
         comment_response = Mock()
@@ -263,7 +263,7 @@ class TestYouTrackIntegration:
 
         assert result is True
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_transition_issue(self, mock_session, youtrack_config, mock_states_response):
         """Test transitioning an issue."""
         transition_response = Mock()
@@ -293,7 +293,7 @@ class TestYouTrackIntegration:
 
         assert result is True
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_get_epic_children(self, mock_session, youtrack_config, mock_issues_list_response):
         """Test getting epic children."""
         search_response = Mock()
@@ -321,7 +321,7 @@ class TestYouTrackIntegration:
         assert children[0].key == "PROJ-10"
         assert children[1].key == "PROJ-11"
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_error_handling_authentication(self, mock_session, youtrack_config):
         """Test authentication error handling."""
         error_response = Mock()
@@ -336,7 +336,7 @@ class TestYouTrackIntegration:
         with pytest.raises(IssueTrackerError):
             adapter.get_current_user()
 
-    @patch("spectra.adapters.youtrack.client.requests.Session")
+    @patch("spectryn.adapters.youtrack.client.requests.Session")
     def test_error_handling_not_found(self, mock_session, youtrack_config):
         """Test not found error handling."""
         error_response = Mock()

@@ -14,7 +14,7 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.tolerant_markdown import (
+from spectryn.adapters.parsers.tolerant_markdown import (
     CodeBlock,
     CodeBlockCollection,
     CodeBlockType,

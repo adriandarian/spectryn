@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from spectra.application.sync.sprint_sync import (
+from spectryn.application.sync.sprint_sync import (
     Sprint,
     SprintAssignment,
     SprintExtractor,

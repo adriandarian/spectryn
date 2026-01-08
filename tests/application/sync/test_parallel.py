@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.sync.parallel import (
+from spectryn.application.sync.parallel import (
     EpicProgress,
     ParallelStrategy,
     ParallelSyncConfig,
@@ -15,8 +15,8 @@ from spectra.application.sync.parallel import (
     ParallelSyncResult,
     create_parallel_orchestrator,
 )
-from spectra.core.domain.entities import Epic, UserStory
-from spectra.core.domain.value_objects import Description, IssueKey, StoryId
+from spectryn.core.domain.entities import Epic, UserStory
+from spectryn.core.domain.value_objects import Description, IssueKey, StoryId
 
 
 @pytest.fixture
@@ -216,7 +216,7 @@ class TestParallelSyncOrchestrator:
         )
 
         # Mock the internal orchestrator
-        with patch("spectra.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
+        with patch("spectryn.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
             mock_orch = MagicMock()
             mock_orch._matches = {}
             mock_orch_cls.return_value = mock_orch
@@ -250,7 +250,7 @@ class TestParallelSyncOrchestrator:
             parallel_config=parallel_config,
         )
 
-        with patch("spectra.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
+        with patch("spectryn.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
             mock_orch = MagicMock()
             mock_orch._matches = {}
             mock_orch_cls.return_value = mock_orch
@@ -279,7 +279,7 @@ class TestParallelSyncOrchestrator:
             config=mock_config,
         )
 
-        with patch("spectra.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
+        with patch("spectryn.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
             mock_orch = MagicMock()
             mock_orch._matches = {}
             mock_orch_cls.return_value = mock_orch
@@ -314,7 +314,7 @@ class TestParallelSyncOrchestrator:
         def progress_callback(epic_key: str, status: str, progress: float) -> None:
             progress_calls.append((epic_key, status, progress))
 
-        with patch("spectra.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
+        with patch("spectryn.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
             mock_orch = MagicMock()
             mock_orch._matches = {}
             mock_orch_cls.return_value = mock_orch
@@ -406,7 +406,7 @@ class TestParallelSyncOrchestrator:
             parallel_config=parallel_config,
         )
 
-        with patch("spectra.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
+        with patch("spectryn.application.sync.orchestrator.SyncOrchestrator") as mock_orch_cls:
             # First epic fails
             mock_orch = MagicMock()
             mock_orch._fetch_jira_state.side_effect = Exception("API Error")

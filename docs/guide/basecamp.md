@@ -1,6 +1,6 @@
 # Basecamp Integration Guide
 
-spectra supports Basecamp 3 for syncing markdown specifications. This guide covers OAuth setup, account and project configuration, and the Todo vs Message mapping strategy.
+spectryn supports Basecamp 3 for syncing markdown specifications. This guide covers OAuth setup, account and project configuration, and the Todo vs Message mapping strategy.
 
 ## Overview
 
@@ -16,18 +16,18 @@ The Basecamp adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Basecamp
-spectra --markdown EPIC.md --tracker basecamp --execute
+spectryn --markdown EPIC.md --tracker basecamp --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Basecamp connection settings
@@ -46,7 +46,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [basecamp]
@@ -77,7 +77,7 @@ export BASECAMP_USE_MESSAGES_FOR_STORIES=false
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker basecamp \
   --basecamp-access-token your-token \
@@ -104,7 +104,7 @@ Basecamp 3 uses OAuth 2.0 for authentication. You'll need to create an OAuth app
 3. **Create New Application**
    - Click **"New application"** or **"Create a new application"**
    - Fill in the application details:
-     - **Name**: `spectra-sync` (or your preferred name)
+     - **Name**: `spectryn-sync` (or your preferred name)
      - **Description**: `CLI tool for syncing markdown specifications to Basecamp`
      - **Redirect URI**: `urn:ietf:wg:oauth:2.0:oob` (for CLI applications)
      - **Scopes**: Select the permissions you need:
@@ -129,7 +129,7 @@ There are two ways to get an access token:
 
 2. **Generate Token**
    - Click **"Create a new token"**
-   - Give it a name: `spectra-sync`
+   - Give it a name: `spectryn-sync`
    - Select scopes (same as OAuth scopes)
    - Copy the token immediately (shown only once)
 
@@ -167,7 +167,7 @@ If you're building an application that needs OAuth:
    - The response contains an `access_token`
    - Use this token for API requests
 
-### Step 3: Configure spectra
+### Step 3: Configure spectryn
 
 Set the access token as an environment variable:
 
@@ -334,7 +334,7 @@ basecamp:
 
 ### Mapping Summary
 
-| spectra Concept | Basecamp (Todos) | Basecamp (Messages) |
+| spectryn Concept | Basecamp (Todos) | Basecamp (Messages) |
 |----------------|------------------|---------------------|
 | Epic | Project or Todo Set | Project or Message Board Category |
 | Story | Todo | Message |
@@ -370,7 +370,7 @@ You can switch between modes, but note:
 
 Basecamp todos use a simple completion model. The adapter maps standard statuses:
 
-| spectra Status | Basecamp Todo Status |
+| spectryn Status | Basecamp Todo Status |
 |----------------|---------------------|
 | Done, Completed, Closed, Resolved | ✅ Completed |
 | Planned, To Do, Backlog | ⬜ Not Completed |
@@ -480,16 +480,16 @@ Basecamp API has a rate limit of **40 requests per 10 seconds**. The adapter:
 
 ```bash
 # Dry run (preview changes)
-spectra --markdown EPIC.md --tracker basecamp
+spectryn --markdown EPIC.md --tracker basecamp
 
 # Execute sync
-spectra --markdown EPIC.md --tracker basecamp --execute
+spectryn --markdown EPIC.md --tracker basecamp --execute
 ```
 
 ### With Custom Configuration
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 basecamp:
   access_token: ${BASECAMP_ACCESS_TOKEN}
   account_id: "123456"
@@ -564,7 +564,7 @@ sync:
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker basecamp --verbose
+spectryn --markdown EPIC.md --tracker basecamp --verbose
 ```
 
 Or set in config:
@@ -579,7 +579,7 @@ sync:
 Test your configuration:
 
 ```python
-from spectra.adapters.basecamp import BasecampAdapter
+from spectryn.adapters.basecamp import BasecampAdapter
 
 adapter = BasecampAdapter(
     access_token="your-token",

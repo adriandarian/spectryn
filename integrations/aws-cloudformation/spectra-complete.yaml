@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 AWSTemplateFormatVersion: '2010-09-09'
@@ -63,7 +63,7 @@ Parameters:
 
   SpectraImage:
     Type: String
-    Default: spectra/spectra:latest
+    Default: spectryn/spectryn:latest
 
   Schedule:
     Type: String
@@ -261,7 +261,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/spectra/${AWS::StackName}'
+      LogGroupName: !Sub '/spectryn/${AWS::StackName}'
       RetentionInDays: 30
 
   # ECS Cluster (for Fargate)
@@ -331,7 +331,7 @@ Resources:
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       TaskRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
-        - Name: spectra
+        - Name: spectryn
           Image: !Ref SpectraImage
           Essential: true
           LogConfiguration:
@@ -339,7 +339,7 @@ Resources:
             Options:
               awslogs-group: !Ref LogGroup
               awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: spectra
+              awslogs-stream-prefix: spectryn
 
   # EventBridge Rule
   ScheduleRule:

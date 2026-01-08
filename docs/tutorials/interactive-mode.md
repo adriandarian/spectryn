@@ -1,6 +1,6 @@
 # Interactive Mode
 
-Learn how to use spectra's interactive mode for step-by-step guided syncing.
+Learn how to use spectryn's interactive mode for step-by-step guided syncing.
 
 **Duration**: ~3 minutes
 
@@ -16,17 +16,17 @@ Interactive mode is perfect when you want to:
 - **Review each change** before applying
 - **Skip specific stories** that aren't ready
 - **Sync selectively** during development
-- **Learn** what spectra does step-by-step
+- **Learn** what spectryn does step-by-step
 
 ## Starting Interactive Mode
 
 <div class="terminal-session">
 
 ```bash
-$ spectra --markdown EPIC.md --epic PROJ-123 --interactive
+$ spectryn --markdown EPIC.md --epic PROJ-123 --interactive
 
 ╭──────────────────────────────────────────────────────────────╮
-│  spectra v1.0.0 - Interactive Mode                           │
+│  spectryn v1.0.0 - Interactive Mode                           │
 │  Syncing: EPIC.md → PROJ-123                                 │
 ╰──────────────────────────────────────────────────────────────╯
 
@@ -176,7 +176,7 @@ Interactive Session Complete
 ╰──────────────────────────────────────────────────────────────╯
 
 Skipped stories can be synced later with:
-  spectra --markdown EPIC.md --epic PROJ-123 --story US-002
+  spectryn --markdown EPIC.md --epic PROJ-123 --story US-002
 ```
 
 </div>
@@ -204,7 +204,7 @@ Skip stories that:
 ::: tip Resume Later
 Skipped stories can be synced individually:
 ```bash
-spectra -m EPIC.md -e PROJ-123 --story US-002 -x
+spectryn -m EPIC.md -e PROJ-123 --story US-002 -x
 ```
 :::
 

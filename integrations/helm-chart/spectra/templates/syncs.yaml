@@ -1,17 +1,17 @@
 {{/*
-Copyright (c) spectra
+Copyright (c) spectryn
 SPDX-License-Identifier: MIT
 */}}
 
 {{- range .Values.syncs }}
 ---
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: {{ .name }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "spectra.labels" $ | nindent 4 }}
+    {{- include "spectryn.labels" $ | nindent 4 }}
 spec:
   source:
     type: {{ .source.type }}

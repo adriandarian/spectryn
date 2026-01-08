@@ -1,11 +1,11 @@
 # CLI Reference
 
-Complete reference for all spectra command-line options.
+Complete reference for all spectryn command-line options.
 
 ## Synopsis
 
 ```bash
-spectra [OPTIONS]
+spectryn [OPTIONS]
 ```
 
 ## Required Options
@@ -64,7 +64,7 @@ spectra [OPTIONS]
 
 | Option | Description |
 |--------|-------------|
-| `--show-guide` | Display the spectra markdown format guide |
+| `--show-guide` | Display the spectryn markdown format guide |
 | `--suggest-fix` | Generate AI prompt for copy-paste fixing |
 | `--auto-fix` | Automatically fix using AI CLI tool |
 | `--ai-tool TOOL` | Specify AI tool for auto-fix (claude, ollama, aider, llm, mods, sgpt) |
@@ -102,108 +102,108 @@ See [AI Fix Guide](/guide/ai-fix) for detailed usage.
 
 ```bash
 # Preview changes (dry-run)
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 
 # Execute sync
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 
 # Short form
-spectra -m EPIC.md -e PROJ-123 -x
+spectryn -m EPIC.md -e PROJ-123 -x
 ```
 
 ### Sync Specific Phases
 
 ```bash
 # Sync descriptions only
-spectra -m EPIC.md -e PROJ-123 -x --phase descriptions
+spectryn -m EPIC.md -e PROJ-123 -x --phase descriptions
 
 # Sync subtasks only
-spectra -m EPIC.md -e PROJ-123 -x --phase subtasks
+spectryn -m EPIC.md -e PROJ-123 -x --phase subtasks
 
 # Sync comments only
-spectra -m EPIC.md -e PROJ-123 -x --phase comments
+spectryn -m EPIC.md -e PROJ-123 -x --phase comments
 
 # Sync status transitions only
-spectra -m EPIC.md -e PROJ-123 -x --phase statuses
+spectryn -m EPIC.md -e PROJ-123 -x --phase statuses
 ```
 
 ### Filter by Story
 
 ```bash
 # Sync specific story
-spectra -m EPIC.md -e PROJ-123 -x --story STORY-001
+spectryn -m EPIC.md -e PROJ-123 -x --story STORY-001
 
 # Multiple stories (run multiple times)
-spectra -m EPIC.md -e PROJ-123 -x --story STORY-001
-spectra -m EPIC.md -e PROJ-123 -x --story STORY-002
+spectryn -m EPIC.md -e PROJ-123 -x --story STORY-001
+spectryn -m EPIC.md -e PROJ-123 -x --story STORY-002
 ```
 
 ### CI/CD Usage
 
 ```bash
 # No prompts, JSON output
-spectra -m EPIC.md -e PROJ-123 -x --no-confirm --output json
+spectryn -m EPIC.md -e PROJ-123 -x --no-confirm --output json
 
 # Export results for processing
-spectra -m EPIC.md -e PROJ-123 -x --no-confirm --export results.json
+spectryn -m EPIC.md -e PROJ-123 -x --no-confirm --export results.json
 
 # Quiet mode (errors only)
-spectra -m EPIC.md -e PROJ-123 -x --no-confirm -q
+spectryn -m EPIC.md -e PROJ-123 -x --no-confirm -q
 ```
 
 ### Logging & Debugging
 
 ```bash
 # Verbose output
-spectra -m EPIC.md -e PROJ-123 -v
+spectryn -m EPIC.md -e PROJ-123 -v
 
 # Write logs to file
-spectra -m EPIC.md -e PROJ-123 -x --log-file sync.log
+spectryn -m EPIC.md -e PROJ-123 -x --log-file sync.log
 
 # JSON logs (for log aggregation)
-spectra -m EPIC.md -e PROJ-123 -x --log-format json
+spectryn -m EPIC.md -e PROJ-123 -x --log-format json
 
 # Full audit trail
-spectra -m EPIC.md -e PROJ-123 -x --audit-trail audit.json
+spectryn -m EPIC.md -e PROJ-123 -x --audit-trail audit.json
 ```
 
 ### Backup & Recovery
 
 ```bash
 # List backups
-spectra --list-backups
+spectryn --list-backups
 
 # View diff from latest backup
-spectra --diff-latest --epic PROJ-123
+spectryn --diff-latest --epic PROJ-123
 
 # View diff from specific backup
-spectra --diff-backup backup_20250113_120000 --epic PROJ-123
+spectryn --diff-backup backup_20250113_120000 --epic PROJ-123
 
 # Restore from backup (dry-run)
-spectra --restore-backup backup_20250113_120000 --epic PROJ-123
+spectryn --restore-backup backup_20250113_120000 --epic PROJ-123
 
 # Restore from backup (execute)
-spectra --restore-backup backup_20250113_120000 --epic PROJ-123 --execute
+spectryn --restore-backup backup_20250113_120000 --epic PROJ-123 --execute
 
 # Rollback last sync
-spectra --rollback --epic PROJ-123 --execute
+spectryn --rollback --epic PROJ-123 --execute
 ```
 
 ### Interactive Mode
 
 ```bash
 # Guided sync with previews
-spectra -m EPIC.md -e PROJ-123 --interactive
+spectryn -m EPIC.md -e PROJ-123 --interactive
 
 # Resume interrupted sync
-spectra -m EPIC.md -e PROJ-123 --resume
+spectryn -m EPIC.md -e PROJ-123 --resume
 ```
 
 ### Source File Update (Tracker Writeback)
 
 ```bash
 # Sync and write tracker info back to markdown file
-spectra -m EPIC.md -e PROJ-123 -x --update-source
+spectryn -m EPIC.md -e PROJ-123 -x --update-source
 
 # After sync, your markdown will contain:
 # > **Tracker:** Jira
@@ -217,29 +217,29 @@ spectra -m EPIC.md -e PROJ-123 -x --update-source
 
 ```bash
 # Validate markdown format only
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 
 # Validate with epic context
-spectra --validate --markdown EPIC.md --epic PROJ-123
+spectryn --validate --markdown EPIC.md --epic PROJ-123
 ```
 
 ### AI Fix
 
 ```bash
 # View the format guide
-spectra --validate --markdown EPIC.md --show-guide
+spectryn --validate --markdown EPIC.md --show-guide
 
 # Get AI prompt for copy-paste
-spectra --validate --markdown EPIC.md --suggest-fix
+spectryn --validate --markdown EPIC.md --suggest-fix
 
 # Auto-fix interactively (select AI tool)
-spectra --validate --markdown EPIC.md --auto-fix
+spectryn --validate --markdown EPIC.md --auto-fix
 
 # Auto-fix with specific AI tool
-spectra --validate --markdown EPIC.md --auto-fix --ai-tool claude
+spectryn --validate --markdown EPIC.md --auto-fix --ai-tool claude
 
 # List available AI tools
-spectra --list-ai-tools
+spectryn --list-ai-tools
 ```
 
 See [AI Fix Guide](/guide/ai-fix) for detailed usage and troubleshooting.
@@ -248,13 +248,13 @@ See [AI Fix Guide](/guide/ai-fix) for detailed usage and troubleshooting.
 
 ```bash
 # Use specific config file
-spectra -m EPIC.md -e PROJ-123 --config ~/.spectra-prod.yaml
+spectryn -m EPIC.md -e PROJ-123 --config ~/.spectryn-prod.yaml
 
 # Override Jira URL
-spectra -m EPIC.md -e PROJ-123 --jira-url https://other.atlassian.net
+spectryn -m EPIC.md -e PROJ-123 --jira-url https://other.atlassian.net
 
 # Override project
-spectra -m EPIC.md -e PROJ-123 --project OTHER
+spectryn -m EPIC.md -e PROJ-123 --project OTHER
 ```
 
 ## Exit Codes

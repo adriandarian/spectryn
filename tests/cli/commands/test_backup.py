@@ -7,14 +7,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.commands.backup import (
+from spectryn.cli.commands.backup import (
     list_backups,
     list_sessions,
     run_diff,
     run_restore,
     run_rollback,
 )
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.exit_codes import ExitCode
 
 
 # =============================================================================
@@ -163,8 +163,8 @@ class TestRunRestore:
         mock_manager = MagicMock()
         mock_manager.load_backup.return_value = None
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.cli.logging.setup_logging"):
                 result = run_restore(mock_args)
 
         assert result == ExitCode.FILE_NOT_FOUND
@@ -177,11 +177,11 @@ class TestRunRestore:
         mock_provider = MagicMock()
         mock_provider.validate.return_value = ["Missing JIRA_URL"]
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter"):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter"):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.cli.logging.setup_logging"):
                             result = run_restore(mock_args)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -198,11 +198,11 @@ class TestRunRestore:
         mock_adapter = MagicMock()
         mock_adapter.test_connection.return_value = False
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.cli.logging.setup_logging"):
                             result = run_restore(mock_args)
 
         assert result == ExitCode.CONNECTION_ERROR
@@ -221,11 +221,11 @@ class TestRunRestore:
         mock_adapter.test_connection.return_value = True
         mock_adapter.get_current_user.return_value = {"displayName": "Test"}
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.cli.logging.setup_logging"):
                             result = run_restore(mock_args)
 
         assert result == ExitCode.SUCCESS
@@ -270,8 +270,8 @@ class TestRunDiff:
         mock_manager = MagicMock()
         mock_manager.load_backup.return_value = None
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.cli.logging.setup_logging"):
                 result = run_diff(mock_args)
 
         assert result == ExitCode.FILE_NOT_FOUND
@@ -281,8 +281,8 @@ class TestRunDiff:
         mock_args.diff_latest = True
         mock_args.diff_backup = None
 
-        with patch("spectra.application.sync.BackupManager"):
-            with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager"):
+            with patch("spectryn.cli.logging.setup_logging"):
                 result = run_diff(mock_args)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -296,8 +296,8 @@ class TestRunDiff:
         mock_manager = MagicMock()
         mock_manager.get_latest_backup.return_value = None
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.cli.logging.setup_logging"):
                 result = run_diff(mock_args)
 
         assert result == ExitCode.FILE_NOT_FOUND
@@ -310,11 +310,11 @@ class TestRunDiff:
         mock_provider = MagicMock()
         mock_provider.validate.return_value = ["Missing JIRA_URL"]
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter"):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter"):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.cli.logging.setup_logging"):
                             result = run_diff(mock_args)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -338,15 +338,15 @@ class TestRunDiff:
         mock_diff_result.total_issues = 5
         mock_diff_result.total_changes = 0
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
                         with patch(
-                            "spectra.application.sync.compare_backup_to_current"
+                            "spectryn.application.sync.compare_backup_to_current"
                         ) as mock_compare:
                             mock_compare.return_value = (mock_diff_result, "No changes")
-                            with patch("spectra.cli.logging.setup_logging"):
+                            with patch("spectryn.cli.logging.setup_logging"):
                                 result = run_diff(mock_args)
 
         assert result == ExitCode.SUCCESS
@@ -391,7 +391,7 @@ class TestRunRollback:
         """Test rollback requires epic."""
         mock_args.epic = None
 
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_rollback(mock_args)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -401,8 +401,8 @@ class TestRunRollback:
         mock_manager = MagicMock()
         mock_manager.get_latest_backup.return_value = None
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.cli.logging.setup_logging"):
                 result = run_rollback(mock_args)
 
         assert result == ExitCode.FILE_NOT_FOUND
@@ -415,11 +415,11 @@ class TestRunRollback:
         mock_provider = MagicMock()
         mock_provider.validate.return_value = ["Missing JIRA_URL"]
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter"):
-                    with patch("spectra.adapters.ADFFormatter"):
-                        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter"):
+                    with patch("spectryn.adapters.ADFFormatter"):
+                        with patch("spectryn.cli.logging.setup_logging"):
                             result = run_rollback(mock_args)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -440,15 +440,15 @@ class TestRunRollback:
         mock_diff_result = MagicMock()
         mock_diff_result.has_changes = False
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
                         with patch(
-                            "spectra.application.sync.compare_backup_to_current"
+                            "spectryn.application.sync.compare_backup_to_current"
                         ) as mock_compare:
                             mock_compare.return_value = (mock_diff_result, "No changes")
-                            with patch("spectra.cli.logging.setup_logging"):
+                            with patch("spectryn.cli.logging.setup_logging"):
                                 result = run_rollback(mock_args)
 
         assert result == ExitCode.SUCCESS
@@ -477,15 +477,15 @@ class TestRunRollback:
         mock_diff_result.has_changes = True
         mock_diff_result.changed_issues = 3
 
-        with patch("spectra.application.sync.BackupManager", return_value=mock_manager):
-            with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-                with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                    with patch("spectra.adapters.ADFFormatter"):
+        with patch("spectryn.application.sync.BackupManager", return_value=mock_manager):
+            with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+                with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                    with patch("spectryn.adapters.ADFFormatter"):
                         with patch(
-                            "spectra.application.sync.compare_backup_to_current"
+                            "spectryn.application.sync.compare_backup_to_current"
                         ) as mock_compare:
                             mock_compare.return_value = (mock_diff_result, "Changes found")
-                            with patch("spectra.cli.logging.setup_logging"):
+                            with patch("spectryn.cli.logging.setup_logging"):
                                 result = run_rollback(mock_args)
 
         assert result == ExitCode.SUCCESS

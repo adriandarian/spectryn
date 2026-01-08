@@ -8,7 +8,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.application.scheduler import (
+from spectryn.application.scheduler import (
     CronSchedule,
     DailySchedule,
     HourlySchedule,

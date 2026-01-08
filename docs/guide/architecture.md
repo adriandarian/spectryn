@@ -1,11 +1,11 @@
 # Architecture
 
-spectra follows a **Clean Architecture** / **Hexagonal Architecture** pattern for maximum flexibility and testability.
+spectryn follows a **Clean Architecture** / **Hexagonal Architecture** pattern for maximum flexibility and testability.
 
 ## Project Structure
 
 ```
-src/spectra/
+src/spectryn/
 ├── core/                     # Pure domain logic (no external deps)
 │   ├── domain/               # Entities, value objects, enums
 │   │   ├── entities.py       # Epic, UserStory, Subtask, Comment
@@ -78,7 +78,7 @@ The core domain logic depends only on abstract interfaces (ports), making it eas
 All write operations are encapsulated as commands, enabling undo/redo and audit trails:
 
 ```python
-from spectra.application.commands import Command, CommandResult
+from spectryn.application.commands import Command, CommandResult
 
 class UpdateDescriptionCommand(Command):
     """Command to update an issue's description."""
@@ -103,7 +103,7 @@ class UpdateDescriptionCommand(Command):
 Domain events provide loose coupling and enable audit logging:
 
 ```python
-from spectra.core.domain.events import DomainEvent, EventBus
+from spectryn.core.domain.events import DomainEvent, EventBus
 
 class IssueUpdatedEvent(DomainEvent):
     issue_key: str
@@ -122,7 +122,7 @@ def log_update(event: IssueUpdatedEvent):
 To add support for a new issue tracker (e.g., GitHub Issues), implement the `IssueTrackerPort` interface:
 
 ```python
-from spectra.core.ports import IssueTrackerPort, IssueData
+from spectryn.core.ports import IssueTrackerPort, IssueData
 
 class GitHubAdapter(IssueTrackerPort):
     """GitHub Issues adapter."""
@@ -153,7 +153,7 @@ class GitHubAdapter(IssueTrackerPort):
 Register the adapter:
 
 ```python
-from spectra.plugins import get_registry
+from spectryn.plugins import get_registry
 
 registry = get_registry()
 registry.register_adapter("github", GitHubAdapter)
@@ -161,10 +161,10 @@ registry.register_adapter("github", GitHubAdapter)
 
 ## Using Hooks
 
-Extend spectra behavior without modifying core code:
+Extend spectryn behavior without modifying core code:
 
 ```python
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 hook_manager = get_registry().hook_manager
 

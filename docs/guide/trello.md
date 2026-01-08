@@ -1,6 +1,6 @@
 # Trello Integration Guide
 
-spectra supports Trello for syncing markdown specifications. This guide covers configuration, authentication, board setup, and advanced features.
+spectryn supports Trello for syncing markdown specifications. This guide covers configuration, authentication, board setup, and advanced features.
 
 ## Overview
 
@@ -17,18 +17,18 @@ The Trello adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Trello
-spectra --markdown EPIC.md --tracker trello --execute
+spectryn --markdown EPIC.md --tracker trello --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Trello connection settings
@@ -63,7 +63,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [trello]
@@ -107,7 +107,7 @@ export TRELLO_SUBTASK_MODE=checklist  # or "linked_card"
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker trello \
   --trello-api-key your-key \
@@ -455,7 +455,7 @@ comments = adapter.get_issue_comments("card123")
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker trello --verbose
+spectryn --markdown EPIC.md --tracker trello --verbose
 ```
 
 Or in config:
@@ -471,7 +471,7 @@ Test your configuration:
 
 ```bash
 # Test connection (dry-run)
-spectra --markdown EPIC.md --tracker trello --validate
+spectryn --markdown EPIC.md --tracker trello --validate
 ```
 
 ## Examples
@@ -480,16 +480,16 @@ spectra --markdown EPIC.md --tracker trello --validate
 
 ```bash
 # Dry-run (preview changes)
-spectra --markdown EPIC.md --tracker trello
+spectryn --markdown EPIC.md --tracker trello
 
 # Execute sync
-spectra --markdown EPIC.md --tracker trello --execute
+spectryn --markdown EPIC.md --tracker trello --execute
 ```
 
 ### With Custom Configuration
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 trello:
   api_key: ${TRELLO_API_KEY}
   api_token: ${TRELLO_API_TOKEN}
@@ -516,8 +516,8 @@ sync:
 ### Using Custom Fields for Story Points
 
 ```python
-from spectra.adapters.trello import TrelloAdapter
-from spectra.core.ports.config_provider import TrelloConfig
+from spectryn.adapters.trello import TrelloAdapter
+from spectryn.core.ports.config_provider import TrelloConfig
 
 config = TrelloConfig(
     api_key="your-key",

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers import AsciiDocParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import AsciiDocParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestAsciiDocParser:

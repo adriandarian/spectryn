@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.app import create_parser, main
-from spectra.cli.exit_codes import ExitCode
+from spectryn.cli.app import create_parser, main
+from spectryn.cli.exit_codes import ExitCode
 
 
 class TestCreateParser:
@@ -211,7 +211,7 @@ class TestMainCompletions:
         """Test completions mode with bash."""
         with (
             patch("sys.argv", ["spectra", "--completions", "bash"]),
-            patch("spectra.cli.completions.print_completion") as mock_print,
+            patch("spectryn.cli.completions.print_completion") as mock_print,
         ):
             mock_print.return_value = True
             result = main()
@@ -221,7 +221,7 @@ class TestMainCompletions:
         """Test completions mode failure with valid shell but failed generation."""
         with (
             patch("sys.argv", ["spectra", "--completions", "bash"]),
-            patch("spectra.cli.completions.print_completion") as mock_print,
+            patch("spectryn.cli.completions.print_completion") as mock_print,
         ):
             mock_print.return_value = False
             result = main()
@@ -235,7 +235,7 @@ class TestMainInit:
         """Test init mode."""
         with (
             patch("sys.argv", ["spectra", "--init"]),
-            patch("spectra.cli.init.run_init") as mock_run_init,
+            patch("spectryn.cli.init.run_init") as mock_run_init,
         ):
             mock_run_init.return_value = ExitCode.SUCCESS
             result = main()
@@ -250,7 +250,7 @@ class TestMainGenerate:
         """Test generate mode."""
         with (
             patch("sys.argv", ["spectra", "--generate", "--epic", "PROJ-123"]),
-            patch("spectra.cli.generate.run_generate") as mock_run_gen,
+            patch("spectryn.cli.generate.run_generate") as mock_run_gen,
         ):
             mock_run_gen.return_value = ExitCode.SUCCESS
             result = main()
@@ -273,8 +273,8 @@ class TestMainListAiTools:
         """Test list-ai-tools mode."""
         with (
             patch("sys.argv", ["spectra", "--list-ai-tools"]),
-            patch("spectra.cli.ai_fix.detect_ai_tools") as mock_detect,
-            patch("spectra.cli.ai_fix.format_ai_tools_list") as mock_format,
+            patch("spectryn.cli.ai_fix.detect_ai_tools") as mock_detect,
+            patch("spectryn.cli.ai_fix.format_ai_tools_list") as mock_format,
         ):
             mock_detect.return_value = []
             mock_format.return_value = ""
@@ -289,9 +289,9 @@ class TestMainAnalytics:
         """Test analytics show mode."""
         with (
             patch("sys.argv", ["spectra", "--analytics-show"]),
-            patch("spectra.cli.analytics.configure_analytics") as mock_configure,
-            patch("spectra.cli.analytics.show_analytics_info") as mock_info,
-            patch("spectra.cli.analytics.format_analytics_display") as mock_format,
+            patch("spectryn.cli.analytics.configure_analytics") as mock_configure,
+            patch("spectryn.cli.analytics.show_analytics_info") as mock_info,
+            patch("spectryn.cli.analytics.format_analytics_display") as mock_format,
         ):
             mock_manager = MagicMock()
             mock_manager.get_display_data.return_value = {}
@@ -305,7 +305,7 @@ class TestMainAnalytics:
         """Test analytics clear mode."""
         with (
             patch("sys.argv", ["spectra", "--analytics-clear"]),
-            patch("spectra.cli.analytics.configure_analytics") as mock_configure,
+            patch("spectryn.cli.analytics.configure_analytics") as mock_configure,
         ):
             mock_manager = MagicMock()
             mock_manager.clear_data.return_value = True
@@ -329,7 +329,7 @@ class TestMainValidation:
         """Test validate mode only needs file."""
         with (
             patch("sys.argv", ["spectra", "--validate", "-f", "test.md"]),
-            patch("spectra.cli.app.validate_markdown") as mock_validate,
+            patch("spectryn.cli.app.validate_markdown") as mock_validate,
         ):
             mock_validate.return_value = ExitCode.SUCCESS
             result = main()

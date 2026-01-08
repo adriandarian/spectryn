@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_gap import (
+from spectryn.application.ai_gap import (
     AIGapAnalyzer,
     CategoryAnalysis,
     GapCategory,
@@ -18,9 +18,9 @@ from spectra.application.ai_gap import (
     build_gap_prompt,
     parse_gap_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -427,7 +427,7 @@ class TestAIGapAnalyzer:
         self, login_story: UserStory, registration_story: UserStory
     ) -> None:
         """Test analysis falls back without LLM."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             analyzer = AIGapAnalyzer()
@@ -461,7 +461,7 @@ class TestAIGapAnalyzer:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -491,7 +491,7 @@ class TestAIGapAnalyzer:
             compliance_requirements=["PCI-DSS", "SOC2"],
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             analyzer = AIGapAnalyzer(options)

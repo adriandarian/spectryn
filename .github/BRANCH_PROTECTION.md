@@ -1,6 +1,6 @@
 # Branch Protection Rules
 
-This document outlines the branch protection rules for the `spectra` repository.
+This document outlines the branch protection rules for the `spectryn` repository.
 
 ## Protected Branches
 

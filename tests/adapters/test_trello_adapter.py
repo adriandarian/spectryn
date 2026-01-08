@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.trello.adapter import TrelloAdapter
-from spectra.adapters.trello.client import TrelloApiClient, TrelloRateLimiter
-from spectra.core.ports.config_provider import TrelloConfig
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.trello.adapter import TrelloAdapter
+from spectryn.adapters.trello.client import TrelloApiClient, TrelloRateLimiter
+from spectryn.core.ports.config_provider import TrelloConfig
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -68,7 +68,7 @@ class TestTrelloApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.trello.client.requests.Session") as mock:
+        with patch("spectryn.adapters.trello.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -299,7 +299,7 @@ class TestTrelloAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock client."""
-        with patch("spectra.adapters.trello.adapter.TrelloApiClient") as mock:
+        with patch("spectryn.adapters.trello.adapter.TrelloApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -646,7 +646,7 @@ class TestTrelloAdapterAttachments:
             api_token="test_token",
             board_id="board123",
         )
-        with patch("spectra.adapters.trello.adapter.TrelloApiClient"):
+        with patch("spectryn.adapters.trello.adapter.TrelloApiClient"):
             return TrelloAdapter(config=config, dry_run=False)
 
     @pytest.fixture
@@ -735,7 +735,7 @@ class TestTrelloApiClientAttachments:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.trello.client.requests.Session") as mock:
+        with patch("spectryn.adapters.trello.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -840,7 +840,7 @@ class TestTrelloAdapterDueDates:
     @pytest.fixture
     def mock_client(self):
         """Create a mock client."""
-        with patch("spectra.adapters.trello.adapter.TrelloApiClient") as mock:
+        with patch("spectryn.adapters.trello.adapter.TrelloApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client
@@ -900,7 +900,7 @@ class TestTrelloAdapterDueDates:
 
     def test_update_issue_due_date_dry_run(self, config):
         """Should not update in dry run mode."""
-        with patch("spectra.adapters.trello.adapter.TrelloApiClient") as mock:
+        with patch("spectryn.adapters.trello.adapter.TrelloApiClient") as mock:
             mock_client = MagicMock()
             mock.return_value = mock_client
             adapter = TrelloAdapter(config=config, dry_run=True)

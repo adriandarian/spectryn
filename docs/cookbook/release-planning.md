@@ -1,6 +1,6 @@
 # Release Planning
 
-Plan and track software releases with spectra.
+Plan and track software releases with spectryn.
 
 ## Release Epic Structure
 
@@ -284,17 +284,17 @@ Plan and track software releases with spectra.
 git checkout -b release/2.0.0
 
 # Initial sync
-spectra -m releases/v2.0.0.md -e REL-200 -x
+spectryn -m releases/v2.0.0.md -e REL-200 -x
 ```
 
 ### 2. Weekly Progress Sync
 
 ```bash
 # Update progress
-spectra -m releases/v2.0.0.md -e REL-200 -x
+spectryn -m releases/v2.0.0.md -e REL-200 -x
 
 # Generate status report
-spectra -m releases/v2.0.0.md -e REL-200 --export status.json
+spectryn -m releases/v2.0.0.md -e REL-200 --export status.json
 ```
 
 ### 3. Feature Freeze
@@ -302,14 +302,14 @@ spectra -m releases/v2.0.0.md -e REL-200 --export status.json
 ```bash
 # Update status to reflect freeze
 # Edit markdown: change remaining features to "Deferred"
-spectra -m releases/v2.0.0.md -e REL-200 -x
+spectryn -m releases/v2.0.0.md -e REL-200 -x
 ```
 
 ### 4. Release Day
 
 ```bash
 # Final sync
-spectra -m releases/v2.0.0.md -e REL-200 -x
+spectryn -m releases/v2.0.0.md -e REL-200 -x
 
 # Mark all done
 # Move markdown to archive
@@ -322,7 +322,7 @@ mv releases/v2.0.0.md releases/archive/
 #!/bin/bash
 # release-metrics.sh
 
-spectra -m releases/v2.0.0.md -e REL-200 --output json | jq '
+spectryn -m releases/v2.0.0.md -e REL-200 --output json | jq '
 {
   release: .epic_key,
   features: {

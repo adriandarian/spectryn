@@ -72,11 +72,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### CLI Features
 
 #### Core Commands
-- `spectra sync` - Sync markdown to issue tracker
-- `spectra validate` - Validate markdown format
-- `spectra init` - Initialize configuration
-- `spectra generate` - Generate markdown from tracker
-- `spectra health` - Check tracker connectivity
+- `spectryn sync` - Sync markdown to issue tracker
+- `spectryn validate` - Validate markdown format
+- `spectryn init` - Initialize configuration
+- `spectryn generate` - Generate markdown from tracker
+- `spectryn health` - Check tracker connectivity
 
 #### Execution Modes
 - `--dry-run` - Preview changes without executing (default)
@@ -115,9 +115,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--audit-trail PATH` - Export operation audit trail
 
 #### Shell Completions
-- Bash completion (`spectra --completions bash`)
-- Zsh completion (`spectra --completions zsh`)
-- Fish completion (`spectra --completions fish`)
+- Bash completion (`spectryn --completions bash`)
+- Zsh completion (`spectryn --completions zsh`)
+- Fish completion (`spectryn --completions fish`)
 
 ### Infrastructure
 
@@ -152,7 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. CLI arguments
 2. Environment variables
 3. `.env` file
-4. Config file (`.spectra.yaml`, `.spectra.toml`, `pyproject.toml [tool.spectra]`)
+4. Config file (`.spectryn.yaml`, `.spectryn.toml`, `pyproject.toml [tool.spectryn]`)
 
 #### Environment Variables
 - `JIRA_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`
@@ -183,22 +183,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Result comments on PRs
 
 #### Terraform Provider
-- `spectra_issue` resource
-- `spectra_epic` data source
-- `spectra_project` data source
+- `spectryn_issue` resource
+- `spectryn_epic` data source
+- `spectryn_project` data source
 - Infrastructure-as-code for issue management
 
 ### Distribution
 
 #### Package Managers
-- **PyPI**: `pip install spectra`
-- **Homebrew**: `brew install adriandarian/spectra/spectra`
-- **Chocolatey**: `choco install spectra`
-- **pipx**: `pipx install spectra`
+- **PyPI**: `pip install spectryn`
+- **Homebrew**: `brew install adriandarian/spectryn/spectryn`
+- **Chocolatey**: `choco install spectryn`
+- **pipx**: `pipx install spectryn`
 
 #### Containers
-- Docker Hub: `adriandarian/spectra`
-- GitHub Container Registry: `ghcr.io/adriandarian/spectra`
+- Docker Hub: `adriandarian/spectryn`
+- GitHub Container Registry: `ghcr.io/adriandarian/spectryn`
 - Docker Compose example included
 
 #### Linux Packages
@@ -256,5 +256,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-[Unreleased]: https://github.com/adriandarian/spectra/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/adriandarian/spectra/releases/tag/v1.0.0
+[Unreleased]: https://github.com/adriandarian/spectryn/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/adriandarian/spectryn/releases/tag/v1.0.0

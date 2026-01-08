@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.cli.tui.data import (
+from spectryn.cli.tui.data import (
     ConflictType,
     StoryConflict,
     SyncProgress,
@@ -15,9 +15,9 @@ from spectra.cli.tui.data import (
     TUIState,
     create_demo_state,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import IssueKey, StoryId
 
 
 class TestSyncProgress:

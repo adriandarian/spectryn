@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 # Example: Multi-tracker sync with Linear
@@ -11,7 +11,7 @@ type: Opaque
 stringData:
   api-key: lin_api_your_linear_api_key
 ---
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: linear-sync

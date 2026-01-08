@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.pivotal.adapter import PivotalAdapter
-from spectra.adapters.pivotal.client import PivotalApiClient, PivotalRateLimiter
-from spectra.adapters.pivotal.plugin import PivotalTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.pivotal.adapter import PivotalAdapter
+from spectryn.adapters.pivotal.client import PivotalApiClient, PivotalRateLimiter
+from spectryn.adapters.pivotal.plugin import PivotalTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -69,7 +69,7 @@ class TestPivotalApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.pivotal.client.requests.Session") as mock:
+        with patch("spectryn.adapters.pivotal.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -364,7 +364,7 @@ class TestPivotalAdapter:
 
     def test_create_link_via_label(self, adapter, mock_client):
         """Should create a link via label."""
-        from spectra.core.ports.issue_tracker import LinkType
+        from spectryn.core.ports.issue_tracker import LinkType
 
         mock_client.get_or_create_label.return_value = {"id": 100, "name": "depends on:456"}
         mock_client.get_story.return_value = {"labels": []}
@@ -410,7 +410,7 @@ class TestPivotalTrackerPlugin:
 
     def test_metadata(self):
         """Should have correct metadata."""
-        from spectra.plugins.base import PluginType
+        from spectryn.plugins.base import PluginType
 
         plugin = PivotalTrackerPlugin()
         metadata = plugin.metadata
@@ -427,7 +427,7 @@ class TestPivotalTrackerPlugin:
         plugin = PivotalTrackerPlugin()
         plugin.config = {}
 
-        with patch("spectra.adapters.pivotal.plugin.PivotalAdapter") as mock_adapter:
+        with patch("spectryn.adapters.pivotal.plugin.PivotalAdapter") as mock_adapter:
             mock_adapter.return_value = MagicMock()
             plugin.initialize()
 
@@ -476,7 +476,7 @@ class TestPivotalAdapterDryRun:
     @pytest.fixture
     def adapter(self):
         """Create an adapter in dry-run mode."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",
@@ -543,7 +543,7 @@ class TestPivotalAdapterWebhooks:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",
@@ -593,7 +593,7 @@ class TestPivotalAdapterWebhooks:
 
     def test_create_webhook_dry_run(self):
         """Should not create webhook in dry-run mode."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",
@@ -619,7 +619,7 @@ class TestPivotalAdapterIterations:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",
@@ -731,7 +731,7 @@ class TestPivotalAdapterLabels:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",
@@ -781,7 +781,7 @@ class TestPivotalAdapterErrors:
     @pytest.fixture
     def adapter(self):
         """Create an adapter with mocked client."""
-        with patch("spectra.adapters.pivotal.adapter.PivotalApiClient"):
+        with patch("spectryn.adapters.pivotal.adapter.PivotalApiClient"):
             adapter = PivotalAdapter(
                 api_token="test_token",
                 project_id="12345",

@@ -58,9 +58,9 @@ class TestMutationTestingSetup:
     def test_target_files_exist(self):
         """Test that target files for mutation exist."""
         target_files = [
-            "src/spectra/core/domain/entities.py",
-            "src/spectra/core/domain/enums.py",
-            "src/spectra/core/domain/value_objects.py",
+            "src/spectryn/core/domain/entities.py",
+            "src/spectryn/core/domain/enums.py",
+            "src/spectryn/core/domain/value_objects.py",
         ]
 
         project_root = Path(__file__).parent.parent.parent
@@ -86,7 +86,7 @@ class TestMutationTargets:
 
     def test_status_from_string_is_testable(self):
         """Test Status.from_string is covered by tests."""
-        from spectra.core.domain.enums import Status
+        from spectryn.core.domain.enums import Status
 
         # These should all be tested to catch mutations
         test_cases = [
@@ -102,7 +102,7 @@ class TestMutationTargets:
 
     def test_priority_from_string_is_testable(self):
         """Test Priority.from_string is covered by tests."""
-        from spectra.core.domain.enums import Priority
+        from spectryn.core.domain.enums import Priority
 
         test_cases = [
             ("critical", Priority.CRITICAL),
@@ -117,7 +117,7 @@ class TestMutationTargets:
 
     def test_story_id_validation(self):
         """Test StoryId validation catches mutations."""
-        from spectra.core.domain.value_objects import StoryId
+        from spectryn.core.domain.value_objects import StoryId
 
         # Valid IDs
         valid_ids = ["US-001", "PROJ-123", "A-1"]
@@ -127,7 +127,7 @@ class TestMutationTargets:
 
     def test_description_formatting(self):
         """Test Description is testable."""
-        from spectra.core.domain.value_objects import Description
+        from spectryn.core.domain.value_objects import Description
 
         desc = Description(
             role="developer",

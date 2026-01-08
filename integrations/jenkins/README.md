@@ -16,17 +16,17 @@ Jenkins Shared Library for syncing markdown specifications to issue trackers.
 
 1. Go to **Manage Jenkins > Configure System > Global Pipeline Libraries**
 2. Add a new library:
-   - Name: `spectra`
+   - Name: `spectryn`
    - Default version: `main`
    - Retrieval method: Modern SCM
    - Source Code Management: Git
-   - Project Repository: `https://github.com/spectra/spectra.git`
+   - Project Repository: `https://github.com/spectryn/spectryn.git`
    - Library Path: `integrations/jenkins`
 
 ### Method 2: Per-Pipeline Library
 
 ```groovy
-@Library('spectra@main') _
+@Library('spectryn@main') _
 ```
 
 ## Quick Start
@@ -34,7 +34,7 @@ Jenkins Shared Library for syncing markdown specifications to issue trackers.
 ### Declarative Pipeline
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 pipeline {
     agent any
@@ -46,7 +46,7 @@ pipeline {
     stages {
         stage('Sync to Jira') {
             steps {
-                spectraSync(
+                spectrynSync(
                     markdownFile: 'docs/user-stories.md',
                     epicKey: 'PROJ-123',
                     tracker: 'jira',
@@ -62,7 +62,7 @@ pipeline {
 ### Scripted Pipeline
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 node {
     stage('Checkout') {
@@ -70,7 +70,7 @@ node {
     }
 
     stage('Sync') {
-        spectraSync(
+        spectrynSync(
             markdownFile: 'docs/user-stories.md',
             epicKey: env.EPIC_KEY,
             execute: true
@@ -119,7 +119,7 @@ node {
 ### Full Pipeline with Stages
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 pipeline {
     agent any
@@ -136,7 +136,7 @@ pipeline {
     stages {
         stage('Validate') {
             steps {
-                spectraValidate(
+                spectrynValidate(
                     markdownFile: 'docs/user-stories.md'
                 )
             }
@@ -147,7 +147,7 @@ pipeline {
                 expression { params.DRY_RUN }
             }
             steps {
-                spectraDiff(
+                spectrynDiff(
                     markdownFile: 'docs/user-stories.md',
                     epicKey: params.EPIC_KEY
                 )
@@ -159,7 +159,7 @@ pipeline {
                 expression { !params.DRY_RUN }
             }
             steps {
-                spectraSync(
+                spectrynSync(
                     markdownFile: 'docs/user-stories.md',
                     epicKey: params.EPIC_KEY,
                     execute: true,
@@ -186,7 +186,7 @@ pipeline {
 ### Multi-Tracker Sync
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 pipeline {
     agent any
@@ -196,7 +196,7 @@ pipeline {
             parallel {
                 stage('Jira') {
                     steps {
-                        spectraSync(
+                        spectrynSync(
                             markdownFile: 'docs/user-stories.md',
                             epicKey: env.JIRA_EPIC,
                             tracker: 'jira',
@@ -207,7 +207,7 @@ pipeline {
                 }
                 stage('GitHub') {
                     steps {
-                        spectraSync(
+                        spectrynSync(
                             markdownFile: 'docs/user-stories.md',
                             tracker: 'github',
                             execute: true
@@ -223,7 +223,7 @@ pipeline {
 ### Scheduled Sync
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 pipeline {
     agent any
@@ -235,7 +235,7 @@ pipeline {
     stages {
         stage('Incremental Sync') {
             steps {
-                spectraSync(
+                spectrynSync(
                     markdownFile: 'docs/user-stories.md',
                     epicKey: env.EPIC_KEY,
                     incremental: true,
@@ -250,7 +250,7 @@ pipeline {
 ### Pull (Reverse Sync)
 
 ```groovy
-@Library('spectra') _
+@Library('spectryn') _
 
 pipeline {
     agent any
@@ -258,7 +258,7 @@ pipeline {
     stages {
         stage('Pull from Jira') {
             steps {
-                spectraPull(
+                spectrynPull(
                     epicKey: 'PROJ-123',
                     outputFile: 'docs/imported-stories.md',
                     tracker: 'jira'
@@ -281,10 +281,10 @@ pipeline {
 
 ## Shared Library Functions
 
-### spectraSync
+### spectrynSync
 
 ```groovy
-spectraSync(
+spectrynSync(
     markdownFile: 'docs/stories.md',
     epicKey: 'PROJ-123',
     tracker: 'jira',
@@ -292,27 +292,27 @@ spectraSync(
 )
 ```
 
-### spectraValidate
+### spectrynValidate
 
 ```groovy
-spectraValidate(
+spectrynValidate(
     markdownFile: 'docs/stories.md'
 )
 ```
 
-### spectraDiff
+### spectrynDiff
 
 ```groovy
-spectraDiff(
+spectrynDiff(
     markdownFile: 'docs/stories.md',
     epicKey: 'PROJ-123'
 )
 ```
 
-### spectraPull
+### spectrynPull
 
 ```groovy
-spectraPull(
+spectrynPull(
     epicKey: 'PROJ-123',
     outputFile: 'docs/stories.md'
 )
@@ -343,7 +343,7 @@ Verify credentials are accessible:
 withCredentials([usernamePassword(credentialsId: 'jira-credentials',
                                    usernameVariable: 'JIRA_EMAIL',
                                    passwordVariable: 'JIRA_API_TOKEN')]) {
-    spectraSync(markdownFile: 'docs/stories.md', epicKey: 'PROJ-123')
+    spectrynSync(markdownFile: 'docs/stories.md', epicKey: 'PROJ-123')
 }
 ```
 

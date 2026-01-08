@@ -1,6 +1,6 @@
 # Video Tutorials
 
-Step-by-step visual guides for spectra.
+Step-by-step visual guides for spectryn.
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
 
@@ -53,10 +53,10 @@ Step-by-step visual guides for spectra.
 <div class="terminal-demo">
 
 ```
-$ spectra --markdown EPIC.md --epic PROJ-123
+$ spectryn --markdown EPIC.md --epic PROJ-123
 
 ╭──────────────────────────────────────────────────────────────╮
-│  spectra v1.0.0                                              │
+│  spectryn v1.0.0                                              │
 │  Syncing: EPIC.md → PROJ-123                                 │
 │  Mode: DRY RUN (use --execute to apply changes)              │
 ╰──────────────────────────────────────────────────────────────╯
@@ -94,7 +94,7 @@ Summary:
   Status transitions: 1
 
 To apply these changes, run:
-  spectra --markdown EPIC.md --epic PROJ-123 --execute
+  spectryn --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
 </div>
@@ -104,10 +104,10 @@ To apply these changes, run:
 <div class="terminal-demo">
 
 ```
-$ spectra --markdown EPIC.md --epic PROJ-123 --execute
+$ spectryn --markdown EPIC.md --epic PROJ-123 --execute
 
 ╭──────────────────────────────────────────────────────────────╮
-│  spectra v1.0.0                                              │
+│  spectryn v1.0.0                                              │
 │  Syncing: EPIC.md → PROJ-123                                 │
 │  Mode: EXECUTE                                               │
 ╰──────────────────────────────────────────────────────────────╯
@@ -141,7 +141,7 @@ Syncing stories ━━━━━━━━━━━━━━━━━━━━━�
 │  Duration: 4.2s                                              │
 │                                                              │
 │  Backup: backup_20250113_142530                              │
-│  To rollback: spectra --rollback --epic PROJ-123             │
+│  To rollback: spectryn --rollback --epic PROJ-123             │
 ╰──────────────────────────────────────────────────────────────╯
 ```
 

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.sync.multi_tracker import (
+from spectryn.application.sync.multi_tracker import (
     MultiTrackerSyncOrchestrator,
     MultiTrackerSyncResult,
     SyncStrategy,
@@ -13,11 +13,11 @@ from spectra.application.sync.multi_tracker import (
     TrackerTarget,
     TrackerType,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, IssueKey, StoryId
-from spectra.core.ports.config_provider import SyncConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, IssueKey, StoryId
+from spectryn.core.ports.config_provider import SyncConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 # =============================================================================

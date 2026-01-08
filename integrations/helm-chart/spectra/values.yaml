@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 # Default values for Spectra Helm chart
@@ -25,7 +25,7 @@ operator:
 
   image:
     # -- Operator image repository
-    repository: spectra/operator
+    repository: spectryn/operator
     # -- Operator image tag
     tag: latest
     # -- Image pull policy
@@ -87,10 +87,10 @@ operator:
     retryPeriod: 2s
 
 # Spectra container image (used by sync jobs)
-spectra:
+spectryn:
   image:
     # -- Spectra image repository
-    repository: spectra/spectra
+    repository: spectryn/spectryn
     # -- Spectra image tag
     tag: latest
     # -- Image pull policy

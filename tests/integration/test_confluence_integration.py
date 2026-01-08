@@ -9,12 +9,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.adapters.confluence.adapter import ConfluenceAdapter
-from spectra.adapters.confluence.client import ConfluenceAPIError, ConfluenceClient
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, IssueKey, StoryId
-from spectra.core.ports.document_output import (
+from spectryn.adapters.confluence.adapter import ConfluenceAdapter
+from spectryn.adapters.confluence.client import ConfluenceAPIError, ConfluenceClient
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, IssueKey, StoryId
+from spectryn.core.ports.document_output import (
     AuthenticationError,
     NotFoundError,
     PermissionError,
@@ -579,7 +579,7 @@ class TestConfluenceStorageFormat:
 
     def test_format_empty_description(self, adapter):
         """Test formatting empty description."""
-        from spectra.core.domain.value_objects import Description
+        from spectryn.core.domain.value_objects import Description
 
         desc = Description(role="", want="", benefit="")
         html = adapter._format_description(desc)
@@ -589,7 +589,7 @@ class TestConfluenceStorageFormat:
 
     def test_status_lozenge_all_statuses(self, adapter):
         """Test status lozenge for all status values."""
-        from spectra.core.domain.enums import Status
+        from spectryn.core.domain.enums import Status
 
         for status in Status:
             html = adapter._status_lozenge(status)

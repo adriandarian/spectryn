@@ -4,7 +4,7 @@ import textwrap
 
 import pytest
 
-from spectra.application.sync.dependencies import (
+from spectryn.application.sync.dependencies import (
     Dependency,
     DependencyExtractor,
     DependencyGraph,

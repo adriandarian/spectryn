@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.protobuf_parser import ProtobufParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.protobuf_parser import ProtobufParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestProtobufParser:

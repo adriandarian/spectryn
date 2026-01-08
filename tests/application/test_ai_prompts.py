@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.application.ai_prompts import (
+from spectryn.application.ai_prompts import (
     DEFAULT_PROMPTS,
     PromptConfig,
     PromptManager,

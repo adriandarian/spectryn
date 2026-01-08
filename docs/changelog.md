@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to spectra will be documented here.
+All notable changes to spectryn will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
@@ -31,9 +31,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   - Shell completions for Bash, Zsh, Fish
 
 - **Configuration**
-  - YAML config file support (`.spectra.yaml`)
-  - TOML config file support (`.spectra.toml`)
-  - pyproject.toml support (`[tool.spectra]`)
+  - YAML config file support (`.spectryn.yaml`)
+  - TOML config file support (`.spectryn.toml`)
+  - pyproject.toml support (`[tool.spectryn]`)
   - Environment variable configuration
   - .env file loading
 
@@ -79,5 +79,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Version History
 
-For the complete version history, see the [CHANGELOG.md](https://github.com/adriandarian/spectra/blob/main/CHANGELOG.md) in the repository.
+For the complete version history, see the [CHANGELOG.md](https://github.com/adriandarian/spectryn/blob/main/CHANGELOG.md) in the repository.
 

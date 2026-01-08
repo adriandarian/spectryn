@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.plugins.base import Plugin, PluginMetadata, PluginType
-from spectra.plugins.registry import PluginRegistry, get_registry
+from spectryn.plugins.base import Plugin, PluginMetadata, PluginType
+from spectryn.plugins.registry import PluginRegistry, get_registry
 
 
 class MockPlugin(Plugin):
@@ -309,7 +309,7 @@ class TestGetRegistry:
     def test_get_registry_singleton(self):
         """Test get_registry returns same instance."""
         # Clear any existing registry
-        import spectra.plugins.registry as reg_module
+        import spectryn.plugins.registry as reg_module
 
         reg_module._registry = None
 
@@ -320,7 +320,7 @@ class TestGetRegistry:
 
     def test_get_registry_creates_instance(self):
         """Test get_registry creates instance if none exists."""
-        import spectra.plugins.registry as reg_module
+        import spectryn.plugins.registry as reg_module
 
         reg_module._registry = None
 

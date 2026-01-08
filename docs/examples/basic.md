@@ -1,6 +1,6 @@
 # Basic Usage Examples
 
-Common usage patterns for spectra.
+Common usage patterns for spectryn.
 
 ## Your First Sync
 
@@ -21,7 +21,7 @@ Create `EPIC.md`:
 ```markdown
 # 🚀 My First Epic
 
-> **Epic: Getting started with spectra**
+> **Epic: Getting started with spectryn**
 
 ---
 
@@ -115,13 +115,13 @@ You can use multiple prefix styles in a single file:
 ### 3. Preview Changes
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123
+spectryn --markdown EPIC.md --epic PROJ-123
 ```
 
 ### 4. Execute Sync
 
 ```bash
-spectra --markdown EPIC.md --epic PROJ-123 --execute
+spectryn --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
 ## Common Scenarios
@@ -131,7 +131,7 @@ spectra --markdown EPIC.md --epic PROJ-123 --execute
 When you only want to update story descriptions:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 -x --phase descriptions
+spectryn -m EPIC.md -e PROJ-123 -x --phase descriptions
 ```
 
 ### Sync Only Subtasks
@@ -139,7 +139,7 @@ spectra -m EPIC.md -e PROJ-123 -x --phase descriptions
 When you only want to create/update subtasks:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 -x --phase subtasks
+spectryn -m EPIC.md -e PROJ-123 -x --phase subtasks
 ```
 
 ### Sync Specific Story
@@ -147,7 +147,7 @@ spectra -m EPIC.md -e PROJ-123 -x --phase subtasks
 Focus on a single story:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 -x --story STORY-001
+spectryn -m EPIC.md -e PROJ-123 -x --story STORY-001
 ```
 
 ### Verbose Output
@@ -155,7 +155,7 @@ spectra -m EPIC.md -e PROJ-123 -x --story STORY-001
 See detailed information about each operation:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 -v
+spectryn -m EPIC.md -e PROJ-123 -v
 ```
 
 ### Export Results
@@ -163,7 +163,7 @@ spectra -m EPIC.md -e PROJ-123 -v
 Save sync results to JSON:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 -x --export results.json
+spectryn -m EPIC.md -e PROJ-123 -x --export results.json
 ```
 
 Output:
@@ -191,7 +191,7 @@ Output:
 Check your markdown format without syncing:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 --validate
+spectryn -m EPIC.md -e PROJ-123 --validate
 ```
 
 Output for valid file:
@@ -219,7 +219,7 @@ Errors:
 ### List Backups
 
 ```bash
-spectra --list-backups
+spectryn --list-backups
 ```
 
 Output:
@@ -234,7 +234,7 @@ Available backups:
 ### View Changes Since Last Backup
 
 ```bash
-spectra --diff-latest --epic PROJ-123
+spectryn --diff-latest --epic PROJ-123
 ```
 
 Output:
@@ -258,13 +258,13 @@ Story: PROJ-124 (STORY-001: Setup Development Environment)
 Preview rollback:
 
 ```bash
-spectra --rollback --epic PROJ-123
+spectryn --rollback --epic PROJ-123
 ```
 
 Execute rollback:
 
 ```bash
-spectra --rollback --epic PROJ-123 --execute
+spectryn --rollback --epic PROJ-123 --execute
 ```
 
 ## Interactive Mode
@@ -272,14 +272,14 @@ spectra --rollback --epic PROJ-123 --execute
 For step-by-step guided sync:
 
 ```bash
-spectra -m EPIC.md -e PROJ-123 --interactive
+spectryn -m EPIC.md -e PROJ-123 --interactive
 ```
 
 Interactive session:
 
 ```
 ╭──────────────────────────────────────────────╮
-│  spectra Interactive Mode                    │
+│  spectryn Interactive Mode                    │
 ╰──────────────────────────────────────────────╯
 
 Found 5 stories to sync with PROJ-123
@@ -308,7 +308,7 @@ Story 2/5: STORY-002 - User Authentication
 ### With YAML Config
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 jira:
   url: https://company.atlassian.net
   project: PROJ
@@ -326,27 +326,27 @@ epic: PROJ-123
 Run with defaults from config:
 
 ```bash
-spectra
+spectryn
 ```
 
 Or override specific values:
 
 ```bash
-spectra --epic PROJ-456
+spectryn --epic PROJ-456
 ```
 
 ### With pyproject.toml
 
 ```toml
 # pyproject.toml
-[tool.spectra]
+[tool.spectryn]
 epic = "PROJ-123"
 
-[tool.spectra.jira]
+[tool.spectryn.jira]
 url = "https://company.atlassian.net"
 project = "PROJ"
 
-[tool.spectra.sync]
+[tool.spectryn.sync]
 verbose = true
 ```
 

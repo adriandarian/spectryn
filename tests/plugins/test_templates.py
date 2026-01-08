@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.plugins.templates import PluginScaffold, PluginTemplateType, scaffold_plugin
-from spectra.plugins.templates.scaffold import PluginScaffoldConfig
+from spectryn.plugins.templates import PluginScaffold, PluginTemplateType, scaffold_plugin
+from spectryn.plugins.templates.scaffold import PluginScaffoldConfig
 
 
 class TestPluginTemplateType:
@@ -498,5 +498,5 @@ class TestPluginEntryPoint:
         content = pyproject.read_text()
 
         # Check entry point is defined
-        assert '[project.entry-points."spectra.plugins"]' in content
+        assert '[project.entry-points."spectryn.plugins"]' in content
         assert 'entry_test = "spectra_entry_test:create_plugin"' in content

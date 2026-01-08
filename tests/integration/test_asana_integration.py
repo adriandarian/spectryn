@@ -10,17 +10,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.asana import (
+from spectryn.adapters.asana import (
     AsanaAdapter,
     AsanaBatchClient,
     CachedAsanaAdapter,
 )
-from spectra.core.exceptions import (
+from spectryn.core.exceptions import (
     AuthenticationError,
     RateLimitError,
     ResourceNotFoundError,
 )
-from spectra.core.ports.config_provider import TrackerConfig
+from spectryn.core.ports.config_provider import TrackerConfig
 
 
 # =============================================================================

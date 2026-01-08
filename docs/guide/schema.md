@@ -1,6 +1,6 @@
 # Markdown Schema Reference
 
-This document defines the exact schema that spectra parses. Follow this structure for successful Jira synchronization.
+This document defines the exact schema that spectryn parses. Follow this structure for successful Jira synchronization.
 
 ## Field Mapping Overview
 
@@ -265,7 +265,7 @@ Commit hash must be wrapped in backticks: `` `hash` ``
 ```
 
 ::: info Attachment Handling
-Attachments are referenced by relative path. During sync, spectra will:
+Attachments are referenced by relative path. During sync, spectryn will:
 1. Upload referenced files to the issue tracker
 2. Update the issue with attachment links
 :::
@@ -379,7 +379,7 @@ Modernize the legacy PHP application to a modern TypeScript/React stack.
 
 ## Validation Checklist
 
-Before running spectra, verify:
+Before running spectryn, verify:
 
 - [ ] Each story has `### [emoji] PREFIX-XXX: Title` format (e.g., STORY-001, PROJ-123)
 - [ ] Each story has the metadata table with Story Points, Priority, Status

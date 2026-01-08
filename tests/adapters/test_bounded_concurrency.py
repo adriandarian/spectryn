@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.adapters.async_base import (
+from spectryn.adapters.async_base import (
     DEFAULT_TRACKER_LIMITS,
     AsyncBoundedExecutor,
     BoundedExecutor,
@@ -21,7 +21,7 @@ from spectra.adapters.async_base import (
     create_async_bounded_executor,
     create_bounded_executor,
 )
-from spectra.core.ports.config_provider import TrackerType
+from spectryn.core.ports.config_provider import TrackerType
 
 
 class TestPriority:

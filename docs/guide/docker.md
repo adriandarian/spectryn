@@ -1,13 +1,13 @@
 # Docker Usage
 
-spectra provides official Docker images for containerized usage, perfect for CI/CD pipelines and consistent environments.
+spectryn provides official Docker images for containerized usage, perfect for CI/CD pipelines and consistent environments.
 
 ## Quick Start
 
 ### Pull the Image
 
 ```bash
-docker pull adriandarian/spectra:latest
+docker pull adriandarian/spectryn:latest
 ```
 
 ### Basic Usage
@@ -18,7 +18,7 @@ docker run --rm \
   -e JIRA_EMAIL=your.email@company.com \
   -e JIRA_API_TOKEN=your-api-token \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -30,7 +30,7 @@ docker run --rm \
   -e JIRA_EMAIL=your.email@company.com \
   -e JIRA_API_TOKEN=your-api-token \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
@@ -42,8 +42,8 @@ For easier management with persistent configuration:
 
 ```yaml
 services:
-  spectra:
-    image: adriandarian/spectra:latest
+  spectryn:
+    image: adriandarian/spectryn:latest
     env_file:
       - .env
     volumes:
@@ -63,16 +63,16 @@ JIRA_API_TOKEN=your-api-token
 
 ```bash
 # Preview changes (dry-run)
-docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123
+docker compose run --rm spectryn --markdown EPIC.md --epic PROJ-123
 
 # Execute sync
-docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123 --execute
+docker compose run --rm spectryn --markdown EPIC.md --epic PROJ-123 --execute
 
 # With verbose output
-docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123 -v
+docker compose run --rm spectryn --markdown EPIC.md --epic PROJ-123 -v
 
 # Specific phase only
-docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123 --execute --phase subtasks
+docker compose run --rm spectryn --markdown EPIC.md --epic PROJ-123 --execute --phase subtasks
 ```
 
 ## Building Locally
@@ -80,9 +80,9 @@ docker compose run --rm spectra --markdown EPIC.md --epic PROJ-123 --execute --p
 Build the image from source:
 
 ```bash
-git clone https://github.com/adriandarian/spectra.git
-cd spectra
-docker build -t spectra:local .
+git clone https://github.com/adriandarian/spectryn.git
+cd spectryn
+docker build -t spectryn:local .
 ```
 
 ### Dockerfile
@@ -100,7 +100,7 @@ RUN pip install --no-cache-dir .
 COPY src/ src/
 
 # Set entrypoint
-ENTRYPOINT ["spectra"]
+ENTRYPOINT ["spectryn"]
 CMD ["--help"]
 
 # Default working directory for mounted files
@@ -132,7 +132,7 @@ jobs:
             -e JIRA_EMAIL=${{ secrets.JIRA_EMAIL }} \
             -e JIRA_API_TOKEN=${{ secrets.JIRA_API_TOKEN }} \
             -v ${{ github.workspace }}:/workspace \
-            adriandarian/spectra:latest \
+            adriandarian/spectryn:latest \
             --markdown docs/EPIC.md \
             --epic ${{ vars.EPIC_KEY }} \
             --execute \
@@ -143,13 +143,13 @@ jobs:
 
 ```yaml
 sync-jira:
-  image: adriandarian/spectra:latest
+  image: adriandarian/spectryn:latest
   variables:
     JIRA_URL: $JIRA_URL
     JIRA_EMAIL: $JIRA_EMAIL
     JIRA_API_TOKEN: $JIRA_API_TOKEN
   script:
-    - spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
+    - spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm
   rules:
     - changes:
         - EPIC.md
@@ -161,7 +161,7 @@ sync-jira:
 pipeline {
     agent {
         docker {
-            image 'adriandarian/spectra:latest'
+            image 'adriandarian/spectryn:latest'
         }
     }
     
@@ -174,7 +174,7 @@ pipeline {
     stages {
         stage('Sync') {
             steps {
-                sh 'spectra --markdown EPIC.md --epic PROJ-123 --execute --no-confirm'
+                sh 'spectryn --markdown EPIC.md --epic PROJ-123 --execute --no-confirm'
             }
         }
     }
@@ -190,8 +190,8 @@ Mount a config file for complex configurations:
 ```bash
 docker run --rm \
   -v $(pwd):/workspace \
-  -v ~/.spectra.yaml:/root/.spectra.yaml:ro \
-  adriandarian/spectra:latest \
+  -v ~/.spectryn.yaml:/root/.spectryn.yaml:ro \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -201,7 +201,7 @@ docker run --rm \
 docker run --rm \
   --env-file .env \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -215,7 +215,7 @@ docker run --rm \
   -e JIRA_EMAIL=... \
   -e JIRA_API_TOKEN=... \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute --export results.json
 ```
 
@@ -240,7 +240,7 @@ docker run --rm \
   -u $(id -u):$(id -g) \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -254,7 +254,7 @@ docker run --rm \
   --network host \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -266,7 +266,7 @@ Run with verbose output to troubleshoot:
 docker run --rm \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectra:latest \
+  adriandarian/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 -v --log-format json
 ```
 

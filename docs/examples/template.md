@@ -1,6 +1,6 @@
 # Epic Template
 
-A blank template to get started with spectra.
+A blank template to get started with spectryn.
 
 ## Copy & Customize
 

@@ -17,7 +17,7 @@ A Language Server Protocol (LSP) implementation for Spectra markdown files, prov
 ### From PyPI
 
 ```bash
-pip install spectra-lsp
+pip install spectryn-lsp
 ```
 
 ### From Source
@@ -33,10 +33,10 @@ pip install -e .
 
 ```bash
 # TCP mode (default)
-spectra-lsp --tcp --port 2087
+spectryn-lsp --tcp --port 2087
 
 # Stdio mode (for editor integration)
-spectra-lsp --stdio
+spectryn-lsp --stdio
 ```
 
 ### Editor Configuration
@@ -54,14 +54,14 @@ See the editor-specific guides below:
 
 The LSP server reads configuration from:
 
-1. `spectra.yaml` or `spectra.toml` in the workspace
+1. `spectryn.yaml` or `spectryn.toml` in the workspace
 2. Editor-specific settings passed via `workspace/didChangeConfiguration`
 
 ### Available Settings
 
 ```json
 {
-  "spectra": {
+  "spectryn": {
     "validation": {
       "enabled": true,
       "validateOnSave": true,
@@ -87,7 +87,7 @@ The LSP server reads configuration from:
 ## Supported File Types
 
 - `*.md` - Markdown files with Spectra headers
-- `*.spectra.md` - Explicit Spectra files
+- `*.spectryn.md` - Explicit Spectra files
 
 ## Protocol Support
 
@@ -117,7 +117,7 @@ pip install -e ".[dev]"
 pytest
 
 # Type check
-mypy src/spectra_lsp
+mypy src/spectryn_lsp
 ```
 
 ## License

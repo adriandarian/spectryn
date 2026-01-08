@@ -22,21 +22,21 @@ class TestBatchOperation:
 
     def test_batch_operation_success_str(self) -> None:
         """Test string representation for successful operation."""
-        from spectra.adapters.azure_devops.batch import BatchOperation
+        from spectryn.adapters.azure_devops.batch import BatchOperation
 
         op = BatchOperation(index=0, success=True, key="123")
         assert str(op) == "[0] 123: OK"
 
     def test_batch_operation_failure_str(self) -> None:
         """Test string representation for failed operation."""
-        from spectra.adapters.azure_devops.batch import BatchOperation
+        from spectryn.adapters.azure_devops.batch import BatchOperation
 
         op = BatchOperation(index=1, success=False, key="456", error="Connection failed")
         assert str(op) == "[1] 456: FAILED - Connection failed"
 
     def test_batch_operation_failure_no_key(self) -> None:
         """Test failure without key shows N/A."""
-        from spectra.adapters.azure_devops.batch import BatchOperation
+        from spectryn.adapters.azure_devops.batch import BatchOperation
 
         op = BatchOperation(index=2, success=False, error="Missing parent")
         assert str(op) == "[2] N/A: FAILED - Missing parent"
@@ -47,7 +47,7 @@ class TestBatchResult:
 
     def test_empty_result(self) -> None:
         """Test empty batch result."""
-        from spectra.adapters.azure_devops.batch import BatchResult
+        from spectryn.adapters.azure_devops.batch import BatchResult
 
         result = BatchResult()
         assert result.success is True
@@ -59,7 +59,7 @@ class TestBatchResult:
 
     def test_add_success(self) -> None:
         """Test adding successful operations."""
-        from spectra.adapters.azure_devops.batch import BatchResult
+        from spectryn.adapters.azure_devops.batch import BatchResult
 
         result = BatchResult()
         result.add_success(0, "123", {"title": "Task 1"})
@@ -74,7 +74,7 @@ class TestBatchResult:
 
     def test_add_failure(self) -> None:
         """Test adding failed operations."""
-        from spectra.adapters.azure_devops.batch import BatchResult
+        from spectryn.adapters.azure_devops.batch import BatchResult
 
         result = BatchResult()
         result.add_failure(0, "Connection error", "123")
@@ -91,7 +91,7 @@ class TestBatchResult:
 
     def test_mixed_success_and_failure(self) -> None:
         """Test mix of successful and failed operations."""
-        from spectra.adapters.azure_devops.batch import BatchResult
+        from spectryn.adapters.azure_devops.batch import BatchResult
 
         result = BatchResult()
         result.add_success(0, "123")
@@ -107,7 +107,7 @@ class TestBatchResult:
 
     def test_summary(self) -> None:
         """Test summary generation."""
-        from spectra.adapters.azure_devops.batch import BatchResult
+        from spectryn.adapters.azure_devops.batch import BatchResult
 
         result = BatchResult()
         result.add_success(0, "123")
@@ -131,7 +131,7 @@ class TestAzureDevOpsBatchClient:
     @pytest.fixture
     def batch_client(self, mock_client: MagicMock) -> Generator:
         """Create a batch client with mock."""
-        from spectra.adapters.azure_devops.batch import AzureDevOpsBatchClient
+        from spectryn.adapters.azure_devops.batch import AzureDevOpsBatchClient
 
         return AzureDevOpsBatchClient(client=mock_client, max_workers=5)
 
@@ -181,7 +181,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_create_subtasks_dry_run(self, mock_client) -> None:
         """Test bulk create in dry run mode."""
-        from spectra.adapters.azure_devops.batch import AzureDevOpsBatchClient
+        from spectryn.adapters.azure_devops.batch import AzureDevOpsBatchClient
 
         mock_client.dry_run = True
         batch_client = AzureDevOpsBatchClient(client=mock_client)
@@ -228,7 +228,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_create_subtasks_api_error(self, batch_client, mock_client) -> None:
         """Test bulk create with API error."""
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         mock_client.create_work_item.side_effect = IssueTrackerError("API failure")
 
@@ -252,7 +252,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_update_work_items_dry_run(self, mock_client) -> None:
         """Test bulk update in dry run mode."""
-        from spectra.adapters.azure_devops.batch import AzureDevOpsBatchClient
+        from spectryn.adapters.azure_devops.batch import AzureDevOpsBatchClient
 
         mock_client.dry_run = True
         batch_client = AzureDevOpsBatchClient(client=mock_client)
@@ -314,7 +314,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_transition_dry_run(self, mock_client) -> None:
         """Test bulk transition in dry run mode."""
-        from spectra.adapters.azure_devops.batch import AzureDevOpsBatchClient
+        from spectryn.adapters.azure_devops.batch import AzureDevOpsBatchClient
 
         mock_client.dry_run = True
         batch_client = AzureDevOpsBatchClient(client=mock_client)
@@ -338,7 +338,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_transition_error(self, batch_client, mock_client) -> None:
         """Test bulk transition with error."""
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         mock_client.update_work_item.side_effect = IssueTrackerError("Invalid state")
 
@@ -359,7 +359,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_add_comments_dry_run(self, mock_client) -> None:
         """Test bulk add comments in dry run mode."""
-        from spectra.adapters.azure_devops.batch import AzureDevOpsBatchClient
+        from spectryn.adapters.azure_devops.batch import AzureDevOpsBatchClient
 
         mock_client.dry_run = True
         batch_client = AzureDevOpsBatchClient(client=mock_client)
@@ -405,7 +405,7 @@ class TestAzureDevOpsBatchClient:
 
     def test_bulk_get_work_items_error(self, batch_client, mock_client) -> None:
         """Test bulk get with error."""
-        from spectra.core.ports.issue_tracker import IssueTrackerError
+        from spectryn.core.ports.issue_tracker import IssueTrackerError
 
         mock_client.get_work_item.side_effect = IssueTrackerError("Not found")
 
@@ -429,7 +429,7 @@ class TestAsyncAzureDevOpsAdapterWithoutAiohttp:
             # Need to reload the module to test the import check
             import importlib
 
-            from spectra.adapters.azure_devops import async_adapter
+            from spectryn.adapters.azure_devops import async_adapter
 
             # Temporarily set ASYNC_AVAILABLE to False
             original = async_adapter.ASYNC_AVAILABLE
@@ -462,7 +462,7 @@ class TestAsyncAzureDevOpsAdapter:
         # Skip if aiohttp not available
         pytest.importorskip("aiohttp")
 
-        from spectra.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
+        from spectryn.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
 
         return AsyncAzureDevOpsAdapter(
             organization="test-org",
@@ -474,7 +474,7 @@ class TestAsyncAzureDevOpsAdapter:
     def test_init(self) -> None:
         """Test adapter initialization."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
+        from spectryn.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
 
         adapter = AsyncAzureDevOpsAdapter(
             organization="my-org",
@@ -578,7 +578,7 @@ class TestAsyncAzureDevOpsAdapter:
     async def test_context_manager(self) -> None:
         """Test async context manager."""
         pytest.importorskip("aiohttp")
-        from spectra.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
+        from spectryn.adapters.azure_devops.async_adapter import AsyncAzureDevOpsAdapter
 
         adapter = AsyncAzureDevOpsAdapter(
             organization="test-org",
@@ -651,7 +651,7 @@ class TestIsAsyncAvailable:
 
     def test_is_async_available(self) -> None:
         """Test is_async_available function."""
-        from spectra.adapters.azure_devops.async_adapter import is_async_available
+        from spectryn.adapters.azure_devops.async_adapter import is_async_available
 
         # Should return a boolean
         result = is_async_available()

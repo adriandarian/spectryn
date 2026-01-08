@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_estimate import (
+from spectryn.application.ai_estimate import (
     AIEstimator,
     ComplexityBreakdown,
     EstimationOptions,
@@ -15,9 +15,9 @@ from spectra.application.ai_estimate import (
     build_estimation_prompt,
     parse_estimation_response,
 )
-from spectra.core.domain.entities import Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -371,7 +371,7 @@ class TestAIEstimator:
 
     def test_estimate_with_fallback(self, sample_story: UserStory) -> None:
         """Test estimating with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             estimator = AIEstimator()
@@ -406,7 +406,7 @@ class TestAIEstimator:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -429,7 +429,7 @@ class TestAIEstimator:
 
     def test_estimate_llm_not_available(self, sample_story: UserStory) -> None:
         """Test estimation when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = False
             mock_manager.return_value = mock_mgr

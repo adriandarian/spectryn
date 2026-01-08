@@ -14,7 +14,7 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.tolerant_markdown import (
+from spectryn.adapters.parsers.tolerant_markdown import (
     EmbeddedImage,
     extract_images_from_section,
     parse_embedded_images,

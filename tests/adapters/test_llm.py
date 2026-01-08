@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.llm.base import (
+from spectryn.adapters.llm.base import (
     LLMConfig,
     LLMMessage,
     LLMProvider,
@@ -12,7 +12,7 @@ from spectra.adapters.llm.base import (
     LLMRole,
     MessageContent,
 )
-from spectra.adapters.llm.manager import (
+from spectryn.adapters.llm.manager import (
     LLMManager,
     LLMManagerConfig,
     ProviderName,

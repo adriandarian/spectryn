@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# GitHub Action Entrypoint for spectra
-# This script parses inputs and runs spectra with the appropriate arguments
+# GitHub Action Entrypoint for spectryn
+# This script parses inputs and runs spectryn with the appropriate arguments
 
-echo "🚀 spectra GitHub Action"
+echo "🚀 spectryn GitHub Action"
 echo "========================"
 
 # Required inputs
@@ -111,9 +111,9 @@ if [ -n "$EPIC_KEY" ]; then
 fi
 echo ""
 
-# Run spectra and capture output
+# Run spectryn and capture output
 set +e
-OUTPUT=$(spectra "${CMD_ARGS[@]}" 2>&1)
+OUTPUT=$(spectryn "${CMD_ARGS[@]}" 2>&1)
 EXIT_CODE=$?
 set -e
 

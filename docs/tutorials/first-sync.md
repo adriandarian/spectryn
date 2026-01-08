@@ -1,6 +1,6 @@
 # Your First Sync
 
-A complete walkthrough of setting up spectra and syncing your first epic to Jira.
+A complete walkthrough of setting up spectryn and syncing your first epic to Jira.
 
 **Duration**: ~5 minutes
 
@@ -9,27 +9,27 @@ A complete walkthrough of setting up spectra and syncing your first epic to Jira
 <p style="color: white; font-size: 1.2rem; margin-top: 1rem;">Terminal Recording</p>
 </div>
 
-## Step 1: Install spectra
+## Step 1: Install spectryn
 
 <div class="step-demo">
 
 ```bash
 # Install with pip
-$ pip install spectra
-Collecting spectra
-  Downloading spectra-1.0.0-py3-none-any.whl (45 kB)
-Installing collected packages: spectra
-Successfully installed spectra-1.0.0
+$ pip install spectryn
+Collecting spectryn
+  Downloading spectryn-1.0.0-py3-none-any.whl (45 kB)
+Installing collected packages: spectryn
+Successfully installed spectryn-1.0.0
 
 # Verify installation
-$ spectra --version
-spectra version 1.0.0
+$ spectryn --version
+spectryn version 1.0.0
 ```
 
 </div>
 
 ::: tip Alternative Installation
-You can also use `pipx install spectra` for an isolated environment, or `brew install adriandarian/spectra/spectra` on macOS.
+You can also use `pipx install spectryn` for an isolated environment, or install via Homebrew on macOS (see [Installation Guide](/guide/installation)).
 :::
 
 ## Step 2: Configure Credentials
@@ -72,7 +72,7 @@ echo ".env" >> .gitignore
 
 <div style="flex: 1; min-width: 280px; background: var(--vp-c-bg-soft); padding: 1.5rem; border-radius: 8px;">
 <strong>2. Create API Token</strong>
-<p style="opacity: 0.8; margin-top: 0.5rem;">Click "Create API token" and give it a name like "spectra"</p>
+<p style="opacity: 0.8; margin-top: 0.5rem;">Click "Create API token" and give it a name like "spectryn"</p>
 </div>
 
 <div style="flex: 1; min-width: 280px; background: var(--vp-c-bg-soft); padding: 1.5rem; border-radius: 8px;">
@@ -90,7 +90,7 @@ echo ".env" >> .gitignore
 $ cat > EPIC.md << 'EOF'
 # 🚀 My First Epic
 
-> **Epic: Getting started with spectra**
+> **Epic: Getting started with spectryn**
 
 ---
 
@@ -137,10 +137,10 @@ EOF
 <div class="step-demo">
 
 ```bash
-$ spectra --markdown EPIC.md --epic PROJ-123
+$ spectryn --markdown EPIC.md --epic PROJ-123
 
 ╭──────────────────────────────────────────────────────────────╮
-│  spectra v1.0.0                                              │
+│  spectryn v1.0.0                                              │
 │  Syncing: EPIC.md → PROJ-123                                 │
 │  Mode: DRY RUN (use --execute to apply changes)              │
 ╰──────────────────────────────────────────────────────────────╯
@@ -175,10 +175,10 @@ To apply these changes, add --execute flag.
 <div class="step-demo">
 
 ```bash
-$ spectra --markdown EPIC.md --epic PROJ-123 --execute
+$ spectryn --markdown EPIC.md --epic PROJ-123 --execute
 
 ╭──────────────────────────────────────────────────────────────╮
-│  spectra v1.0.0                                              │
+│  spectryn v1.0.0                                              │
 │  Syncing: EPIC.md → PROJ-123                                 │
 │  Mode: EXECUTE                                               │
 ╰──────────────────────────────────────────────────────────────╯

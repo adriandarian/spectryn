@@ -44,7 +44,7 @@ class TestMarkdownParser:
 
     def test_parse_priority(self, markdown_parser, sample_markdown):
         """Test priority extraction."""
-        from spectra.core.domain import Priority
+        from spectryn.core.domain import Priority
 
         stories = markdown_parser.parse_stories(sample_markdown)
         assert stories[0].priority == Priority.HIGH
@@ -52,7 +52,7 @@ class TestMarkdownParser:
 
     def test_parse_status(self, markdown_parser, sample_markdown):
         """Test status extraction."""
-        from spectra.core.domain import Status
+        from spectryn.core.domain import Status
 
         stories = markdown_parser.parse_stories(sample_markdown)
         assert stories[0].status == Status.DONE
@@ -208,7 +208,7 @@ Create detailed technical documentation.
 
     def test_parse_inline_priority(self, markdown_parser):
         """Test priority extraction from inline format with P0/P1 notation."""
-        from spectra.core.domain import Priority
+        from spectryn.core.domain import Priority
 
         stories = markdown_parser.parse_stories(self.INLINE_FORMAT_MARKDOWN)
         assert stories[0].priority == Priority.CRITICAL  # P0
@@ -216,14 +216,14 @@ Create detailed technical documentation.
 
     def test_parse_inline_status_complete(self, markdown_parser):
         """Test status extraction for Complete status."""
-        from spectra.core.domain import Status
+        from spectryn.core.domain import Status
 
         stories = markdown_parser.parse_stories(self.INLINE_FORMAT_MARKDOWN)
         assert stories[0].status == Status.DONE  # ✅ Complete
 
     def test_parse_inline_status_not_started(self, markdown_parser):
         """Test status extraction for Not Started status."""
-        from spectra.core.domain import Status
+        from spectryn.core.domain import Status
 
         stories = markdown_parser.parse_stories(self.INLINE_FORMAT_MARKDOWN)
         assert stories[1].status == Status.PLANNED  # 🔲 Not Started

@@ -22,17 +22,17 @@ image: python:3.11-slim
 
 definitions:
   caches:
-    spectra: ~/.cache/pip
+    spectryn: ~/.cache/pip
 
 pipelines:
   default:
     - step:
         name: Sync to Jira
         caches:
-          - spectra
+          - spectryn
         script:
-          - pip install spectra
-          - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
+          - pip install spectryn
+          - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
 ```
 
 ### Using the Pipe
@@ -43,7 +43,7 @@ pipelines:
     - step:
         name: Sync to Jira
         script:
-          - pipe: spectra/spectra-sync:1.0.0
+          - pipe: spectryn/spectryn-sync:1.0.0
             variables:
               MARKDOWN_FILE: "docs/user-stories.md"
               EPIC_KEY: "PROJ-123"
@@ -86,8 +86,8 @@ pipelines:
       - step:
           name: Sync to Jira
           script:
-            - pip install spectra
-            - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
+            - pip install spectryn
+            - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
 ```
 
 ### Dry-Run on Pull Requests
@@ -99,8 +99,8 @@ pipelines:
       - step:
           name: Preview Sync
           script:
-            - pip install spectra
-            - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY
+            - pip install spectryn
+            - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY
 ```
 
 ### Scheduled Sync
@@ -112,8 +112,8 @@ pipelines:
       - step:
           name: Scheduled Sync
           script:
-            - pip install spectra
-            - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --incremental --no-confirm
+            - pip install spectryn
+            - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --incremental --no-confirm
 ```
 
 ### Multi-Tracker Setup
@@ -126,13 +126,13 @@ pipelines:
           - step:
               name: Sync to Jira
               script:
-                - pip install spectra
-                - spectra sync --markdown docs/stories.md --epic $JIRA_EPIC --tracker jira --execute --no-confirm
+                - pip install spectryn
+                - spectryn sync --markdown docs/stories.md --epic $JIRA_EPIC --tracker jira --execute --no-confirm
           - step:
               name: Sync to GitHub
               script:
-                - pip install spectra
-                - spectra sync --markdown docs/stories.md --tracker github --execute --no-confirm
+                - pip install spectryn
+                - spectryn sync --markdown docs/stories.md --tracker github --execute --no-confirm
 ```
 
 ### With Artifacts
@@ -143,8 +143,8 @@ pipelines:
     - step:
         name: Sync with Export
         script:
-          - pip install spectra
-          - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --export sync-results.json --no-confirm
+          - pip install spectryn
+          - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --export sync-results.json --no-confirm
         artifacts:
           - sync-results.json
           - backups/**
@@ -166,17 +166,17 @@ image: python:3.11-slim
 
 definitions:
   caches:
-    spectra: ~/.cache/pip
+    spectryn: ~/.cache/pip
 
   steps:
     - step: &sync-step
         name: Spectra Sync
         caches:
-          - spectra
+          - spectryn
         script:
-          - pip install spectra
+          - pip install spectryn
           - |
-            spectra sync \
+            spectryn sync \
               --markdown $MARKDOWN_FILE \
               --epic $EPIC_KEY \
               --tracker jira \
@@ -191,8 +191,8 @@ pipelines:
         <<: *sync-step
         name: Preview Sync (Dry-run)
         script:
-          - pip install spectra
-          - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY
+          - pip install spectryn
+          - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY
 
   branches:
     main:
@@ -205,8 +205,8 @@ pipelines:
       - step:
           name: Validate Markdown
           script:
-            - pip install spectra
-            - spectra validate --markdown docs/user-stories.md
+            - pip install spectryn
+            - spectryn validate --markdown docs/user-stories.md
 
   custom:
     full-sync:
@@ -214,8 +214,8 @@ pipelines:
           <<: *sync-step
           name: Full Sync
           script:
-            - pip install spectra
-            - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
+            - pip install spectryn
+            - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY --execute --no-confirm
 ```
 
 ## Troubleshooting
@@ -228,7 +228,7 @@ Ensure repository variables are set:
 export JIRA_URL="https://company.atlassian.net"
 export JIRA_EMAIL="user@company.com"
 export JIRA_API_TOKEN="your-token"
-spectra sync --markdown docs/stories.md --epic PROJ-123
+spectryn sync --markdown docs/stories.md --epic PROJ-123
 ```
 
 ### File Not Found
@@ -237,7 +237,7 @@ Use relative paths from repository root:
 ```yaml
 script:
   - ls -la docs/  # Debug: list files
-  - spectra sync --markdown docs/user-stories.md --epic $EPIC_KEY
+  - spectryn sync --markdown docs/user-stories.md --epic $EPIC_KEY
 ```
 
 ## License

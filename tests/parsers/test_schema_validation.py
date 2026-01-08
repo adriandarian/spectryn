@@ -13,7 +13,7 @@ Tests cover:
 
 import pytest
 
-from spectra.adapters.parsers.schema_validation import (
+from spectryn.adapters.parsers.schema_validation import (
     EpicSchema,
     FieldSchema,
     FieldType,
@@ -40,15 +40,15 @@ from spectra.adapters.parsers.schema_validation import (
     valid_status,
     valid_story_id,
 )
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import (
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import (
     AcceptanceCriteria,
     Description,
     IssueKey,
     StoryId,
 )
-from spectra.core.ports.document_parser import ParserError
+from spectryn.core.ports.document_parser import ParserError
 
 
 # =============================================================================
@@ -701,7 +701,7 @@ class TestValidatingParser:
 
     def test_wraps_parser_name(self) -> None:
         """Test parser name includes wrapper."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         parser = MarkdownParser()
         validating = ValidatingParser(parser)
@@ -711,7 +711,7 @@ class TestValidatingParser:
 
     def test_supported_extensions(self) -> None:
         """Test extensions come from wrapped parser."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         parser = MarkdownParser()
         validating = ValidatingParser(parser)
@@ -720,7 +720,7 @@ class TestValidatingParser:
 
     def test_can_parse_delegates(self, tmp_path) -> None:
         """Test can_parse delegates to wrapped parser."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         parser = MarkdownParser()
         validating = ValidatingParser(parser)
@@ -736,7 +736,7 @@ class TestValidatingParser:
 
     def test_parse_stories_validates(self, tmp_path) -> None:
         """Test parse_stories validates results."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         # Create a valid markdown file
         content = """
@@ -768,7 +768,7 @@ class TestValidatingParser:
 
     def test_parse_stories_raises_on_invalid(self, tmp_path) -> None:
         """Test parse_stories raises on validation failure."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         # Create a markdown file with issues
         content = """
@@ -797,7 +797,7 @@ class TestValidatingParser:
 
     def test_parse_stories_no_raise(self, tmp_path) -> None:
         """Test parse_stories doesn't raise when disabled."""
-        from spectra.adapters.parsers import MarkdownParser
+        from spectryn.adapters.parsers import MarkdownParser
 
         content = """
 # Epic: PROJ-100 - Test Epic
@@ -881,7 +881,7 @@ class TestEdgeCases:
 
     def test_validation_error_with_location(self) -> None:
         """Test ValidationError with location."""
-        from spectra.adapters.parsers.tolerant_markdown import ParseLocation
+        from spectryn.adapters.parsers.tolerant_markdown import ParseLocation
 
         error = ValidationError(
             field="title",

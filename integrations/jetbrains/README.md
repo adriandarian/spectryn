@@ -10,7 +10,7 @@ IDE plugin for IntelliJ IDEA, PyCharm, WebStorm, and other JetBrains IDEs.
 - **Inspections** - Real-time validation warnings
 - **Quick Fixes** - Auto-fix common issues
 - **Tool Window** - Sidebar with sync status and stories
-- **External Tools** - Run spectra commands from IDE
+- **External Tools** - Run spectryn commands from IDE
 
 ## Installation
 
@@ -22,7 +22,7 @@ IDE plugin for IntelliJ IDEA, PyCharm, WebStorm, and other JetBrains IDEs.
 
 ### From Disk
 
-1. Download the latest release from [Releases](https://github.com/spectra/spectra/releases)
+1. Download the latest release from [Releases](https://github.com/spectryn/spectryn/releases)
 2. Open **Settings/Preferences** → **Plugins**
 3. Click the gear icon → **Install Plugin from Disk...**
 4. Select the downloaded `.zip` file
@@ -30,7 +30,7 @@ IDE plugin for IntelliJ IDEA, PyCharm, WebStorm, and other JetBrains IDEs.
 ## Requirements
 
 - IntelliJ IDEA 2023.1 or later (or compatible IDE)
-- Spectra CLI installed (`pip install spectra`)
+- Spectra CLI installed (`pip install spectryn`)
 
 ## Configuration
 
@@ -48,11 +48,11 @@ Navigate to **Settings/Preferences** → **Tools** → **Spectra**
 
 ### External Tools
 
-The plugin automatically detects the `spectra` CLI. To configure manually:
+The plugin automatically detects the `spectryn` CLI. To configure manually:
 
 1. **Settings** → **Tools** → **External Tools**
 2. Add a new tool with:
-   - **Program**: `spectra`
+   - **Program**: `spectryn`
    - **Arguments**: `--validate --markdown $FilePath$`
    - **Working directory**: `$ProjectFileDir$`
 
@@ -114,7 +114,7 @@ cd integrations/jetbrains
 jetbrains/
 ├── src/main/
 │   ├── kotlin/
-│   │   └── dev/spectra/plugin/
+│   │   └── dev/spectryn/plugin/
 │   │       ├── SpectraPlugin.kt
 │   │       ├── actions/
 │   │       ├── completion/

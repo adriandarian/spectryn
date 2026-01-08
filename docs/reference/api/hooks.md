@@ -1,10 +1,10 @@
 # Hooks System
 
-API reference for spectra's plugin hooks system.
+API reference for spectryn's plugin hooks system.
 
 ## Overview
 
-The hooks system allows you to execute custom code at specific points during spectra operations. This enables:
+The hooks system allows you to execute custom code at specific points during spectryn operations. This enables:
 
 - Notifications (Slack, email, PagerDuty)
 - Logging and auditing
@@ -16,7 +16,7 @@ The hooks system allows you to execute custom code at specific points during spe
 ### Available Hooks
 
 ```python
-from spectra.plugins import HookPoint
+from spectryn.plugins import HookPoint
 
 class HookPoint(Enum):
     """Available hook points in the sync lifecycle."""
@@ -75,7 +75,7 @@ class HookContext:
 ### Using Decorators
 
 ```python
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 hook_manager = get_registry().hook_manager
 
@@ -95,7 +95,7 @@ def on_sync_complete(ctx: HookContext):
 ### Programmatic Registration
 
 ```python
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 def my_handler(ctx: HookContext):
     print(f"Hook triggered: {ctx.hook_point}")
@@ -191,7 +191,7 @@ def validate(ctx):
 
 ```python
 from slack_sdk import WebClient
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 slack = WebClient(token=os.environ["SLACK_TOKEN"])
 CHANNEL = "#jira-sync"
@@ -240,7 +240,7 @@ def notify_error(ctx):
 
 ```python
 from sqlalchemy import create_engine, text
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 from datetime import datetime
 
 engine = create_engine(os.environ["DATABASE_URL"])
@@ -270,7 +270,7 @@ def audit_log(ctx):
 
 ```python
 import pdpyras
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 pagerduty = pdpyras.EventsAPIV2Session(
     os.environ["PAGERDUTY_ROUTING_KEY"]
@@ -281,9 +281,9 @@ def alert_pagerduty(ctx):
     # Only alert on critical errors
     if isinstance(ctx.error, (AuthenticationError, ConnectionError)):
         pagerduty.trigger(
-            summary=f"spectra sync failed: {ctx.error}",
+            summary=f"spectryn sync failed: {ctx.error}",
             severity="error",
-            source="spectra",
+            source="spectryn",
             custom_details={
                 "epic_key": ctx.data.get('epic_key'),
                 "command": ctx.command_type,
@@ -295,7 +295,7 @@ def alert_pagerduty(ctx):
 ### Custom Validation
 
 ```python
-from spectra.plugins import HookPoint, get_registry
+from spectryn.plugins import HookPoint, get_registry
 
 @get_registry().hook_manager.hook(HookPoint.ON_VALIDATION)
 def validate_story_points(ctx):

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.application.sync.delta import (
+from spectryn.application.sync.delta import (
     ChangeDirection,
     DeltaSyncResult,
     DeltaTracker,
@@ -15,10 +15,10 @@ from spectra.application.sync.delta import (
     SyncableField,
     create_delta_tracker,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, IssueKey, StoryId
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, IssueKey, StoryId
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 # =============================================================================

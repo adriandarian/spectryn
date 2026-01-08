@@ -1,9 +1,9 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📖 Documentation
-    url: https://adriandarian.github.io/spectra
+    url: https://adriandarian.github.io/spectryn
     about: Check the docs for guides, tutorials, and API reference
   - name: 💬 Discussions
-    url: https://github.com/adriandarian/spectra/discussions
+    url: https://github.com/adriandarian/spectryn/discussions
     about: Ask questions and share ideas in GitHub Discussions
 

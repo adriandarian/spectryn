@@ -10,16 +10,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.core.compact_entities import (
+from spectryn.core.compact_entities import (
     CompactComment,
     CompactEpic,
     CompactSubtask,
     CompactUserStory,
     estimate_memory_savings,
 )
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import CommitRef, IssueKey, StoryId
-from spectra.core.memory import (
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import CommitRef, IssueKey, StoryId
+from spectryn.core.memory import (
     ChunkedList,
     CompactString,
     LazyLoader,

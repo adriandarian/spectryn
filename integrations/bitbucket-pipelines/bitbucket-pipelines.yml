@@ -5,21 +5,21 @@ image: python:3.11-slim
 
 definitions:
   caches:
-    spectra: ~/.cache/pip
+    spectryn: ~/.cache/pip
 
   steps:
     # Base sync step
-    - step: &spectra-sync
+    - step: &spectryn-sync
         name: Spectra Sync
         caches:
-          - spectra
+          - spectryn
         script:
           - pip install --upgrade pip
-          - pip install spectra
-          - spectra --version
+          - pip install spectryn
+          - spectryn --version
           - |
             # Build command based on variables
-            CMD="spectra sync --markdown $MARKDOWN_FILE"
+            CMD="spectryn sync --markdown $MARKDOWN_FILE"
 
             # Add epic key if provided
             if [ -n "$EPIC_KEY" ]; then
@@ -57,22 +57,22 @@ definitions:
             eval $CMD
 
     # Validation step
-    - step: &spectra-validate
+    - step: &spectryn-validate
         name: Validate Markdown
         caches:
-          - spectra
+          - spectryn
         script:
-          - pip install spectra
-          - spectra validate --markdown $MARKDOWN_FILE
+          - pip install spectryn
+          - spectryn validate --markdown $MARKDOWN_FILE
 
     # Pull (reverse sync) step
-    - step: &spectra-pull
+    - step: &spectryn-pull
         name: Spectra Pull
         caches:
-          - spectra
+          - spectryn
         script:
-          - pip install spectra
-          - spectra pull --epic $EPIC_KEY --output $OUTPUT_FILE --tracker ${TRACKER:-jira}
+          - pip install spectryn
+          - spectryn pull --epic $EPIC_KEY --output $OUTPUT_FILE --tracker ${TRACKER:-jira}
         artifacts:
           - $OUTPUT_FILE
 
@@ -80,40 +80,40 @@ pipelines:
   # Default pipeline (runs on all pushes)
   default:
     - step:
-        <<: *spectra-validate
+        <<: *spectryn-validate
         name: Validate Specs
 
   # Branch-specific pipelines
   branches:
     main:
       - step:
-          <<: *spectra-sync
+          <<: *spectryn-sync
           name: Sync to Jira
           deployment: production
 
     develop:
       - step:
-          <<: *spectra-sync
+          <<: *spectryn-sync
           name: Sync to Jira (Preview)
           script:
-            - pip install spectra
-            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
+            - pip install spectryn
+            - spectryn sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
             # Dry-run only on develop
 
   # Pull request pipelines
   pull-requests:
     '**':
       - step:
-          <<: *spectra-validate
+          <<: *spectryn-validate
           name: Validate Changes
       - step:
           name: Preview Sync
           caches:
-            - spectra
+            - spectryn
           script:
-            - pip install spectra
-            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
-            - spectra diff --markdown $MARKDOWN_FILE --epic $EPIC_KEY
+            - pip install spectryn
+            - spectryn sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --tracker jira
+            - spectryn diff --markdown $MARKDOWN_FILE --epic $EPIC_KEY
 
   # Custom pipelines (triggered manually)
   custom:
@@ -125,7 +125,7 @@ pipelines:
           - name: TRACKER
             default: "jira"
       - step:
-          <<: *spectra-sync
+          <<: *spectryn-sync
           name: Full Sync
 
     pull-from-tracker:
@@ -136,7 +136,7 @@ pipelines:
           - name: TRACKER
             default: "jira"
       - step:
-          <<: *spectra-pull
+          <<: *spectryn-pull
           name: Pull from Tracker
 
     multi-epic-sync:
@@ -147,10 +147,10 @@ pipelines:
       - step:
           name: Multi-Epic Sync
           caches:
-            - spectra
+            - spectryn
           script:
-            - pip install spectra
-            - spectra sync --markdown $MARKDOWN_FILE --multi-epic --epic-filter $EPIC_FILTER --execute --no-confirm
+            - pip install spectryn
+            - spectryn sync --markdown $MARKDOWN_FILE --multi-epic --epic-filter $EPIC_FILTER --execute --no-confirm
 
     incremental-sync:
       - variables:
@@ -158,11 +158,11 @@ pipelines:
             default: "docs/user-stories.md"
           - name: EPIC_KEY
       - step:
-          <<: *spectra-sync
+          <<: *spectryn-sync
           name: Incremental Sync
           script:
-            - pip install spectra
-            - spectra sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --incremental --execute --no-confirm
+            - pip install spectryn
+            - spectryn sync --markdown $MARKDOWN_FILE --epic $EPIC_KEY --incremental --execute --no-confirm
 
 # Note: Set the following repository variables in Bitbucket settings:
 # - JIRA_URL: Your Jira instance URL

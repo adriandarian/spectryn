@@ -15,21 +15,21 @@ A Pulumi provider for deploying and managing Spectra syncs across multiple cloud
 ### TypeScript/JavaScript
 
 ```bash
-npm install @spectra/pulumi
+npm install @spectryn/pulumi
 # or
-yarn add @spectra/pulumi
+yarn add @spectryn/pulumi
 ```
 
 ### Python
 
 ```bash
-pip install pulumi-spectra
+pip install pulumi-spectryn
 ```
 
 ### Go
 
 ```bash
-go get github.com/spectra/pulumi-spectra/sdk/go/spectra
+go get github.com/spectryn/pulumi-spectryn/sdk/go/spectryn
 ```
 
 ## Quick Start
@@ -37,10 +37,10 @@ go get github.com/spectra/pulumi-spectra/sdk/go/spectra
 ### TypeScript
 
 ```typescript
-import * as spectra from "@spectra/pulumi";
+import * as spectryn from "@spectryn/pulumi";
 
 // Create a Spectra sync on AWS
-const sync = new spectra.aws.FargateSync("my-sync", {
+const sync = new spectryn.aws.FargateSync("my-sync", {
     tracker: {
         type: "jira",
         url: "https://company.atlassian.net",
@@ -67,21 +67,21 @@ export const syncArn = sync.arn;
 
 ```python
 import pulumi
-import pulumi_spectra as spectra
+import pulumi_spectryn as spectryn
 
 # Create a Spectra sync on Kubernetes
-sync = spectra.kubernetes.SpectraSync("my-sync",
-    tracker=spectra.TrackerConfigArgs(
+sync = spectryn.kubernetes.SpectraSync("my-sync",
+    tracker=spectryn.TrackerConfigArgs(
         type="jira",
         url="https://company.atlassian.net",
         project="PROJ",
         epic_key="PROJ-123",
-        credentials=spectra.CredentialsArgs(
+        credentials=spectryn.CredentialsArgs(
             email=jira_email,
             api_token=pulumi.Output.secret(jira_token),
         ),
     ),
-    source=spectra.SourceConfigArgs(
+    source=spectryn.SourceConfigArgs(
         type="configmap",
         config_map_name="user-stories",
         key="spec.md",
@@ -98,38 +98,38 @@ pulumi.export("sync_name", sync.name)
 
 | Resource | Description |
 |----------|-------------|
-| `spectra.aws.FargateSync` | ECS Fargate-based sync |
-| `spectra.aws.LambdaSync` | Lambda-based sync |
-| `spectra.aws.EcsSync` | ECS EC2-based sync |
+| `spectryn.aws.FargateSync` | ECS Fargate-based sync |
+| `spectryn.aws.LambdaSync` | Lambda-based sync |
+| `spectryn.aws.EcsSync` | ECS EC2-based sync |
 
 ### Azure Resources
 
 | Resource | Description |
 |----------|-------------|
-| `spectra.azure.ContainerInstanceSync` | ACI-based sync |
-| `spectra.azure.ContainerAppSync` | Container Apps sync |
-| `spectra.azure.FunctionSync` | Azure Function sync |
+| `spectryn.azure.ContainerInstanceSync` | ACI-based sync |
+| `spectryn.azure.ContainerAppSync` | Container Apps sync |
+| `spectryn.azure.FunctionSync` | Azure Function sync |
 
 ### GCP Resources
 
 | Resource | Description |
 |----------|-------------|
-| `spectra.gcp.CloudRunSync` | Cloud Run sync |
-| `spectra.gcp.CloudFunctionSync` | Cloud Function sync |
+| `spectryn.gcp.CloudRunSync` | Cloud Run sync |
+| `spectryn.gcp.CloudFunctionSync` | Cloud Function sync |
 
 ### Kubernetes Resources
 
 | Resource | Description |
 |----------|-------------|
-| `spectra.kubernetes.SpectraSync` | CRD-based sync |
-| `spectra.kubernetes.CronJobSync` | CronJob-based sync |
+| `spectryn.kubernetes.SpectraSync` | CRD-based sync |
+| `spectryn.kubernetes.CronJobSync` | CronJob-based sync |
 
 ## Configuration
 
 ### Tracker Types
 
 ```typescript
-const jiraTracker: spectra.TrackerConfig = {
+const jiraTracker: spectryn.TrackerConfig = {
     type: "jira",
     url: "https://company.atlassian.net",
     project: "PROJ",
@@ -140,7 +140,7 @@ const jiraTracker: spectra.TrackerConfig = {
     },
 };
 
-const githubTracker: spectra.TrackerConfig = {
+const githubTracker: spectryn.TrackerConfig = {
     type: "github",
     owner: "myorg",
     repo: "myrepo",
@@ -149,7 +149,7 @@ const githubTracker: spectra.TrackerConfig = {
     },
 };
 
-const linearTracker: spectra.TrackerConfig = {
+const linearTracker: spectryn.TrackerConfig = {
     type: "linear",
     teamId: "TEAM-123",
     credentials: {
@@ -162,14 +162,14 @@ const linearTracker: spectra.TrackerConfig = {
 
 ```typescript
 // S3 source (AWS)
-const s3Source: spectra.SourceConfig = {
+const s3Source: spectryn.SourceConfig = {
     type: "s3",
     bucket: "my-bucket",
     key: "docs/user-stories.md",
 };
 
 // Git source
-const gitSource: spectra.SourceConfig = {
+const gitSource: spectryn.SourceConfig = {
     type: "git",
     repository: "https://github.com/org/repo.git",
     branch: "main",
@@ -181,7 +181,7 @@ const gitSource: spectra.SourceConfig = {
 };
 
 // ConfigMap source (Kubernetes)
-const configMapSource: spectra.SourceConfig = {
+const configMapSource: spectryn.SourceConfig = {
     type: "configmap",
     configMapName: "user-stories",
     key: "spec.md",
@@ -194,7 +194,7 @@ const configMapSource: spectra.SourceConfig = {
 
 ```typescript
 import * as pulumi from "@pulumi/pulumi";
-import * as spectra from "@spectra/pulumi";
+import * as spectryn from "@spectryn/pulumi";
 
 const config = new pulumi.Config();
 const trackerConfig = {
@@ -207,21 +207,21 @@ const trackerConfig = {
 };
 
 // Deploy to AWS
-const awsSync = new spectra.aws.FargateSync("aws-sync", {
+const awsSync = new spectryn.aws.FargateSync("aws-sync", {
     tracker: trackerConfig,
     source: { type: "s3", bucket: "specs", key: "stories.md" },
     schedule: "rate(6 hours)",
 });
 
 // Deploy to Azure
-const azureSync = new spectra.azure.ContainerInstanceSync("azure-sync", {
+const azureSync = new spectryn.azure.ContainerInstanceSync("azure-sync", {
     tracker: trackerConfig,
     source: { type: "blob", container: "specs", blob: "stories.md" },
     schedule: "0 */6 * * *",
 });
 
 // Deploy to Kubernetes
-const k8sSync = new spectra.kubernetes.SpectraSync("k8s-sync", {
+const k8sSync = new spectryn.kubernetes.SpectraSync("k8s-sync", {
     tracker: trackerConfig,
     source: { type: "configmap", configMapName: "specs", key: "stories.md" },
     schedule: "0 */6 * * *",
@@ -231,10 +231,10 @@ const k8sSync = new spectra.kubernetes.SpectraSync("k8s-sync", {
 ### With Monitoring
 
 ```typescript
-import * as spectra from "@spectra/pulumi";
+import * as spectryn from "@spectryn/pulumi";
 import * as aws from "@pulumi/aws";
 
-const sync = new spectra.aws.FargateSync("monitored-sync", {
+const sync = new spectryn.aws.FargateSync("monitored-sync", {
     tracker: { /* ... */ },
     source: { /* ... */ },
     schedule: "rate(1 hour)",

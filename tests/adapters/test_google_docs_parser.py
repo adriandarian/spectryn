@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.adapters.parsers.google_docs_parser import GoogleDocsParser
+from spectryn.adapters.parsers.google_docs_parser import GoogleDocsParser
 
 
 class TestGoogleDocsParser:

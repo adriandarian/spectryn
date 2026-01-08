@@ -8,13 +8,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.adapters.asana.async_adapter import (
+from spectryn.adapters.asana.async_adapter import (
     ASYNC_AVAILABLE,
     AsyncAsanaAdapter,
     AsyncResult,
     is_async_available,
 )
-from spectra.core.ports.config_provider import TrackerConfig
+from spectryn.core.ports.config_provider import TrackerConfig
 
 
 @pytest.fixture
@@ -476,10 +476,10 @@ class TestAsyncNotAvailable:
 
     def test_import_error_when_aiohttp_not_available(self, mock_config):
         """Test that ImportError is raised when aiohttp is not available."""
-        with patch("spectra.adapters.asana.async_adapter.ASYNC_AVAILABLE", False):
+        with patch("spectryn.adapters.asana.async_adapter.ASYNC_AVAILABLE", False):
             from importlib import reload
 
-            import spectra.adapters.asana.async_adapter as async_module
+            import spectryn.adapters.asana.async_adapter as async_module
 
             # Force reload to re-evaluate ASYNC_AVAILABLE
             original_available = async_module.ASYNC_AVAILABLE

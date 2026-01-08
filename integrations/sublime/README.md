@@ -4,7 +4,7 @@ Sublime Text package for Spectra markdown user story files with LSP support.
 
 ## Features
 
-- **LSP Integration** - Full language server support via spectra-lsp
+- **LSP Integration** - Full language server support via spectryn-lsp
 - **Syntax Highlighting** - Enhanced markdown highlighting for Spectra
 - **Completions** - Auto-complete status, priority, and tracker IDs
 - **Diagnostics** - Real-time validation errors in the gutter
@@ -18,10 +18,10 @@ Sublime Text package for Spectra markdown user story files with LSP support.
 
 ```bash
 # Install Spectra LSP
-pip install spectra-lsp
+pip install spectryn-lsp
 
 # Install Spectra CLI
-pip install spectra
+pip install spectryn
 ```
 
 ### 2. Install LSP Package
@@ -46,15 +46,15 @@ Install the [LSP](https://packagecontrol.io/packages/LSP) package via Package Co
    ```bash
    # macOS
    cd ~/Library/Application\ Support/Sublime\ Text/Packages
-   git clone https://github.com/spectra/spectra-sublime Spectra
+   git clone https://github.com/spectryn/spectryn-sublime Spectra
 
    # Linux
    cd ~/.config/sublime-text/Packages
-   git clone https://github.com/spectra/spectra-sublime Spectra
+   git clone https://github.com/spectryn/spectryn-sublime Spectra
 
    # Windows
    cd %APPDATA%\Sublime Text\Packages
-   git clone https://github.com/spectra/spectra-sublime Spectra
+   git clone https://github.com/spectryn/spectryn-sublime Spectra
    ```
 
 2. Or copy the files from `integrations/sublime/` to your packages directory.
@@ -68,12 +68,12 @@ Open **Preferences → Package Settings → LSP → Settings** and add:
 ```json
 {
   "clients": {
-    "spectra": {
+    "spectryn": {
       "enabled": true,
-      "command": ["spectra-lsp", "--stdio"],
-      "selector": "source.spectra, text.html.markdown",
+      "command": ["spectryn-lsp", "--stdio"],
+      "selector": "source.spectryn, text.html.markdown",
       "initializationOptions": {
-        "spectra": {
+        "spectryn": {
           "tracker": {
             "type": "jira",
             "url": "https://your-org.atlassian.net",
@@ -100,8 +100,8 @@ Open **Preferences → Package Settings → Spectra → Settings** and customize
 
 ```json
 {
-  // Path to spectra CLI
-  "spectra_cli_path": "spectra",
+  // Path to spectryn CLI
+  "spectryn_cli_path": "spectryn",
 
   // Validate on save
   "validate_on_save": true,
@@ -133,10 +133,10 @@ Add to your **Preferences → Key Bindings**:
 
 ```json
 [
-  { "keys": ["ctrl+shift+v"], "command": "spectra_validate", "context": [{ "key": "selector", "operand": "source.spectra, text.html.markdown" }] },
-  { "keys": ["ctrl+shift+s"], "command": "spectra_sync", "context": [{ "key": "selector", "operand": "source.spectra, text.html.markdown" }] },
-  { "keys": ["ctrl+shift+p"], "command": "spectra_plan", "context": [{ "key": "selector", "operand": "source.spectra, text.html.markdown" }] },
-  { "keys": ["ctrl+shift+o"], "command": "spectra_open_in_tracker", "context": [{ "key": "selector", "operand": "source.spectra, text.html.markdown" }] }
+  { "keys": ["ctrl+shift+v"], "command": "spectryn_validate", "context": [{ "key": "selector", "operand": "source.spectryn, text.html.markdown" }] },
+  { "keys": ["ctrl+shift+s"], "command": "spectryn_sync", "context": [{ "key": "selector", "operand": "source.spectryn, text.html.markdown" }] },
+  { "keys": ["ctrl+shift+p"], "command": "spectryn_plan", "context": [{ "key": "selector", "operand": "source.spectryn, text.html.markdown" }] },
+  { "keys": ["ctrl+shift+o"], "command": "spectryn_open_in_tracker", "context": [{ "key": "selector", "operand": "source.spectryn, text.html.markdown" }] }
 ]
 ```
 
@@ -162,7 +162,7 @@ Access via Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
 
 The package includes a build system for validation:
 
-1. Open a `.spectra.md` or `.md` file
+1. Open a `.spectryn.md` or `.md` file
 2. Press `Cmd+B` / `Ctrl+B` to validate
 3. Or select **Tools → Build System → Spectra**
 
@@ -195,7 +195,7 @@ sublime/
 │   ├── story.sublime-snippet
 │   ├── subtask.sublime-snippet
 │   └── ...
-└── spectra_commands.py           # Plugin commands
+└── spectryn_commands.py           # Plugin commands
 ```
 
 ## Troubleshooting
@@ -203,23 +203,23 @@ sublime/
 ### LSP Not Working
 
 1. Check LSP package is installed
-2. Verify spectra-lsp is in PATH:
+2. Verify spectryn-lsp is in PATH:
    ```bash
-   which spectra-lsp
+   which spectryn-lsp
    ```
 3. Check LSP logs: **View → Show Console**
 4. Restart Sublime Text
 
 ### Syntax Highlighting Not Working
 
-1. Ensure file has `.spectra.md` extension
+1. Ensure file has `.spectryn.md` extension
 2. Or set syntax manually: **View → Syntax → Spectra**
 
 ### Commands Not Found
 
-Verify spectra CLI is installed:
+Verify spectryn CLI is installed:
 ```bash
-spectra --version
+spectryn --version
 ```
 
 ## License

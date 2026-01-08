@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.import_cmd import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.import_cmd import (
     ImportOptions,
     ImportResult,
     _extract_text_from_adf,
@@ -315,7 +315,7 @@ class TestRunImport:
 
     def test_import_requires_epic_or_project(self, mock_console):
         """Test that either epic or project must be specified."""
-        with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.cli.logging.setup_logging"):
             result = run_import(mock_console)
 
         assert result == ExitCode.CONFIG_ERROR
@@ -326,10 +326,10 @@ class TestRunImport:
         mock_provider = MagicMock()
         mock_provider.validate.return_value = ["Missing JIRA_URL"]
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter"):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter"):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, epic_key="EPIC-123")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -343,10 +343,10 @@ class TestRunImport:
         mock_adapter = MagicMock()
         mock_adapter.test_connection.return_value = False
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, epic_key="EPIC-123")
 
         assert result == ExitCode.CONNECTION_ERROR
@@ -362,10 +362,10 @@ class TestRunImport:
         mock_adapter.get_current_user.return_value = {"displayName": "Test"}
         mock_adapter.get_issue.return_value = None
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, epic_key="EPIC-123")
 
         assert result == ExitCode.FILE_NOT_FOUND
@@ -403,10 +403,10 @@ class TestRunImport:
 
         output_path = tmp_path / "output.md"
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(
                             mock_console, epic_key="EPIC-123", output_path=str(output_path)
                         )
@@ -435,10 +435,10 @@ class TestRunImport:
         }
         mock_adapter.get_epic_issues.return_value = []
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, epic_key="EPIC-123", dry_run=True)
 
         assert result == ExitCode.SUCCESS
@@ -455,10 +455,10 @@ class TestRunImport:
         mock_adapter.test_connection.return_value = True
         mock_adapter.get_current_user.return_value = {"displayName": "Test"}
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, project_key="PROJ")
 
         assert result == ExitCode.CONFIG_ERROR
@@ -475,10 +475,10 @@ class TestRunImport:
         mock_adapter.get_current_user.return_value = {"displayName": "Test"}
         mock_adapter.get_issue.side_effect = Exception("API Error")
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(mock_console, epic_key="EPIC-123")
 
         assert result == ExitCode.ERROR
@@ -516,10 +516,10 @@ class TestRunImport:
 
         output_path = tmp_path / "output.md"
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(
                             mock_console,
                             epic_key="EPIC-123",
@@ -570,10 +570,10 @@ class TestRunImport:
 
         output_path = tmp_path / "output.md"
 
-        with patch("spectra.adapters.EnvironmentConfigProvider", return_value=mock_provider):
-            with patch("spectra.adapters.JiraAdapter", return_value=mock_adapter):
-                with patch("spectra.adapters.ADFFormatter"):
-                    with patch("spectra.cli.logging.setup_logging"):
+        with patch("spectryn.adapters.EnvironmentConfigProvider", return_value=mock_provider):
+            with patch("spectryn.adapters.JiraAdapter", return_value=mock_adapter):
+                with patch("spectryn.adapters.ADFFormatter"):
+                    with patch("spectryn.cli.logging.setup_logging"):
                         result = run_import(
                             mock_console, epic_key="EPIC-123", output_path=str(output_path)
                         )

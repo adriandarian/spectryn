@@ -4,7 +4,7 @@ Tests for shell completion generation.
 
 from unittest.mock import patch
 
-from spectra.cli.completions import (
+from spectryn.cli.completions import (
     BASH_COMPLETION,
     FISH_COMPLETION,
     POWERSHELL_COMPLETION,
@@ -303,7 +303,7 @@ class TestCLICompletionsFlag:
 
     def test_completions_flag_bash(self, capsys):
         """Test --completions bash via CLI."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         with patch("sys.argv", ["spectra", "--completions", "bash"]):
             result = main()
@@ -314,7 +314,7 @@ class TestCLICompletionsFlag:
 
     def test_completions_flag_zsh(self, capsys):
         """Test --completions zsh via CLI."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         with patch("sys.argv", ["spectra", "--completions", "zsh"]):
             result = main()
@@ -325,7 +325,7 @@ class TestCLICompletionsFlag:
 
     def test_completions_flag_fish(self, capsys):
         """Test --completions fish via CLI."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         with patch("sys.argv", ["spectra", "--completions", "fish"]):
             result = main()
@@ -336,7 +336,7 @@ class TestCLICompletionsFlag:
 
     def test_completions_flag_powershell(self, capsys):
         """Test --completions powershell via CLI."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         with patch("sys.argv", ["spectra", "--completions", "powershell"]):
             result = main()
@@ -347,7 +347,7 @@ class TestCLICompletionsFlag:
 
     def test_completions_without_required_args(self, capsys):
         """Test that --completions works without --input and --epic."""
-        from spectra.cli.app import main
+        from spectryn.cli.app import main
 
         # Should not raise error about missing required args
         with patch("sys.argv", ["spectra", "--completions", "bash"]):

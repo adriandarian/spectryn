@@ -1,6 +1,6 @@
 """Tests for ADF formatter adapter."""
 
-from spectra.core.domain import CommitRef
+from spectryn.core.domain import CommitRef
 
 
 class TestADFFormatter:

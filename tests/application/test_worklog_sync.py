@@ -5,8 +5,8 @@ from datetime import datetime
 
 import pytest
 
-from spectra.application.sync.time_tracking import TimeValue, WorkLogEntry
-from spectra.application.sync.worklog_sync import (
+from spectryn.application.sync.time_tracking import TimeValue, WorkLogEntry
+from spectryn.application.sync.worklog_sync import (
     WorklogChange,
     WorklogExtractor,
     WorklogSyncConfig,

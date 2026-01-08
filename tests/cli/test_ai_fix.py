@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.ai_fix import (
+from spectryn.cli.ai_fix import (
     AIFixResult,
     AITool,
     DetectedTool,
@@ -141,7 +141,7 @@ class TestDetectAITools:
 
         with (
             patch("shutil.which", side_effect=mock_which),
-            patch("spectra.cli.ai_fix._get_version", return_value="claude-cli version 1.0.0"),
+            patch("spectryn.cli.ai_fix._get_version", return_value="claude-cli version 1.0.0"),
         ):
             tools = detect_ai_tools()
 
@@ -157,7 +157,7 @@ class TestDetectAITools:
 
         with (
             patch("shutil.which", side_effect=mock_which),
-            patch("spectra.cli.ai_fix._get_version", return_value="ollama version 0.1.0"),
+            patch("spectryn.cli.ai_fix._get_version", return_value="ollama version 0.1.0"),
         ):
             tools = detect_ai_tools()
 
@@ -174,7 +174,7 @@ class TestDetectAITools:
 
         with (
             patch("shutil.which", side_effect=mock_which),
-            patch("spectra.cli.ai_fix._get_version", return_value="1.0.0"),
+            patch("spectryn.cli.ai_fix._get_version", return_value="1.0.0"),
         ):
             tools = detect_ai_tools()
 

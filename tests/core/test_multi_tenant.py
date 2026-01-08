@@ -25,7 +25,7 @@ from typing import Any
 
 import pytest
 
-from spectra.core.tenant import (
+from spectryn.core.tenant import (
     DEFAULT_TENANT_ID,
     IsolationLevel,
     Tenant,
@@ -666,7 +666,7 @@ class TestTenantStateStore:
 
     def test_state_store_uses_tenant_dir(self, tenant_manager: TenantManager) -> None:
         """Test that state store uses tenant directory."""
-        from spectra.core.tenant_state import TenantStateStore
+        from spectryn.core.tenant_state import TenantStateStore
 
         tenant_manager.create(id="test", name="Test")
 
@@ -680,8 +680,8 @@ class TestTenantStateStore:
 
     def test_state_isolation_between_tenants(self, tenant_manager: TenantManager) -> None:
         """Test that state is isolated between tenants."""
-        from spectra.application.sync.state import SyncState
-        from spectra.core.tenant_state import TenantStateStore
+        from spectryn.application.sync.state import SyncState
+        from spectryn.core.tenant_state import TenantStateStore
 
         tenant_manager.create(id="tenant1", name="Tenant 1")
         tenant_manager.create(id="tenant2", name="Tenant 2")
@@ -719,7 +719,7 @@ class TestTenantCacheStore:
 
     def test_cache_uses_tenant_dir(self, tenant_manager: TenantManager) -> None:
         """Test that cache uses tenant directory."""
-        from spectra.core.tenant_cache import TenantCacheStore
+        from spectryn.core.tenant_cache import TenantCacheStore
 
         tenant_manager.create(id="test", name="Test")
 
@@ -733,7 +733,7 @@ class TestTenantCacheStore:
 
     def test_cache_isolation_between_tenants(self, tenant_manager: TenantManager) -> None:
         """Test that cache is isolated between tenants."""
-        from spectra.core.tenant_cache import TenantCacheStore
+        from spectryn.core.tenant_cache import TenantCacheStore
 
         tenant_manager.create(id="tenant1", name="Tenant 1")
         tenant_manager.create(id="tenant2", name="Tenant 2")
@@ -757,7 +757,7 @@ class TestTenantCacheStore:
 
     def test_cache_shared_mode(self, tenant_manager: TenantManager) -> None:
         """Test shared cache mode."""
-        from spectra.core.tenant_cache import TenantCacheStore
+        from spectryn.core.tenant_cache import TenantCacheStore
 
         tenant_manager.create(
             id="shared1",
@@ -794,7 +794,7 @@ class TestTenantConfigProvider:
 
     def test_config_uses_tenant_paths(self, tenant_manager: TenantManager) -> None:
         """Test that config provider uses tenant paths."""
-        from spectra.core.tenant_config import TenantConfigProvider
+        from spectryn.core.tenant_config import TenantConfigProvider
 
         tenant_manager.create(id="test", name="Test")
 
@@ -805,9 +805,16 @@ class TestTenantConfigProvider:
 
         assert "Tenant[test]" in provider.name
 
-    def test_config_isolation_between_tenants(self, tenant_manager: TenantManager) -> None:
+    def test_config_isolation_between_tenants(
+        self, tenant_manager: TenantManager, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test that config is isolated between tenants."""
-        from spectra.core.tenant_config import TenantConfigProvider
+        from spectryn.core.tenant_config import TenantConfigProvider
+
+        # Clear any pre-existing environment variables that might interfere
+        monkeypatch.delenv("JIRA_URL", raising=False)
+        monkeypatch.delenv("JIRA_EMAIL", raising=False)
+        monkeypatch.delenv("JIRA_API_TOKEN", raising=False)
 
         tenant_manager.create(id="tenant1", name="Tenant 1")
         tenant_manager.create(id="tenant2", name="Tenant 2")
@@ -849,8 +856,8 @@ class TestCrossTenantOperations:
 
     def test_list_all_sessions(self, tenant_manager: TenantManager) -> None:
         """Test listing sessions across tenants."""
-        from spectra.application.sync.state import SyncState
-        from spectra.core.tenant_state import (
+        from spectryn.application.sync.state import SyncState
+        from spectryn.core.tenant_state import (
             CrossTenantStateQuery,
             TenantStateStore,
         )
@@ -883,7 +890,7 @@ class TestCrossTenantOperations:
 
     def test_cross_tenant_cache_clear(self, tenant_manager: TenantManager) -> None:
         """Test clearing cache across all tenants."""
-        from spectra.core.tenant_cache import (
+        from spectryn.core.tenant_cache import (
             CrossTenantCacheManager,
             TenantCacheStore,
         )

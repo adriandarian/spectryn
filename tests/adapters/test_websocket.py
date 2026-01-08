@@ -18,14 +18,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from spectra.adapters.websocket import (
+from spectryn.adapters.websocket import (
     AioHttpWebSocketServer,
     SimpleWebSocketServer,
     SyncEventBroadcaster,
     WebSocketBridge,
     create_websocket_server,
 )
-from spectra.core.domain.events import (
+from spectryn.core.domain.events import (
     CommentAdded,
     ConflictDetected,
     DomainEvent,
@@ -37,7 +37,7 @@ from spectra.core.domain.events import (
     SyncCompleted,
     SyncStarted,
 )
-from spectra.core.ports.websocket import (
+from spectryn.core.ports.websocket import (
     BroadcastError,
     ConnectionInfo,
     MessageType,
@@ -597,7 +597,7 @@ class TestWebSocketExceptions:
 
     def test_connection_error(self):
         """Test connection error."""
-        from spectra.core.ports.websocket import ConnectionError as WsConnError
+        from spectryn.core.ports.websocket import ConnectionError as WsConnError
 
         error = WsConnError("Connection failed")
         assert isinstance(error, WebSocketError)

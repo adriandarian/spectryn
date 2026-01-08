@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.orgmode_parser import OrgModeParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.orgmode_parser import OrgModeParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestOrgModeParser:

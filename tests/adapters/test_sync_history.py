@@ -10,12 +10,12 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.sync_history import (
+from spectryn.adapters.sync_history import (
     SQLiteSyncHistoryStore,
     generate_change_id,
     generate_entry_id,
 )
-from spectra.core.ports.sync_history import (
+from spectryn.core.ports.sync_history import (
     ChangeRecord,
     HistoryQuery,
     SyncHistoryEntry,
@@ -779,7 +779,7 @@ class TestDataClasses:
 
     def test_sync_statistics_to_dict(self) -> None:
         """Test SyncStatistics.to_dict()."""
-        from spectra.core.ports.sync_history import SyncStatistics
+        from spectryn.core.ports.sync_history import SyncStatistics
 
         stats = SyncStatistics(
             total_syncs=10,
@@ -797,7 +797,7 @@ class TestDataClasses:
 
     def test_velocity_metrics_to_dict(self) -> None:
         """Test VelocityMetrics.to_dict()."""
-        from spectra.core.ports.sync_history import VelocityMetrics
+        from spectryn.core.ports.sync_history import VelocityMetrics
 
         metrics = VelocityMetrics(
             period_start=datetime.now() - timedelta(days=7),
@@ -1142,7 +1142,7 @@ class TestTimestampBasedRollback:
         sqlite_store: SQLiteSyncHistoryStore,
     ) -> None:
         """Test executing a rollback plan with no changes."""
-        from spectra.core.ports.sync_history import RollbackPlan
+        from spectryn.core.ports.sync_history import RollbackPlan
 
         plan = RollbackPlan(
             target_timestamp=datetime.now(),
@@ -1159,7 +1159,7 @@ class TestTimestampBasedRollback:
         sqlite_store: SQLiteSyncHistoryStore,
     ) -> None:
         """Test that executing an invalid plan raises an error."""
-        from spectra.core.ports.sync_history import RollbackError, RollbackPlan
+        from spectryn.core.ports.sync_history import RollbackError, RollbackPlan
 
         plan = RollbackPlan(
             target_timestamp=datetime.now(),
@@ -1172,7 +1172,7 @@ class TestTimestampBasedRollback:
 
     def test_rollback_plan_to_dict(self) -> None:
         """Test RollbackPlan.to_dict() serialization."""
-        from spectra.core.ports.sync_history import RollbackPlan
+        from spectryn.core.ports.sync_history import RollbackPlan
 
         plan = RollbackPlan(
             target_timestamp=datetime.now(),
@@ -1191,7 +1191,7 @@ class TestTimestampBasedRollback:
 
     def test_rollback_plan_from_dict(self) -> None:
         """Test RollbackPlan.from_dict() deserialization."""
-        from spectra.core.ports.sync_history import RollbackPlan
+        from spectryn.core.ports.sync_history import RollbackPlan
 
         data = {
             "target_timestamp": datetime.now().isoformat(),

@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.application.sync.workflow_rules import (
+from spectryn.application.sync.workflow_rules import (
     RuleAction,
     RuleActionSpec,
     RuleCondition,
@@ -16,9 +16,9 @@ from spectra.application.sync.workflow_rules import (
     evaluate_epic_rules,
     evaluate_story_rules,
 )
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Status
-from spectra.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Status
+from spectryn.core.domain.value_objects import IssueKey, StoryId
 
 
 class TestRuleType:

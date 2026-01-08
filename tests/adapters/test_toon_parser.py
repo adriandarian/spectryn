@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers import ToonParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import ToonParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestToonParser:
@@ -399,7 +399,7 @@ stories:
 
     def test_parse_unmatched_bracket_error(self, parser: ToonParser) -> None:
         """Test that unmatched brackets raise error."""
-        from spectra.core.ports.document_parser import ParserError
+        from spectryn.core.ports.document_parser import ParserError
 
         content = "epic{key:PROJ-123 title:Test"
         with pytest.raises(ParserError, match="Unable to parse"):

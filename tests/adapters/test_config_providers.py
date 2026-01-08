@@ -7,7 +7,7 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.config import (
+from spectryn.adapters.config import (
     EnvironmentConfigProvider,
     FileConfigProvider,
 )
@@ -301,6 +301,10 @@ class TestEnvironmentConfigProvider:
 
     def test_load_from_env_file(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test loading from .env file."""
+        # Clear any pre-existing environment variables that might interfere
+        monkeypatch.delenv("JIRA_URL", raising=False)
+        monkeypatch.delenv("JIRA_EMAIL", raising=False)
+        monkeypatch.delenv("JIRA_API_TOKEN", raising=False)
         monkeypatch.chdir(tmp_path)
 
         env_file = tmp_path / ".env"
@@ -362,6 +366,12 @@ class TestConfigPrecedence:
 
     def test_full_precedence_chain(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test the full configuration precedence chain."""
+        # Clear any pre-existing environment variables that might interfere
+        monkeypatch.delenv("JIRA_URL", raising=False)
+        monkeypatch.delenv("JIRA_EMAIL", raising=False)
+        monkeypatch.delenv("JIRA_API_TOKEN", raising=False)
+        monkeypatch.delenv("JIRA_PROJECT_KEY", raising=False)
+
         # 1. Config file (lowest priority)
         config_file = tmp_path / ".spectra.yaml"
         config_file.write_text(

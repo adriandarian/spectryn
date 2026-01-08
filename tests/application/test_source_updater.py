@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from spectra.application.sync.source_updater import (
+from spectryn.application.sync.source_updater import (
     EpicTrackerInfo,
     SourceFileUpdater,
     SourceUpdateResult,
@@ -14,9 +14,9 @@ from spectra.application.sync.source_updater import (
     compute_story_content_hash,
     detect_sync_conflicts,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.value_objects import IssueKey, StoryId
-from spectra.core.ports.config_provider import TrackerType
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.value_objects import IssueKey, StoryId
+from spectryn.core.ports.config_provider import TrackerType
 
 
 class TestSourceFileUpdater:

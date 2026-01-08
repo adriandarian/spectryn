@@ -1,6 +1,6 @@
 # Bitbucket Integration Guide
 
-spectra supports Bitbucket Cloud and Server for syncing markdown specifications. This guide covers configuration, authentication, workspace setup, and advanced features.
+spectryn supports Bitbucket Cloud and Server for syncing markdown specifications. This guide covers configuration, authentication, workspace setup, and advanced features.
 
 ## Overview
 
@@ -16,21 +16,21 @@ The Bitbucket adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Optional: Install with atlassian-python-api for enhanced Server support
-pip install spectra[bitbucket]
+pip install spectryn[bitbucket]
 
 # Sync markdown to Bitbucket
-spectra --markdown EPIC.md --tracker bitbucket --execute
+spectryn --markdown EPIC.md --tracker bitbucket --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Bitbucket connection settings
@@ -68,7 +68,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [bitbucket]
@@ -111,7 +111,7 @@ export BITBUCKET_BASE_URL=https://api.bitbucket.org/2.0
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker bitbucket \
   --bitbucket-username your-username \
@@ -144,7 +144,7 @@ App Passwords are required for Bitbucket Cloud authentication. They provide secu
    - You'll see a list of existing app passwords (if any)
 
 2. **Configure App Password**
-   - **Label**: Give it a descriptive name (e.g., `spectra-sync`)
+   - **Label**: Give it a descriptive name (e.g., `spectryn-sync`)
    - **Permissions**: Select the required scopes:
      - ✅ **Issues: Write** - Create and update issues
      - ✅ **Issues: Read** - Read issues
@@ -157,7 +157,7 @@ App Passwords are required for Bitbucket Cloud authentication. They provide secu
    - **Important**: Copy the password immediately - it's shown only once!
    - Format: `xxxxxxxxxxxxxxxxxxxx` (20+ characters)
 
-#### Step 3: Configure spectra
+#### Step 3: Configure spectryn
 
 ```bash
 export BITBUCKET_USERNAME=your-username
@@ -200,7 +200,7 @@ For self-hosted Bitbucket Server, use Personal Access Tokens (PATs) instead of A
 1. **Click "Create token"**
 
 2. **Configure Token**
-   - **Label**: Give it a descriptive name (e.g., `spectra-sync`)
+   - **Label**: Give it a descriptive name (e.g., `spectryn-sync`)
    - **Expiration**: Set appropriate expiration date
    - **Permissions**: Select required scopes:
      - ✅ **Read** - Read issues and repositories
@@ -212,7 +212,7 @@ For self-hosted Bitbucket Server, use Personal Access Tokens (PATs) instead of A
    - **Important**: Copy the token immediately - it's shown only once!
    - Format: Varies by Server version
 
-#### Step 3: Configure spectra
+#### Step 3: Configure spectryn
 
 ```bash
 export BITBUCKET_USERNAME=your-username
@@ -281,7 +281,7 @@ Test your configuration:
 
 ```bash
 # Dry-run to verify connection
-spectra --markdown EPIC.md --tracker bitbucket --verbose
+spectryn --markdown EPIC.md --tracker bitbucket --verbose
 ```
 
 The adapter will:
@@ -310,7 +310,7 @@ bitbucket:
 Install `atlassian-python-api` for enhanced Server support:
 
 ```bash
-pip install spectra[bitbucket]
+pip install spectryn[bitbucket]
 ```
 
 **Benefits:**
@@ -388,7 +388,7 @@ bitbucket:
 Link pull requests to issues automatically:
 
 ```python
-from spectra.adapters.bitbucket import BitbucketAdapter
+from spectryn.adapters.bitbucket import BitbucketAdapter
 
 adapter = BitbucketAdapter(
     username="user",
@@ -565,7 +565,7 @@ The adapter extracts story points from the markdown table and includes them in i
 - Server: Check instance rate limits
 
 **Issue: "Server features not working"**
-- Install `atlassian-python-api`: `pip install spectra[bitbucket]`
+- Install `atlassian-python-api`: `pip install spectryn[bitbucket]`
 - Verify Server URL is correctly formatted
 - Check Server version compatibility
 
@@ -574,7 +574,7 @@ The adapter extracts story points from the markdown table and includes them in i
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker bitbucket --verbose
+spectryn --markdown EPIC.md --tracker bitbucket --verbose
 ```
 
 Or in config:
@@ -590,10 +590,10 @@ sync:
 
 ```bash
 # Dry-run (preview changes)
-spectra --markdown EPIC.md --tracker bitbucket
+spectryn --markdown EPIC.md --tracker bitbucket
 
 # Execute sync
-spectra --markdown EPIC.md --tracker bitbucket --execute
+spectryn --markdown EPIC.md --tracker bitbucket --execute
 ```
 
 ### Bitbucket Cloud
@@ -604,7 +604,7 @@ export BITBUCKET_APP_PASSWORD=xxxxxxxxxxxxxxxxxxxx
 export BITBUCKET_WORKSPACE=acme-corp
 export BITBUCKET_REPO=backend-api
 
-spectra --markdown EPIC.md --tracker bitbucket --execute
+spectryn --markdown EPIC.md --tracker bitbucket --execute
 ```
 
 ### Bitbucket Server
@@ -616,17 +616,17 @@ export BITBUCKET_WORKSPACE=PROJ
 export BITBUCKET_REPO=backend-api
 export BITBUCKET_BASE_URL=https://bitbucket.company.com/rest/api/2.0
 
-spectra --markdown EPIC.md --tracker bitbucket --execute
+spectryn --markdown EPIC.md --tracker bitbucket --execute
 ```
 
 ### With Enhanced Server Support
 
 ```bash
 # Install with atlassian-python-api
-pip install spectra[bitbucket]
+pip install spectryn[bitbucket]
 
 # Use as normal - adapter detects Server and uses library automatically
-spectra --markdown EPIC.md --tracker bitbucket --execute
+spectryn --markdown EPIC.md --tracker bitbucket --execute
 ```
 
 ## Reference

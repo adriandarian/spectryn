@@ -34,11 +34,11 @@ skipUsers:
 # useReviewGroups: true
 # assignFromChangedFilesGroups:
 #   core:
-#     - src/spectra/core/**/*
+#     - src/spectryn/core/**/*
 #   adapters:
-#     - src/spectra/adapters/**/*
+#     - src/spectryn/adapters/**/*
 #   cli:
-#     - src/spectra/cli/**/*
+#     - src/spectryn/cli/**/*
 #   docs:
 #     - docs/**/*
 #     - "*.md"

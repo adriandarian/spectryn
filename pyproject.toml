@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spectra"
+name = "spectryn"
 version = "1.0.0"
 description = "A production-grade CLI tool for synchronizing markdown specifications with issue trackers"
 readme = "README.md"
@@ -106,25 +106,25 @@ tui = [
 ]
 
 [project.scripts]
-spectra = "spectra.cli:run"
+spectryn = "spectryn.cli:run"
 
-[project.entry-points."spectra.plugins"]
+[project.entry-points."spectryn.plugins"]
 # Built-in plugins (example entry points for future plugins)
-# github = "spectra.plugins.github:GithubTrackerPlugin"
-# linear = "spectra.plugins.linear:LinearTrackerPlugin"
+# github = "spectryn.plugins.github:GithubTrackerPlugin"
+# linear = "spectryn.plugins.linear:LinearTrackerPlugin"
 
 [project.urls]
-Homepage = "https://github.com/adriandarian/spectra"
-Documentation = "https://github.com/adriandarian/spectra#readme"
-Repository = "https://github.com/adriandarian/spectra.git"
-Issues = "https://github.com/adriandarian/spectra/issues"
-Changelog = "https://github.com/adriandarian/spectra/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/adriandarian/spectryn"
+Documentation = "https://github.com/adriandarian/spectryn#readme"
+Repository = "https://github.com/adriandarian/spectryn.git"
+Issues = "https://github.com/adriandarian/spectryn/issues"
+Changelog = "https://github.com/adriandarian/spectryn/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-spectra = ["py.typed"]
+spectryn = ["py.typed"]
 
 # ============================================================================
 # Testing
@@ -163,7 +163,7 @@ markers = [
 #   pytest -m benchmark --benchmark-enable  # Run benchmarks
 
 [tool.coverage.run]
-source = ["src/spectra"]
+source = ["src/spectryn"]
 branch = true
 relative_files = true
 omit = ["*/tests/*", "*/__main__.py"]
@@ -189,7 +189,7 @@ exclude_lines = [
 [tool.mypy]
 python_version = "3.11"
 mypy_path = "src"
-packages = ["spectra"]
+packages = ["spectryn"]
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -210,18 +210,18 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 # Services and container modules use complex factory patterns
 module = [
-    "spectra.core.services",
-    "spectra.core.container",
-    "spectra.core",  # Module __init__ file
-    "spectra.core.result",
-    "spectra.adapters.cache.backend",
+    "spectryn.core.services",
+    "spectryn.core.container",
+    "spectryn.core",  # Module __init__ file
+    "spectryn.core.result",
+    "spectryn.adapters.cache.backend",
 ]
 disable_error_code = ["type-abstract", "assignment", "valid-type", "type-var", "misc", "call-arg", "arg-type"]
 
 [[tool.mypy.overrides]]
 # CLI modules - keep these loose for now but tighter than before
 module = [
-    "spectra.cli.*",
+    "spectryn.cli.*",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
@@ -232,16 +232,16 @@ disable_error_code = ["union-attr", "arg-type", "assignment", "attr-defined"]
 # Adapters with complex return types from external APIs
 # Note: no-any-return is allowed because API responses are Any typed
 module = [
-    "spectra.adapters.monday.*",
-    "spectra.adapters.clickup.*",
-    "spectra.adapters.bitbucket.*",
-    "spectra.adapters.youtrack.*",
-    "spectra.adapters.asana.*",
-    "spectra.adapters.trello.*",
-    "spectra.adapters.shortcut.*",
-    "spectra.adapters.plane.*",
-    "spectra.adapters.pivotal.*",
-    "spectra.adapters.basecamp.*",
+    "spectryn.adapters.monday.*",
+    "spectryn.adapters.clickup.*",
+    "spectryn.adapters.bitbucket.*",
+    "spectryn.adapters.youtrack.*",
+    "spectryn.adapters.asana.*",
+    "spectryn.adapters.trello.*",
+    "spectryn.adapters.shortcut.*",
+    "spectryn.adapters.plane.*",
+    "spectryn.adapters.pivotal.*",
+    "spectryn.adapters.basecamp.*",
 ]
 warn_return_any = false
 disable_error_code = ["no-any-return", "arg-type", "assignment"]
@@ -249,15 +249,15 @@ disable_error_code = ["no-any-return", "arg-type", "assignment"]
 [[tool.mypy.overrides]]
 # Core adapters - tighter checking
 module = [
-    "spectra.adapters.formatters.*",
-    "spectra.adapters.parsers.*",
-    "spectra.adapters.jira.*",
-    "spectra.adapters.github.*",
-    "spectra.adapters.linear.*",
-    "spectra.adapters.azure_devops.*",
-    "spectra.adapters.confluence.*",
-    "spectra.adapters.config.*",
-    "spectra.adapters.async_base.*",
+    "spectryn.adapters.formatters.*",
+    "spectryn.adapters.parsers.*",
+    "spectryn.adapters.jira.*",
+    "spectryn.adapters.github.*",
+    "spectryn.adapters.linear.*",
+    "spectryn.adapters.azure_devops.*",
+    "spectryn.adapters.confluence.*",
+    "spectryn.adapters.config.*",
+    "spectryn.adapters.async_base.*",
 ]
 warn_return_any = false
 disable_error_code = ["index", "union-attr", "var-annotated", "arg-type", "assignment", "attr-defined", "return-value", "name-defined", "dict-item", "import-untyped"]
@@ -265,7 +265,7 @@ disable_error_code = ["index", "union-attr", "var-annotated", "arg-type", "assig
 [[tool.mypy.overrides]]
 # Application sync modules - now tighter
 module = [
-    "spectra.application.sync.*",
+    "spectryn.application.sync.*",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
@@ -274,7 +274,7 @@ disable_error_code = ["attr-defined", "arg-type", "name-defined", "assignment", 
 [[tool.mypy.overrides]]
 # Application modules - general (includes ai modules)
 module = [
-    "spectra.application.*",
+    "spectryn.application.*",
 ]
 warn_return_any = false
 disable_error_code = ["attr-defined", "dict-item", "list-item"]
@@ -282,7 +282,7 @@ disable_error_code = ["attr-defined", "dict-item", "list-item"]
 [[tool.mypy.overrides]]
 # Plugin modules are currently lightweight wrappers around adapters
 module = [
-    "spectra.plugins.*",
+    "spectryn.plugins.*",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
@@ -291,7 +291,7 @@ disallow_incomplete_defs = false
 [[tool.mypy.overrides]]
 # Testing utilities
 module = [
-    "spectra.testing",
+    "spectryn.testing",
 ]
 disable_error_code = ["arg-type"]
 
@@ -389,23 +389,23 @@ ignore = [
     "RUF059",  # unused unpacked variable (common in tests that only check first value)
     "RET504",  # unnecessary assignment before return (clearer in fixtures)
 ]
-"src/spectra/adapters/*" = [
+"src/spectryn/adapters/*" = [
     "ARG002",  # unused method argument (interface implementations)
     "B023",    # function doesn't bind loop variable
 ]
-"src/spectra/adapters/graphql_api/schema.py" = [
+"src/spectryn/adapters/graphql_api/schema.py" = [
     "E402",    # module import not at top (imports after SDL string is intentional)
 ]
-"src/spectra/adapters/graphql_api/server.py" = [
+"src/spectryn/adapters/graphql_api/server.py" = [
     "N803",    # camelCase args required for GraphQL resolver compatibility
 ]
-"src/spectra/core/__init__.py" = ["F401", "F403"]  # re-exports
-"src/spectra/adapters/observability/*" = ["F401"]  # optional imports
-"src/spectra/cli/telemetry.py" = ["F401"]  # optional imports for type checking
+"src/spectryn/core/__init__.py" = ["F401", "F403"]  # re-exports
+"src/spectryn/adapters/observability/*" = ["F401"]  # optional imports
+"src/spectryn/cli/telemetry.py" = ["F401"]  # optional imports for type checking
 "**/__init__.py" = ["F401"]  # re-exports
 
 [tool.ruff.lint.isort]
-known-first-party = ["spectra"]
+known-first-party = ["spectryn"]
 force-single-line = false
 lines-after-imports = 2
 

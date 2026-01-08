@@ -4,7 +4,7 @@ import textwrap
 
 import pytest
 
-from spectra.application.sync.epic_hierarchy import (
+from spectryn.application.sync.epic_hierarchy import (
     EpicHierarchy,
     EpicLevel,
     EpicNode,

@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.cli.exit_codes import ExitCode
-from spectra.cli.split import (
+from spectryn.cli.exit_codes import ExitCode
+from spectryn.cli.split import (
     SplitSuggestion,
     StorySplitAnalysis,
     analyze_story_complexity,
@@ -530,7 +530,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.ERROR
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_parse_error(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split with parse error."""
         test_file = tmp_path / "test.md"
@@ -546,7 +546,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.ERROR
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_no_stories(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split with no stories found."""
         test_file = tmp_path / "test.md"
@@ -563,7 +563,7 @@ class TestRunSplit:
         assert result == ExitCode.SUCCESS
         mock_console.warning.assert_called()
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_success(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split success."""
         test_file = tmp_path / "test.md"
@@ -586,7 +586,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_specific_story(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split with specific story ID."""
         test_file = tmp_path / "test.md"
@@ -617,7 +617,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_story_not_found(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split when story ID not found."""
         test_file = tmp_path / "test.md"
@@ -641,7 +641,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.ERROR
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_json_output(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_split with JSON output."""
         test_file = tmp_path / "test.md"
@@ -671,7 +671,7 @@ class TestRunSplit:
         assert "split_recommended" in data
         assert "analyses" in data
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_markdown_output(self, mock_parser_class, mock_console, tmp_path, capsys):
         """Test run_split with markdown output."""
         test_file = tmp_path / "test.md"
@@ -699,7 +699,7 @@ class TestRunSplit:
         assert "# Story Split Analysis" in captured.out
         assert "US-001" in captured.out
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_with_recommendations(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split with stories needing splits."""
         test_file = tmp_path / "test.md"
@@ -722,7 +722,7 @@ class TestRunSplit:
         )
         assert result == ExitCode.SUCCESS
 
-    @patch("spectra.adapters.parsers.markdown.MarkdownParser")
+    @patch("spectryn.adapters.parsers.markdown.MarkdownParser")
     def test_run_split_no_color(self, mock_parser_class, mock_console, tmp_path):
         """Test run_split without color."""
         test_file = tmp_path / "test.md"

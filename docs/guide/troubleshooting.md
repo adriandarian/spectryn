@@ -1,13 +1,13 @@
 # Troubleshooting Guide
 
-Common issues and solutions when using spectra.
+Common issues and solutions when using spectryn.
 
 ## Quick Diagnostics
 
 Run the built-in diagnostic tool to identify common issues:
 
 ```bash
-spectra doctor
+spectryn doctor
 ```
 
 This checks:
@@ -39,7 +39,7 @@ Error: Authentication failed (401)
 # Verify credentials
 export JIRA_API_TOKEN="your-new-token"
 export JIRA_EMAIL="your-email@example.com"
-spectra doctor
+spectryn doctor
 ```
 :::
 
@@ -91,7 +91,7 @@ Error: Permission denied (403)
 
 ```bash
 # Check project access
-spectra --validate --epic PROJ-123
+spectryn --validate --epic PROJ-123
 ```
 
 ---
@@ -175,13 +175,13 @@ Warning: No stories found in EPIC.md
 
 3. **Story ID format mismatch:**
    ```yaml
-   # In spectra.yaml
+   # In spectryn.yaml
    story_id_pattern: "US-\\d+"    # Matches US-001
    ```
 
 **Validate your markdown:**
 ```bash
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 ```
 
 ---
@@ -203,7 +203,7 @@ spectra --validate --markdown EPIC.md
 
 ### "Invalid status/priority mapping"
 
-**Configure custom mappings in `spectra.yaml`:**
+**Configure custom mappings in `spectryn.yaml`:**
 
 ```yaml
 mappings:
@@ -226,21 +226,21 @@ mappings:
 
 ### "Story already exists" Error
 
-**When spectra creates duplicates:**
+**When spectryn creates duplicates:**
 
-1. **Check state file:** The `.spectra/` directory tracks synced items
+1. **Check state file:** The `.spectryn/` directory tracks synced items
    ```bash
-   cat .spectra/state.json | jq '.stories'
+   cat .spectryn/state.json | jq '.stories'
    ```
 
 2. **Reset state for a story:**
    ```bash
-   spectra --reset-state --story US-001
+   spectryn --reset-state --story US-001
    ```
 
 3. **Force re-link:**
    ```bash
-   spectra --link US-001 JIRA-456
+   spectryn --link US-001 JIRA-456
    ```
 
 ---
@@ -251,16 +251,16 @@ mappings:
 
 ```bash
 # View differences
-spectra diff --markdown EPIC.md --epic PROJ-123
+spectryn diff --markdown EPIC.md --epic PROJ-123
 
 # Resolve interactively
-spectra sync --interactive --markdown EPIC.md
+spectryn sync --interactive --markdown EPIC.md
 
 # Force markdown to win (overwrite tracker)
-spectra sync --force-local --markdown EPIC.md
+spectryn sync --force-local --markdown EPIC.md
 
 # Force tracker to win (update markdown)
-spectra import --epic PROJ-123 --output EPIC.md
+spectryn import --epic PROJ-123 --output EPIC.md
 ```
 
 ---
@@ -286,7 +286,7 @@ spectra import --epic PROJ-123 --output EPIC.md
 
 3. **Subtask issue type not configured:**
    ```yaml
-   # In spectra.yaml
+   # In spectryn.yaml
    jira:
      subtask_type: "Sub-task"  # Must match your Jira's subtask type
    ```
@@ -300,7 +300,7 @@ spectra import --epic PROJ-123 --output EPIC.md
 **Optimize with these settings:**
 
 ```yaml
-# spectra.yaml
+# spectryn.yaml
 performance:
   parallel_sync: true
   max_workers: 4
@@ -310,7 +310,7 @@ performance:
 
 **Use incremental sync:**
 ```bash
-spectra sync --incremental --markdown EPIC.md
+spectryn sync --incremental --markdown EPIC.md
 ```
 
 ---
@@ -324,7 +324,7 @@ Error: Rate limit exceeded. Retry after 60 seconds.
 
 **Solutions:**
 
-1. **Wait and retry** - spectra auto-retries with backoff
+1. **Wait and retry** - spectryn auto-retries with backoff
 2. **Reduce parallelism:**
    ```yaml
    performance:
@@ -333,7 +333,7 @@ Error: Rate limit exceeded. Retry after 60 seconds.
    ```
 3. **Use batch operations:**
    ```bash
-   spectra sync --batch --markdown EPIC.md
+   spectryn sync --batch --markdown EPIC.md
    ```
 
 ---
@@ -344,16 +344,16 @@ Error: Rate limit exceeded. Retry after 60 seconds.
 
 **Search order for configuration:**
 1. `--config` flag path
-2. `./spectra.yaml` (current directory)
-3. `./.spectra/config.yaml`
-4. `~/.config/spectra/config.yaml`
+2. `./spectryn.yaml` (current directory)
+3. `./.spectryn/config.yaml`
+4. `~/.config/spectryn/config.yaml`
 5. Environment variables only
 
 **Create a minimal config:**
 ```bash
-spectra init
+spectryn init
 # Or manually:
-cat > spectra.yaml << EOF
+cat > spectryn.yaml << EOF
 tracker: jira
 jira:
   url: https://your-instance.atlassian.net
@@ -368,26 +368,26 @@ EOF
 **Check `.env` file location:**
 ```bash
 # Must be in current directory or specify path
-spectra --env-file /path/to/.env --markdown EPIC.md
+spectryn --env-file /path/to/.env --markdown EPIC.md
 ```
 
 **Verify variables are set:**
 ```bash
-spectra doctor --verbose
+spectryn doctor --verbose
 ```
 
 ---
 
 ## CLI Issues
 
-### "Command not found: spectra"
+### "Command not found: spectryn"
 
 **After pip install:**
 
 1. **Check installation:**
    ```bash
-   pip show spectra
-   pip list | grep spectra
+   pip show spectryn
+   pip list | grep spectryn
    ```
 
 2. **Add to PATH:**
@@ -400,7 +400,7 @@ spectra doctor --verbose
 
 3. **Use module directly:**
    ```bash
-   python -m spectra --help
+   python -m spectryn --help
    ```
 
 ---
@@ -411,22 +411,22 @@ spectra doctor --verbose
 
 ::: code-group
 ```bash [Bash]
-spectra completions bash > ~/.local/share/bash-completion/completions/spectra
+spectryn completions bash > ~/.local/share/bash-completion/completions/spectryn
 source ~/.bashrc
 ```
 
 ```bash [Zsh]
-spectra completions zsh > ~/.zfunc/_spectra
+spectryn completions zsh > ~/.zfunc/_spectryn
 # Add to .zshrc: fpath+=~/.zfunc
 source ~/.zshrc
 ```
 
 ```bash [Fish]
-spectra completions fish > ~/.config/fish/completions/spectra.fish
+spectryn completions fish > ~/.config/fish/completions/spectryn.fish
 ```
 
 ```powershell [PowerShell]
-spectra completions powershell >> $PROFILE
+spectryn completions powershell >> $PROFILE
 ```
 :::
 
@@ -438,7 +438,7 @@ spectra completions powershell >> $PROFILE
 
 Enable verbose logging:
 ```bash
-spectra --verbose --debug --markdown EPIC.md
+spectryn --verbose --debug --markdown EPIC.md
 ```
 
 ### Log Files
@@ -446,24 +446,24 @@ spectra --verbose --debug --markdown EPIC.md
 Check logs for detailed errors:
 ```bash
 # Default log location
-cat ~/.spectra/logs/spectra.log
+cat ~/.spectryn/logs/spectryn.log
 
 # Or specify location
-export SPECTRA_LOG_FILE="/tmp/spectra-debug.log"
-spectra --verbose --markdown EPIC.md
+export SPECTRA_LOG_FILE="/tmp/spectryn-debug.log"
+spectryn --verbose --markdown EPIC.md
 ```
 
 ### Report an Issue
 
 If you've tried the above and still have issues:
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/adriandarian/spectra/issues)
+1. **Search existing issues:** [GitHub Issues](https://github.com/adriandarian/spectryn/issues)
 2. **Gather diagnostic info:**
    ```bash
-   spectra doctor --report > diagnostic-report.txt
+   spectryn doctor --report > diagnostic-report.txt
    ```
 3. **Open a new issue** with:
-   - spectra version (`spectra --version`)
+   - spectryn version (`spectryn --version`)
    - Python version (`python --version`)
    - Operating system
    - Full error message
@@ -483,6 +483,6 @@ If you've tried the above and still have issues:
 | `E005` | Parse error | Validate markdown format |
 | `E006` | Sync conflict | Use `--interactive` to resolve |
 | `E007` | Network error | Check connectivity |
-| `E008` | Config error | Run `spectra doctor` |
+| `E008` | Config error | Run `spectryn doctor` |
 
 See [Exit Codes Reference](/reference/exit-codes) for complete list.

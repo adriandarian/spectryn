@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.adapters.graphql_api import (
+from spectryn.adapters.graphql_api import (
     SCHEMA_SDL,
     DataStore,
     GraphQLChangeType,
@@ -27,15 +27,15 @@ from spectra.adapters.graphql_api import (
     convert_subtask,
     create_graphql_server,
 )
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import (
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import (
     AcceptanceCriteria,
     Description,
     IssueKey,
     StoryId,
 )
-from spectra.core.ports.graphql_api import (
+from spectryn.core.ports.graphql_api import (
     ExecutionContext,
     GraphQLRequest,
     GraphQLResponse,

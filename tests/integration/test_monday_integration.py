@@ -9,14 +9,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.monday.adapter import MondayAdapter
-from spectra.adapters.monday.client import MondayApiClient
-from spectra.adapters.monday.webhook_parser import (
+from spectryn.adapters.monday.adapter import MondayAdapter
+from spectryn.adapters.monday.client import MondayApiClient
+from spectryn.adapters.monday.webhook_parser import (
     MondayWebhookEvent,
     MondayWebhookEventType,
     MondayWebhookParser,
 )
-from spectra.core.ports.issue_tracker import NotFoundError, TransitionError
+from spectryn.core.ports.issue_tracker import NotFoundError, TransitionError
 
 
 # =============================================================================

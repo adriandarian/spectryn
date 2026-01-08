@@ -1,5 +1,5 @@
 # Spectra Complete Pipeline Template
-# Use this as a starting point for your spectra pipeline
+# Use this as a starting point for your spectryn pipeline
 
 trigger:
   branches:
@@ -32,7 +32,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: spectra-credentials
+  - group: spectryn-credentials
   - name: MARKDOWN_FILE
     value: 'docs/user-stories.md'
 
@@ -49,8 +49,8 @@ stages:
               versionSpec: '3.11'
 
           - script: |
-              pip install spectra
-              spectra validate --markdown $(MARKDOWN_FILE)
+              pip install spectryn
+              spectryn validate --markdown $(MARKDOWN_FILE)
             displayName: 'Validate'
 
   # Stage 2: Preview (PRs only)
@@ -67,10 +67,10 @@ stages:
               versionSpec: '3.11'
 
           - script: |
-              pip install spectra
+              pip install spectryn
               echo "## 📋 Sync Preview" >> $(System.DefaultWorkingDirectory)/preview.md
               echo "" >> $(System.DefaultWorkingDirectory)/preview.md
-              spectra diff --markdown $(MARKDOWN_FILE) --epic $(EPIC_KEY) >> $(System.DefaultWorkingDirectory)/preview.md 2>&1 || true
+              spectryn diff --markdown $(MARKDOWN_FILE) --epic $(EPIC_KEY) >> $(System.DefaultWorkingDirectory)/preview.md 2>&1 || true
             displayName: 'Generate Preview'
             env:
               JIRA_URL: $(JIRA_URL)
@@ -106,8 +106,8 @@ stages:
                     versionSpec: '3.11'
 
                 - script: |
-                    pip install spectra
-                    spectra sync \
+                    pip install spectryn
+                    spectryn sync \
                       --markdown $(MARKDOWN_FILE) \
                       --epic $(EPIC_KEY) \
                       --tracker jira \
@@ -140,8 +140,8 @@ stages:
               versionSpec: '3.11'
 
           - script: |
-              pip install spectra
-              spectra sync \
+              pip install spectryn
+              spectryn sync \
                 --markdown $(MARKDOWN_FILE) \
                 --epic $(EPIC_KEY) \
                 --tracker jira \

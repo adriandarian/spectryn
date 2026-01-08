@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers.streaming import (
+from spectryn.adapters.parsers.streaming import (
     ChunkedFileProcessor,
     ChunkInfo,
     MemoryMappedParser,
@@ -18,9 +18,9 @@ from spectra.adapters.parsers.streaming import (
     get_file_stats,
     stream_stories_from_file,
 )
-from spectra.core.domain.entities import Subtask
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.ports.document_parser import ParserError
+from spectryn.core.domain.entities import Subtask
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.ports.document_parser import ParserError
 
 
 class TestStreamingStats:

@@ -4,7 +4,7 @@
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 # Workflow definitions
 workflows:
@@ -12,12 +12,12 @@ workflows:
   main:
     jobs:
       # Always validate markdown
-      - spectra/validate:
+      - spectryn/validate:
           name: validate
           markdown-file: docs/user-stories.md
 
       # Preview changes on feature branches
-      - spectra/sync:
+      - spectryn/sync:
           name: preview
           markdown-file: docs/user-stories.md
           epic-key: ${EPIC_KEY}
@@ -31,7 +31,7 @@ workflows:
           context: jira-credentials
 
       # Show diff on feature branches
-      - spectra/diff:
+      - spectryn/diff:
           name: diff
           markdown-file: docs/user-stories.md
           epic-key: ${EPIC_KEY}
@@ -43,7 +43,7 @@ workflows:
           context: jira-credentials
 
       # Execute sync on main branch
-      - spectra/sync:
+      - spectryn/sync:
           name: deploy
           markdown-file: docs/user-stories.md
           epic-key: ${EPIC_KEY}
@@ -66,7 +66,7 @@ workflows:
             branches:
               only: main
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           name: incremental-sync
           markdown-file: docs/user-stories.md
           epic-key: ${EPIC_KEY}
@@ -83,7 +83,7 @@ workflows:
             branches:
               only: main
     jobs:
-      - spectra/pull:
+      - spectryn/pull:
           name: pull-from-jira
           epic-key: ${EPIC_KEY}
           output-file: docs/imported-stories.md
@@ -97,14 +97,14 @@ workflows:
 #
 # jobs:
 #   custom-sync:
-#     executor: spectra/python
+#     executor: spectryn/python
 #     steps:
 #       - checkout
-#       - spectra/install:
+#       - spectryn/install:
 #           version: "1.0.0"
-#       - spectra/validate-command:
+#       - spectryn/validate-command:
 #           markdown-file: docs/user-stories.md
-#       - spectra/sync-command:
+#       - spectryn/sync-command:
 #           markdown-file: docs/user-stories.md
 #           epic-key: ${EPIC_KEY}
 #           execute: true

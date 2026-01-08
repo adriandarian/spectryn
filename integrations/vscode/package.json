@@ -1,12 +1,12 @@
 {
-  "name": "spectra",
-  "displayName": "spectra",
+  "name": "spectryn",
+  "displayName": "spectryn",
   "description": "Sync markdown documentation with issue trackers (Jira, GitHub, Linear, etc.) - validate, preview, and sync stories directly from VS Code",
   "version": "1.1.0",
-  "publisher": "spectra",
+  "publisher": "spectryn",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/spectra"
+    "url": "https://github.com/your-org/spectryn"
   },
   "engines": {
     "vscode": "^1.80.0"
@@ -30,178 +30,178 @@
   "activationEvents": [
     "onLanguage:markdown",
     "workspaceContains:**/*.md",
-    "onView:spectraSidebar"
+    "onView:spectrynSidebar"
   ],
   "main": "./out/extension.js",
   "icon": "media/icon.png",
   "contributes": {
     "commands": [
       {
-        "command": "spectra.validate",
+        "command": "spectryn.validate",
         "title": "Validate Markdown",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(check)"
       },
       {
-        "command": "spectra.sync",
+        "command": "spectryn.sync",
         "title": "Sync to Tracker (Dry Run)",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(sync)"
       },
       {
-        "command": "spectra.syncExecute",
+        "command": "spectryn.syncExecute",
         "title": "Sync to Tracker (Execute)",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(cloud-upload)"
       },
       {
-        "command": "spectra.syncSingleStory",
+        "command": "spectryn.syncSingleStory",
         "title": "Sync Single Story",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(sync)"
       },
       {
-        "command": "spectra.dashboard",
+        "command": "spectryn.dashboard",
         "title": "Show Dashboard",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(dashboard)"
       },
       {
-        "command": "spectra.init",
+        "command": "spectryn.init",
         "title": "Setup Wizard",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(gear)"
       },
       {
-        "command": "spectra.generate",
+        "command": "spectryn.generate",
         "title": "Generate Template from Tracker",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(file-add)"
       },
       {
-        "command": "spectra.gotoStory",
+        "command": "spectryn.gotoStory",
         "title": "Go to Story",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(symbol-class)"
       },
       {
-        "command": "spectra.copyStoryId",
+        "command": "spectryn.copyStoryId",
         "title": "Copy Story ID",
-        "category": "spectra"
+        "category": "spectryn"
       },
       {
-        "command": "spectra.copyStoryIdArg",
+        "command": "spectryn.copyStoryIdArg",
         "title": "Copy Story ID (with argument)",
-        "category": "spectra"
+        "category": "spectryn"
       },
       {
-        "command": "spectra.openInJira",
+        "command": "spectryn.openInJira",
         "title": "Open in Tracker",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(link-external)"
       },
       {
-        "command": "spectra.openEpicInTracker",
+        "command": "spectryn.openEpicInTracker",
         "title": "Open Epic in Tracker",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(link-external)"
       },
       {
-        "command": "spectra.createStoryInTracker",
+        "command": "spectryn.createStoryInTracker",
         "title": "Create Story in Tracker",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(add)"
       },
       {
-        "command": "spectra.generateStoryId",
+        "command": "spectryn.generateStoryId",
         "title": "Generate Story ID",
-        "category": "spectra"
+        "category": "spectryn"
       },
       {
-        "command": "spectra.updateStoryStatus",
+        "command": "spectryn.updateStoryStatus",
         "title": "Update Story Status",
-        "category": "spectra"
+        "category": "spectryn"
       },
       {
-        "command": "spectra.generateAcceptanceCriteria",
+        "command": "spectryn.generateAcceptanceCriteria",
         "title": "Generate Acceptance Criteria with AI",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(sparkle)"
       },
       {
-        "command": "spectra.estimateStoryPoints",
+        "command": "spectryn.estimateStoryPoints",
         "title": "Estimate Story Points with AI",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(sparkle)"
       },
       {
-        "command": "spectra.refreshSidebar",
+        "command": "spectryn.refreshSidebar",
         "title": "Refresh Sidebar",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(refresh)"
       },
       {
-        "command": "spectra.refreshIssueCache",
+        "command": "spectryn.refreshIssueCache",
         "title": "Refresh Issue Cache",
-        "category": "spectra"
+        "category": "spectryn"
       },
       {
-        "command": "spectra.openSettings",
+        "command": "spectryn.openSettings",
         "title": "Open Settings",
-        "category": "spectra",
+        "category": "spectryn",
         "icon": "$(settings-gear)"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "spectra.validate",
+          "command": "spectryn.validate",
           "when": "resourceLangId == markdown",
           "group": "navigation@1"
         },
         {
-          "command": "spectra.sync",
+          "command": "spectryn.sync",
           "when": "resourceLangId == markdown",
           "group": "navigation@2"
         }
       ],
       "editor/context": [
         {
-          "command": "spectra.copyStoryId",
+          "command": "spectryn.copyStoryId",
           "when": "resourceLangId == markdown",
-          "group": "spectra@1"
+          "group": "spectryn@1"
         },
         {
-          "command": "spectra.openInJira",
+          "command": "spectryn.openInJira",
           "when": "resourceLangId == markdown",
-          "group": "spectra@2"
+          "group": "spectryn@2"
         }
       ],
       "commandPalette": [
         {
-          "command": "spectra.validate",
+          "command": "spectryn.validate",
           "when": "resourceLangId == markdown"
         },
         {
-          "command": "spectra.sync",
+          "command": "spectryn.sync",
           "when": "resourceLangId == markdown"
         },
         {
-          "command": "spectra.syncExecute",
+          "command": "spectryn.syncExecute",
           "when": "resourceLangId == markdown"
         }
       ]
     },
     "configuration": {
-      "title": "spectra",
+      "title": "spectryn",
       "properties": {
-        "spectra.executable": {
+        "spectryn.executable": {
           "type": "string",
-          "default": "spectra",
-          "description": "Path to spectra executable",
+          "default": "spectryn",
+          "description": "Path to spectryn executable",
           "order": 1
         },
-        "spectra.trackerType": {
+        "spectryn.trackerType": {
           "type": "string",
           "default": "jira",
           "enum": ["jira", "github", "gitlab", "linear", "azure", "trello", "asana", "clickup", "monday", "shortcut", "youtrack", "plane", "pivotal", "basecamp", "notion"],
@@ -225,86 +225,86 @@
           "description": "Type of issue tracker to sync with",
           "order": 2
         },
-        "spectra.trackerUrl": {
+        "spectryn.trackerUrl": {
           "type": "string",
           "default": "",
           "description": "Tracker instance URL (e.g., https://your-org.atlassian.net for Jira, or https://github.com/owner/repo for GitHub)",
           "order": 3
         },
-        "spectra.jiraUrl": {
+        "spectryn.jiraUrl": {
           "type": "string",
           "default": "",
           "description": "Jira instance URL (deprecated: use trackerUrl instead)",
-          "deprecationMessage": "Use spectra.trackerUrl instead",
+          "deprecationMessage": "Use spectryn.trackerUrl instead",
           "order": 4
         },
-        "spectra.projectKey": {
+        "spectryn.projectKey": {
           "type": "string",
           "default": "",
           "description": "Default project key for new issues (e.g., PROJ)",
           "order": 5
         },
-        "spectra.defaultEpic": {
+        "spectryn.defaultEpic": {
           "type": "string",
           "default": "",
           "description": "Default epic key for new stories",
           "order": 6
         },
-        "spectra.autoValidate": {
+        "spectryn.autoValidate": {
           "type": "boolean",
           "default": true,
           "description": "Automatically validate markdown on save",
           "order": 10
         },
-        "spectra.autoSync": {
+        "spectryn.autoSync": {
           "type": "boolean",
           "default": false,
           "description": "Automatically sync to tracker on save (dry-run only)",
           "order": 11
         },
-        "spectra.showStoryDecorations": {
+        "spectryn.showStoryDecorations": {
           "type": "boolean",
           "default": true,
           "description": "Show inline decorations for stories",
           "order": 20
         },
-        "spectra.showCodeLens": {
+        "spectryn.showCodeLens": {
           "type": "boolean",
           "default": true,
           "description": "Show CodeLens actions above stories",
           "order": 21
         },
-        "spectra.showStatusBar": {
+        "spectryn.showStatusBar": {
           "type": "boolean",
           "default": true,
           "description": "Show story count in status bar",
           "order": 22
         },
-        "spectra.showHoverPreviews": {
+        "spectryn.showHoverPreviews": {
           "type": "boolean",
           "default": true,
           "description": "Show tracker issue details when hovering over story IDs",
           "order": 23
         },
-        "spectra.enableGoToTracker": {
+        "spectryn.enableGoToTracker": {
           "type": "boolean",
           "default": true,
           "description": "Enable Cmd+Click on issue IDs to open in browser",
           "order": 24
         },
-        "spectra.showSidebar": {
+        "spectryn.showSidebar": {
           "type": "boolean",
           "default": true,
-          "description": "Show spectra sidebar panel",
+          "description": "Show spectryn sidebar panel",
           "order": 25
         },
-        "spectra.validation.strictMode": {
+        "spectryn.validation.strictMode": {
           "type": "boolean",
           "default": false,
           "description": "Enable strict validation mode (treat warnings as errors)",
           "order": 30
         },
-        "spectra.validation.requiredFields": {
+        "spectryn.validation.requiredFields": {
           "type": "array",
           "items": {
             "type": "string",
@@ -314,26 +314,26 @@
           "description": "Required fields for stories",
           "order": 31
         },
-        "spectra.ai.enabled": {
+        "spectryn.ai.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Enable AI features (requires spectra AI configuration)",
+          "description": "Enable AI features (requires spectryn AI configuration)",
           "order": 40
         },
-        "spectra.ai.provider": {
+        "spectryn.ai.provider": {
           "type": "string",
           "default": "openai",
           "enum": ["openai", "anthropic", "google", "local"],
           "description": "AI provider for story generation and estimation",
           "order": 41
         },
-        "spectra.sync.confirmBeforeExecute": {
+        "spectryn.sync.confirmBeforeExecute": {
           "type": "boolean",
           "default": true,
           "description": "Show confirmation dialog before executing sync",
           "order": 50
         },
-        "spectra.sync.dryRunByDefault": {
+        "spectryn.sync.dryRunByDefault": {
           "type": "boolean",
           "default": true,
           "description": "Default to dry-run mode for sync operations",
@@ -343,7 +343,7 @@
     },
     "colors": [
       {
-        "id": "spectra.storyIdColor",
+        "id": "spectryn.storyIdColor",
         "description": "Color for story IDs",
         "defaults": {
           "dark": "#4EC9B0",
@@ -352,7 +352,7 @@
         }
       },
       {
-        "id": "spectra.epicIdColor",
+        "id": "spectryn.epicIdColor",
         "description": "Color for epic IDs",
         "defaults": {
           "dark": "#DCDCAA",
@@ -363,19 +363,19 @@
     ],
     "keybindings": [
       {
-        "command": "spectra.validate",
+        "command": "spectryn.validate",
         "key": "ctrl+shift+v",
         "mac": "cmd+shift+v",
         "when": "resourceLangId == markdown"
       },
       {
-        "command": "spectra.sync",
+        "command": "spectryn.sync",
         "key": "ctrl+shift+s",
         "mac": "cmd+shift+s",
         "when": "resourceLangId == markdown"
       },
       {
-        "command": "spectra.gotoStory",
+        "command": "spectryn.gotoStory",
         "key": "ctrl+shift+g",
         "mac": "cmd+shift+g",
         "when": "resourceLangId == markdown"
@@ -384,15 +384,15 @@
     "views": {
       "explorer": [
         {
-          "id": "spectraStories",
-          "name": "spectra Stories",
+          "id": "spectrynStories",
+          "name": "spectryn Stories",
           "when": "resourceLangId == markdown",
           "icon": "$(list-unordered)"
         }
       ],
-      "spectra": [
+      "spectryn": [
         {
-          "id": "spectraSidebar",
+          "id": "spectrynSidebar",
           "name": "Spectra",
           "icon": "$(list-unordered)"
         }
@@ -401,7 +401,7 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "spectra",
+          "id": "spectryn",
           "title": "Spectra",
           "icon": "$(list-unordered)"
         }
@@ -409,14 +409,14 @@
     },
     "viewsWelcome": [
       {
-        "view": "spectraSidebar",
-        "contents": "No spectra stories found.\n[Open a Markdown File](command:workbench.action.files.openFile)\n[Run Setup Wizard](command:spectra.init)"
+        "view": "spectrynSidebar",
+        "contents": "No spectryn stories found.\n[Open a Markdown File](command:workbench.action.files.openFile)\n[Run Setup Wizard](command:spectryn.init)"
       }
     ],
     "problemMatchers": [
       {
-        "name": "spectra",
-        "owner": "spectra",
+        "name": "spectryn",
+        "owner": "spectryn",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": [
           {
@@ -430,8 +430,8 @@
         ]
       },
       {
-        "name": "spectra-validation",
-        "owner": "spectra",
+        "name": "spectryn-validation",
+        "owner": "spectryn",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": [
           {
@@ -445,8 +445,8 @@
         ]
       },
       {
-        "name": "spectra-simple",
-        "owner": "spectra",
+        "name": "spectryn-simple",
+        "owner": "spectryn",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": [
           {

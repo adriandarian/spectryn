@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.gitlab.client import GitLabApiClient, GitLabRateLimiter
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.gitlab.client import GitLabApiClient, GitLabRateLimiter
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -37,7 +37,7 @@ def mock_issue_response():
 @pytest.fixture
 def mock_session():
     """Create a mock requests session."""
-    with patch("spectra.adapters.gitlab.client.requests.Session") as mock:
+    with patch("spectryn.adapters.gitlab.client.requests.Session") as mock:
         session_instance = MagicMock()
         mock.return_value = session_instance
         yield session_instance

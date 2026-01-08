@@ -157,7 +157,7 @@ Now generate a complete epic document with 6 user stories covering the features 
 
 ### Output from AI
 
-The AI will generate a complete, parseable markdown document ready for spectra.
+The AI will generate a complete, parseable markdown document ready for spectryn.
 
 ## Prompt Variations
 
@@ -202,7 +202,7 @@ Focus on risk mitigation and validation criteria.
 1. **Be Specific** - The more detail you provide about features, the better the output
 2. **Set Scope** - Specify number of stories to keep output manageable
 3. **Iterate** - Generate, review, and ask for refinements
-4. **Validate** - Run through spectra with `--validate` first
+4. **Validate** - Run through spectryn with `--validate` first
 
 :::
 
@@ -230,7 +230,7 @@ Separate stories with ---
 ## Related Documentation
 
 - [AI Fix Guide](/guide/ai-fix) – Fix formatting issues in existing documents
-- [AI Agents Guide](/guide/agents) – Context for AI coding assistants working on spectra
+- [AI Agents Guide](/guide/agents) – Context for AI coding assistants working on spectryn
 - [Validation Reference](/reference/cli#validation-options) – CLI validation options
 - [Format Schema](/guide/schema) – Complete markdown format specification
 

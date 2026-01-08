@@ -1,5 +1,5 @@
 {{/*
-Copyright (c) spectra
+Copyright (c) spectryn
 SPDX-License-Identifier: MIT
 */}}
 
@@ -7,15 +7,15 @@ SPDX-License-Identifier: MIT
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "spectra.fullname" . }}-manager
+  name: {{ include "spectryn.fullname" . }}-manager
   labels:
-    {{- include "spectra.labels" . | nindent 4 }}
+    {{- include "spectryn.labels" . | nindent 4 }}
 rules:
   # SpectraSync resources
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs
+      - spectrynsyncs
     verbs:
       - create
       - delete
@@ -25,17 +25,17 @@ rules:
       - update
       - watch
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs/status
+      - spectrynsyncs/status
     verbs:
       - get
       - patch
       - update
   - apiGroups:
-      - spectra.io
+      - spectryn.io
     resources:
-      - spectrasyncs/finalizers
+      - spectrynsyncs/finalizers
     verbs:
       - update
   # Jobs
@@ -83,26 +83,26 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "spectra.fullname" . }}-manager
+  name: {{ include "spectryn.fullname" . }}-manager
   labels:
-    {{- include "spectra.labels" . | nindent 4 }}
+    {{- include "spectryn.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "spectra.fullname" . }}-manager
+  name: {{ include "spectryn.fullname" . }}-manager
 subjects:
   - kind: ServiceAccount
-    name: {{ include "spectra.serviceAccountName" . }}
+    name: {{ include "spectryn.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 ---
 {{- if .Values.operator.leaderElection.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "spectra.fullname" . }}-leader-election
+  name: {{ include "spectryn.fullname" . }}-leader-election
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "spectra.labels" . | nindent 4 }}
+    {{- include "spectryn.labels" . | nindent 4 }}
 rules:
   - apiGroups:
       - ""
@@ -139,17 +139,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "spectra.fullname" . }}-leader-election
+  name: {{ include "spectryn.fullname" . }}-leader-election
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "spectra.labels" . | nindent 4 }}
+    {{- include "spectryn.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "spectra.fullname" . }}-leader-election
+  name: {{ include "spectryn.fullname" . }}-leader-election
 subjects:
   - kind: ServiceAccount
-    name: {{ include "spectra.serviceAccountName" . }}
+    name: {{ include "spectryn.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
 {{- end }}

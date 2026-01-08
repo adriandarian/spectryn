@@ -7,9 +7,9 @@ set -e
 echo "🚀 Spectra Bitbucket Pipe"
 echo "========================="
 
-# Install spectra
-pip install --quiet spectra
-spectra --version
+# Install spectryn
+pip install --quiet spectryn
+spectryn --version
 
 # Validate required inputs
 if [ -z "$MARKDOWN_FILE" ]; then
@@ -28,7 +28,7 @@ if [ -z "$EPIC_KEY" ] && [ "$MULTI_EPIC" != "true" ]; then
 fi
 
 # Build command
-CMD="spectra sync --markdown $MARKDOWN_FILE --tracker ${TRACKER:-jira}"
+CMD="spectryn sync --markdown $MARKDOWN_FILE --tracker ${TRACKER:-jira}"
 
 # Add epic key if provided
 if [ -n "$EPIC_KEY" ]; then

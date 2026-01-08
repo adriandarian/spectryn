@@ -1,6 +1,6 @@
 # Migration Projects
 
-Track system migrations, technology upgrades, and data migrations with spectra.
+Track system migrations, technology upgrades, and data migrations with spectryn.
 
 ## Migration Epic Template
 
@@ -286,13 +286,13 @@ horizontal scalability and multi-region deployment capabilities.
 
 ```bash
 # Initial sync when planning starts
-spectra -m migrations/postgres-to-crdb.md -e INFRA-100 -x
+spectryn -m migrations/postgres-to-crdb.md -e INFRA-100 -x
 
 # Update as phases complete
-spectra -m migrations/postgres-to-crdb.md -e INFRA-100 -x --phase statuses
+spectryn -m migrations/postgres-to-crdb.md -e INFRA-100 -x --phase statuses
 
 # Export for stakeholder reports
-spectra -m migrations/postgres-to-crdb.md -e INFRA-100 --export migration-status.json
+spectryn -m migrations/postgres-to-crdb.md -e INFRA-100 --export migration-status.json
 ```
 
 ## Migration Tracking Dashboard
@@ -303,7 +303,7 @@ Create a script to generate migration status:
 #!/bin/bash
 # migration-status.sh
 
-spectra -m migrations/postgres-to-crdb.md -e INFRA-100 --output json | jq '
+spectryn -m migrations/postgres-to-crdb.md -e INFRA-100 --output json | jq '
 {
   epic: .epic_key,
   phases: [

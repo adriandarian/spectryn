@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.basecamp.adapter import BasecampAdapter
-from spectra.adapters.basecamp.client import BasecampApiClient, BasecampRateLimiter
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.basecamp.adapter import BasecampAdapter
+from spectryn.adapters.basecamp.client import BasecampApiClient, BasecampRateLimiter
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueTrackerError,
     NotFoundError,
@@ -82,7 +82,7 @@ class TestBasecampApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.basecamp.client.requests.Session") as mock:
+        with patch("spectryn.adapters.basecamp.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -484,7 +484,7 @@ class TestBasecampAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.basecamp.adapter.BasecampApiClient") as mock:
+        with patch("spectryn.adapters.basecamp.adapter.BasecampApiClient") as mock:
             client = MagicMock()
             mock.return_value = client
             yield client

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.cache import (
+from spectryn.adapters.cache import (
     CacheEntry,
     CacheKeyBuilder,
     CacheManager,
@@ -466,7 +466,7 @@ class TestCachedJiraApiClient:
 
     def test_client_initialization(self):
         """Test client can be initialized with cache options."""
-        from spectra.adapters.jira import CachedJiraApiClient
+        from spectryn.adapters.jira import CachedJiraApiClient
 
         client = CachedJiraApiClient(
             base_url="https://test.atlassian.net",
@@ -482,7 +482,7 @@ class TestCachedJiraApiClient:
 
     def test_cache_disabled(self):
         """Test cache can be disabled."""
-        from spectra.adapters.jira import CachedJiraApiClient
+        from spectryn.adapters.jira import CachedJiraApiClient
 
         client = CachedJiraApiClient(
             base_url="https://test.atlassian.net",
@@ -495,7 +495,7 @@ class TestCachedJiraApiClient:
 
     def test_cache_stats_property(self):
         """Test cache_stats property."""
-        from spectra.adapters.jira import CachedJiraApiClient
+        from spectryn.adapters.jira import CachedJiraApiClient
 
         client = CachedJiraApiClient(
             base_url="https://test.atlassian.net",

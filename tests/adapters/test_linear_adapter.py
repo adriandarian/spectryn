@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.linear.adapter import LinearAdapter
-from spectra.adapters.linear.client import LinearApiClient, LinearRateLimiter
-from spectra.adapters.linear.plugin import LinearTrackerPlugin, create_plugin
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.linear.adapter import LinearAdapter
+from spectryn.adapters.linear.client import LinearApiClient, LinearRateLimiter
+from spectryn.adapters.linear.plugin import LinearTrackerPlugin, create_plugin
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     NotFoundError,
     TransitionError,
@@ -85,7 +85,7 @@ class TestLinearApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.linear.client.requests.Session") as mock:
+        with patch("spectryn.adapters.linear.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session
@@ -262,7 +262,7 @@ class TestLinearAdapter:
     @pytest.fixture
     def mock_client(self):
         """Create a mock API client."""
-        with patch("spectra.adapters.linear.adapter.LinearApiClient") as mock:
+        with patch("spectryn.adapters.linear.adapter.LinearApiClient") as mock:
             client = MagicMock()
             # Setup default returns
             client.get_team_by_key.return_value = {
@@ -525,7 +525,7 @@ class TestLinearTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.linear.plugin.LinearAdapter") as MockAdapter:
+        with patch("spectryn.adapters.linear.plugin.LinearAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -550,7 +550,7 @@ class TestLinearTrackerPlugin:
             }
         )
 
-        with patch("spectra.adapters.linear.plugin.LinearAdapter") as MockAdapter:
+        with patch("spectryn.adapters.linear.plugin.LinearAdapter") as MockAdapter:
             mock_adapter = MagicMock()
             MockAdapter.return_value = mock_adapter
 
@@ -584,7 +584,7 @@ class TestLinearAdapterIntegration:
     @pytest.fixture
     def live_adapter(self):
         """Create adapter with mocked client for workflow tests."""
-        with patch("spectra.adapters.linear.adapter.LinearApiClient") as MockClient:
+        with patch("spectryn.adapters.linear.adapter.LinearApiClient") as MockClient:
             client = MagicMock()
             client.get_team_by_key.return_value = {
                 "id": "team-123",

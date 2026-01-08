@@ -10,9 +10,9 @@ body:
         Have a question about using Spectra? Ask away!
         
         Before asking, please check:
-        - [Documentation](https://adriandarian.github.io/spectra)
-        - [Existing discussions](https://github.com/adriandarian/spectra/discussions)
-        - [FAQ section](https://adriandarian.github.io/spectra/guide/faq)
+        - [Documentation](https://adriandarian.github.io/spectryn)
+        - [Existing discussions](https://github.com/adriandarian/spectryn/discussions)
+        - [FAQ section](https://adriandarian.github.io/spectryn/guide/faq)
 
   - type: textarea
     id: question
@@ -40,7 +40,7 @@ body:
       label: What have you tried?
       description: What approaches have you already attempted?
       placeholder: |
-        I tried running `spectra sync ...` but...
+        I tried running `spectryn sync ...` but...
         I looked at the docs but couldn't find...
 
   - type: dropdown
@@ -67,7 +67,7 @@ body:
     id: version
     attributes:
       label: Spectra Version
-      description: Output of `spectra --version` (if applicable)
+      description: Output of `spectryn --version` (if applicable)
       placeholder: "1.0.0"
 
 

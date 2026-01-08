@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.state_store import (
+from spectryn.adapters.state_store import (
     FileStateStore,
     SQLiteStateStore,
     StateStoreMigrator,
@@ -20,8 +20,8 @@ from spectra.adapters.state_store import (
     export_to_json,
     import_from_json,
 )
-from spectra.application.sync.state import OperationRecord, SyncPhase, SyncState
-from spectra.core.ports.state_store import (
+from spectryn.application.sync.state import OperationRecord, SyncPhase, SyncState
+from spectryn.core.ports.state_store import (
     QuerySortField,
     QuerySortOrder,
     StateQuery,

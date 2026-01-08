@@ -1,4 +1,4 @@
-# Example workflow for using spectra GitHub Action
+# Example workflow for using spectryn GitHub Action
 # Copy this file to your repository's .github/workflows/ directory
 
 name: Sync Documentation to Jira
@@ -39,7 +39,7 @@ jobs:
       
       - name: Preview Sync
         id: preview
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -85,7 +85,7 @@ jobs:
       
       - name: Sync to Jira
         id: sync
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123
@@ -132,7 +132,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Dry-run Sync
-        uses: spectra/spectra-action@v1
+        uses: spectryn/spectryn-action@v1
         with:
           markdown-file: docs/EPIC.md
           epic-key: PROJ-123

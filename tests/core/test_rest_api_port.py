@@ -8,7 +8,7 @@ from datetime import datetime
 
 import pytest
 
-from spectra.core.ports.rest_api import (
+from spectryn.core.ports.rest_api import (
     ConflictError,
     ErrorCode,
     HttpMethod,

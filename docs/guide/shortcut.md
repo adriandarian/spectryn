@@ -1,6 +1,6 @@
 # Shortcut Integration Guide
 
-spectra supports Shortcut (formerly Clubhouse) for syncing markdown specifications. This guide covers configuration, authentication, workspace setup, and advanced features.
+spectryn supports Shortcut (formerly Clubhouse) for syncing markdown specifications. This guide covers configuration, authentication, workspace setup, and advanced features.
 
 ## Overview
 
@@ -16,18 +16,18 @@ The Shortcut adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Shortcut
-spectra --markdown EPIC.md --tracker shortcut --execute
+spectryn --markdown EPIC.md --tracker shortcut --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Shortcut connection settings
@@ -44,7 +44,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [shortcut]
@@ -71,7 +71,7 @@ export SHORTCUT_API_URL=https://api.app.shortcut.com/api/v3
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker shortcut \
   --shortcut-api-token your-token \
@@ -91,7 +91,7 @@ spectra \
    - Click on your profile icon (top right)
    - Go to **Settings** → **API Tokens**
    - Click **Create Token**
-   - Give it a name (e.g., "spectra-sync")
+   - Give it a name (e.g., "spectryn-sync")
    - Copy the token immediately (you won't be able to see it again)
 
 3. **Find Your Workspace ID**
@@ -139,7 +139,7 @@ Shortcut uses workflow states to track story status. The adapter maps standard s
 
 ### Default Status Mapping
 
-| spectra Status | Shortcut Workflow State |
+| spectryn Status | Shortcut Workflow State |
 |----------------|------------------------|
 | Planned        | To Do                  |
 | Open           | To Do                  |
@@ -248,16 +248,16 @@ Shortcut API has a rate limit of **200 requests per minute**. The adapter:
 
 ```bash
 # Dry run (preview changes)
-spectra --markdown EPIC.md --tracker shortcut
+spectryn --markdown EPIC.md --tracker shortcut
 
 # Execute sync
-spectra --markdown EPIC.md --tracker shortcut --execute
+spectryn --markdown EPIC.md --tracker shortcut --execute
 ```
 
 ### With Custom Configuration
 
 ```yaml
-# .spectra.yaml
+# .spectryn.yaml
 shortcut:
   api_token: ${SHORTCUT_API_TOKEN}
   workspace_id: my-workspace
@@ -329,7 +329,7 @@ sync:
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker shortcut --verbose
+spectryn --markdown EPIC.md --tracker shortcut --verbose
 ```
 
 Or set in config:

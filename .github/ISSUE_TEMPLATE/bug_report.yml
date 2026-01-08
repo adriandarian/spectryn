@@ -23,7 +23,7 @@ body:
       label: Steps to Reproduce
       description: Steps to reproduce the behavior
       placeholder: |
-        1. Run command `spectra ...`
+        1. Run command `spectryn ...`
         2. With this markdown file...
         3. See error
     validations:
@@ -64,7 +64,7 @@ body:
     id: version
     attributes:
       label: Spectra Version
-      description: Output of `spectra --version`
+      description: Output of `spectryn --version`
       placeholder: "1.0.0"
     validations:
       required: true

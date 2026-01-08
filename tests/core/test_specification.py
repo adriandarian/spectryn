@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from spectra.core.specification import (
+from spectryn.core.specification import (
     AllSubtasksMatchSpec,
     AlwaysFalse,
     AlwaysTrue,

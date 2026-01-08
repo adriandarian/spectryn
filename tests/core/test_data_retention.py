@@ -27,7 +27,7 @@ from typing import Any
 
 import pytest
 
-from spectra.core.retention import (
+from spectryn.core.retention import (
     CleanupItem,
     CleanupResult,
     CleanupScheduler,

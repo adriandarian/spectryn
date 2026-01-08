@@ -7,7 +7,7 @@ python-gitlab is available, and handles gracefully when it's not.
 
 import pytest
 
-from spectra.adapters.gitlab.sdk_client import GITLAB_SDK_AVAILABLE, GitLabSdkClient
+from spectryn.adapters.gitlab.sdk_client import GITLAB_SDK_AVAILABLE, GitLabSdkClient
 
 
 class TestGitLabSdkClientAvailability:
@@ -37,7 +37,7 @@ class TestGitLabSdkClient:
         """Mock gitlab module."""
         from unittest.mock import MagicMock, patch
 
-        with patch("spectra.adapters.gitlab.sdk_client.gitlab") as mock:
+        with patch("spectryn.adapters.gitlab.sdk_client.gitlab") as mock:
             mock_gitlab_instance = MagicMock()
             mock.Gitlab.return_value = mock_gitlab_instance
 

@@ -1,4 +1,4 @@
-# Copyright (c) spectra
+# Copyright (c) spectryn
 # SPDX-License-Identifier: MIT
 
 # Basic example of SpectraSync with Jira
@@ -36,7 +36,7 @@ data:
     - [ ] User sees error on invalid credentials
     - [ ] User is redirected to dashboard on success
 ---
-apiVersion: spectra.io/v1alpha1
+apiVersion: spectryn.io/v1alpha1
 kind: SpectraSync
 metadata:
   name: my-project-sync

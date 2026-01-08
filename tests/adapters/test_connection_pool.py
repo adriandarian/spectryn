@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.http.connection_pool import (
+from spectryn.adapters.http.connection_pool import (
     ConnectionPoolManager,
     PoolConfig,
     PoolStats,
@@ -339,7 +339,7 @@ class TestConvenienceFunctions:
     @pytest.fixture(autouse=True)
     def reset_global_manager(self):
         """Reset global manager before each test."""
-        import spectra.adapters.http.connection_pool as module
+        import spectryn.adapters.http.connection_pool as module
 
         module._pool_manager = None
         yield

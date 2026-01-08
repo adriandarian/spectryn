@@ -6,9 +6,9 @@ from textwrap import dedent
 
 import pytest
 
-from spectra.adapters.parsers.notion_parser import NotionParser
-from spectra.adapters.parsers.notion_plugin import NotionParserPlugin, create_plugin
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.notion_parser import NotionParser
+from spectryn.adapters.parsers.notion_plugin import NotionParserPlugin, create_plugin
+from spectryn.core.domain.enums import Priority, Status
 
 
 # =============================================================================

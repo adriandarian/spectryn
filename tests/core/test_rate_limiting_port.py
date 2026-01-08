@@ -6,7 +6,7 @@ Tests the data classes, enums, and utility functions in the rate_limiting port.
 
 import pytest
 
-from spectra.core.ports.rate_limiting import (
+from spectryn.core.ports.rate_limiting import (
     TRACKER_PRESETS,
     CircuitBreakerConfig,
     CircuitOpenError,

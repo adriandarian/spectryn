@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Mutation Testing Script for spectra.
+Mutation Testing Script for spectryn.
 
 This script runs mutation testing on specific modules and generates reports.
 Mutation testing helps verify test quality by introducing small code changes
@@ -43,14 +43,14 @@ from pathlib import Path
 
 # Modules to test with mutation testing
 MUTATION_TARGETS = {
-    "result": "src/spectra/core/result.py",
-    "specification": "src/spectra/core/specification.py",
-    "container": "src/spectra/core/container.py",
-    "exceptions": "src/spectra/core/exceptions.py",
-    "constants": "src/spectra/core/constants.py",
-    "entities": "src/spectra/core/domain/entities.py",
-    "value_objects": "src/spectra/core/domain/value_objects.py",
-    "enums": "src/spectra/core/domain/enums.py",
+    "result": "src/spectryn/core/result.py",
+    "specification": "src/spectryn/core/specification.py",
+    "container": "src/spectryn/core/container.py",
+    "exceptions": "src/spectryn/core/exceptions.py",
+    "constants": "src/spectryn/core/constants.py",
+    "entities": "src/spectryn/core/domain/entities.py",
+    "value_objects": "src/spectryn/core/domain/value_objects.py",
+    "enums": "src/spectryn/core/domain/enums.py",
 }
 
 
@@ -81,7 +81,7 @@ def run_mutation_test(
         paths = MUTATION_TARGETS[module]
         tests = f"tests/core/test_{module}.py"
     else:
-        paths = "src/spectra/core/"
+        paths = "src/spectryn/core/"
         tests = "tests/core/"
 
     # Build mutmut command
@@ -144,7 +144,7 @@ def show_surviving_mutant(mutant_id: int) -> None:
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Run mutation testing on spectra modules"
+        description="Run mutation testing on spectryn modules"
     )
     parser.add_argument(
         "--module", "-m",

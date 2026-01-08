@@ -6,23 +6,23 @@ from unittest.mock import Mock
 
 import pytest
 
-from spectra.adapters.formatters.markdown_writer import MarkdownUpdater, MarkdownWriter
-from spectra.application.sync.reverse_sync import (
+from spectryn.adapters.formatters.markdown_writer import MarkdownUpdater, MarkdownWriter
+from spectryn.application.sync.reverse_sync import (
     ChangeDetail,
     PullChanges,
     PullResult,
     ReverseSyncOrchestrator,
 )
-from spectra.core.domain.entities import Epic, Subtask, UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import (
+from spectryn.core.domain.entities import Epic, Subtask, UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import (
     AcceptanceCriteria,
     Description,
     IssueKey,
     StoryId,
 )
-from spectra.core.ports.config_provider import SyncConfig
-from spectra.core.ports.issue_tracker import IssueData
+from spectryn.core.ports.config_provider import SyncConfig
+from spectryn.core.ports.issue_tracker import IssueData
 
 
 class TestMarkdownWriter:

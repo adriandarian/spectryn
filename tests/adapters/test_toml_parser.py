@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from spectra.adapters.parsers import TomlParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import TomlParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestTomlParser:

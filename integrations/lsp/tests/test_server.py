@@ -3,7 +3,7 @@
 import pytest
 from lsprotocol import types as lsp
 
-from spectra_lsp.server import SpectraLanguageServer
+from spectryn_lsp.server import SpectraLanguageServer
 
 
 @pytest.fixture

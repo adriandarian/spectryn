@@ -19,7 +19,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.core.ports.issue_tracker import (
+from spectryn.core.ports.issue_tracker import (
     IssueData,
     IssueTrackerError,
     IssueTrackerPort,
@@ -52,8 +52,8 @@ class TestJiraAdapterContract(AdapterContractTestBase):
     """Contract tests for JiraAdapter."""
 
     def create_adapter(self, dry_run: bool = True) -> IssueTrackerPort:
-        from spectra.adapters.jira.adapter import JiraAdapter
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.adapters.jira.adapter import JiraAdapter
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         config = TrackerConfig(
             url="https://test.atlassian.net",
@@ -63,8 +63,8 @@ class TestJiraAdapterContract(AdapterContractTestBase):
         )
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient"),
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient"),
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             return JiraAdapter(config=config, dry_run=dry_run)
 
@@ -142,9 +142,9 @@ class TestGitHubAdapterContract(AdapterContractTestBase):
     """Contract tests for GitHubAdapter."""
 
     def create_adapter(self, dry_run: bool = True) -> IssueTrackerPort:
-        from spectra.adapters.github.adapter import GitHubAdapter
+        from spectryn.adapters.github.adapter import GitHubAdapter
 
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.list_labels.return_value = []
             MockClient.return_value = mock_client
@@ -229,9 +229,9 @@ class TestLinearAdapterContract(AdapterContractTestBase):
     """Contract tests for LinearAdapter."""
 
     def create_adapter(self, dry_run: bool = True) -> IssueTrackerPort:
-        from spectra.adapters.linear.adapter import LinearAdapter
+        from spectryn.adapters.linear.adapter import LinearAdapter
 
-        with patch("spectra.adapters.linear.adapter.LinearApiClient") as MockClient:
+        with patch("spectryn.adapters.linear.adapter.LinearApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.get_team_by_key.return_value = {"id": "team-123", "key": "ENG"}
             MockClient.return_value = mock_client
@@ -308,10 +308,10 @@ class TestYouTrackAdapterContract(AdapterContractTestBase):
     """Contract tests for YouTrackAdapter."""
 
     def create_adapter(self, dry_run: bool = True) -> IssueTrackerPort:
-        from spectra.adapters.youtrack.adapter import YouTrackAdapter
-        from spectra.core.ports.config_provider import YouTrackConfig
+        from spectryn.adapters.youtrack.adapter import YouTrackAdapter
+        from spectryn.core.ports.config_provider import YouTrackConfig
 
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.get_current_user.return_value = {"login": "testuser"}
             mock_client.get_available_states.return_value = [
@@ -406,12 +406,12 @@ class TestAdapterContractConsistency:
         adapters = []
 
         # Jira
-        from spectra.adapters.jira.adapter import JiraAdapter
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.adapters.jira.adapter import JiraAdapter
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient"),
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient"),
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             config = TrackerConfig(
                 url="https://test.atlassian.net",
@@ -421,9 +421,9 @@ class TestAdapterContractConsistency:
             adapters.append(("Jira", JiraAdapter(config=config, dry_run=True)))
 
         # GitHub
-        from spectra.adapters.github.adapter import GitHubAdapter
+        from spectryn.adapters.github.adapter import GitHubAdapter
 
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.list_labels.return_value = []
             MockClient.return_value = mock_client
@@ -435,19 +435,19 @@ class TestAdapterContractConsistency:
             )
 
         # Linear
-        from spectra.adapters.linear.adapter import LinearAdapter
+        from spectryn.adapters.linear.adapter import LinearAdapter
 
-        with patch("spectra.adapters.linear.adapter.LinearApiClient") as MockClient:
+        with patch("spectryn.adapters.linear.adapter.LinearApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.get_team_by_key.return_value = {"id": "t", "key": "ENG"}
             MockClient.return_value = mock_client
             adapters.append(("Linear", LinearAdapter(api_key="test", team_key="ENG", dry_run=True)))
 
         # YouTrack
-        from spectra.adapters.youtrack.adapter import YouTrackAdapter
-        from spectra.core.ports.config_provider import YouTrackConfig
+        from spectryn.adapters.youtrack.adapter import YouTrackAdapter
+        from spectryn.core.ports.config_provider import YouTrackConfig
 
-        with patch("spectra.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
+        with patch("spectryn.adapters.youtrack.adapter.YouTrackApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.get_current_user.return_value = {"login": "testuser"}
             mock_client.get_available_states.return_value = []
@@ -510,12 +510,12 @@ class TestAdapterDryRunContract:
 
     def test_jira_dry_run_no_writes(self):
         """Test Jira adapter makes no writes in dry-run mode."""
-        from spectra.adapters.jira.adapter import JiraAdapter
-        from spectra.core.ports.config_provider import TrackerConfig
+        from spectryn.adapters.jira.adapter import JiraAdapter
+        from spectryn.core.ports.config_provider import TrackerConfig
 
         with (
-            patch("spectra.adapters.jira.adapter.JiraApiClient") as MockClient,
-            patch("spectra.adapters.jira.adapter.JiraBatchClient"),
+            patch("spectryn.adapters.jira.adapter.JiraApiClient") as MockClient,
+            patch("spectryn.adapters.jira.adapter.JiraBatchClient"),
         ):
             mock_client = MagicMock()
             MockClient.return_value = mock_client
@@ -540,9 +540,9 @@ class TestAdapterDryRunContract:
 
     def test_github_dry_run_no_writes(self):
         """Test GitHub adapter makes no writes in dry-run mode."""
-        from spectra.adapters.github.adapter import GitHubAdapter
+        from spectryn.adapters.github.adapter import GitHubAdapter
 
-        with patch("spectra.adapters.github.adapter.GitHubApiClient") as MockClient:
+        with patch("spectryn.adapters.github.adapter.GitHubApiClient") as MockClient:
             mock_client = MagicMock()
             mock_client.list_labels.return_value = []
             MockClient.return_value = mock_client

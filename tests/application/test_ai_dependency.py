@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_dependency import (
+from spectryn.application.ai_dependency import (
     AIDependencyDetector,
     DependencyOptions,
     DependencyResult,
@@ -16,9 +16,9 @@ from spectra.application.ai_dependency import (
     build_dependency_prompt,
     parse_dependency_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import Description, StoryId
 
 
 @pytest.fixture
@@ -400,7 +400,7 @@ class TestAIDependencyDetector:
 
     def test_detect_with_fallback(self, api_story: UserStory, ui_story: UserStory) -> None:
         """Test detecting with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             detector = AIDependencyDetector()
@@ -429,7 +429,7 @@ class TestAIDependencyDetector:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -476,7 +476,7 @@ class TestAIDependencyDetector:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 

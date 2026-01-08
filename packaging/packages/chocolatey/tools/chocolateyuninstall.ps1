@@ -1,16 +1,16 @@
 # ==============================================================================
-# spectra Chocolatey Uninstall Script
+# spectryn Chocolatey Uninstall Script
 # ==============================================================================
 
 $ErrorActionPreference = 'Stop'
 
-$packageName = 'spectra'
+$packageName = 'spectryn'
 
 # Uninstall via pip
 $pipArgs = @(
     'uninstall'
     '--yes'
-    'spectra'
+    'spectryn'
 )
 
 # Try pip3 first, fall back to pip

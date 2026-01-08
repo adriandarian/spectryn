@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from spectra.core.ports.graphql_api import (
+from spectryn.core.ports.graphql_api import (
     Connection,
     Edge,
     ErrorCode,

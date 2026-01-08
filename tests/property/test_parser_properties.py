@@ -15,10 +15,10 @@ from textwrap import dedent
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from spectra.adapters.parsers import MarkdownParser
-from spectra.adapters.parsers.json_parser import JsonParser
-from spectra.adapters.parsers.yaml_parser import YamlParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers import MarkdownParser
+from spectryn.adapters.parsers.json_parser import JsonParser
+from spectryn.adapters.parsers.yaml_parser import YamlParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 # =============================================================================

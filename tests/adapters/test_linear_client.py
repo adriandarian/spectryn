@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.linear.client import LinearRateLimiter
+from spectryn.adapters.linear.client import LinearRateLimiter
 
 
 class TestLinearRateLimiter:
@@ -81,8 +81,8 @@ class TestLinearApiClientInit:
 
     def test_init_sets_attributes(self):
         """Test initialization sets basic attributes."""
-        with patch("spectra.adapters.linear.client.requests.Session"):
-            from spectra.adapters.linear.client import LinearApiClient
+        with patch("spectryn.adapters.linear.client.requests.Session"):
+            from spectryn.adapters.linear.client import LinearApiClient
 
             client = LinearApiClient(
                 api_key="lin_api_test",
@@ -93,8 +93,8 @@ class TestLinearApiClientInit:
 
     def test_init_without_rate_limiter(self):
         """Test initialization without rate limiting."""
-        with patch("spectra.adapters.linear.client.requests.Session"):
-            from spectra.adapters.linear.client import LinearApiClient
+        with patch("spectryn.adapters.linear.client.requests.Session"):
+            from spectryn.adapters.linear.client import LinearApiClient
 
             client = LinearApiClient(
                 api_key="lin_api_test",
@@ -105,8 +105,8 @@ class TestLinearApiClientInit:
 
     def test_init_with_rate_limiter(self):
         """Test initialization with rate limiting."""
-        with patch("spectra.adapters.linear.client.requests.Session"):
-            from spectra.adapters.linear.client import LinearApiClient
+        with patch("spectryn.adapters.linear.client.requests.Session"):
+            from spectryn.adapters.linear.client import LinearApiClient
 
             client = LinearApiClient(
                 api_key="lin_api_test",

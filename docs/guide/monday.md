@@ -1,6 +1,6 @@
 # Monday.com Integration Guide
 
-spectra supports Monday.com for syncing markdown specifications. This guide covers configuration, authentication, board setup, and column mapping.
+spectryn supports Monday.com for syncing markdown specifications. This guide covers configuration, authentication, board setup, and column mapping.
 
 ## Overview
 
@@ -16,18 +16,18 @@ The Monday.com adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Monday.com
-spectra --markdown EPIC.md --tracker monday --execute
+spectryn --markdown EPIC.md --tracker monday --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Monday.com connection settings
@@ -50,7 +50,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [monday]
@@ -87,7 +87,7 @@ export MONDAY_STORY_POINTS_COLUMN_ID=numbers
 ### CLI Arguments
 
 ```bash
-spectra \
+spectryn \
   --markdown EPIC.md \
   --tracker monday \
   --monday-api-token your-token \
@@ -106,17 +106,17 @@ spectra \
 
 2. **Create API Token**
    - Click **"Generate new token"** or **"Create token"**
-   - Give it a descriptive name (e.g., "spectra CLI")
+   - Give it a descriptive name (e.g., "spectryn CLI")
    - Select the appropriate scope:
      - **Read** - View boards, items, columns
      - **Write** - Create and update items, columns
-     - **Full access** - Complete access (recommended for spectra)
+     - **Full access** - Complete access (recommended for spectryn)
 
 3. **Copy Token**
    - Copy the token immediately (shown only once)
    - Format: Long alphanumeric string (e.g., `eyJhbGciOiJIUzI1NiJ9...`)
 
-4. **Configure spectra**
+4. **Configure spectryn**
    ```bash
    export MONDAY_API_TOKEN=your-token-here
    ```
@@ -192,7 +192,7 @@ Workspace
               └── Subitem (Subtask)
 ```
 
-**Mapping to spectra:**
+**Mapping to spectryn:**
 - **Epic** → Group (column/group within a board)
 - **Story** → Item (row/item on the board)
 - **Subtask** → Subitem (child item linked to parent)
@@ -202,7 +202,7 @@ Workspace
 
 ### Required Columns
 
-For full spectra functionality, your board should have these columns:
+For full spectryn functionality, your board should have these columns:
 
 | Column Type | Column Name | Purpose |
 |-------------|-------------|---------|
@@ -231,11 +231,11 @@ If your board doesn't have the required columns:
 
 ## Custom Column Mapping Guide
 
-spectra automatically detects columns by type and name, but you can specify custom mappings if your board uses different column names.
+spectryn automatically detects columns by type and name, but you can specify custom mappings if your board uses different column names.
 
 ### Auto-Detection
 
-By default, spectra automatically finds columns by:
+By default, spectryn automatically finds columns by:
 1. **Type match** - Finds columns by type (status, priority, numbers, timeline)
 2. **Name match** - If multiple columns of same type, matches by name hints
 
@@ -314,7 +314,7 @@ Status columns need specific labels. Configure them in Monday.com:
    - Done
    - (Add more as needed)
 
-3. **spectra will map:**
+3. **spectryn will map:**
    - `Planned` → "Not Started"
    - `In Progress` → "Working on it"
    - `Done` → "Done"
@@ -330,7 +330,7 @@ Priority columns use index-based values:
 | Medium | 2 | Medium |
 | Low | 3 | Low |
 
-spectra automatically maps priority values to the correct index.
+spectryn automatically maps priority values to the correct index.
 
 ### Story Points Column Configuration
 
@@ -347,7 +347,7 @@ Story Points use a Numbers column:
 Set start and end dates for items to enable Gantt view:
 
 ```python
-from spectra.adapters.monday import MondayAdapter
+from spectryn.adapters.monday import MondayAdapter
 
 adapter = MondayAdapter(
     api_token="your-token",
@@ -441,7 +441,7 @@ adapter.delete_webhook(webhook_id="webhook-123")
 Enable verbose logging:
 
 ```bash
-spectra --markdown EPIC.md --tracker monday --verbose
+spectryn --markdown EPIC.md --tracker monday --verbose
 ```
 
 Or in config:
@@ -457,7 +457,7 @@ Test your configuration:
 
 ```bash
 # Test connection (dry-run)
-spectra --markdown EPIC.md --tracker monday --validate
+spectryn --markdown EPIC.md --tracker monday --validate
 ```
 
 ## Examples
@@ -466,10 +466,10 @@ spectra --markdown EPIC.md --tracker monday --validate
 
 ```bash
 # Dry-run (preview changes)
-spectra --markdown EPIC.md --tracker monday
+spectryn --markdown EPIC.md --tracker monday
 
 # Execute sync
-spectra --markdown EPIC.md --tracker monday --execute
+spectryn --markdown EPIC.md --tracker monday --execute
 ```
 
 ### With Custom Column Mapping
@@ -486,7 +486,7 @@ monday:
 ### With Timeline Support
 
 ```python
-from spectra.adapters.monday import MondayAdapter
+from spectryn.adapters.monday import MondayAdapter
 
 adapter = MondayAdapter(
     api_token="your-token",

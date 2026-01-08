@@ -1,10 +1,10 @@
 # AI Fix
 
-AI Fix is an intelligent assistant that helps you correct markdown formatting issues in your spectra documents. When validation fails, AI Fix can guide you through repairs using AI-powered tools.
+AI Fix is an intelligent assistant that helps you correct markdown formatting issues in your spectryn documents. When validation fails, AI Fix can guide you through repairs using AI-powered tools.
 
 ## Overview
 
-spectra's markdown parser requires specific formatting for stories, metadata, acceptance criteria, and subtasks. When your document doesn't match the expected format, AI Fix offers three ways to resolve issues:
+spectryn's markdown parser requires specific formatting for stories, metadata, acceptance criteria, and subtasks. When your document doesn't match the expected format, AI Fix offers three ways to resolve issues:
 
 1. **Format Guide** – View the complete format specification
 2. **AI Prompt** – Get a copy-paste prompt for your favorite AI tool
@@ -14,12 +14,12 @@ spectra's markdown parser requires specific formatting for stories, metadata, ac
 
 ```bash
 # Validate your markdown file
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 
 # If validation fails, you'll see AI Fix suggestions automatically
 ```
 
-When validation fails, spectra displays available options:
+When validation fails, spectryn displays available options:
 
 ```
 ────────────────────────────────────────────────────────────────────
@@ -27,25 +27,25 @@ When validation fails, spectra displays available options:
 ────────────────────────────────────────────────────────────────────
 
 Option 1: View format guide
-  Run: spectra --validate --markdown EPIC.md --show-guide
+  Run: spectryn --validate --markdown EPIC.md --show-guide
 
 Option 2: Get AI fix prompt (copy to your AI tool)
-  Run: spectra --validate --markdown EPIC.md --suggest-fix
+  Run: spectryn --validate --markdown EPIC.md --suggest-fix
 
 Option 3: Auto-fix with AI tool
   Available AI tools for auto-fix:
     1. Claude CLI (claude 1.0.5)
     2. Ollama (ollama version 0.5.0)
-  Run: spectra --validate --markdown EPIC.md --auto-fix --ai-tool claude
-  Or interactively: spectra --validate --markdown EPIC.md --auto-fix
+  Run: spectryn --validate --markdown EPIC.md --auto-fix --ai-tool claude
+  Or interactively: spectryn --validate --markdown EPIC.md --auto-fix
 ```
 
 ## Option 1: Format Guide
 
-View the complete spectra markdown format specification:
+View the complete spectryn markdown format specification:
 
 ```bash
-spectra --validate --markdown EPIC.md --show-guide
+spectryn --validate --markdown EPIC.md --show-guide
 ```
 
 This displays a comprehensive guide covering:
@@ -65,13 +65,13 @@ Use this guide as a reference when manually fixing your documents.
 Generate a prompt you can copy into any AI assistant (ChatGPT, Claude web, etc.):
 
 ```bash
-spectra --validate --markdown EPIC.md --suggest-fix
+spectryn --validate --markdown EPIC.md --suggest-fix
 ```
 
 This outputs a prompt like:
 
 ```
-Fix this markdown file (EPIC.md) to match the spectra format.
+Fix this markdown file (EPIC.md) to match the spectryn format.
 
 Issues to fix:
 - [MD001] Story header missing required format
@@ -90,13 +90,13 @@ Paste your file content after this prompt, then I'll return the corrected versio
 
 ### How to Use
 
-1. Run `spectra --validate --markdown EPIC.md --suggest-fix`
+1. Run `spectryn --validate --markdown EPIC.md --suggest-fix`
 2. Copy the generated prompt
 3. Open your preferred AI tool (ChatGPT, Claude, Gemini, etc.)
 4. Paste the prompt
 5. Paste your markdown file content after the prompt
 6. Copy the AI's corrected output back to your file
-7. Re-validate: `spectra --validate --markdown EPIC.md`
+7. Re-validate: `spectryn --validate --markdown EPIC.md`
 
 ## Option 3: Auto-Fix (CLI Tools)
 
@@ -104,15 +104,15 @@ Auto-fix uses AI CLI tools installed on your system to automatically repair your
 
 ```bash
 # Interactive mode (prompts you to select a tool)
-spectra --validate --markdown EPIC.md --auto-fix
+spectryn --validate --markdown EPIC.md --auto-fix
 
 # Specify a tool directly
-spectra --validate --markdown EPIC.md --auto-fix --ai-tool claude
+spectryn --validate --markdown EPIC.md --auto-fix --ai-tool claude
 ```
 
 ### Supported AI CLI Tools
 
-spectra automatically detects these AI CLI tools:
+spectryn automatically detects these AI CLI tools:
 
 | Tool | Command | Installation |
 |------|---------|--------------|
@@ -130,7 +130,7 @@ spectra automatically detects these AI CLI tools:
 Check which AI tools are available on your system:
 
 ```bash
-spectra --list-ai-tools
+spectryn --list-ai-tools
 ```
 
 Output:
@@ -143,7 +143,7 @@ Available AI tools for auto-fix:
 
 ### Auto-Fix Workflow
 
-1. spectra reads your markdown file
+1. spectryn reads your markdown file
 2. Generates a detailed prompt with:
    - List of validation errors
    - Format specifications
@@ -159,10 +159,10 @@ Auto-fix modifies your file in place. Consider using version control or making a
 ### Example Session
 
 ```bash
-$ spectra --validate --markdown stories.md --auto-fix
+$ spectryn --validate --markdown stories.md --auto-fix
 
 ╭─────────────────────────────────────────────────────────────╮
-│  spectra Validate ✓                                         │
+│  spectryn Validate ✓                                         │
 ╰─────────────────────────────────────────────────────────────╯
 
 File: stories.md
@@ -188,7 +188,7 @@ Enter choice [1]: 1
 Using Claude CLI to fix formatting issues...
 
 ✓ File has been fixed!
-Run validation again to verify: spectra --validate --markdown stories.md
+Run validation again to verify: spectryn --validate --markdown stories.md
 ```
 
 ## Troubleshooting
@@ -214,10 +214,10 @@ The specified tool is not detected on your system:
 
 ```bash
 # Check available tools
-spectra --list-ai-tools
+spectryn --list-ai-tools
 
 # Use a different tool
-spectra --validate --markdown EPIC.md --auto-fix --ai-tool ollama
+spectryn --validate --markdown EPIC.md --auto-fix --ai-tool ollama
 ```
 
 ### "Command timed out"
@@ -242,8 +242,8 @@ chmod u+w EPIC.md
 
 Sometimes AI tools produce incomplete or incorrectly formatted output. If this happens:
 
-1. Re-validate: `spectra --validate --markdown EPIC.md`
-2. Try a different AI tool: `spectra --validate --markdown EPIC.md --auto-fix --ai-tool aider`
+1. Re-validate: `spectryn --validate --markdown EPIC.md`
+2. Try a different AI tool: `spectryn --validate --markdown EPIC.md --auto-fix --ai-tool aider`
 3. Use the copy-paste method for more control over the AI interaction
 4. Manually fix remaining issues using the format guide
 
@@ -254,7 +254,7 @@ Sometimes AI tools produce incomplete or incorrectly formatted output. If this h
 Always start with validation to understand the issues:
 
 ```bash
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 ```
 
 ### 2. Start with Copy-Paste
@@ -262,7 +262,7 @@ spectra --validate --markdown EPIC.md
 For your first time, use `--suggest-fix` to understand what the AI is doing:
 
 ```bash
-spectra --validate --markdown EPIC.md --suggest-fix
+spectryn --validate --markdown EPIC.md --suggest-fix
 ```
 
 ### 3. Review AI Changes
@@ -271,7 +271,7 @@ After auto-fix, review the changes before syncing to Jira:
 
 ```bash
 # Re-validate
-spectra --validate --markdown EPIC.md
+spectryn --validate --markdown EPIC.md
 
 # Review diff if using git
 git diff EPIC.md
@@ -285,7 +285,7 @@ Keep your markdown files in git to easily revert unwanted changes:
 git add EPIC.md
 git commit -m "Before AI fix"
 
-spectra --validate --markdown EPIC.md --auto-fix
+spectryn --validate --markdown EPIC.md --auto-fix
 
 # If something went wrong:
 git checkout EPIC.md
@@ -298,14 +298,14 @@ If you encounter problems with AI Fix:
 ### 1. Gather Information
 
 ```bash
-# Get spectra version
-spectra --version
+# Get spectryn version
+spectryn --version
 
 # List detected tools
-spectra --list-ai-tools
+spectryn --list-ai-tools
 
 # Run with verbose output
-spectra --validate --markdown EPIC.md --auto-fix -v
+spectryn --validate --markdown EPIC.md --auto-fix -v
 ```
 
 ### 2. Create a Minimal Reproduction
@@ -326,10 +326,10 @@ This is a minimal test case.
 
 ### 3. Open an Issue
 
-Report issues at: [github.com/adriandarian/spectra/issues](https://github.com/adriandarian/spectra/issues)
+Report issues at: [github.com/adriandarian/spectryn/issues](https://github.com/adriandarian/spectryn/issues)
 
 Include:
-- spectra version
+- spectryn version
 - Operating system
 - AI tool used and version
 - Error message or unexpected behavior
@@ -340,14 +340,14 @@ Include:
 
 Search for similar issues before creating a new one:
 
-- [AI Fix issues](https://github.com/adriandarian/spectra/labels/ai-fix)
-- [Validation issues](https://github.com/adriandarian/spectra/labels/validation)
+- [AI Fix issues](https://github.com/adriandarian/spectryn/labels/ai-fix)
+- [Validation issues](https://github.com/adriandarian/spectryn/labels/validation)
 
 ## Related Documentation
 
 - [Validation Reference](/reference/cli#validation-options) – Complete validation CLI options
 - [AI Prompts Guide](/guide/ai-prompts) – Prompts for generating new epic documents
-- [AI Agents Guide](/guide/agents) – Context for AI coding assistants working on spectra
-- [Exit Codes](/reference/exit-codes) – Understanding spectra exit codes
-- [Configuration](/guide/configuration) – Configure spectra behavior
+- [AI Agents Guide](/guide/agents) – Context for AI coding assistants working on spectryn
+- [Exit Codes](/reference/exit-codes) – Understanding spectryn exit codes
+- [Configuration](/guide/configuration) – Configure spectryn behavior
 

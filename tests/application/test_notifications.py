@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.notifications import (
+from spectryn.application.notifications import (
     DiscordNotifier,
     GenericWebhookNotifier,
     NotificationConfig,

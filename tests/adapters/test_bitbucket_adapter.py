@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.bitbucket.adapter import BitbucketAdapter
-from spectra.adapters.bitbucket.client import BitbucketApiClient
-from spectra.core.ports.issue_tracker import (
+from spectryn.adapters.bitbucket.adapter import BitbucketAdapter
+from spectryn.adapters.bitbucket.client import BitbucketApiClient
+from spectryn.core.ports.issue_tracker import (
     AuthenticationError,
     IssueData,
     IssueTrackerError,
@@ -28,7 +28,7 @@ class TestBitbucketApiClient:
     @pytest.fixture
     def mock_session(self):
         """Create a mock session for testing."""
-        with patch("spectra.adapters.bitbucket.client.requests.Session") as mock:
+        with patch("spectryn.adapters.bitbucket.client.requests.Session") as mock:
             session = MagicMock()
             mock.return_value = session
             yield session

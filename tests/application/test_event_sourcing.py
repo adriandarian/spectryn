@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from spectra.adapters.event_store import MemoryEventStore
-from spectra.application.sync.event_sourcing import (
+from spectryn.adapters.event_store import MemoryEventStore
+from spectryn.application.sync.event_sourcing import (
     EpicHistory,
     EpicHistoryProjection,
     EventReplayer,
@@ -15,7 +15,7 @@ from spectra.application.sync.event_sourcing import (
     create_event_sourced_bus,
     get_epic_history,
 )
-from spectra.core.domain.events import (
+from spectryn.core.domain.events import (
     CommentAdded,
     ConflictDetected,
     ConflictResolved,
@@ -28,7 +28,7 @@ from spectra.core.domain.events import (
     SyncCompleted,
     SyncStarted,
 )
-from spectra.core.ports.event_store import make_sync_stream_id
+from spectryn.core.ports.event_store import make_sync_stream_id
 
 
 # =============================================================================

@@ -9,8 +9,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from spectra.adapters.linear.adapter import LinearAdapter
-from spectra.core.ports.issue_tracker import IssueTrackerError, TransitionError
+from spectryn.adapters.linear.adapter import LinearAdapter
+from spectryn.core.ports.issue_tracker import IssueTrackerError, TransitionError
 
 
 # =============================================================================

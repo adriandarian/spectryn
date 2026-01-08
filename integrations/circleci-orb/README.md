@@ -18,12 +18,12 @@ CircleCI Orb for syncing markdown specifications to issue trackers.
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 workflows:
   sync:
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
 ```
@@ -34,7 +34,7 @@ workflows:
 version: 2.1
 
 orbs:
-  spectra:
+  spectryn:
     commands:
       # ... inline orb definition
 ```
@@ -47,12 +47,12 @@ orbs:
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 workflows:
   main:
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           context: jira-credentials
@@ -64,11 +64,11 @@ workflows:
 workflows:
   main:
     jobs:
-      - spectra/validate:
+      - spectryn/validate:
           markdown-file: docs/user-stories.md
-      - spectra/sync:
+      - spectryn/sync:
           requires:
-            - spectra/validate
+            - spectryn/validate
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
 ```
@@ -90,7 +90,7 @@ Set these in your CircleCI project settings or context:
 
 ### Job Parameters
 
-#### spectra/sync
+#### spectryn/sync
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
@@ -105,13 +105,13 @@ Set these in your CircleCI project settings or context:
 | `verbose` | No | `false` | Verbose output |
 | `export-results` | No | | Export file path |
 
-#### spectra/validate
+#### spectryn/validate
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `markdown-file` | Yes | Path to markdown file |
 
-#### spectra/pull
+#### spectryn/pull
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
@@ -127,39 +127,39 @@ Set these in your CircleCI project settings or context:
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 workflows:
   sync-workflow:
     jobs:
       # Validate on all branches
-      - spectra/validate:
+      - spectryn/validate:
           markdown-file: docs/user-stories.md
           filters:
             branches:
               only: /.*/
 
       # Preview on feature branches
-      - spectra/sync:
+      - spectryn/sync:
           name: preview
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           dry-run: true
           requires:
-            - spectra/validate
+            - spectryn/validate
           filters:
             branches:
               ignore: main
           context: jira-credentials
 
       # Execute on main
-      - spectra/sync:
+      - spectryn/sync:
           name: deploy
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           execute: true
           requires:
-            - spectra/validate
+            - spectryn/validate
           filters:
             branches:
               only: main
@@ -172,7 +172,7 @@ workflows:
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 workflows:
   nightly-sync:
@@ -183,7 +183,7 @@ workflows:
             branches:
               only: main
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           incremental: true
@@ -196,19 +196,19 @@ workflows:
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 workflows:
   multi-tracker:
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           name: sync-jira
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           tracker: jira
           context: jira-credentials
 
-      - spectra/sync:
+      - spectryn/sync:
           name: sync-github
           markdown-file: docs/user-stories.md
           tracker: github
@@ -221,15 +221,15 @@ workflows:
 version: 2.1
 
 orbs:
-  spectra: spectra/spectra@1.0.0
+  spectryn: spectryn/spectryn@1.0.0
 
 jobs:
   custom-sync:
-    executor: spectra/python
+    executor: spectryn/python
     steps:
       - checkout
-      - spectra/install
-      - spectra/sync-command:
+      - spectryn/install
+      - spectryn/sync-command:
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           execute: true
@@ -249,7 +249,7 @@ workflows:
 workflows:
   main:
     jobs:
-      - spectra/sync:
+      - spectryn/sync:
           markdown-file: docs/user-stories.md
           epic-key: PROJ-123
           export-results: sync-results.json
@@ -271,50 +271,50 @@ Reference in workflow:
 
 ```yaml
 jobs:
-  - spectra/sync:
+  - spectryn/sync:
       context: jira-credentials
 ```
 
 ## Orb Commands
 
-### spectra/install
+### spectryn/install
 
-Install spectra CLI:
+Install spectryn CLI:
 
 ```yaml
 steps:
-  - spectra/install:
+  - spectryn/install:
       version: latest
 ```
 
-### spectra/sync-command
+### spectryn/sync-command
 
 Run sync:
 
 ```yaml
 steps:
-  - spectra/sync-command:
+  - spectryn/sync-command:
       markdown-file: docs/stories.md
       epic-key: PROJ-123
 ```
 
-### spectra/validate-command
+### spectryn/validate-command
 
 Validate markdown:
 
 ```yaml
 steps:
-  - spectra/validate-command:
+  - spectryn/validate-command:
       markdown-file: docs/stories.md
 ```
 
-### spectra/pull-command
+### spectryn/pull-command
 
 Pull from tracker:
 
 ```yaml
 steps:
-  - spectra/pull-command:
+  - spectryn/pull-command:
       epic-key: PROJ-123
       output-file: docs/stories.md
 ```
@@ -327,7 +327,7 @@ Ensure context is attached to job:
 
 ```yaml
 jobs:
-  - spectra/sync:
+  - spectryn/sync:
       context: jira-credentials  # Don't forget this!
 ```
 
@@ -339,7 +339,7 @@ Use specific Python version:
 jobs:
   custom:
     executor:
-      name: spectra/python
+      name: spectryn/python
       python-version: "3.11"
 ```
 

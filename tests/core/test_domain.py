@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.core.domain import (
+from spectryn.core.domain import (
     AcceptanceCriteria,
     CommitRef,
     Description,

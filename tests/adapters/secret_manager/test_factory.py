@@ -12,15 +12,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.adapters.secret_manager.environment_manager import EnvironmentSecretManager
-from spectra.adapters.secret_manager.factory import (
+from spectryn.adapters.secret_manager.environment_manager import EnvironmentSecretManager
+from spectryn.adapters.secret_manager.factory import (
     create_secret_manager,
     get_config_secret,
     get_global_secret_manager,
     resolve_config_secrets,
     set_global_secret_manager,
 )
-from spectra.core.ports.secret_manager import SecretBackend
+from spectryn.core.ports.secret_manager import SecretBackend
 
 
 class TestCreateSecretManager:
@@ -57,7 +57,7 @@ class TestCreateSecretManager:
         monkeypatch.setenv("VAULT_TOKEN", "hvs.test")
 
         # This would try to connect, so we just test detection
-        from spectra.adapters.secret_manager.factory import _detect_backend
+        from spectryn.adapters.secret_manager.factory import _detect_backend
 
         assert _detect_backend() == SecretBackend.VAULT
 
@@ -66,7 +66,7 @@ class TestCreateSecretManager:
         monkeypatch.delenv("VAULT_ADDR", raising=False)
         monkeypatch.setenv("DOPPLER_TOKEN", "dp.st.xxx")
 
-        from spectra.adapters.secret_manager.factory import _detect_backend
+        from spectryn.adapters.secret_manager.factory import _detect_backend
 
         assert _detect_backend() == SecretBackend.DOPPLER
 
@@ -76,7 +76,7 @@ class TestCreateSecretManager:
         monkeypatch.delenv("DOPPLER_TOKEN", raising=False)
         monkeypatch.setenv("OP_SERVICE_ACCOUNT_TOKEN", "ops_xxx")
 
-        from spectra.adapters.secret_manager.factory import _detect_backend
+        from spectryn.adapters.secret_manager.factory import _detect_backend
 
         assert _detect_backend() == SecretBackend.ONEPASSWORD
 
@@ -167,7 +167,7 @@ class TestGlobalSecretManager:
     def test_get_global_creates(self) -> None:
         """Should create global manager on first access."""
         # Reset global state
-        from spectra.adapters.secret_manager import factory
+        from spectryn.adapters.secret_manager import factory
 
         factory._global_manager = None
 

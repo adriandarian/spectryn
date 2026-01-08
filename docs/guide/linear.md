@@ -1,6 +1,6 @@
 # Linear Integration Guide
 
-spectra supports Linear for syncing markdown specifications to issues. This guide covers configuration, authentication, and advanced features.
+spectryn supports Linear for syncing markdown specifications to issues. This guide covers configuration, authentication, and advanced features.
 
 ## Overview
 
@@ -17,18 +17,18 @@ The Linear adapter supports:
 ## Quick Start
 
 ```bash
-# Install spectra
-pip install spectra
+# Install spectryn
+pip install spectryn
 
 # Sync markdown to Linear
-spectra sync --markdown EPIC.md --tracker linear --team TEAM --execute
+spectryn sync --markdown EPIC.md --tracker linear --team TEAM --execute
 ```
 
 ## Configuration
 
 ### Config File (YAML)
 
-Create `.spectra.yaml`:
+Create `.spectryn.yaml`:
 
 ```yaml
 # Linear connection settings
@@ -71,7 +71,7 @@ sync:
 
 ### Config File (TOML)
 
-Create `.spectra.toml`:
+Create `.spectryn.toml`:
 
 ```toml
 [linear]
@@ -115,7 +115,7 @@ export LINEAR_CYCLE_ID=cycle-uuid
 ### CLI Arguments
 
 ```bash
-spectra sync \
+spectryn sync \
   --tracker linear \
   --markdown EPIC.md \
   --team TEAM \
@@ -141,7 +141,7 @@ For team use, create an OAuth app:
 1. Go to **Settings** → **API** → **OAuth applications**
 2. Create new application
 3. Configure redirect URI
-4. Use OAuth flow in spectra:
+4. Use OAuth flow in spectryn:
 
 ```yaml
 linear:
@@ -372,13 +372,13 @@ linear:
 ### 2. Preview Sync
 
 ```bash
-spectra sync --tracker linear --markdown epic.md --team ENG
+spectryn sync --tracker linear --markdown epic.md --team ENG
 ```
 
 ### 3. Execute Sync
 
 ```bash
-spectra sync --tracker linear --markdown epic.md --team ENG --execute
+spectryn sync --tracker linear --markdown epic.md --team ENG --execute
 ```
 
 ### 4. View Results
@@ -409,12 +409,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install spectra
-        run: pip install spectra
+      - name: Install spectryn
+        run: pip install spectryn
 
       - name: Sync to Linear
         run: |
-          spectra sync \
+          spectryn sync \
             --tracker linear \
             --markdown docs/EPIC.md \
             --team ${{ vars.LINEAR_TEAM }} \

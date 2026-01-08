@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spectra.application.ai_label import (
+from spectryn.application.ai_label import (
     AILabeler,
     LabelCategory,
     LabelingOptions,
@@ -15,9 +15,9 @@ from spectra.application.ai_label import (
     build_labeling_prompt,
     parse_labeling_response,
 )
-from spectra.core.domain.entities import UserStory
-from spectra.core.domain.enums import Priority, Status
-from spectra.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
+from spectryn.core.domain.entities import UserStory
+from spectryn.core.domain.enums import Priority, Status
+from spectryn.core.domain.value_objects import AcceptanceCriteria, Description, StoryId
 
 
 @pytest.fixture
@@ -372,7 +372,7 @@ class TestAILabeler:
 
     def test_label_with_fallback(self, unlabeled_story: UserStory) -> None:
         """Test labeling with fallback when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_manager.side_effect = Exception("LLM not configured")
 
             labeler = AILabeler()
@@ -406,7 +406,7 @@ class TestAILabeler:
             }
         )
 
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = True
 
@@ -429,7 +429,7 @@ class TestAILabeler:
 
     def test_label_llm_not_available(self, sample_story: UserStory) -> None:
         """Test labeling when LLM is not available."""
-        with patch("spectra.adapters.llm.create_llm_manager") as mock_manager:
+        with patch("spectryn.adapters.llm.create_llm_manager") as mock_manager:
             mock_mgr = MagicMock()
             mock_mgr.is_available.return_value = False
             mock_manager.return_value = mock_mgr

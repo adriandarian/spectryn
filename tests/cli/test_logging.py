@@ -8,7 +8,7 @@ import sys
 from io import StringIO
 from unittest.mock import patch
 
-from spectra.cli.logging import (
+from spectryn.cli.logging import (
     ContextLogger,
     JSONFormatter,
     TextFormatter,

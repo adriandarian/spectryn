@@ -4,7 +4,7 @@ Tests for sync state persistence.
 
 import pytest
 
-from spectra.application.sync.state import (
+from spectryn.application.sync.state import (
     OperationRecord,
     StateStore,
     SyncPhase,

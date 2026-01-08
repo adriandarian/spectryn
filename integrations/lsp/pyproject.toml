@@ -40,7 +40,7 @@ dev = [
 ]
 
 [project.scripts]
-spectra-lsp = "spectra_lsp.server:main"
+spectra-lsp = "spectryn_lsp.server:main"
 
 [project.urls]
 Homepage = "https://github.com/spectra/spectra"

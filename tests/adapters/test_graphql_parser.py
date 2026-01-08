@@ -4,8 +4,8 @@ import textwrap
 
 import pytest
 
-from spectra.adapters.parsers.graphql_parser import GraphQLParser
-from spectra.core.domain.enums import Priority, Status
+from spectryn.adapters.parsers.graphql_parser import GraphQLParser
+from spectryn.core.domain.enums import Priority, Status
 
 
 class TestGraphQLParser:

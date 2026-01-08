@@ -19,10 +19,10 @@ Add to your `.gitlab-ci.yml`:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/spectra/spectra/main/integrations/gitlab-ci/.spectra-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/spectryn/spectryn/main/integrations/gitlab-ci/.spectryn-ci.yml'
 
-spectra-sync:
-  extends: .spectra-sync
+spectryn-sync:
+  extends: .spectryn-sync
   variables:
     MARKDOWN_FILE: "docs/user-stories.md"
     EPIC_KEY: "PROJ-123"
@@ -33,14 +33,14 @@ spectra-sync:
 
 ### Local Template
 
-Copy `.spectra-ci.yml` to your repository:
+Copy `.spectryn-ci.yml` to your repository:
 
 ```yaml
 include:
-  - local: '.gitlab/spectra-ci.yml'
+  - local: '.gitlab/spectryn-ci.yml'
 
-spectra-sync:
-  extends: .spectra-sync
+spectryn-sync:
+  extends: .spectryn-sync
   variables:
     MARKDOWN_FILE: "docs/user-stories.md"
     EPIC_KEY: "PROJ-123"
@@ -109,10 +109,10 @@ variables:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/spectra/spectra/main/integrations/gitlab-ci/.spectra-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/spectryn/spectryn/main/integrations/gitlab-ci/.spectryn-ci.yml'
 
-spectra-sync:
-  extends: .spectra-sync
+spectryn-sync:
+  extends: .spectryn-sync
   only:
     - main
   variables:
@@ -123,8 +123,8 @@ spectra-sync:
 ### Dry-Run on Merge Requests
 
 ```yaml
-spectra-preview:
-  extends: .spectra-sync
+spectryn-preview:
+  extends: .spectryn-sync
   only:
     - merge_requests
   variables:
@@ -136,8 +136,8 @@ spectra-preview:
 ### Scheduled Sync
 
 ```yaml
-spectra-scheduled:
-  extends: .spectra-sync
+spectryn-scheduled:
+  extends: .spectryn-sync
   only:
     - schedules
   variables:
@@ -149,8 +149,8 @@ spectra-scheduled:
 ### Multi-Epic Sync
 
 ```yaml
-spectra-multi:
-  extends: .spectra-sync
+spectryn-multi:
+  extends: .spectryn-sync
   variables:
     MARKDOWN_FILE: "docs/all-epics.md"
     MULTI_EPIC: "true"
@@ -160,8 +160,8 @@ spectra-multi:
 ### Pull (Reverse Sync)
 
 ```yaml
-spectra-pull:
-  extends: .spectra-pull
+spectryn-pull:
+  extends: .spectryn-pull
   only:
     - schedules
   variables:
@@ -176,8 +176,8 @@ spectra-pull:
 ### Export Results
 
 ```yaml
-spectra-with-export:
-  extends: .spectra-sync
+spectryn-with-export:
+  extends: .spectryn-sync
   variables:
     MARKDOWN_FILE: "docs/user-stories.md"
     EPIC_KEY: "PROJ-123"
@@ -203,7 +203,7 @@ The template automatically caches pip packages:
 
 ```yaml
 cache:
-  key: spectra-${CI_COMMIT_REF_SLUG}
+  key: spectryn-${CI_COMMIT_REF_SLUG}
   paths:
     - .cache/pip
 ```

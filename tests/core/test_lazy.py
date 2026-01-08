@@ -6,19 +6,19 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from spectra.core.lazy.cache import (
+from spectryn.core.lazy.cache import (
     CacheEntry,
     CacheStats,
     FieldCache,
     get_global_cache,
     set_global_cache,
 )
-from spectra.core.lazy.collections import (
+from spectryn.core.lazy.collections import (
     LazyDict,
     LazyList,
     PaginatedCollection,
 )
-from spectra.core.lazy.proxy import (
+from spectryn.core.lazy.proxy import (
     LazyField,
     LazyLoadingConfig,
     LazyProxy,

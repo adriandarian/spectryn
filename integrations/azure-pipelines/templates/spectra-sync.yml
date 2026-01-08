@@ -88,7 +88,7 @@ parameters:
     default: '3.11'
     displayName: 'Python version'
 
-  - name: spectraVersion
+  - name: spectrynVersion
     type: string
     default: 'latest'
     displayName: 'Spectra version'
@@ -102,12 +102,12 @@ steps:
 
   - script: |
       python -m pip install --upgrade pip
-      if [ "${{ parameters.spectraVersion }}" = "latest" ]; then
-        pip install spectra
+      if [ "${{ parameters.spectrynVersion }}" = "latest" ]; then
+        pip install spectryn
       else
-        pip install spectra==${{ parameters.spectraVersion }}
+        pip install spectryn==${{ parameters.spectrynVersion }}
       fi
-      spectra --version
+      spectryn --version
     displayName: 'Install Spectra'
 
   - script: |
@@ -115,7 +115,7 @@ steps:
       echo "=========================="
 
       # Build command
-      CMD="spectra sync --markdown ${{ parameters.markdownFile }} --tracker ${{ parameters.tracker }}"
+      CMD="spectryn sync --markdown ${{ parameters.markdownFile }} --tracker ${{ parameters.tracker }}"
 
       # Add epic key if provided
       if [ -n "${{ parameters.epicKey }}" ]; then

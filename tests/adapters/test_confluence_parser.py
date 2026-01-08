@@ -2,7 +2,7 @@
 
 import pytest
 
-from spectra.adapters.parsers.confluence_parser import ConfluenceParser
+from spectryn.adapters.parsers.confluence_parser import ConfluenceParser
 
 
 class TestConfluenceParser:

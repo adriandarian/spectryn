@@ -53,7 +53,7 @@ pytest tests/core/test_domain.py -v
 pytest -k "test_sync" -v
 
 # Run with coverage for specific file
-pytest tests/adapters/test_jira_batch.py --cov=src/spectra/adapters/jira/batch.py
+pytest tests/adapters/test_jira_batch.py --cov=src/spectryn/adapters/jira/batch.py
 
 # Run only fast tests (skip integration/property)
 make test-fast
@@ -66,9 +66,9 @@ make bench
 
 | Source File | Test File |
 |-------------|-----------|
-| `src/spectra/core/domain.py` | `tests/core/test_domain.py` |
-| `src/spectra/adapters/jira/adapter.py` | `tests/adapters/test_jira_adapter.py` |
-| `src/spectra/cli/app.py` | `tests/cli/test_cli.py` |
+| `src/spectryn/core/domain.py` | `tests/core/test_domain.py` |
+| `src/spectryn/adapters/jira/adapter.py` | `tests/adapters/test_jira_adapter.py` |
+| `src/spectryn/cli/app.py` | `tests/cli/test_cli.py` |
 
 ---
 
@@ -118,11 +118,11 @@ from typing import TYPE_CHECKING
 import requests
 
 # Local - absolute imports preferred
-from spectra.core.domain import Epic, Story
-from spectra.core.result import Result, Ok, Err
+from spectryn.core.domain import Epic, Story
+from spectryn.core.result import Result, Ok, Err
 
 if TYPE_CHECKING:
-    from spectra.core.ports import IssueTrackerPort
+    from spectryn.core.ports import IssueTrackerPort
 ```
 
 ### Architecture Layers
@@ -162,14 +162,14 @@ Rules:
 
 ```python
 # 1. Create adapter package
-src/spectra/adapters/my_tracker/
+src/spectryn/adapters/my_tracker/
 ├── __init__.py
 ├── adapter.py      # IssueTrackerPort implementation
 ├── client.py       # Low-level API client
 └── plugin.py       # Plugin registration
 
 # 2. Implement the port interface
-from spectra.core.ports import IssueTrackerPort
+from spectryn.core.ports import IssueTrackerPort
 
 class MyTrackerAdapter(IssueTrackerPort):
     @property
@@ -233,7 +233,7 @@ import os
 os.environ["DEBUG"] = "true"  # Side effect at import!
 
 # ❌ Direct external calls from core
-from spectra.core.domain import Epic
+from spectryn.core.domain import Epic
 import requests  # ❌ Core shouldn't import requests!
 
 # ❌ Ignoring Result types
@@ -322,25 +322,25 @@ make bench
 
 | Feature | Location |
 |---------|----------|
-| Domain entities | `src/spectra/core/domain/entities.py` |
-| Ports/interfaces | `src/spectra/core/ports/` |
-| Jira adapter | `src/spectra/adapters/jira/` |
-| CLI commands | `src/spectra/cli/app.py` |
-| Sync orchestrator | `src/spectra/application/sync/orchestrator.py` |
-| Plugin system | `src/spectra/plugins/` |
+| Domain entities | `src/spectryn/core/domain/entities.py` |
+| Ports/interfaces | `src/spectryn/core/ports/` |
+| Jira adapter | `src/spectryn/adapters/jira/` |
+| CLI commands | `src/spectryn/cli/app.py` |
+| Sync orchestrator | `src/spectryn/application/sync/orchestrator.py` |
+| Plugin system | `src/spectryn/plugins/` |
 | Test fixtures | `tests/conftest.py` |
 
 ### Understanding the codebase
 
 ```bash
 # Find implementations of a port
-grep -r "IssueTrackerPort" src/spectra/adapters/
+grep -r "IssueTrackerPort" src/spectryn/adapters/
 
 # Find all tests for a module
-find tests -name "test_*.py" | xargs grep "from spectra.core.domain"
+find tests -name "test_*.py" | xargs grep "from spectryn.core.domain"
 
 # Check what imports a module
-grep -r "from spectra.core.result" src/
+grep -r "from spectryn.core.result" src/
 ```
 
 ---
