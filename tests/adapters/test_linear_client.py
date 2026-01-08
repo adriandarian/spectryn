@@ -65,14 +65,17 @@ class TestLinearRateLimiter:
 
     def test_refill_tokens(self):
         """Test _refill_tokens adds tokens over time."""
-        limiter = LinearRateLimiter(requests_per_second=1000.0, burst_size=10)
-        limiter._tokens = 0.0
-
         import time
 
-        time.sleep(0.01)
+        limiter = LinearRateLimiter(requests_per_second=1000.0, burst_size=10)
+        limiter._tokens = 0.0
+        # Reset _last_update to now so elapsed time is measured from this point
+        limiter._last_update = time.monotonic()
+
+        time.sleep(0.05)  # Use longer sleep for reliability across platforms
         limiter._refill_tokens()
 
+        # With 1000 req/s and 0.05s sleep, expect ~50 tokens (capped at burst_size=10)
         assert limiter._tokens > 0
 
 
