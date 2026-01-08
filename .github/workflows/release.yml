@@ -162,60 +162,78 @@ jobs:
             NOTES="Release $VERSION"
           fi
 
+          # Get previous tag for changelog link
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # Generate checksums
+          CHECKSUMS=$(cd artifacts && find . -type f -name "*.whl" -o -name "*.tar.gz" -o -name "*.vsix" 2>/dev/null | xargs sha256sum 2>/dev/null | sed 's/\.\///' || echo "See individual asset files")
+
           # Create release notes file
-          cat > release_notes.md << 'EOF'
-          ## What's New in v${{ needs.validate.outputs.version }}
+          cat > release_notes.md << EOF
+          # 🎉 Spectryn $VERSION
 
           $NOTES
 
           ---
 
-          ## Installation
+          ## 🚀 Quick Start
 
-          ### pip (recommended)
-          ```bash
-          pip install spectryn==${{ needs.validate.outputs.version }}
-          ```
+          \`\`\`bash
+          # Install
+          pip install spectryn==$VERSION
 
-          ### pipx
-          ```bash
-          pipx install spectryn==${{ needs.validate.outputs.version }}
-          ```
+          # Validate your spec
+          spectryn validate --markdown my-spec.md
 
-          ### Homebrew (macOS/Linux)
-          ```bash
-          brew install adriandarian/spectryn/spectryn
-          ```
+          # Preview sync (dry run)
+          spectryn sync --markdown my-spec.md --tracker jira
 
-          ### Docker
-          ```bash
-          docker pull adriandarian/spectryn:${{ needs.validate.outputs.version }}
-          ```
+          # Execute sync
+          spectryn sync --markdown my-spec.md --tracker jira --execute
+          \`\`\`
+
+          ---
+
+          ## 📦 Installation
+
+          | Method | Command |
+          |--------|---------|
+          | **pip** | \`pip install spectryn==$VERSION\` |
+          | **pipx** | \`pipx install spectryn==$VERSION\` |
+          | **Docker** | \`docker pull adriandarian/spectryn:$VERSION\` |
+          | **Homebrew** | \`brew install adriandarian/spectryn/spectryn\` |
 
           ### VS Code Extension
 
-          Download the `.vsix` file from the assets below and install manually:
-          ```bash
-          code --install-extension spectryn-${{ needs.validate.outputs.version }}.vsix
-          ```
+          Download the \`.vsix\` file from the assets below and install:
+          \`\`\`bash
+          code --install-extension spectryn-$VERSION.vsix
+          \`\`\`
 
           ### From Source
-          ```bash
-          pip install git+https://github.com/adriandarian/spectryn.git@v${{ needs.validate.outputs.version }}
-          ```
+          \`\`\`bash
+          pip install git+https://github.com/adriandarian/spectryn.git@v$VERSION
+          \`\`\`
 
           ---
 
-          ## Checksums
+          ## 📚 Documentation
 
-          SHA256 checksums for release assets:
-          ```
-          $(cd artifacts && find . -type f -exec sha256sum {} \; 2>/dev/null || echo "See individual files")
-          ```
+          - [Getting Started](https://spectryn.dev/guide/getting-started)
+          - [CLI Reference](https://spectryn.dev/reference/cli)
+          - [Configuration](https://spectryn.dev/guide/configuration)
 
           ---
 
-          **Full Changelog**: https://github.com/adriandarian/spectryn/compare/v$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "1.0.0")...v${{ needs.validate.outputs.version }}
+          ## 🔐 Checksums
+
+          \`\`\`
+          $CHECKSUMS
+          \`\`\`
+
+          ---
+
+          **Full Changelog**: https://github.com/adriandarian/spectryn/compare/${PREV_TAG:-v0.0.0}...v$VERSION
           EOF
 
           echo "Generated release notes"
