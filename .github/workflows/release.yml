@@ -200,7 +200,7 @@ jobs:
           |--------|---------|
           | **pip** | \`pip install spectryn==$VERSION\` |
           | **pipx** | \`pipx install spectryn==$VERSION\` |
-          | **Docker** | \`docker pull adriandarian/spectryn:$VERSION\` |
+          | **Docker** | \`docker pull adrianthehactus/spectryn:$VERSION\` |
           | **Homebrew** | \`brew install adriandarian/spectryn/spectryn\` |
 
           ### VS Code Extension
@@ -317,7 +317,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            adriandarian/spectryn
+            adrianthehactus/spectryn
             ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}},value=${{ needs.validate.outputs.version }}
@@ -590,6 +590,6 @@ jobs:
           echo "### Links" >> $GITHUB_STEP_SUMMARY
           echo "- [GitHub Release](https://github.com/adriandarian/spectryn/releases/tag/v${{ needs.validate.outputs.version }})" >> $GITHUB_STEP_SUMMARY
           echo "- [PyPI Package](https://pypi.org/project/spectryn/${{ needs.validate.outputs.version }}/)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Docker Hub](https://hub.docker.com/r/adriandarian/spectryn)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker Hub](https://hub.docker.com/r/adrianthehactus/spectryn)" >> $GITHUB_STEP_SUMMARY
 
 

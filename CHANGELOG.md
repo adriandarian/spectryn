@@ -197,7 +197,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **pipx**: `pipx install spectryn`
 
 #### Containers
-- Docker Hub: `adriandarian/spectryn`
+- Docker Hub: `adrianthehactus/spectryn`
 - GitHub Container Registry: `ghcr.io/adriandarian/spectryn`
 - Docker Compose example included
 

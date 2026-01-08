@@ -106,7 +106,7 @@ If a release has issues:
 | Artifact | Location |
 |----------|----------|
 | Python package | https://pypi.org/project/spectryn/ |
-| Docker image | https://hub.docker.com/r/adriandarian/spectryn |
+| Docker image | https://hub.docker.com/r/adrianthehactus/spectryn |
 | Docker image | ghcr.io/adriandarian/spectryn |
 | VS Code extension | VS Code Marketplace |
 | Documentation | https://adriandarian.github.io/spectryn |

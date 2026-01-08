@@ -204,7 +204,7 @@ sync-to-jira:
 ```yaml
 # .gitlab-ci.yml
 sync-jira:
-  image: adriandarian/spectryn:latest
+  image: adrianthehactus/spectryn:latest
   stage: deploy
   variables:
     JIRA_URL: $JIRA_URL

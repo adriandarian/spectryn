@@ -294,7 +294,7 @@ version: '3.8'
 
 services:
   spectryn:
-    image: adriandarian/spectryn:latest
+    image: adrianthehactus/spectryn:latest
     environment:
       OTEL_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
@@ -318,7 +318,7 @@ version: '3.8'
 
 services:
   spectryn:
-    image: adriandarian/spectryn:latest
+    image: adrianthehactus/spectryn:latest
     environment:
       PROMETHEUS_ENABLED: "true"
       PROMETHEUS_PORT: "9090"
@@ -367,7 +367,7 @@ spec:
     spec:
       containers:
         - name: spectryn
-          image: adriandarian/spectryn:latest
+          image: adrianthehactus/spectryn:latest
           env:
             - name: OTEL_ENABLED
               value: "true"

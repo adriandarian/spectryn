@@ -72,7 +72,7 @@ brew install spectra
 ```
 
 ```bash [Docker]
-docker pull adriandarian/spectryn:latest
+docker pull adrianthehactus/spectryn:latest
 ```
 
 :::

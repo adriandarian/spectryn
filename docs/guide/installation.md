@@ -47,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/adriandarian/spectryn/main/packagin
 ### Pull from Docker Hub
 
 ```bash
-docker pull adriandarian/spectryn:latest
+docker pull adrianthehactus/spectryn:latest
 ```
 
 ### Run with Docker
@@ -70,7 +70,7 @@ For easier usage with persistent configuration:
 # docker-compose.yml
 services:
   spectryn:
-    image: adriandarian/spectryn:latest
+    image: adrianthehactus/spectryn:latest
     env_file:
       - .env
     volumes:

@@ -7,7 +7,7 @@ spectryn provides official Docker images for containerized usage, perfect for CI
 ### Pull the Image
 
 ```bash
-docker pull adriandarian/spectryn:latest
+docker pull adrianthehactus/spectryn:latest
 ```
 
 ### Basic Usage
@@ -18,7 +18,7 @@ docker run --rm \
   -e JIRA_EMAIL=your.email@company.com \
   -e JIRA_API_TOKEN=your-api-token \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -30,7 +30,7 @@ docker run --rm \
   -e JIRA_EMAIL=your.email@company.com \
   -e JIRA_API_TOKEN=your-api-token \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
@@ -43,7 +43,7 @@ For easier management with persistent configuration:
 ```yaml
 services:
   spectryn:
-    image: adriandarian/spectryn:latest
+    image: adrianthehactus/spectryn:latest
     env_file:
       - .env
     volumes:
@@ -132,7 +132,7 @@ jobs:
             -e JIRA_EMAIL=${{ secrets.JIRA_EMAIL }} \
             -e JIRA_API_TOKEN=${{ secrets.JIRA_API_TOKEN }} \
             -v ${{ github.workspace }}:/workspace \
-            adriandarian/spectryn:latest \
+            adrianthehactus/spectryn:latest \
             --markdown docs/EPIC.md \
             --epic ${{ vars.EPIC_KEY }} \
             --execute \
@@ -143,7 +143,7 @@ jobs:
 
 ```yaml
 sync-jira:
-  image: adriandarian/spectryn:latest
+  image: adrianthehactus/spectryn:latest
   variables:
     JIRA_URL: $JIRA_URL
     JIRA_EMAIL: $JIRA_EMAIL
@@ -161,7 +161,7 @@ sync-jira:
 pipeline {
     agent {
         docker {
-            image 'adriandarian/spectryn:latest'
+            image 'adrianthehactus/spectryn:latest'
         }
     }
     
@@ -191,7 +191,7 @@ Mount a config file for complex configurations:
 docker run --rm \
   -v $(pwd):/workspace \
   -v ~/.spectryn.yaml:/root/.spectryn.yaml:ro \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -201,7 +201,7 @@ docker run --rm \
 docker run --rm \
   --env-file .env \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -215,7 +215,7 @@ docker run --rm \
   -e JIRA_EMAIL=... \
   -e JIRA_API_TOKEN=... \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute --export results.json
 ```
 
@@ -240,7 +240,7 @@ docker run --rm \
   -u $(id -u):$(id -g) \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -254,7 +254,7 @@ docker run --rm \
   --network host \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123
 ```
 
@@ -266,7 +266,7 @@ Run with verbose output to troubleshoot:
 docker run --rm \
   -e JIRA_URL=... \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 -v --log-format json
 ```
 

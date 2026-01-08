@@ -304,7 +304,7 @@ docker run --rm \
   -e JIRA_EMAIL=$JIRA_EMAIL \
   -e JIRA_API_TOKEN=$JIRA_API_TOKEN \
   -v $(pwd):/workspace \
-  adriandarian/spectryn:latest \
+  adrianthehactus/spectryn:latest \
   --markdown EPIC.md --epic PROJ-123 --execute
 ```
 
