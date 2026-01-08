@@ -379,14 +379,18 @@ jobs:
         run: npx vsce package
 
       - name: 🚀 Publish to VS Code Marketplace
-        if: ${{ !inputs.dry_run && secrets.VSCE_PAT != ' ' }}
+        if: ${{ !inputs.dry_run }}
         run: npx vsce publish -p ${{ secrets.VSCE_PAT }}
-        continue-on-error: true  # Optional: publish if token exists
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        continue-on-error: true  # Will fail gracefully if token not set
 
       - name: 🚀 Publish to Open VSX
-        if: ${{ !inputs.dry_run && secrets.OVSX_PAT != ' ' }}
+        if: ${{ !inputs.dry_run }}
         run: npx ovsx publish -p ${{ secrets.OVSX_PAT }}
-        continue-on-error: true  # Optional: publish if token exists
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        continue-on-error: true  # Will fail gracefully if token not set
 
       - name: 📤 Upload Extension
         uses: actions/upload-artifact@v4
